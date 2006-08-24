@@ -1,13 +1,21 @@
-evolution-data-server (1.4.2.1-20060808) unstable; urgency=low
+evolution-data-server (1.4.2.1-20060807) unstable; urgency=low
 
-  * Mass merge from IT2007:
-  * Rewrite the book view code.
-  * Add -dbg packages
   * Minor merges with upstream
-  * Remove ucamel from the source, it's not used anymore
-  * Fixes: NB#31924
 
- -- Ross Burton <ross@openedhand.com>  Tue,  8 Aug 2006 16:58:29 +0100
+ -- Ross Burton <ross@openedhand.com>  Mon,  7 Aug 2006 19:39:34 +0100
+
+evolution-data-server (1.4.2.1-20060713) unstable; urgency=low
+
+  * Remove ucamel from the source, it's not used anymore
+  * Add -dbg packages
+
+ -- Ross Burton <ross@openedhand.com>  Thu, 13 Jul 2006 16:41:04 +0100
+
+evolution-data-server (1.4.2.1-20060705) unstable; urgency=low
+
+  * Rewrite the book view code.
+
+ -- Ross Burton <ross@openedhand.com>  Wed,  5 Jul 2006 12:29:39 +0100
 
 evolution-data-server (1.4.1-0osso20060613-2) unstable; urgency=low
 

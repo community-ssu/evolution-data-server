@@ -119,6 +119,14 @@ fi
 AM_CONDITIONAL(HAVE_JW, test "x$HAVE_JW" = "xyes")
 AC_SUBST(HAVE_JW)
 
+dnl glibc backtrace functions
+AC_CHECK_FUNCS(backtrace backtrace_symbols_fd)
+AC_CHECK_HEADERS(execinfo.h)
+
+dnl signal functions
+AC_CHECK_FUNCS(signal)
+AC_CHECK_HEADERS(signal.h)
+
 dnl I18N stuff
 AC_PROG_INTLTOOL
 
@@ -1104,7 +1112,7 @@ dnl support. Make him aware of this with a warning message at the end.
 	fi
 fi
 
-GLIB_REQUIRED="2.9.1"
+GLIB_REQUIRED="2.6.6-1osso2"
 LIBBONOBO_REQUIRED="2.4.2"
 ORBIT_REQUIRED="2.9.8"
 
