@@ -20,9 +20,6 @@
 
 #include <config.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <signal.h>
-#include <execinfo.h>
 #include <string.h>
 #include <glib-object.h>
 #include <glib/gi18n.h>
@@ -315,53 +312,6 @@ backup_start (DBusGProxy *proxy, EDataBookFactory *factory)
   g_mutex_unlock (factory->priv->books_lock);
 }
 
-static void
-print_backtrace (void)
-{
-#if defined (HAVE_BACKTRACE) && defined (HAVE_BACKTRACE_SYMBOLS_FD)
-  void *array[20];
-  size_t size;
-
-#define MSG "\n########## Backtrace (version " VERSION ") ##########\n"
-  write (STDERR_FILENO, MSG, strlen (MSG));
-#undef MSG
-
-  size = backtrace (array, 20);
-  backtrace_symbols_fd (array, size, STDERR_FILENO);
-#endif /* HAVE_BACKTRACE && HAVE_BACKTRACE_SYMBOLS_FD */
-}
-
-static void
-critical_handler (const gchar *log_domain,
-                  GLogLevelFlags log_level,
-                  const gchar *message,
-                  gpointer user_data)
-{
-  g_log_default_handler (log_domain, log_level, message, user_data);
-  print_backtrace ();
-}
-
-#ifdef HAVE_SIGNAL
-static void
-segv_handler (int sig)
-{
-#define MSG "caught SIGSEGV\n"
-  write (STDERR_FILENO, MSG, strlen (MSG));
-#undef MSG
-
-  print_backtrace ();
-  abort ();
-}
-#endif /* HAVE_SIGNAL */
-
-static void
-add_signal_handlers (void)
-{
-#ifdef HAVE_SIGNAL
-  signal (SIGSEGV, segv_handler);
-#endif /* HAVE_SIGNAL */
-}
-
 #define E_DATA_BOOK_FACTORY_SERVICE_NAME "org.gnome.evolution.dataserver.AddressBook"
 
 int
@@ -372,34 +322,11 @@ main (int argc, char **argv)
 
 #if WITH_BUGBUDDY
   setup_segv_handler ();
-#else
-  add_signal_handlers ();
 #endif
 
   g_type_init ();
   if (!g_thread_supported ()) g_thread_init (NULL);
   dbus_g_thread_init ();
-
-  {
-      GLogLevelFlags fatal_mask;
-
-      fatal_mask = g_log_set_always_fatal (G_LOG_FATAL_MASK);
-      fatal_mask |= G_LOG_LEVEL_CRITICAL;
-      g_log_set_always_fatal (fatal_mask);
-
-      g_log_set_handler ("GLib-GObject",
-          G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_ERROR |
-          G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION,
-          critical_handler, NULL);
-      g_log_set_handler ("GLib",
-          G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_ERROR |
-          G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION,
-          critical_handler, NULL);
-      g_log_set_handler (NULL,
-          G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_ERROR |
-          G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION,
-          critical_handler, NULL);
-    }
 
   loop = g_main_loop_new (NULL, FALSE);
 

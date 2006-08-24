@@ -83,7 +83,6 @@ static GStaticMutex global_env_lock = G_STATIC_MUTEX_INIT;
 static struct {
 	int ref_count;
 	DB_ENV *env;
-	gboolean had_error;
 } global_env;
 
 static EDataBookStatus
@@ -189,9 +188,10 @@ do_create(EBookBackendFile  *bf,
 	  const char      *vcard_req,
 	  EContact **contact)
 {
+	EDataBookStatus status = Success;
 	DB             *db = bf->priv->file_db;
 	DBT            id_dbt, vcard_dbt;
-	int            db_error = 0;
+	int            db_error;
 	char           *id;
 	char           *vcard;
 	const char *rev;
@@ -214,29 +214,26 @@ do_create(EBookBackendFile  *bf,
 
 	string_to_dbt (vcard, &vcard_dbt);
 
-	global_env.had_error = FALSE;
 	db_error = db->put (db, NULL, &id_dbt, &vcard_dbt, 0);
-	/* SO SO WRONG */
-	if (global_env.had_error) db_error = ENOSPC;
 
 	g_free (vcard);
 
 	if (0 == db_error) {
-		global_env.had_error = FALSE;
 		db_error = db->sync (db, 0);
-		/* SO SO WRONG */
-		if (global_env.had_error) db_error = ENOSPC;
 		if (db_error != 0) {
 			g_warning ("db->sync failed with %d", db_error);
+			status = db_error_to_status (db_error);
 		}
-	} else {
+	}
+	else {
 		g_warning (G_STRLOC ": db->put failed with %d", db_error);
 		g_object_unref (*contact);
 		*contact = NULL;
+		status = db_error_to_status (db_error);
 	}
 
 	g_free (id);
-	return db_error_to_status (db_error);
+	return status;
 }
 
 static EBookBackendSyncStatus
@@ -352,25 +349,18 @@ e_book_backend_file_modify_contact (EBookBackendSync *backend,
 	vcard_with_rev = e_vcard_to_string (E_VCARD (*contact), EVC_FORMAT_VCARD_30);
 	
 	string_to_dbt (vcard_with_rev, &vcard_dbt);	
-	
-	global_env.had_error = FALSE;
+
 	db_error = db->put (db, NULL, &id_dbt, &vcard_dbt, 0);
-	if (global_env.had_error) db_error = ENOSPC;
-		
+
 	if (0 == db_error) {
-		global_env.had_error = FALSE;
 		db_error = db->sync (db, 0);
-		if (global_env.had_error) db_error = ENOSPC;
 		if (db_error != 0) {
 			g_warning (G_STRLOC ": db->sync failed with %d", db_error);
 		} else {
 			e_book_backend_summary_remove_contact (bf->priv->summary, id);
 			e_book_backend_summary_add_contact (bf->priv->summary, *contact);
 		}
-	} else {
-		g_warning (G_STRLOC ": db->put failed with %d", db_error);
 	}
-
 	g_free (id);
 	g_free (vcard_with_rev);
 
@@ -1072,8 +1062,6 @@ file_errcall (const char *buf1, char *buf2)
 #endif
 {
 	g_warning ("libdb error: %s", buf2);
-	/* Very wrong */
-	global_env.had_error = TRUE;
 }
 
 
@@ -1122,8 +1110,6 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 
 		env->set_errcall (env, file_errcall);
 
-		env->set_cachesize (env, 0, 128 * 1024, 1);
-
 		/* Set the allocation routines to the non-aborting GLib functions */
 		env->set_alloc (env, (void *(*)(size_t))g_try_malloc, 
 				(void *(*)(void *, size_t))g_try_realloc,
@@ -1141,7 +1127,6 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 
 		global_env.env = env;
 		global_env.ref_count = 1;
-		global_env.had_error = FALSE;
 	}
 	g_static_mutex_unlock(&global_env_lock);
 
