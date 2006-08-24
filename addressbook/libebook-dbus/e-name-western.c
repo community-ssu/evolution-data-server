@@ -121,21 +121,21 @@ static gboolean
 e_name_western_word_is_suffix (char *word)
 {
 	int i;
+	gchar *folded_word = g_utf8_casefold (word, -1);
 
+	/* The suffix table is already in lowercase, and we know that
+	 * g_utf8_casefold turns the string into lowercase, so we
+	 * don't need to casefold the suffixes.
+	 */
 	for (i = 0; i < G_N_ELEMENTS (western_sfx_index); i++) {
-		const char *suffix;
-		int length;
+		const char *suffix = western_sfx_table + western_sfx_index[i];
 
-		suffix = western_sfx_table + western_sfx_index[i];
-		length = strlen (suffix);
-
-		if (!g_strcasecmp (word, suffix) || 
-		    ( !g_strncasecmp (word, suffix, length) &&
-		      strlen(word) == length + 1 &&
-		      word[length] == '.' ))
+		if (!g_utf8_collate (folded_word, suffix)) {
+			g_free (folded_word);
 			return TRUE;
+		}
 	}
-
+	g_free (folded_word);
 	return FALSE;
 }
 
@@ -152,14 +152,18 @@ e_name_western_get_one_prefix_at_str (char *str)
 		int pfx_words;
 		const char *prefix;
 		char *words;
+		char *folded_words;
 
 		prefix = western_pfx_table + western_pfx_index[i];
 		pfx_words = e_name_western_str_count_words (prefix);
 		words = e_name_western_get_words_at_idx (str, 0, pfx_words);
+		folded_words = g_utf8_casefold (words, -1);
 
-		if (! g_strcasecmp (words, prefix))
+		if (! g_utf8_collate (folded_words, prefix)) {
+			g_free (folded_words);
 			return words;
-
+		}
+		g_free (folded_words);
 		g_free (words);
 	}
 
@@ -235,13 +239,16 @@ static gboolean
 e_name_western_is_complex_last_beginning (char *word)
 {
 	int i;
+	char *folded_word = g_utf8_casefold (word, -1);
 
 	for (i = 0; i < G_N_ELEMENTS (western_complex_last_index); i++) {
 		const char *last = western_complex_last_table + western_complex_last_index[i];
-		if (! g_strcasecmp (word, last))
+		if (! g_utf8_collate (folded_word, last)) {
+			g_free (folded_word);
 			return TRUE;
+		}
 	}
-
+	g_free (folded_word);
 	return FALSE;
 }
 
@@ -653,7 +660,24 @@ e_name_western_reorder_asshole (ENameWestern *name, ENameWesternIdxs *idxs)
 
 	while (g_unichar_isspace (g_utf8_get_char (p)) && *p != '\0')
 		p = g_utf8_next_char (p);
+	
+	/* 
+	   Consider this case, "Br.Gate,Br. Gate,W". I know this is a damn
+	   random name, but, I got this from the bug report of 317411.
+	   
+	   comma = ",Br.Gate,W"
+	   prefix = "Br.Gate,Br."
+	   p = " Gate,W"
+	   comma - p < 0 and hence the crash.
 
+	   Actually, we don't have to put lot of intelligence in reordering such
+	   screwedup names, just return.
+	*/
+	if (comma - p + 1 < 1) {
+		g_free (prefix);
+		return;
+	}
+	
 	last = g_malloc0 (comma - p + 1);
 	strncpy (last, p, comma - p);
 
@@ -778,7 +802,7 @@ e_name_western_zap_nil (char **str, int *idx)
 	}
 
 #define CHECK_MIDDLE_NAME_FOR_CONJUNCTION_CASE(conj) \
-	if (idxs->middle_idx != -1 && !strcasecmp (name->middle, conj)) {	\
+	if (idxs->middle_idx != -1 && !g_ascii_strcasecmp (name->middle, conj)) {	\
 		FINISH_CHECK_MIDDLE_NAME_FOR_CONJUNCTION	\
 	}
 
@@ -935,7 +959,7 @@ e_name_western_parse (const char *full_name)
 	idxs->nick_idx   = -1;
 	idxs->last_idx   = -1;
 	idxs->suffix_idx = -1;
-	
+
 	/*
 	 * An extremely simple algorithm.
 	 *

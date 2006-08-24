@@ -39,6 +39,16 @@ Description: Utility library for evolution data servers (development files)
  .
  This package contains header files and static library for libedataserver3.
 
+Package: libedataserver-dbg
+Section: libdevel
+Architecture: any
+Depends: libedataserver (= ${Source-Version})
+Description: Utility library for evolution data servers (debugging symbols)
+ The data server, called "Evolution Data Server" is responsible for managing
+ calendar and addressbook information.
+ .
+ This package contains the debugging symbols.
+
 Package: libebook
 Section: libs
 Architecture: any
@@ -59,6 +69,16 @@ Description: Client library for evolution address books (development files)
  .
  This package contains header files and static library for libebook@VER@.
 
+Package: libebook-dbg
+Section: libdevel
+Architecture: any
+Depends: libebook (= ${Source-Version})
+Description: Client library for evolution address books (development files)
+ Evolution is the integrated mail, calendar, task and address book
+ distributed suite from Novell, Inc.
+ .
+ This package contains the debugging symbols.
+
 Package: libedata-book
 Section: libs
 Architecture: any
@@ -73,6 +93,16 @@ Package: libedata-book-dev
 Section: libdevel
 Architecture: any
 Depends: libedata-book (= ${Source-Version}), libedataserver-dev (= ${Source-Version}) 
+Description: Backend library for evolution address books
+ Evolution is the integrated mail, calendar, task and address book
+ distributed suite from Novell, Inc.
+ .
+ This package is backend library for evolution address book.
+
+Package: libedata-book-dbg
+Section: libdevel
+Architecture: any
+Depends: libedata-book (= ${Source-Version})
 Description: Backend library for evolution address books
  Evolution is the integrated mail, calendar, task and address book
  distributed suite from Novell, Inc.

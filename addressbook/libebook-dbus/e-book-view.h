@@ -1,10 +1,21 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /*
- * The Evolution addressbook client object.
+ * Copyright (C) 2006 OpenedHand Ltd
  *
- * Author: Ross Burton <ross@o-hand.com>
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of version 2 of the GNU Lesser General Public License as published
+ * by the Free Software Foundation.
  *
- * Copyright 2005 OpenedHand
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *
+ * Author: Ross Burton <ross@openedhand.com>
  */
 
 #ifndef __E_BOOK_VIEW_H__
@@ -13,7 +24,6 @@
 #include <glib.h>
 #include <glib-object.h>
 #include "e-book-types.h"
-#include "e-book-view-listener.h"
 
 #define E_TYPE_BOOK_VIEW           (e_book_view_get_type ())
 #define E_BOOK_VIEW(o)             (G_TYPE_CHECK_INSTANCE_CAST ((o), E_TYPE_BOOK_VIEW, EBookView))
@@ -26,11 +36,14 @@ G_BEGIN_DECLS
 
 typedef struct _EBookView        EBookView;
 typedef struct _EBookViewClass   EBookViewClass;
+typedef struct _EBookViewPrivate EBookViewPrivate;
 
 struct _EBook;  /* Forward reference */
 
 struct _EBookView {
 	GObject     parent;
+	/*< private >*/
+	EBookViewPrivate *priv;
 };
 
 struct _EBookViewClass {

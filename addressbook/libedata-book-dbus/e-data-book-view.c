@@ -1,14 +1,36 @@
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
+/*
+ * Copyright (C) 2006 OpenedHand Ltd
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of version 2 of the GNU Lesser General Public License as published
+ * by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *
+ * Author: Ross Burton <ross@openedhand.com>
+ */
+
+#include <config.h>
 #include <string.h>
 #include <dbus/dbus.h>
 #include <libebook/e-contact.h>
 #include "e-data-book-view.h"
+
+extern DBusGConnection *connection;
 
 static gboolean impl_BookView_start (EDataBookView *view, GError **error);
 static gboolean impl_BookView_stop (EDataBookView *view, GError **error);
 static gboolean impl_BookView_dispose (EDataBookView *view, GError **eror);
 
 #include "e-data-book-view-glue.h"
-#include "e-data-book-view-listener-bindings.h"
 
 typedef struct {
   char **arr;
@@ -22,16 +44,17 @@ static void resizing_array_resize (ResizingArray *array, int size);
 static void resizing_array_finish (ResizingArray *array);
 static void resizing_array_reset (ResizingArray *array);
 
+G_DEFINE_TYPE (EDataBookView, e_data_book_view, G_TYPE_OBJECT);
 #define E_DATA_BOOK_VIEW_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), E_TYPE_DATA_BOOK_VIEW, EDataBookViewPrivate))
 
 #define DEFAULT_INITIAL_THRESHOLD 5
 #define DEFAULT_THRESHOLD_MAX 20
 
 struct _EDataBookViewPrivate {
+  EDataBook *book;
   EBookBackend *backend;
-  DBusGProxy *listener;
 
-  char* card_query;
+  char* card_query; /* TODO: unused */
   EBookBackendSExp *card_sexp;
   int max_results;
 
@@ -50,6 +73,17 @@ struct _EDataBookViewPrivate {
   guint idle_id;
 };
 
+enum {
+  CONTACTS_ADDED,
+  CONTACTS_CHANGED,
+  CONTACTS_REMOVED,
+  STATUS_MESSAGE,
+  COMPLETE,
+  LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL] = { 0 };
+
 static void e_data_book_view_dispose (GObject *object);
 static void e_data_book_view_finalize (GObject *object);
 
@@ -60,7 +94,47 @@ e_data_book_view_class_init (EDataBookViewClass *klass)
 
   object_class->dispose = e_data_book_view_dispose;
   object_class->finalize = e_data_book_view_finalize;
-  
+
+  signals[CONTACTS_ADDED] =
+    g_signal_new ("contacts-added",
+                  G_OBJECT_CLASS_TYPE (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0, NULL, NULL,
+                  g_cclosure_marshal_VOID__BOXED,
+                  G_TYPE_NONE, 1, G_TYPE_STRV);
+
+  signals[CONTACTS_CHANGED] =
+    g_signal_new ("contacts-changed",
+                  G_OBJECT_CLASS_TYPE (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0, NULL, NULL,
+                  g_cclosure_marshal_VOID__BOXED,
+                  G_TYPE_NONE, 1, G_TYPE_STRV);
+
+  signals[CONTACTS_REMOVED] =
+    g_signal_new ("contacts-removed",
+                  G_OBJECT_CLASS_TYPE (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0, NULL, NULL,
+                  g_cclosure_marshal_VOID__BOXED,
+                  G_TYPE_NONE, 1, G_TYPE_STRV);
+
+  signals[STATUS_MESSAGE] =
+    g_signal_new ("status-message",
+                  G_OBJECT_CLASS_TYPE (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0, NULL, NULL,
+                  g_cclosure_marshal_VOID__STRING,
+                  G_TYPE_NONE, 1, G_TYPE_STRING);
+
+  signals[COMPLETE] =
+    g_signal_new ("complete",
+                  G_OBJECT_CLASS_TYPE (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0, NULL, NULL,
+                  g_cclosure_marshal_VOID__UINT,
+                  G_TYPE_NONE, 1, G_TYPE_UINT);
+
   g_type_class_add_private (klass, sizeof (EDataBookViewPrivate));
 
   dbus_g_object_type_install_info (G_TYPE_FROM_CLASS (klass), &dbus_glib_e_data_book_view_object_info);
@@ -87,11 +161,29 @@ e_data_book_view_init (EDataBookView *book_view)
                                      g_free, NULL);
 }
 
+static void
+book_destroyed_cb (gpointer data, GObject *dead)
+{
+  EDataBookView *view = E_DATA_BOOK_VIEW (data);
+  /* The book has just died, so unset the pointer so we don't try and remove a
+     dead weak reference. */
+  view->priv->book = NULL;
+  g_object_unref (view);
+}
+
 /**
- * Create a new EDataBookView.
+ * e_data_book_view_new:
+ * @book: The #EDataBook to search
+ * @path: The object path that this book view should have
+ * @card_query: The query as a string
+ * @card_sexp: The query as an #EBookBackendSExp
+ * @max_results: The maximum number of results to return
+ *
+ * Create a new #EDataBookView for the given #EBook, filtering on #card_sexp,
+ * and place it on DBus at the object path #path.
  */
 EDataBookView *
-e_data_book_view_new (EBookBackend *backend, DBusGProxy *listener, const char *card_query, EBookBackendSExp *card_sexp, int max_results)
+e_data_book_view_new (EDataBook *book, const char *path, const char *card_query, EBookBackendSExp *card_sexp, int max_results)
 {
   EDataBookView *view;
   EDataBookViewPrivate *priv;
@@ -99,17 +191,18 @@ e_data_book_view_new (EBookBackend *backend, DBusGProxy *listener, const char *c
   view = g_object_new (E_TYPE_DATA_BOOK_VIEW, NULL);
   priv = view->priv;
 
-  priv->backend = g_object_ref (backend);
-  priv->listener = listener;
-  g_object_add_weak_pointer (G_OBJECT (listener), (gpointer*)&priv->listener);
+  priv->book = book;
+  /* Attach a weak reference to the book, so if it dies the book view is destroyed too */
+  g_object_weak_ref (G_OBJECT (priv->book), book_destroyed_cb, view);
+  priv->backend = g_object_ref (e_data_book_get_backend (book));
   priv->card_query = g_strdup (card_query);
   priv->card_sexp = card_sexp;
   priv->max_results = max_results;
-  
+
+  dbus_g_connection_register_g_object (connection, path, G_OBJECT (view));
+
   return view;
 }
-
-G_DEFINE_TYPE (EDataBookView, e_data_book_view, G_TYPE_OBJECT);
 
 static void
 e_data_book_view_dispose (GObject *object)
@@ -117,21 +210,25 @@ e_data_book_view_dispose (GObject *object)
   EDataBookView *book_view = E_DATA_BOOK_VIEW (object);
   EDataBookViewPrivate *priv = book_view->priv;
 
+  g_message (G_STRFUNC);
+
+  if (priv->book) {
+    /* Remove the weak reference */
+    g_object_weak_unref (G_OBJECT (priv->book), book_destroyed_cb, book_view);
+    priv->book = NULL;
+  }
+
   if (priv->running) {
     e_book_backend_stop_book_view (priv->backend, book_view);
     priv->running = FALSE;
   }
 
   if (priv->backend) {
+    e_book_backend_remove_book_view (priv->backend, book_view);
     g_object_unref (priv->backend);
     priv->backend = NULL;
   }
   
-  if (priv->listener) {
-    g_object_unref (priv->listener);
-    priv->listener = NULL;
-  }
-
   if (priv->card_sexp) {
     g_object_unref (priv->card_sexp);
     priv->card_sexp = NULL;
@@ -142,8 +239,7 @@ e_data_book_view_dispose (GObject *object)
     priv->idle_id = 0;
   }
 
-  if (G_OBJECT_CLASS (e_data_book_view_parent_class)->dispose) 
-    G_OBJECT_CLASS (e_data_book_view_parent_class)->dispose (object);
+  G_OBJECT_CLASS (e_data_book_view_parent_class)->dispose (object);
 }
 
 static void
@@ -162,8 +258,7 @@ e_data_book_view_finalize (GObject *object)
 
   g_hash_table_destroy (priv->ids);
 
-  if (G_OBJECT_CLASS (e_data_book_view_parent_class)->finalize)
-    G_OBJECT_CLASS (e_data_book_view_parent_class)->finalize (object);
+  G_OBJECT_CLASS (e_data_book_view_parent_class)->finalize (object);
 }
 
 static gboolean
@@ -211,7 +306,7 @@ impl_BookView_stop (EDataBookView *book_view, GError **error)
 static gboolean
 impl_BookView_dispose (EDataBookView *book_view, GError **eror)
 {
-  g_warning(__FUNCTION__);
+  g_message (G_STRFUNC);
 
   g_object_unref (book_view);
   
@@ -265,8 +360,7 @@ send_pending_adds (EDataBookView *view, gboolean reset)
     return;
 
   resizing_array_finish (priv->adds);
-  if (priv->listener)
-    org_gnome_evolution_dataserver_addressbook_DataBookViewListener_notify_contacts_added (priv->listener, (const char **) priv->adds->arr, NULL);
+  g_signal_emit (view, signals[CONTACTS_ADDED], 0, priv->adds->arr);
   resizing_array_reset (priv->adds);
   
   if (reset)
@@ -282,8 +376,7 @@ send_pending_changes (EDataBookView *view)
     return;
 
   resizing_array_finish (priv->changes);
-  if (priv->listener)
-    org_gnome_evolution_dataserver_addressbook_DataBookViewListener_notify_contacts_changed (priv->listener, (const char **) priv->changes->arr, NULL);
+  g_signal_emit (view, signals[CONTACTS_CHANGED], 0, priv->changes->arr);
   resizing_array_reset (priv->changes);
 }
 
@@ -296,8 +389,7 @@ send_pending_removes (EDataBookView *view)
     return;
 
   resizing_array_finish (priv->removes);
-  if (priv->listener)
-    org_gnome_evolution_dataserver_addressbook_DataBookViewListener_notify_contacts_removed (priv->listener, (const char **) priv->removes->arr, NULL);
+  g_signal_emit (view, signals[CONTACTS_REMOVED], 0, priv->removes->arr);
   resizing_array_reset (priv->removes);
 }
 
@@ -358,6 +450,9 @@ e_data_book_view_notify_update (EDataBookView *book_view, EContact *contact)
   const char *id;
   char *vcard;
 
+  if (!priv->running)
+    return;
+
   g_mutex_lock (priv->pending_mutex);
 
   id = e_contact_get_const (contact, E_CONTACT_UID);
@@ -392,6 +487,9 @@ e_data_book_view_notify_update_vcard (EDataBookView *book_view, char *vcard)
   const char *id;
   EContact *contact;
 
+  if (!priv->running)
+    return;
+
   g_mutex_lock (priv->pending_mutex);
 
   contact = e_contact_new_from_vcard (vcard);
@@ -425,6 +523,9 @@ e_data_book_view_notify_update_prefiltered_vcard (EDataBookView *book_view, cons
   EDataBookViewPrivate *priv = book_view->priv;
   gboolean currently_in_view;
 
+  if (!priv->running)
+    return;
+
   g_mutex_lock (priv->pending_mutex);
 
   currently_in_view =
@@ -443,6 +544,9 @@ e_data_book_view_notify_remove (EDataBookView *book_view, const char *id)
 {
   EDataBookViewPrivate *priv = E_DATA_BOOK_VIEW_GET_PRIVATE (book_view);
 
+  if (!priv->running)
+    return;
+
   g_mutex_lock (priv->pending_mutex);
   notify_remove (book_view, id);
   g_mutex_unlock (priv->pending_mutex);
@@ -452,6 +556,9 @@ void
 e_data_book_view_notify_complete (EDataBookView *book_view, EDataBookStatus status)
 {
   EDataBookViewPrivate *priv = book_view->priv;
+
+  if (!priv->running)
+    return;
 
   g_mutex_lock (priv->pending_mutex);
 
@@ -464,8 +571,7 @@ e_data_book_view_notify_complete (EDataBookView *book_view, EDataBookStatus stat
   /* We're done now, so tell the backend to stop?  TODO: this is a bit different to
      how the CORBA backend works... */
 
-  if (priv->listener)
-    org_gnome_evolution_dataserver_addressbook_DataBookViewListener_notify_complete (priv->listener, status, NULL);
+  g_signal_emit (book_view, signals[COMPLETE], 0, status);
 }
 
 void
@@ -473,8 +579,10 @@ e_data_book_view_notify_status_message (EDataBookView *book_view, const char *me
 {
   EDataBookViewPrivate *priv = E_DATA_BOOK_VIEW_GET_PRIVATE (book_view);
 
-  if (priv->listener)
-    org_gnome_evolution_dataserver_addressbook_DataBookViewListener_notify_status_message (priv->listener, message, NULL);
+  if (!priv->running)
+    return;
+
+  g_signal_emit (book_view, signals[STATUS_MESSAGE], 0, message);
 }
 
 static ResizingArray *

@@ -14,13 +14,13 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include <libedataserver/e-source-list.h>
 #include <libedataserver/e-source.h>
 #include <libedataserver/e-list.h>
-#include "e-contact.h"
-#include "e-book-query.h"
-#include "e-book-view.h"
-#include "e-book-types.h"
+#include <libebook/e-contact.h>
+#include <libebook/e-book-query.h>
+#include <libebook/e-book-view.h>
+#include <libebook/e-book-types.h>
+#include <libedataserver/e-source-list.h>
 
 #define E_TYPE_BOOK        (e_book_get_type ())
 #define E_BOOK(o)          (G_TYPE_CHECK_INSTANCE_CAST ((o), E_TYPE_BOOK, EBook))
@@ -49,6 +49,7 @@ typedef void (*EBookEListCallback)   (EBook *book, EBookStatus status, EList *li
 
 struct _EBook {
 	GObject       parent;
+	/*< private >*/
 	EBookPrivate *priv;
 };
 
@@ -61,7 +62,7 @@ struct _EBookClass {
 	void (* writable_status) (EBook *book, gboolean writable);
 	void (* connection_status) (EBook *book, gboolean connected);
 	void (* auth_required) (EBook *book);
-	void (* backend_died)    (EBook *book); /* TODO not implemented */
+	void (* backend_died)    (EBook *book);
 
 	/* Padding for future expansion */
 	void (*_ebook_reserved0) (void);
@@ -89,11 +90,9 @@ guint    e_book_async_open                 (EBook         *book,
 
 gboolean e_book_remove                     (EBook       *book,
 					    GError     **error);
-
 guint    e_book_async_remove               (EBook   *book,
 					    EBookCallback cb,
 					    gpointer closure);
-
 gboolean e_book_get_required_fields       (EBook       *book,
 					    GList      **fields,
 					    GError     **error);
@@ -117,6 +116,7 @@ gboolean e_book_get_supported_auth_methods       (EBook       *book,
 guint    e_book_async_get_supported_auth_methods (EBook              *book,
 						  EBookEListCallback  cb,
 						  gpointer            closure);
+
 
 /* User authentication. */
 gboolean e_book_authenticate_user          (EBook       *book,
@@ -165,6 +165,7 @@ guint    e_book_async_remove_contacts      (EBook                 *book,
 					    GList                 *id_list,
 					    EBookCallback          cb,
 					    gpointer               closure);
+
 /* Adding contacts. */
 gboolean e_book_add_contact                (EBook           *book,
 					    EContact        *contact,
@@ -225,17 +226,13 @@ guint    e_book_async_get_changes          (EBook             *book,
 void     e_book_free_change_list           (GList       *change_list);
 
 const char *e_book_get_uri                 (EBook       *book);
-
 ESource    *e_book_get_source              (EBook       *book);
 
 const char *e_book_get_static_capabilities (EBook    *book,
 					    GError  **error);
-
 gboolean    e_book_check_static_capability (EBook       *book,
 					    const char  *cap);
-
 gboolean    e_book_is_opened               (EBook       *book);
-
 gboolean    e_book_is_writable             (EBook       *book);
 
 gboolean    e_book_is_online               (EBook       *book);

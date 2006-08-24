@@ -14,7 +14,7 @@ MARSHAL_GENERATED = e-data-book-marshal.c e-data-book-marshal.h
 # The library
 lib_LTLIBRARIES = libedata-book-1.2.la
 
-DBUS_GENERATED_H = e-data-book-glue.h e-data-book-factory-glue.h e-data-book-view-glue.h e-data-book-view-listener-bindings.h
+DBUS_GENERATED_H = e-data-book-glue.h e-data-book-factory-glue.h e-data-book-view-glue.h
 
 include glib-gen.mak
 glib_enum_headers=e-data-book-types.h

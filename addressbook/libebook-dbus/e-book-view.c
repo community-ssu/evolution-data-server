@@ -1,3 +1,23 @@
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
+/*
+ * Copyright (C) 2006 OpenedHand Ltd
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of version 2 of the GNU Lesser General Public License as published
+ * by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *
+ * Author: Ross Burton <ross@openedhand.com>
+ */
+
 #include <glib-object.h>
 #include <dbus/dbus-glib.h>
 #include "e-book.h"
@@ -7,13 +27,15 @@
 #include "e-book-marshal.h"
 
 G_DEFINE_TYPE(EBookView, e_book_view, G_TYPE_OBJECT);
-#define E_BOOK_VIEW_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), E_TYPE_BOOK_VIEW, EBookViewPrivate))
 
-typedef struct _EBookViewPrivate {
+#define E_BOOK_VIEW_GET_PRIVATE(o) \
+  (G_TYPE_INSTANCE_GET_PRIVATE ((o), E_TYPE_BOOK_VIEW, EBookViewPrivate))
+
+struct _EBookViewPrivate {
   EBook *book;
   DBusGProxy *view_proxy;
-  EBookViewListener *listener;
-} EBookViewPrivate;
+  gboolean running;
+};
 
 enum {
   CONTACTS_CHANGED,
@@ -29,22 +51,18 @@ static void
 e_book_view_dispose (GObject *object)
 {
   EBookView *view = E_BOOK_VIEW (object);
-  EBookViewPrivate *priv = E_BOOK_VIEW_GET_PRIVATE (view);
 
-  if (priv->book) {
-    g_object_unref (priv->book);
-    priv->book = NULL;
+  g_warning ("e_book_view_dispose");
+
+  if (view->priv->view_proxy) {
+    org_gnome_evolution_dataserver_addressbook_BookView_dispose (view->priv->view_proxy, NULL);
+    g_object_unref (view->priv->view_proxy);
+    view->priv->view_proxy = NULL;
   }
-  
-  if (priv->listener) {
-    e_book_view_listener_stop (priv->listener);
-    g_object_unref (priv->listener);
-    priv->listener = NULL;
-  }
-  
-  if (priv->view_proxy) {
-    g_object_unref (priv->view_proxy);
-    priv->view_proxy = NULL;
+
+  if (view->priv->book) {
+    g_object_unref (view->priv->book);
+    view->priv->book = NULL;
   }
 }
 
@@ -52,6 +70,9 @@ static void
 e_book_view_class_init (EBookViewClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+  object_class->dispose = e_book_view_dispose;
+
   g_type_class_add_private (klass, sizeof (EBookViewPrivate));
 
   signals [CONTACTS_CHANGED] = g_signal_new ("contacts_changed",
@@ -89,79 +110,146 @@ e_book_view_class_init (EBookViewClass *klass)
                                            NULL, NULL,
                                            e_book_marshal_NONE__STRING,
                                            G_TYPE_NONE, 1, G_TYPE_STRING);
-
-  object_class->dispose = e_book_view_dispose;
 }
 
 static void
 e_book_view_init (EBookView *view)
 {
+  EBookViewPrivate *priv = E_BOOK_VIEW_GET_PRIVATE (view);
+
+  priv->book = NULL;
+  priv->view_proxy = NULL;
+  priv->running = FALSE;
+
+  view->priv = priv;
 }
 
 static void
-on_response (EBookViewListener *listener, EBookViewListenerResponse *response, EBookView *book_view)
+status_message_cb (DBusGProxy *proxy, const char *message, EBookView *book_view)
 {
-  switch (response->op) {
-  case StatusMessageEvent:
-    g_signal_emit (book_view, signals [STATUS_MESSAGE], 0, response->message);
-    break;
-  case ContactsModifiedEvent:
-    g_signal_emit (book_view, signals [CONTACTS_CHANGED], 0, response->contacts);
-    break;
-  case ContactsRemovedEvent:
-    g_signal_emit (book_view, signals [CONTACTS_REMOVED], 0, response->ids);
-    break;
-  case ContactsAddedEvent:
-    g_signal_emit (book_view, signals [CONTACTS_ADDED], 0, response->contacts);
-    break;
-  case SequenceCompleteEvent:
-    g_signal_emit (book_view, signals [SEQUENCE_COMPLETE], 0, response->status);
-    break;
-  default:
-    g_warning("Unhandled response type %d\n", response->op);
+  if (!book_view->priv->running)
+    return;
+
+  g_signal_emit (book_view, signals[STATUS_MESSAGE], 0, message);
+}
+
+static void
+contacts_added_cb (DBusGProxy *proxy, const char **vcards, EBookView *book_view)
+{
+  const char **p;
+  GList *contacts = NULL;
+
+  if (!book_view->priv->running)
+    return;
+
+  for (p = vcards; *p; p++) {
+    contacts = g_list_prepend (contacts, e_contact_new_from_vcard (*p));
   }
+  contacts = g_list_reverse (contacts);
+
+  g_signal_emit (book_view, signals[CONTACTS_ADDED], 0, contacts);
+
+  g_list_foreach (contacts, (GFunc)g_object_unref, NULL);
+  g_list_free (contacts);
+}
+
+static void
+contacts_changed_cb (DBusGProxy *proxy, const char **vcards, EBookView *book_view)
+{
+  const char **p;
+  GList *contacts = NULL;
+
+  if (!book_view->priv->running)
+    return;
+
+  for (p = vcards; *p; p++) {
+    contacts = g_list_prepend (contacts, e_contact_new_from_vcard (*p));
+  }
+  contacts = g_list_reverse (contacts);
+
+  g_signal_emit (book_view, signals[CONTACTS_CHANGED], 0, contacts);
+
+  g_list_foreach (contacts, (GFunc)g_object_unref, NULL);
+  g_list_free (contacts);
+}
+
+static void
+contacts_removed_cb (DBusGProxy *proxy, const char **ids, EBookView *book_view)
+{
+  const char **p;
+  GList *list = NULL;
+
+  if (!book_view->priv->running)
+    return;
+
+  for (p = ids; *p; p++) {
+    list = g_list_prepend (list, (char*)*p);
+  }
+  list = g_list_reverse (list);
+
+  g_signal_emit (book_view, signals[CONTACTS_REMOVED], 0, list);
+
+  /* No need to free the values, our caller will */
+  g_list_free (list);
+}
+
+static void
+complete_cb (DBusGProxy *proxy, guint status, EBookView *book_view)
+{
+  if (!book_view->priv->running)
+    return;
+
+  g_signal_emit (book_view, signals[SEQUENCE_COMPLETE], 0, status);
 }
 
 EBookView*
-e_book_view_new (EBook *book, DBusGProxy *view_proxy, EBookViewListener *listener)
+e_book_view_new (EBook *book, DBusGProxy *view_proxy)
 {
   EBookView *view;
   EBookViewPrivate *priv;
+
   view = g_object_new (E_TYPE_BOOK_VIEW, NULL);
-  priv = E_BOOK_VIEW_GET_PRIVATE (view);
+  priv = view->priv;
+
   priv->book = g_object_ref (book);
-  /* Take ownership of the view_proxy and listener objects */
+
+  /* Take ownership of the view_proxy object */
   priv->view_proxy = view_proxy;
   g_object_add_weak_pointer (G_OBJECT (view_proxy), (gpointer)&priv->view_proxy);
-  priv->listener = listener;
 
-  g_signal_connect (priv->listener, "response", G_CALLBACK (on_response), view);
+  dbus_g_proxy_add_signal (view_proxy, "StatusMessage", G_TYPE_STRING, G_TYPE_INVALID);
+  dbus_g_proxy_connect_signal (view_proxy, "StatusMessage", G_CALLBACK (status_message_cb), view, NULL);
+  dbus_g_proxy_add_signal (view_proxy, "ContactsAdded", G_TYPE_STRV, G_TYPE_INVALID);
+  dbus_g_proxy_connect_signal (view_proxy, "ContactsAdded", G_CALLBACK (contacts_added_cb), view, NULL);
+  dbus_g_proxy_add_signal (view_proxy, "ContactsChanged", G_TYPE_STRV, G_TYPE_INVALID);
+  dbus_g_proxy_connect_signal (view_proxy, "ContactsChanged", G_CALLBACK (contacts_changed_cb), view, NULL);
+  dbus_g_proxy_add_signal (view_proxy, "ContactsRemoved", G_TYPE_STRV, G_TYPE_INVALID);
+  dbus_g_proxy_connect_signal (view_proxy, "ContactsRemoved", G_CALLBACK (contacts_removed_cb), view, NULL);
+  dbus_g_proxy_add_signal (view_proxy, "Complete", G_TYPE_UINT, G_TYPE_INVALID);
+  dbus_g_proxy_connect_signal (view_proxy, "Complete", G_CALLBACK (complete_cb), view, NULL);
+
   return view;
 }
 
 EBook *
 e_book_view_get_book (EBookView *book_view)
 {
-  EBookViewPrivate *priv;
   g_return_val_if_fail (E_IS_BOOK_VIEW (book_view), NULL);
-  priv = E_BOOK_VIEW_GET_PRIVATE (book_view);
-  return priv->book;
+
+  return book_view->priv->book;
 }
 
 void
 e_book_view_start (EBookView *book_view)
 {
-  EBookViewPrivate *priv;
   GError *error = NULL;
 
   g_return_if_fail (E_IS_BOOK_VIEW (book_view));
 
-  priv = E_BOOK_VIEW_GET_PRIVATE (book_view);
+  book_view->priv->running = TRUE;
 
-  e_book_view_listener_start (priv->listener);
-
-  if (priv->view_proxy) {
-    org_gnome_evolution_dataserver_addressbook_BookView_start (priv->view_proxy, &error);
+  if (book_view->priv->view_proxy) {
+    org_gnome_evolution_dataserver_addressbook_BookView_start (book_view->priv->view_proxy, &error);
     if (error) {
       g_printerr("Cannot start book view: %s\n", error->message);
       g_error_free (error);
@@ -172,17 +260,14 @@ e_book_view_start (EBookView *book_view)
 void
 e_book_view_stop (EBookView *book_view)
 {
-  EBookViewPrivate *priv;
   GError *error = NULL;
 
   g_return_if_fail (E_IS_BOOK_VIEW (book_view));
 
-  priv = E_BOOK_VIEW_GET_PRIVATE (book_view);
+  book_view->priv->running = FALSE;
 
-  e_book_view_listener_stop (priv->listener);
-
-  if (priv->view_proxy) {
-    org_gnome_evolution_dataserver_addressbook_BookView_stop (priv->view_proxy, &error);
+  if (book_view->priv->view_proxy) {
+    org_gnome_evolution_dataserver_addressbook_BookView_stop (book_view->priv->view_proxy, &error);
     if (error) {
       g_printerr("Cannot stop book view: %s\n", error->message);
       g_error_free (error);

@@ -1,3 +1,23 @@
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
+/*
+ * Copyright (C) 2006 OpenedHand Ltd
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of version 2 of the GNU Lesser General Public License as published
+ * by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *
+ * Author: Ross Burton <ross@openedhand.com>
+ */
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <dbus/dbus.h>
@@ -26,10 +46,10 @@ static gboolean impl_AddressBook_Book_getStaticCapabilities(EDataBook *book, cha
 static gboolean impl_AddressBook_Book_getSupportedFields(EDataBook *book, DBusGMethodInvocation *context);
 static gboolean impl_AddressBook_Book_getRequiredFields(EDataBook *book, DBusGMethodInvocation *context);
 static gboolean impl_AddressBook_Book_getSupportedAuthMethods(EDataBook *book, DBusGMethodInvocation *context);
-static gboolean impl_AddressBook_Book_getBookView (EDataBook *book, const char *listener_path, const char *search, const char **fields, const guint max_results, DBusGMethodInvocation *context);
+static gboolean impl_AddressBook_Book_getBookView (EDataBook *book, const char *search, const char **fields, const guint max_results, DBusGMethodInvocation *context);
 static gboolean impl_AddressBook_Book_getChanges(EDataBook *book, const char *IN_change_id, DBusGMethodInvocation *context);
 static gboolean impl_AddressBook_Book_cancelOperation(EDataBook *book, GError **error);
-static gboolean impl_AddressBook_Book_close(EDataBook *object, const char *IN_client, GError **error);
+static gboolean impl_AddressBook_Book_close(EDataBook *book, DBusGMethodInvocation *context);
 #include "e-data-book-glue.h"
 
 static void return_status_and_list (guint32 opid, EDataBookStatus status, GList *list, gboolean free_data);
@@ -62,15 +82,8 @@ static void
 e_data_book_dispose (GObject *object)
 {
   EDataBook *book = E_DATA_BOOK (object);
-  GList *views;
   
-  if (book->views) {
-    views = book->views;
-    book->views = NULL;
-    
-    g_list_foreach (views, (GFunc)g_object_unref, NULL);
-    g_list_free (views);
-  }
+  g_message (G_STRFUNC);
 
   if (book->backend) {
     g_object_unref (book->backend);
@@ -134,6 +147,7 @@ e_data_book_init (EDataBook *ebook)
 EDataBook *
 e_data_book_new (EBookBackend *backend, ESource *source, EDataBookClosedCallback closed_cb)
 {
+  /* TODO: still need closed_cb? */
   EDataBook *book;
   book = g_object_new (E_TYPE_DATA_BOOK, NULL);
   book->backend = g_object_ref (backend);
@@ -398,24 +412,13 @@ construct_bookview_path (void)
   return g_strdup_printf ("/org/gnome/evolution/dataserver/addressbook/BookView/%d/%d", getpid(), counter++);
 }
 
-static void
-view_destroy(gpointer data, GObject *dead)
-{
-  EDataBook *book = E_DATA_BOOK (data);
-  if (book) {
-    e_book_backend_remove_book_view (book->backend, (EDataBookView*)dead);
-    book->views = g_list_remove (book->views, dead);
-  }
-}
-
 static gboolean
-impl_AddressBook_Book_getBookView (EDataBook *book, const char *listener_path, const char *search, const char **fields, const guint max_results, DBusGMethodInvocation *context)
+impl_AddressBook_Book_getBookView (EDataBook *book, const char *search, const char **fields, const guint max_results, DBusGMethodInvocation *context)
 {
   EBookBackend *backend = e_data_book_get_backend (book);
   EBookBackendSExp *card_sexp;
   EDataBookView *book_view;
-  DBusGProxy *listener;
-  char *path, *sender;
+  char *path;
 
   card_sexp = e_book_backend_sexp_new (search);
   if (!card_sexp) {
@@ -423,17 +426,11 @@ impl_AddressBook_Book_getBookView (EDataBook *book, const char *listener_path, c
     return FALSE;
   }
 
-  sender = dbus_g_method_get_sender (context);
-  listener = dbus_g_proxy_new_for_name (connection, sender, listener_path, "org.gnome.evolution.dataserver.addressbook.DataBookViewListener");
-  g_free (sender);
-  g_assert (listener != NULL);
-
-  book_view = e_data_book_view_new (backend, listener, search, card_sexp, max_results);
-  g_object_weak_ref (G_OBJECT (book_view), view_destroy, book);
   path = construct_bookview_path ();
-  dbus_g_connection_register_g_object (connection, path, G_OBJECT (book_view));
+  book_view = e_data_book_view_new (book, path, search, card_sexp, max_results);
+
   e_book_backend_add_book_view (backend, book_view);
-  book->views = g_list_prepend(book->views, book_view);
+
   dbus_g_method_return (context, path);
   g_free (path);
   return TRUE;
@@ -481,11 +478,19 @@ impl_AddressBook_Book_cancelOperation(EDataBook *book, GError **error)
 }
 
 static gboolean
-impl_AddressBook_Book_close(EDataBook *book, const char *IN_client, GError **error)
+impl_AddressBook_Book_close(EDataBook *book, DBusGMethodInvocation *context)
 {
+  char *sender;
+
+  sender = dbus_g_method_get_sender (context);
+
+  book->closed_cb (book, sender);
+
+  g_free (sender);
+
   g_object_unref (book);
 
-  book->closed_cb (book, IN_client);
+  dbus_g_method_return (context);
 
   return TRUE;
 }

@@ -5,9 +5,9 @@ if ! WITH_LIBDB
 LIBDB = libdb
 endif
 
-SUBDIRS = $(LIBDB) libedataserver ucamel addressbook 
+SUBDIRS = $(LIBDB) libedataserver addressbook 
 
-DIST_SUBDIRS= libedataserver ucamel addressbook 
+DIST_SUBDIRS= libedataserver addressbook 
 
 changelogs =			\
 	ChangeLog

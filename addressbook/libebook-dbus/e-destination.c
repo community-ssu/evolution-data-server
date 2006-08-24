@@ -39,17 +39,13 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#include "e-book.h"
+#include <libebook/e-book.h>
 #include <libedataserver/e-data-server-marshal.h>
 
 #include <glib.h>
 #include <libxml/xmlmemory.h>
 #include <glib/gi18n-lib.h>
-#if ENABLE_CAMEL
 #include <camel/camel-internet-address.h>
-#else
-#include <ucamel/camel-internet-address.h>
-#endif
 
 #define d(x)
 

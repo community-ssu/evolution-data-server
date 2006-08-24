@@ -26,16 +26,17 @@ DEB_SHLIBDEPS_INCLUDE := debian/tmp/usr/lib
 
 DEB_DH_MAKESHLIBS_ARGS_ALL := -V
 
+DEB_DH_STRIP_ARGS := --dbg-package=libedataserver --dbg-package=libedata-book --dbg-package=libebook
+
 DEB_CONFIGURE_EXTRA_FLAGS := \
 	--prefix=/usr \
 	--with-dbus \
 	--without-openldap \
 	--without-libgnome \
-	--disable-camel \
 	--disable-groupwise \
 	--disable-nss \
 	--without-soup \
-	--enable-nntp=no \
+	--disable-nntp \
 	--without-bug-buddy \
 	--disable-calendar
 

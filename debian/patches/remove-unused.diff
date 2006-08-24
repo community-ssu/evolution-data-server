@@ -14,7 +14,7 @@ Index: addressbook/libebook-dbus/Makefile.am
  
  libebook_1_2_la_LIBADD =					\
  	$(EVOLUTION_ADDRESSBOOK_LIBS)				\
--	$(CAMEL_LIB) \
+-	$(top_builddir)/camel/libcamel-$(API_VERSION).la \
  	$(top_builddir)/libedataserver/libedataserver-$(API_VERSION).la
  
  libebook_1_2_la_LDFLAGS = 							\
@@ -26,28 +26,6 @@ Index: addressbook/libebook-dbus/Makefile.am
  	e-name-western.h				\
  	e-name-western-tables.h				\
  	e-vcard.h
-@@ -84,4 +81,4 @@
- 
- noinst_PROGRAMS = test
- test_SOURCES = test.c
--test_LDADD = $(EVOLUTION_ADDRESSBOOK_LIBS) $(CAMEL_LIB) libebook-1.2.la
-+test_LDADD = $(EVOLUTION_ADDRESSBOOK_LIBS) libebook-1.2.la
-Index: Makefile.am
-===================================================================
---- Makefile.am	2006-05-12 17:41:41.000000000 +0100
-+++ Makefile.am.new	2006-05-12 17:41:07.000000000 +0100
-@@ -5,9 +5,9 @@
- LIBDB = libdb
- endif
- 
--SUBDIRS = $(LIBDB) libedataserver ucamel addressbook 
-+SUBDIRS = $(LIBDB) libedataserver addressbook 
- 
--DIST_SUBDIRS= libedataserver ucamel addressbook 
-+DIST_SUBDIRS= libedataserver addressbook 
- 
- changelogs =			\
- 	ChangeLog
 Index: libedataserver/Makefile.am
 ===================================================================
 --- libedataserver/Makefile.am	(revision 3732)

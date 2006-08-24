@@ -83,14 +83,19 @@ static const char western_pfx_table[] = {
   "herr\0"
   "frau\0"
   "fraulein\0"
+  "fräulein\0"
+  "doktor\0"
   "herr doktor\0"
   "doktor frau\0"
   "doktor frau doktor\0"
   "frau doktor\0"
   "senor\0"
+  "señor\0"
   "senora\0"
+  "señora\0"
   "sra.\0"
   "senorita\0"
+  "señorita\0"
   "srita.\0"
 };
 static const guint western_pfx_index[] = {
@@ -178,21 +183,28 @@ static const guint western_pfx_index[] = {
   634,
   639,
   648,
-  660,
-  672,
-  691,
-  703,
-  709,
-  716,
-  721,
-  730,
+  658,
+  665,
+  677,
+  689,
+  708,
+  720,
+  726,
+  733,
+  740,
+  748,
+  753,
+  762,
+  772,
 };
 
 static const char western_sfx_table[] = {
   "junior\0"
   "senior\0"
   "jr\0"
+  "jr.\0"
   "sr\0"
+  "sr.\0"
   "I\0"
   "II\0"
   "III\0"
@@ -218,6 +230,7 @@ static const char western_sfx_table[] = {
   "phd\0"
   "ms\0"
   "md\0"
+  "m.d.\0"
   "esq\0"
   "esq.\0"
   "esquire\0"
@@ -227,34 +240,37 @@ static const guint western_sfx_index[] = {
   7,
   14,
   17,
-  20,
-  22,
-  25,
-  29,
-  32,
-  34,
+  21,
+  24,
+  28,
+  30,
+  33,
   37,
-  41,
-  46,
+  40,
+  42,
+  45,
   49,
-  51,
   54,
-  58,
-  63,
-  67,
-  70,
-  74,
-  79,
-  85,
-  89,
-  92,
-  96,
-  101,
-  105,
-  108,
-  111,
-  115,
-  120,
+  57,
+  59,
+  62,
+  66,
+  71,
+  75,
+  78,
+  82,
+  87,
+  93,
+  97,
+  100,
+  104,
+  109,
+  113,
+  116,
+  119,
+  124,
+  128,
+  133,
 };
 
 static const char western_complex_last_table[] = {
@@ -262,11 +278,13 @@ static const char western_complex_last_table[] = {
   "von\0"
   "de\0"
   "di\0"
+  "af\0"
 };
 static const guint western_complex_last_index[] = {
   0,
   4,
   8,
   11,
+  14,
 };
 

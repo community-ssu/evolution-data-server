@@ -1,3 +1,23 @@
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
+/*
+ * Copyright (C) 2006 OpenedHand Ltd
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of version 2 of the GNU Lesser General Public License as published
+ * by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *
+ * Author: Ross Burton <ross@openedhand.com>
+ */
+
 #include <config.h>
 #include <unistd.h>
 #include <string.h>
@@ -7,7 +27,6 @@
 #include "e-book.h"
 #include "e-error.h"
 #include "e-contact.h"
-#include "e-book-view-listener.h"
 #include "e-book-view-private.h"
 #include "e-data-book-factory-bindings.h"
 #include "e-data-book-bindings.h"
@@ -91,12 +110,8 @@ e_book_dispose (GObject *object)
   book->priv->loaded = FALSE;
 
   if (book->priv->proxy) {
-    const char *address;
-
     g_object_weak_unref (G_OBJECT (book->priv->proxy), proxy_destroyed, book);
-
-    address = dbus_bus_get_unique_name (dbus_g_connection_get_connection (connection));
-    org_gnome_evolution_dataserver_addressbook_Book_close (book->priv->proxy, address, NULL);
+    org_gnome_evolution_dataserver_addressbook_Book_close (book->priv->proxy, NULL);
   }
   if (book->priv->source) {
     g_object_unref (book->priv->source);
@@ -870,7 +885,6 @@ e_book_get_contacts (EBook *book, EBookQuery *query, GList **contacts, GError **
       l = g_list_prepend (l, e_contact_new_from_vcard (*i++));
     }
     *contacts = g_list_reverse (l);
-    /* TODO: check that new_from_vcard doens't copy */
     g_strfreev (list);
     return TRUE;
   } else {
@@ -1241,38 +1255,24 @@ e_book_async_remove_contacts (EBook *book, GList *id_list, EBookCallback cb, gpo
   return 0;
 }
 
-static char*
-construct_bookview_path (void)
-{
-  static guint counter = 1;
-  return g_strdup_printf ("/org/gnome/evolution/dataserver/addressbook/ViewListener/%d/%d", getpid(), counter++);
-}
-
 gboolean
 e_book_get_book_view (EBook *book, EBookQuery *query, GList *requested_fields, int max_results, EBookView **book_view, GError **error)
 {
   GError *err = NULL;
-  EBookViewListener *listener;
   DBusGProxy *view_proxy;
   char **fields;
-  char *sexp, *listener_path, *view_path;
+  char *sexp, *view_path;
 
   e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
 
   fields = flatten_stringlist (requested_fields);
 
-  listener = e_book_view_listener_new ();
-  listener_path = construct_bookview_path ();
-  dbus_g_connection_register_g_object (connection, listener_path, G_OBJECT(listener));
-
   sexp = e_book_query_to_string (query);
-
-  if (!org_gnome_evolution_dataserver_addressbook_Book_get_book_view (book->priv->proxy, listener_path, sexp, (const char **) fields, max_results, &view_path, &err)) {
+  
+  if (!org_gnome_evolution_dataserver_addressbook_Book_get_book_view (book->priv->proxy, sexp, (const char **) fields, max_results, &view_path, &err)) {
     *book_view = NULL;
     g_free (sexp);
-    g_free (listener_path);
-    g_object_unref (listener);
     return unwrap_gerror (err, error);
   }
   view_proxy = dbus_g_proxy_new_for_name_owner (connection,
@@ -1282,11 +1282,10 @@ e_book_get_book_view (EBook *book, EBookQuery *query, GList *requested_fields, i
   if (!view_proxy) {
     *book_view = NULL;
   } else {
-    *book_view = e_book_view_new (book, view_proxy, listener);
+    *book_view = e_book_view_new (book, view_proxy);
   }
   g_free (view_path);
   g_free (sexp);
-  g_free (listener_path);
   g_free (fields);
   return TRUE;
 }
@@ -1296,15 +1295,13 @@ get_book_view_reply (DBusGProxy *proxy, char *view_path, GError *error, gpointer
 {
   struct async_data *data = user_data;
   EBookView *view;
-  EBookViewListener *listener;
   EBookBookViewCallback cb = data->callback;
   DBusGProxy *view_proxy;
 
-  listener = E_BOOK_VIEW_LISTENER (data->data);
   view_proxy = dbus_g_proxy_new_for_name_owner (connection, E_DATA_BOOK_FACTORY_SERVICE_NAME, view_path,
                                            "org.gnome.evolution.dataserver.addressbook.BookView", NULL);
   /* TODO: handle errors */
-  view = e_book_view_new (data->book, view_proxy, listener);
+  view = e_book_view_new (data->book, view_proxy);
 
   if (cb)
     cb (data->book, get_status_from_error (error), view, data->closure);
@@ -1314,10 +1311,8 @@ get_book_view_reply (DBusGProxy *proxy, char *view_path, GError *error, gpointer
 guint
 e_book_async_get_book_view (EBook *book, EBookQuery *query, GList *requested_fields, int max_results, EBookBookViewCallback cb, gpointer closure)
 {
-  EBookViewListener *listener;
   struct async_data *data;
-  DBusGProxy *listener_proxy;
-  char *path, *sexp;
+  char *sexp;
   char **fields;
 
   e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
@@ -1329,18 +1324,10 @@ e_book_async_get_book_view (EBook *book, EBookQuery *query, GList *requested_fie
   data->callback = cb;
   data->closure = closure;
 
-  listener = e_book_view_listener_new ();
-  path = construct_bookview_path ();
-  dbus_g_connection_register_g_object (connection, path, G_OBJECT (listener));
-  listener_proxy = dbus_g_proxy_new_from_proxy (book->priv->proxy, "org.gnome.evolution.dataserver.addressbook.BookViewListener", path);
-  g_free (path);
-  data->data = listener;
-
   fields = flatten_stringlist (requested_fields);
   sexp = e_book_query_to_string (query);
 
-  org_gnome_evolution_dataserver_addressbook_Book_get_book_view_async (book->priv->proxy, dbus_g_proxy_get_path (listener_proxy), sexp, (const char **) fields, max_results, get_book_view_reply, data);
-  g_object_unref (listener_proxy);
+  org_gnome_evolution_dataserver_addressbook_Book_get_book_view_async (book->priv->proxy, sexp, (const char **) fields, max_results, get_book_view_reply, data);
 
   g_free (sexp);
   g_free (fields);

@@ -22,6 +22,11 @@ Copyright (C) 2005 Opened Hand Ltd
       <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_BookView_dispose"/>
     </method>
 
+    <signal name="ContactsAdded"/>
+    <signal name="ContactsChanged"/>
+    <signal name="ContactsRemoved"/>
+    <signal name="StatusMessage"/>
+    <signal name="Complete"/>
   </interface>
 
 </node>

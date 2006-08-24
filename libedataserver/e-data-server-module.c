@@ -251,7 +251,7 @@ e_data_server_module_add_type (GType type)
 {
 	GObject *object;
 
-	g_message ("adding type `%s'", g_type_name (type));
+	g_printerr ("adding type `%s'\n", g_type_name (type));
 
 	object = g_object_new (type, NULL);
 	g_object_weak_ref (object, 

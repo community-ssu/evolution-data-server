@@ -23,9 +23,7 @@
  *          Hans Petter Jansson <hpj@novell.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include <config.h> 
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,16 +36,21 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 
+#include <glib.h>
+#include <glib/gstdio.h>
 #include <glib/gi18n-lib.h>
+
 #include "e-dbhash.h"
 #include "e-db3-utils.h"
-#include <libedataserver/e-util.h>
-#include <libebook/e-contact.h>
+#include "libedataserver/e-util.h"
 
-#include <libedata-book/e-book-backend-sexp.h>
-#include <libedata-book/e-book-backend-summary.h>
-#include <libedata-book/e-data-book.h>
-#include <libedata-book/e-data-book-view.h>
+#include "libebook/e-contact.h"
+
+#include "libedata-book/e-book-backend-sexp.h"
+#include "libedata-book/e-book-backend-summary.h"
+#include "libedata-book/e-data-book.h"
+#include "libedata-book/e-data-book-view.h"
+
 #include "e-book-backend-file.h"
 
 #define d(x) x
@@ -55,7 +58,6 @@
 #define CHANGES_DB_SUFFIX ".changes.db"
 
 #define E_BOOK_BACKEND_FILE_VERSION_NAME "PAS-DB-VERSION"
-#define E_BOOK_BACKEND_FILE_VERSION_NAME_LENGTH 14
 #define E_BOOK_BACKEND_FILE_VERSION "0.2"
 
 #define PAS_ID_PREFIX "pas-id-"
@@ -463,21 +465,21 @@ e_book_backend_file_get_contact_list (EBookBackendSync *backend,
 		memset (&vcard_dbt, 0, sizeof (vcard_dbt));
 		vcard_dbt.flags = DB_DBT_MALLOC;
 		memset (&id_dbt, 0, sizeof (id_dbt));
-
 		db_error = dbc->c_get(dbc, &id_dbt, &vcard_dbt, DB_FIRST);
+
 		while (db_error == 0) {
+
 			/* don't include the version in the list of cards */
-			if (id_dbt.size != E_BOOK_BACKEND_FILE_VERSION_NAME_LENGTH + 1
+			if (id_dbt.size != strlen(E_BOOK_BACKEND_FILE_VERSION_NAME) + 1
 			    || strcmp (id_dbt.data, E_BOOK_BACKEND_FILE_VERSION_NAME)) {
 
 				if ((!search_needed) || (card_sexp != NULL && e_book_backend_sexp_match_vcard  (card_sexp, vcard_dbt.data))) {
-					/* Don't need to strdup the data here
-					   as it belongs to application */
 					contact_list = g_list_prepend (contact_list, vcard_dbt.data);
 				}
 			}
-			
+
 			db_error = dbc->c_get(dbc, &id_dbt, &vcard_dbt, DB_NEXT);
+
 		}
 		g_object_unref (card_sexp);
 		
@@ -593,7 +595,6 @@ book_view_thread (gpointer data)
 			db_error = db->get (db, NULL, &id_dbt, &vcard_dbt, 0);
 
 			if (db_error == 0) {
-				/* notify_update will check if it matches for us */
 				e_data_book_view_notify_update_prefiltered_vcard (book_view, id, vcard_dbt.data);
 			}
 			else {
@@ -626,7 +627,6 @@ book_view_thread (gpointer data)
 
 				/* don't include the version in the list of cards */
 				if (strcmp (id_dbt.data, E_BOOK_BACKEND_FILE_VERSION_NAME)) {
-					/* notify_update will check if it matches for us */
 					if (allcontacts)
 						e_data_book_view_notify_update_prefiltered_vcard (book_view, id_dbt.data, vcard_dbt.data);
 					else
@@ -872,6 +872,14 @@ e_book_backend_file_get_changes (EBookBackendSync *backend,
 	return GNOME_Evolution_Addressbook_Success;
 }
 
+static char *
+e_book_backend_file_extract_path_from_uri (const char *uri)
+{
+	g_assert (g_ascii_strncasecmp (uri, "file://", 7) == 0);
+
+	return g_filename_from_uri (uri, NULL, NULL);
+}
+
 static EBookBackendSyncStatus
 e_book_backend_file_authenticate_user (EBookBackendSync *backend,
 				       EDataBook *book,
@@ -1022,7 +1030,7 @@ e_book_backend_file_maybe_upgrade_db (EBookBackendFile *bf)
 
 	string_to_dbt (E_BOOK_BACKEND_FILE_VERSION_NAME, &version_name_dbt);
 	memset (&version_dbt, 0, sizeof (version_dbt));
- 	version_dbt.flags = DB_DBT_MALLOC;
+	version_dbt.flags = DB_DBT_MALLOC;
 
 	db_error = db->get (db, NULL, &version_name_dbt, &version_dbt, 0);
 	if (db_error == 0) {
@@ -1031,14 +1039,13 @@ e_book_backend_file_maybe_upgrade_db (EBookBackendFile *bf)
 	}
 	else {
 		/* key was not in file */
- 		version = g_strdup ("0.0");
+		version = g_strdup ("0.0");
 	}
 
-	if (strcmp (version, E_BOOK_BACKEND_FILE_VERSION)) {
+	if (strcmp (version, E_BOOK_BACKEND_FILE_VERSION))
 		ret_val = e_book_backend_file_upgrade_db (bf, version);
-	}
 
-  	g_free (version);
+	g_free (version);
 
 	return ret_val;
 }
@@ -1047,8 +1054,8 @@ e_book_backend_file_maybe_upgrade_db (EBookBackendFile *bf)
 # include <libedata-book/ximian-vcard.h>
 #endif
 
- static void
-#if DB_VERSION_MAJOR >= 4 && DB_VERSION_MINOR >= 3
+static void
+#if DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 3
 file_errcall (const DB_ENV *env, const char *buf1, const char *buf2)
 #else
 file_errcall (const char *buf1, char *buf2)
@@ -1075,7 +1082,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 
 	uri = e_source_get_uri (source);
 
-	dirname = g_filename_from_uri (uri, NULL, NULL);
+	dirname = e_book_backend_file_extract_path_from_uri (uri);
 	filename = g_build_filename (dirname, "addressbook.db", NULL);
 	g_free (uri);
 
@@ -1107,6 +1114,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 		env->set_alloc (env, (void *(*)(size_t))g_try_malloc, 
 				(void *(*)(void *, size_t))g_try_realloc,
 				g_free);
+
 		db_error = env->open (env, NULL, DB_CREATE | DB_INIT_MPOOL | DB_PRIVATE | DB_THREAD, 0);
 		if (db_error != 0) {
 			env->close(env, 0);
@@ -1212,7 +1220,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 	bf->priv->dirname = dirname;
 	bf->priv->filename = filename;
 
-	if (stat (bf->priv->filename, &sb) == -1) {
+	if (g_stat (bf->priv->filename, &sb) == -1) {
 		db->close (db, 0);
 		bf->priv->file_db = NULL;
 		g_warning ("stat(%s) failed", bf->priv->filename);
@@ -1260,7 +1268,7 @@ e_book_backend_file_remove (EBookBackendSync *backend,
 	EBookBackendFile *bf = E_BOOK_BACKEND_FILE (backend);
 	GDir *dir;
 
-	if (-1 == unlink (bf->priv->filename)) {
+	if (-1 == g_unlink (bf->priv->filename)) {
 		if (errno == EACCES || errno == EPERM)
 			return GNOME_Evolution_Addressbook_PermissionDenied;
 		else
@@ -1270,7 +1278,7 @@ e_book_backend_file_remove (EBookBackendSync *backend,
 	/* unref the summary before we remove the file so it's not written out again */
 	g_object_unref (bf->priv->summary);
 	bf->priv->summary = NULL;
-	if (-1 == unlink (bf->priv->summary_filename))
+	if (-1 == g_unlink (bf->priv->summary_filename))
 		g_warning ("failed to remove summary file `%s`: %s", bf->priv->summary_filename, strerror (errno));
 
 	dir = g_dir_open (bf->priv->dirname, 0, NULL);
@@ -1280,7 +1288,7 @@ e_book_backend_file_remove (EBookBackendSync *backend,
 		while ((name = g_dir_read_name (dir))) {
 			if (select_changes (name)) {
 				char *full_path = g_build_filename (bf->priv->dirname, name, NULL);
-				if (-1 == unlink (full_path)) {
+				if (-1 == g_unlink (full_path)) {
 					g_warning ("failed to remove change db `%s': %s", full_path, strerror (errno));
 				}
 				g_free (full_path);
@@ -1290,7 +1298,7 @@ e_book_backend_file_remove (EBookBackendSync *backend,
 		g_dir_close (dir);
 	}
 
-	if (-1 == rmdir (bf->priv->dirname))
+	if (-1 == g_rmdir (bf->priv->dirname))
 		g_warning ("failed to remove directory `%s`: %s", bf->priv->dirname, strerror (errno));
 
 	/* we may not have actually succeeded in removing the
@@ -1399,6 +1407,50 @@ e_book_backend_file_dispose (GObject *object)
 	G_OBJECT_CLASS (e_book_backend_file_parent_class)->dispose (object);	
 }
 
+#ifdef G_OS_WIN32
+/* Avoid compiler warning by providing a function with exactly the
+ * prototype that db_env_set_func_open() wants for the open method.
+ */
+
+static int
+my_open (const char *name, int oflag, ...)
+{
+	int mode = 0;
+
+	if (oflag & O_CREAT) {
+		va_list arg;
+		va_start (arg, oflag);
+		mode = va_arg (arg, int);
+		va_end (arg);
+	}
+
+	return g_open (name, oflag, mode);
+}
+
+int
+my_rename (const char *oldname, const char *newname)
+{
+	return g_rename (oldname, newname);
+}
+
+int
+my_exists (const char *name, int *isdirp)
+{
+	if (!g_file_test (name, G_FILE_TEST_EXISTS))
+		return ENOENT;
+	if (isdirp != NULL)
+		*isdirp = g_file_test (name, G_FILE_TEST_IS_DIR);
+	return 0;
+}
+
+int
+my_unlink (const char *name)
+{
+	return g_unlink (name);
+}
+
+#endif
+
 static void
 e_book_backend_file_class_init (EBookBackendFileClass *klass)
 {
@@ -1418,7 +1470,7 @@ e_book_backend_file_class_init (EBookBackendFileClass *klass)
 	backend_class->stop_book_view          = e_book_backend_file_stop_book_view;
 	backend_class->cancel_operation        = e_book_backend_file_cancel_operation;
 	backend_class->set_mode                = e_book_backend_file_set_mode;
-	backend_class->sync                = e_book_backend_file_sync;
+	backend_class->sync                    = e_book_backend_file_sync;
 	sync_class->remove_sync                = e_book_backend_file_remove;
 	sync_class->create_contact_sync        = e_book_backend_file_create_contact;
 	sync_class->remove_contacts_sync       = e_book_backend_file_remove_contacts;
@@ -1432,6 +1484,17 @@ e_book_backend_file_class_init (EBookBackendFileClass *klass)
 	
 
 	object_class->dispose = e_book_backend_file_dispose;
+
+#ifdef G_OS_WIN32
+	/* Use the gstdio wrappers to open, check, rename and unlink
+	 * files from libdb.
+	 */
+	db_env_set_func_open (my_open);
+	db_env_set_func_close (close);
+	db_env_set_func_exists (my_exists);
+	db_env_set_func_rename (my_rename);
+	db_env_set_func_unlink (my_unlink);
+#endif
 }
 
 static void

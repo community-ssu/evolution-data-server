@@ -20,6 +20,10 @@
  * Author: Chris Toshok (toshok@ximian.com)
  */
 
+/* This file implements the decoding of the v-card format
+ * http://www.imc.org/pdi/vcard-21.txt
+ */
+
 #include <glib.h>
 #include <stdio.h>
 #include <string.h>
@@ -32,6 +36,9 @@
 
 #define FOLD_LINES 0
 
+/** Encoding used in v-card 
+ *  Note: v-card spec defines additional 7BIT 8BIT and X- encoding
+ */
 typedef enum {
 	EVC_ENCODING_RAW,    /* no encoding */
 	EVC_ENCODING_BASE64, /* base64 */
@@ -977,6 +984,7 @@ e_vcard_attribute_copy (EVCardAttribute *attr)
 
 	for (p = attr->values; p; p = p->next)
 		e_vcard_attribute_add_value (a, p->data);
+
 	for (p = attr->params; p; p = p->next)
 		e_vcard_attribute_add_param (a, e_vcard_attribute_param_copy (p->data));
 
@@ -1208,6 +1216,13 @@ e_vcard_attribute_remove_values (EVCardAttribute *attr)
 	attr->decoded_values = NULL;
 }
 
+/**
+ * e_vcard_attribute_remove_value:
+ * @attr: an #EVCardAttribute
+ * @s: an value to remove
+ *
+ * Removes from the value list in @attr the value @s.
+ **/
 void
 e_vcard_attribute_remove_value (EVCardAttribute *attr, const char *s)
 {
@@ -1474,6 +1489,14 @@ e_vcard_attribute_param_remove_values (EVCardAttributeParam *param)
 	param->values = NULL;
 }
 
+/**
+ * e_vcard_attribute_remove_param_value:
+ * @attr: an #EVCardAttribute
+ * @param_name: a parameter name
+ * @s: a value
+ *
+ * Removes the value @s from the parameter @param_name on the attribute @attr.
+ **/
 void
 e_vcard_attribute_remove_param_value (EVCardAttribute *attr, const char *param_name, const char *s)
 {
@@ -1684,6 +1707,8 @@ e_vcard_attribute_get_value (EVCardAttribute *attr)
  * Gets the value of a single-valued #EVCardAttribute, @attr, decoding
  * it if necessary.
  *
+ * Note: this function seems currently to be unused. Could be removed.
+ *
  * Return value: A newly allocated #GString representing the value.
  **/
 GString*
@@ -1759,6 +1784,16 @@ e_vcard_attribute_get_params (EVCardAttribute *attr)
 	return attr->params;
 }
 
+/**
+ * e_vcard_attribute_get_param:
+ * @attr: an #EVCardAttribute
+ * @name: a parameter name
+ * 
+ * Gets the list of values for the paramater @name from @attr. The list and its
+ * contents are owned by @attr, and must not be freed.
+ *
+ * Return value: A list of string elements representing the parameter's values.
+ **/
 GList *
 e_vcard_attribute_get_param (EVCardAttribute *attr, const char *name)
 {

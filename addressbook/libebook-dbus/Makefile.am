@@ -18,8 +18,6 @@ libebook_1_2_la_SOURCES =					\
 	$(MARSHAL_GENERATED)				\
 	e-address-western.c				\
 	e-book-query.c					\
-	e-book-view-listener.c				\
-	e-book-view-listener-glue.h				\
 	e-book-view.c					\
 	e-book-view-private.h				\
 	e-book.c					\
@@ -28,15 +26,9 @@ libebook_1_2_la_SOURCES =					\
 	e-name-western.c				\
 	e-vcard.c
 
-if ENABLE_CAMEL
-CAMEL_LIB=$(top_builddir)/camel/libcamel-$(API_VERSION).la
-else
-CAMEL_LIB=$(top_builddir)/ucamel/libcamel-$(API_VERSION).la
-endif
-
 libebook_1_2_la_LIBADD =					\
 	$(EVOLUTION_ADDRESSBOOK_LIBS)				\
-	$(CAMEL_LIB) \
+	$(top_builddir)/camel/libcamel-$(API_VERSION).la \
 	$(top_builddir)/libedataserver/libedataserver-$(API_VERSION).la
 
 libebook_1_2_la_LDFLAGS = 							\
@@ -48,7 +40,6 @@ libebookinclude_HEADERS =				\
 	$(DBUS_GENERATED_H)				\
 	e-address-western.h				\
 	e-book-query.h					\
-	e-book-view-listener.h				\
 	e-book-view.h					\
 	e-book-types.h					\
 	e-book.h					\
@@ -64,7 +55,7 @@ libebookinclude_HEADERS =				\
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libebook-$(API_VERSION).pc
 
-DBUS_GENERATED_H = e-data-book-factory-bindings.h e-data-book-bindings.h e-data-book-view-bindings.h e-data-book-view-listener-glue.h
+DBUS_GENERATED_H = e-data-book-factory-bindings.h e-data-book-bindings.h e-data-book-view-bindings.h
 %-glue.h: ../libedata-book-dbus/%.xml
 	dbus-binding-tool --mode=glib-server --output=$@ --prefix=$(subst -,_,$*) $^
 
@@ -84,4 +75,4 @@ dist-hook:
 
 noinst_PROGRAMS = test
 test_SOURCES = test.c
-test_LDADD = $(EVOLUTION_ADDRESSBOOK_LIBS) $(CAMEL_LIB) libebook-1.2.la
+test_LDADD = $(EVOLUTION_ADDRESSBOOK_LIBS) libebook-1.2.la

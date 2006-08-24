@@ -104,9 +104,13 @@ static const EContactFieldInfo field_info[] = {
 	{0,}, /* Dummy row as EContactField starts from 1 */
  	STRING_FIELD (E_CONTACT_UID,        EVC_UID,       "id",         N_("Unique ID"),  FALSE),
 	STRING_FIELD (E_CONTACT_FILE_AS,    EVC_X_FILE_AS, "file-as",    N_("File Under"),    FALSE),
+	/* URI of the book to which the contact belongs to */
 	STRING_FIELD (E_CONTACT_BOOK_URI, EVC_X_BOOK_URI, "book-uri", N_("Book URI"), FALSE),
 
 	/* Name fields */
+	/* FN isn't really a structured field - we use a getter/setter
+	   so we can set the N property (since evo 1.4 works fine with
+	   vcards that don't even have a N attribute.  *sigh*) */
 	GETSET_FIELD        (E_CONTACT_FULL_NAME,   EVC_FN,       "full-name",   N_("Full Name"),   FALSE, fn_getter, fn_setter),
 	LIST_ELEM_STR_FIELD (E_CONTACT_GIVEN_NAME,  EVC_N,        "given-name",  N_("Given Name"),  FALSE, 1),
 	LIST_ELEM_STR_FIELD (E_CONTACT_FAMILY_NAME, EVC_N,        "family-name", N_("Family Name"), FALSE, 0),
@@ -144,12 +148,14 @@ static const EContactFieldInfo field_info[] = {
 	ATTR_TYPE_STR_FIELD  (E_CONTACT_PHONE_PRIMARY,      EVC_TEL, "primary-phone",     N_("Primary Phone"),    FALSE, "PREF",                  0),
 	ATTR_TYPE_STR_FIELD  (E_CONTACT_PHONE_RADIO,        EVC_TEL, "radio",             N_("Radio"),            FALSE, EVC_X_RADIO,     0),
 	ATTR_TYPE_STR_FIELD  (E_CONTACT_PHONE_TELEX,        EVC_TEL, "telex",             N_("Telex"),            FALSE, EVC_X_TELEX,     0),
+	/* To translators: TTY is Teletypewriter */
 	ATTR_TYPE_STR_FIELD  (E_CONTACT_PHONE_TTYTDD,       EVC_TEL, "tty",               N_("TTY"),              FALSE, EVC_X_TTYTDD,    0),
 	
 	/* Organizational fields */
 	LIST_ELEM_STR_FIELD (E_CONTACT_ORG,      EVC_ORG, "org",      N_("Organization"),        FALSE, 0),
 	LIST_ELEM_STR_FIELD (E_CONTACT_ORG_UNIT, EVC_ORG, "org-unit", N_("Organizational Unit"), FALSE, 1),
 	LIST_ELEM_STR_FIELD (E_CONTACT_OFFICE,   EVC_ORG, "office",   N_("Office"),              FALSE, 2),
+
 	STRING_FIELD    (E_CONTACT_TITLE,     EVC_TITLE,       "title",     N_("Title"),           FALSE),
 	STRING_FIELD    (E_CONTACT_ROLE,      EVC_ROLE,        "role",      N_("Role"),            FALSE),
 	STRING_FIELD    (E_CONTACT_MANAGER,   EVC_X_MANAGER,   "manager",   N_("Manager"),         FALSE),
@@ -172,6 +178,7 @@ static const EContactFieldInfo field_info[] = {
 	STRING_FIELD (E_CONTACT_SPOUSE, EVC_X_SPOUSE,    "spouse", N_("Spouse's Name"), FALSE),
 	STRING_FIELD (E_CONTACT_NOTE,   EVC_NOTE,        "note",   N_("Note"),          FALSE),
 
+	/* Instant messaging fields */
 	ATTR_TYPE_STR_FIELD (E_CONTACT_IM_AIM_HOME_1,    EVC_X_AIM,    "im-aim-home-1",    N_("AIM Home Screen Name 1"),    FALSE, "HOME", 0),
 	ATTR_TYPE_STR_FIELD (E_CONTACT_IM_AIM_HOME_2,    EVC_X_AIM,    "im-aim-home-2",    N_("AIM Home Screen Name 2"),    FALSE, "HOME", 1),
 	ATTR_TYPE_STR_FIELD (E_CONTACT_IM_AIM_HOME_3,    EVC_X_AIM,    "im-aim-home-3",    N_("AIM Home Screen Name 3"),    FALSE, "HOME", 2),
@@ -246,7 +253,7 @@ static const EContactFieldInfo field_info[] = {
 	STRUCT_FIELD (E_CONTACT_ANNIVERSARY, EVC_X_ANNIVERSARY, "anniversary", N_("Anniversary"), FALSE, date_getter, date_setter, e_contact_date_get_type),
 
 	/* Security fields */
-	ATTR_TYPE_STRUCT_FIELD (E_CONTACT_X509_CERT,  EVC_KEY, "x509Cert",  N_("X.509 Certificate"), FALSE, "X509", cert_getter, cert_setter, e_contact_cert_get_type), 
+	ATTR_TYPE_STRUCT_FIELD (E_CONTACT_X509_CERT,  EVC_KEY, "x509Cert",  N_("X.509 Certificate"), FALSE, "X509", cert_getter, cert_setter, e_contact_cert_get_type),
 
 	MULTI_LIST_FIELD (E_CONTACT_OSSO_CONTACT_STATE,       EVC_X_OSSO_CONTACT_STATE,       "osso-contact-state",       N_("Contact State"),    FALSE),
 };
