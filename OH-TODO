@@ -1,0 +1,31 @@
+Opened Hand To Do List
+
+Finish Address Book port [N]
+- remove the status argument from e_data_book_open (1 hour)
+- lock race when starting bookview with status messages
+
+
+Port libedataserverui to use DBus libraries [N] (1 week)
+- should be trivial, but you never know
+
+
+Add --with-backends=... (1 week)
+- configure flags to turn on/off selected backends
+- probably easier to do --without-webcal, --without-groupwise etc
+
+
+Solve the libebook vs libebook-dbus naming problem [N]
+- this means that every program that links to a ported library has to be
+  modified to use the new path
+- if DBus will go upstream, maybe libebook etc could be named libebook-corba?
+
+
+Merge any patches from HEAD Bonobo libraries back into our copies (1 day)
+- specifically the portability/gthread fixes by Tor
+
+
+Investigate the threadsafe GObject patches, to see if the object library in Camel can be removed (1 week)
+- currently libebook uses camel for parsing email addresses
+- maybe statically linking to camel would be a good compromise, suffer the extra
+  object layer and see if the linker will throw away the symbols we are not
+  using

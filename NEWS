@@ -1,0 +1,983 @@
+Evolution-Data-Server 1.4.0, 2005-09-05
+---------------------------------------
+
+What is new ?
+
+- Evolution-Data-Server is now available in LGPL.
+- Inline PGP Signature/Encryption support.
+- Performance enhancements on Camel/GroupWise Backends.
+- Thunderbird-compatible storage of labels on IMAP.
+- Support for delegation of meetings (Calendar)
+
+Evolution-Data-Server 1.3.8, 2005-08-22
+---------------------------------------
+
+Bugzilla bugs fixed (see http://bugzilla.gnome.org/show_bug.cgi):
+
+	#242032 - color labels stored to imap message store (Michael Zucchi)  
+	#247706 - Automatically add comma after autocompleting an address (Devashish)
+	#271894 - PGP-encrypted attached messages not displayed (Michael Zucchi)
+	#271969 - Synchronize doesn't work for Tasks and Calendar (Armin Bauer, Varadhan, Mubeen)
+	#300115 - RFC2047 encoding always separates the last non-ASCII UTF-8 character. (Changwoo)
+	#300891 - Now camel should specify the translation domain explicitly to use gettext (Changwoo)
+	#302835 - Mailbox does not appear on top in offline mode (Parthasarathi)
+	#302963 - Status tracking does not work for some items (Vivek)
+	#309499 - Additional mail is sent to delegate(s) in Groupwise. (Chakravarthi)
+	#310325 - Meeting request mail cannot be sent for Meeting created in 'Personal' calendar (Vivek)
+	#310496 - 'make check' fails on gpg test (Michael Zucchi) 
+	#310956 - gw: trying to copy the mailbox folder when online copies the folder below the mailbox folder (Parthasarathi)
+	#311078 - Calendar loading progress information goes beyond 100% (Chakravarthi)
+	#311639 - mh: Renaming parent folder loses subfolders (Michael Zucchi)
+	#311831 - sometimes clicking on a meeting request mail or any mail related to assigned task crashes evolution (Chenthill)
+	#312184 - Signature shown as attachment (Parthasarathi)
+	#312578 - In GW calendar user should be able to delegate all instances together (Chenthill)
+	#312668 - Unable to go back to Online mode after clicking offline button (Michael Zucchi)
+	#312715 - Evolution crashes moving IMAP folder to local folder (Michael Zucchi)
+	#312831 - crash in camel-folder-thread.c:sort_node when generating message list (Michael Zucchi)
+	#312857 - gw: Evolution crashes while starting up (Parthasarathi)
+	#312988 - Regressing 274308 - EDS crashed (Sushma)
+	#313058 - gw: Unable to create a new folder(subfolder) with names like Mailbox, Sent Items, etc (Vivek)
+	#313091 - Useless assignment in e-vcard (Ross Burton)
+	#313284 - camel indexing valgrind hits (Michael Zucchi)
+	#313381 - gw: evo crashes while trying to refresh the folder (Vivek)
+	#313574 - crash viewing IMAP mail (Michael Zucchi)
+	#313593 - imap4: sub folders not working (Michael Zucchi)
+	#313657 - IOP: Implement Outlook-like handling of recurrence corner-cases (Carsten Guenther)
+	#313806 - cannot decrypt an encrypted message (Parthasarathi)
+
+Updated Translations:
+
+	- bg (Rostislav Raykov)
+	- ca (Xavier Conde)
+	- de (Frank Arnold)
+	- de (Kostas Papadimas)
+	- el (Kostas Papadimas)
+	- et (Ivar Smolin)
+	- hu (Gabor Kelemen)
+	- lt (Justina Klingaitė)
+	- sr, sr@Latn (Igor Nestorivić)
+	- sq (Laurent Dhima)
+
+Evolution-Data-Server 1.3.7, 2005-08-08
+---------------------------------------
+
+Bugzilla bugs fixed (see http://bugzilla.gnome.org/show_bug.cgi):
+
+	 #274382 - Multiple CC headers are not processed properly (Michael Zucchi)
+	 #310198 - Grammar errors failing Sun's compiler 'Vulcan / Forte' (Mengjie Yu)
+	 #309237 - broken imap server workaround (Michael Zucchi)
+	 #311658 - 1.3.6 lists a pile of old folders (Michael Zucchi)
+	 #300048 - configure script fails to detect getaddrinfo (Harish)
+	 #312535 - GW: Fwded message headers are not displayed (Parthasarathi)
+	 #305304 - Description does not appear completely when using the ITIP FORMATTER plugin (Dinesh Layek)
+	 #312190 - problems with junk test in filters (Vivek Jain)
+	 #312185 - Configuring same account for IMAP and GroupWise troubles Proxy Login (Sankar)
+	 #302968 - GW: Some mails do not get delivered (Sankar)
+	 #305590 - GW: don't see schedules from people in other post offices. (Chenthill)
+	 #310328 - Cannot create recurring 'All Day event' in groupwise calendar (Chenthill)
+	 #311684 - evolution-data-server crashes trying to reply all (Wolfgang Ocker)
+	 #303111 - GW long delays & no status (Sushma Rai)
+	 #308512 - Key /apps/evolution/lock/mail/accounts/save_password does not work correctly
+
+Updated Translations:
+
+	- cs (Miloslav Trmac)
+	- es (Francisco Javier F. Serrador)
+	- et (Ivar Smolin)
+	- fi (Ilkka Tuohela)
+	- gu (Ankit Patel)
+	- id (Imam Musthaqim)
+	- it (Marco Ciampa)
+	- ja (Takeshi AIHANA)
+	- nb,no (Terance Sola)
+	- nl (Reinout van Schouwen)
+	- pl (GNOME PL Team)
+	- pt_BR (Raphael Higino)
+	- vi (Clytie Siddall)
+	- zh_CN (Funda Wang)
+	- zh_TW (Chao-Hsiung Liao)
+
+Evolution-Data-Server 1.3.6, 2005-07-26
+---------------------------------------
+
+Bugzilla bugs fixed (see http://bugzilla.gnome.org/show_bug.cgi):
+
+Addressbook :
+	 #260851 - "Edit Contact" option in Contact name popup menu (Sushma)
+	 #301922 - Composer Section (To: CC: BCC:) Fields Flip Order Of Names (Antony)
+
+Calendar :
+	 #303548 - Missing Calendar Items in GW (Chenthill)
+	 #310752 - Multiple mails and multiple appointments created for a non recurring 
+	           appointment (Chenthill)
+	 #310767 - Cannot Accept GW Appointments Without Error (Chenthill)
+
+Mailer:
+	 #301871 - uninitialized variable in evo-data-server pop3 and imap backend
+	 (meissner@suse.de)
+	 #272505 - GroupWise" spelled inconsistently in evolution-data-server (Parthasarathi)
+	 #310953 - reproducible crash trying to "add signature" in preferences (Parthasarathi)
+	 #310716 - trying to delete a subfolder crashed evolution (Parthasarathi)
+
+Exchange :
+	 #310483 - Check Remember password option, and enter wrong password - Evolution unusable
+	 (Arunprakash)
+
+Others :
+	 #271837 - handle _PRETTY_FUNCTION_ for Sun compilers
+	 (The Written Word)
+	- Copy folder contents locally by default. (Shreyas)
+	- camel store/folder refactoring (Michael)
+	- camel docs breakage fix (Shreyas) 
+	- camel imap store - if the folder is on disk, just get it 
+	  offline, only go to the server if we need to. (Michael)
+	- align ESource uri handling in Exchange addressbook to the
+	  calendar uris (Praveen)
+	- remove esource removal to exchange plugins code (Sarfraaz)
+	- support for timed refresh of GW system addressbook (Sushma)
+	- freezing the cache while updating and writing to disk at once
+	  (Sushma)
+	- make Name selector dialog more intuitive (Vivek)
+	- send a cancel reply to kill a e-password dialog (Jedy Wang) 
+
+
+Updated Translations:
+
+	- cs (Miloslav Trmac)
+	- de (Frank Arnold)
+	- en_CA (Adam Weinberger)
+	- es (Francisco Javier F. Serrador)
+	- et (Ivar Smolin)
+	- et (Priit Laes)
+	- fi (Ilkka Tuohela)
+	- gu (Ankit Patel)
+	- hu (Gabor Kelemen)
+	- id (Imam Musthaqim)
+	- ja (Takeshi AIHANA)
+	- nb, no (Kjartan Maraas)
+	- nl (Vincent van Adrighem)
+	- POTFILES (Adam Weinberger)
+	- POTFILES (Sarfraaz Ahmed)
+	- pt_BR (Raphael Higino)
+	- sr, sr@Latn (Igor Nestorivia)
+	- vi (Clytie Siddall)
+	- zh_CN (Funda Wang)
+
+Evolution-Data-Server 1.3.5, 2005-07-12
+---------------------------------------
+
+Bugzilla bugs fixed (see http://bugzilla.gnome.org/show_bug.cgi):
+
+	#309175 - Error compiling e-d-s based applications with GCC4 (Sushma)
+	#309276 - "is" sexp queries not working with E_CONTACT_UID (Sushma)
+	#308209 - SASL LOGIN mechanism protocol violation (Greg Hudson)
+	#309684 - Contact text entry leaks threads (Ross Burton)
+	#242165 - "search in any field" produces wrong results (Sushma)
+	#302965 - Names begin with a comma in GW Sent Items folder (Partha)
+
+New features :
+	GroupWise Proxy support (Sankar, Shreyas)
+
+Other fixes and changes :
+
+	- Support for getting e-mail ids from a contact list for GW
+	  addressbooks (Sushma)
+	- Addressbook memory leak fixes (Kjartan Maraas, Ross Burton) 
+	- Update GW address book only if marked for offline usage (Sushma)
+	- Optimize e_cal_is_read_only calls (Viren)
+	- Handle GW recurrences in Evolution (This and All) as in GW clients
+	  (Harish)
+	- Optimize calendar attachment retrievals (Chenthill) 
+	- Fix miscellaneous compiler versions (Harish)
+	- Use read cursors request instead of getQM calls in GW backend (Chen)
+	- Improve Junk Mail Handling support (Vivek)
+	- Background folder refresh in GW store (Partha)
+	- Make name selector dialog modal (Sushma)
+	- Remove e-mail addresses more easily in name-selector (Philip Van Hoof)
+	- Fetch folder size in Exchange store (Sarfraaz)
+	- Exchange Foreign hierarchy support (Shakti Sen)
+	- Improved error handling in Exchange store (Arun Prakash)
+
+Updated Translations:
+
+	- bg (Rostislav Raykov)
+	- cs (Miloslav Trmac)
+	- de (Jens Seidel)
+	- en_CA (Adam Weinberger)
+	- es (Francisco Javier F. Serrador)
+	- et (Ivar Smolin)
+	- nb, no (Terance Sola)
+	- vi (Clytie Siddall)
+	- zh_TW (Chao Hsiung Liao) 
+
+Evolution-Data-Server 1.3.4, 2005-07-02
+----------------------------------------
+
+Bugzilla bugs fixed (see http://bugzilla.gnome.org/show_bug.cgi):
+
+Camel
+	#303225 - Left pane is not updated with maildir (Michael Zucchi)
+
+Addressbook
+	#302006 - Autocompletion does not work properly (Hans Petter Jansson)
+
+Calendar
+	#309079 Memory leaks when syncing PDA on FC4 (Harish)
+
+
+Other fixes and changes:
+
+	- Inline PGP signature support (Matt Brown)	
+	- Add exchange as a supported backend to e-d-s
+	- remove checks for unused fields in camel local provider (Michael
+	  Zucchi)
+	- Display GW events based on date of appointment not on the received
+	  time. (Parthasarathi)
+	- Remove redundant linking of http backend to the file (Chen) 
+	- Define static capability for delegation to multiple recipients (Chen)
+	- Support --no-undefined option on windows while building evolution 
+	  and drop superfluous inclusion of pthread.h in Addressbook (Tor Lillqvist)
+	- Switch to GThread API instead of pthreads for the main loop in Addressbook
+	  (Tor Lillqvist)
+	- Ignore 'any field contains' query in LDAP address book refresh
+	  (Sushma)
+	- Build system addressbook cache if marked for offline usage (Sushma)
+	- Update addressbook cache with changes in GW System Address book
+	  (Srinivasa Ragavan)
+	- Use GtkFileChooserButton instead of GnomeFileEntry (Ross Burton)
+	- store the change type of a  Groupwise item while getting the changes
+	  (Chenthill)
+	- Miscellaneous compiler warning fixes (Harish)
+
+Updated Translations:
+	
+	- bg (Vladimir Petkov)
+	- cs (Miloslav Trmac)
+	- da (Martin Willemoes Hansen)
+	- en_CA (Adam Weinberger)
+	- et (Ivar Smolin)
+	- et (Priit Laes)
+	- et (Priit Laes)
+	- nb, no (Kjartan Maraas)
+	- zh_CN (Funda Wang)
+	- zh_TW (Abel Cheung)
+	- zh_TW (Chao-Hsiung Liao)
+	- POTFILES.in (Sarfraaz Ahmed)
+
+Evolution-Data-Server 1.3.3, 2005-06-07
+----------------------------------------
+Bugzilla bugs fixed (see http://bugzilla.gnome.org/show_bug.cgi):
+
+IMAP
+	#274407 IMAP4rev1: moved message pops up as new (Jeffrey Stedfast)
+
+Groupwise 
+
+	#300599 Mail folders not getting refreshed for GW account (Partha)
+	
+Addressbook
+	#271901 GroupWise naming consistency (Daniel van Eeden)
+	#300290 GALview does not show Complete name.(Sushma)
+
+
+Other Features and Fixes:
+	- Added support for delegating meetings in Groupwise (Chenthill)
+	- Memory leak in Addressbook File backend (Ross Burton)
+	- updates to camel session fixes for Groupwise backend (Parthasarathi)
+	- fix incorrect naming of camel function (Jeffrey Stedfast)
+
+Updated Translations:
+
+        - es (Francisco Javier F. Serrador)
+	- en_CA (Adam Weinberger)
+	- nb (Terance Sola)
+	- vi (Clytie Siddall)
+	- cs (Miloslav Trmac)
+	- zh_CN (Funda Wang)
+	- cy (Dafydd Harries)
+	- ja (Takeshi AIHANA)
+ 
+Evolution-Data-Server 1.3.2, 2005-05-18
+----------------------------------------
+Bugzilla bugs fixed (see http://bugzilla.gnome.org/show_bug.cgi):
+
+Groupwise 
+
+	#274194 Filters do not filter all messages  (Partha)
+	#273246 email is visible with mime.822 file attached (Partha)
+	#273243 external HTML mail is an attachment not viewed inline (Partha)
+
+	#256874 Anniversaries in B&A calendar have the Birthday category (Shreyas)
+	#301116 libedataserverui needs to specify the translation domain explicitly
+		(Changwoo Ryu) 
+
+	#303540 F10 + Shift Key' doesn't work in evolution contacts (Mengjie Yu)  
+	#272504 spell GW rightly (Chenthill)
+	#272503 Typo fix (Thierry Moisan)
+
+
+Other Features and Fixes:
+
+	API docs  (Hans Petter Jansson, Rodrigo Moya) 
+
+	Misc pc file, configure fixes   (Harish)
+	GW Backend Memory leaks (Ulrich Neumann)
+	const keyword additions to camel files (Ross Burton)  
+	Added a new flag CAMEL_PROVIDER_DISABLE_SENT_FOLDER   (Sankar)  
+	Memory leak fixes  (Sushma) 
+	Checks for Win32 (mingw) (Tor Lillqvist)  
+	Copy the flags field when converting from CamelStoreInfo to CamelFolderInfo.
+	 (Alessandro Decina)   
+	VJOURNAL backend (Rodrigo Moya) 
+
+
+Updated Translations:
+
+	- bg (Rostislav Raykov) 
+        - el (Kostas Papadimas) 
+        - da (Martin Willemoes Hansen) 
+  
+
+Evolution Data Server 1.3.1, 2005-04-26
+---------------------------------------
+
+Bugzilla bugs fixed (see http://bugzilla.gnome.org/show_bug.cgi):
+
+* Camel
+
+  #301037 - Handle case where the path doesn't exist in the url (Jeff)
+  #273945 - If camel_charset_best() returns NULL, default to UTF-8 (Jeff)
+ 
+* Groupwise Provider
+
+ #274257  - Automatically synchronize account locally option does not work (Jeff)
+ #74369   - enable viewing shared folder notifications (Sankar)
+ #72032   - update summary with items that have been deleted from the server (Partha)
+ #72310   - deleted mail is not visible in Trash Folder (Partha)
+ #74183   - Expunge does not expunge all (Sankar)
+ #274409  - hang while reading Email (Chenthill)
+
+* Calendar
+ 
+ #270035 - incompatible calendar.ics created with mozilla (Rodrigo)
+	
+* Addressbook
+
+ #268533 - evolution-alarm-notify appears to cause a leak in e-d-s  (JP)
+ #273330 - Crash  adding attendee under gw calendar - (Siva) 
+ 
+
+Other Bugs 
+
+* Camel 
+	- Fix for systems where read is a macro (David Malcolm)
+	- don't set exceptions for failed date commands in NNTP (Michael)
+	- abort if we fail to get the date in NNTP (Alessandro Decina) 
+	- Don't try to EXPUNGE in READ-ONLY mode (Jeff)
+	
+* Groupwise Provider
+
+	- Remove redundant getQuickMessageRequest (Partha)
+
+* Address Book 
+	- multiple authentication prompts for addressbook (Hans)
+
+
+Updated Translations:
+	* et (Ivar Smolin)
+ 	* fa (Meelad Zakaria)
+	* it (Marco Ciampa) 
+	* cs (Miloslav Trmac)
+	* en_CA (Adam Weinberger)
+
+Evolution Data Server 1.2.0, 2005-03-07
+---------------------------------------
+
+Bugzilla bugs fixed (see http://bugzilla.ximian.com/show_bug.cgi):
+
+  * Addressbook
+    #73226 - Missing symbol in e-destination (JP)
+
+  * Addressbook
+    #72454 - Crash for webcals with gnome proxy setting (Rodrigo)
+
+  * All
+    #73010 - Cannot cancel/close 'Category icon' popup (Harry Lu)
+	
+Updated Translations:
+	- pt_BR (Raphael Higino)
+	- hu (Laszlo Dvornik)
+	- sr (Igor Nestorovic)
+	- sr@Latn (Igor Nestorovic)
+	- ca (Xavier Conde Rueda)
+
+Evolution Data Server 1.1.6, 2005-02-28
+---------------------------------------
+
+Bugzilla bugs fixed (see http://bugzilla.ximian.com/show_bug.cgi):
+
+  * Addressbook
+    #72806 - EDS is crashing while trying to add a contact to Groupwise book (Siva)
+    #70908 - Can't remove e-mail addresses assigned to types evolution doesn't know about (Siva)
+    #67541 - LDAP password not remembered (Siva)
+
+  * Calendar
+    #71490 - Events shows up multiple times (Chen)
+    #71545 - Crash At Startup of Evolution 2.1 (Rodrigo)
+    #72107 - Evolution is hanging if you go offline and then come online (Chen)
+    #73008 - Recipients in CC and BCC field gets added into the TO field and not in their intended place (Sankar)
+    #72965 - Unable to rename a groupwise folder (Partha)
+    #72285 - groupwise backend crashes on a GWPOA generated email (Sankar)
+    #72907 - Few mails are not available for offline in groupwise (Siva)
+
+  * Camel
+    #68459 - Answering to Usenet article doesn't consider the "Followup-To:" field (Michael)
+    #71747 - IMAP host lookup on 'hostname;noselect=yes' (Jeff)
+    #71752 - Make sure auth_domain is 'Groupwise' (Vivek)
+    #72106 - New mails are in "READ" state (Partha)
+    #61468 - From and Subject information is missing from Inbox mailbox (Michael)
+    #57185 - MH file mode changes and broken links (Michael)
+    #59507 - tries to write junk cmeta in local spool (Michael)
+    #71812 - folders are stored way too often (Michael)
+    #70590 - Filters mark mail as read when it really isn't (Michael)
+    #72609 - Crash everytime when read the article (Michael)
+
+  * All
+    #9605  - Let "Delete" remove selected contact from the name selector (Harry Lu)
+    #73011 - Evolution crashed when clicked on new category (Rodrigo)
+
+Other bugs
+
+  * Addressbook
+    - Make sure editors are always read-only in offline mode (Siva)
+    - Destroy groupwise connection hash tables correctly (Chen)
+    - Migration issue with non-ASCII quoted printable chars in contact notes (Siva)
+
+  * Calendar
+    - Return the weather calendar capabilities properly (Rodrigo)
+    - Fix getQM issues in groupwise backend so we don't miss events (Harish, Chen)
+    - Locking fixes to prevent races in backend (JP, Rodrigo)
+    - Download groupwise calendar attachments only if not already in cache (Harish)
+    - Destroy groupwise connection hash tables correctly (Chen)
+    - Make sure groupwise item creation date exists before using (Chen)
+    - Fix crash during migration if e-d-s is not available (Rodrigo)
+    - Set detached instance recurid and start/end properly (Rodrigo)
+
+  * Camel
+    - Make junk code use camel debug (Rodo)
+    - Use groupwise getQM call with correct timestamp to prevent missing messages (Harish)
+    - Fix deletion of groupwise mail (Chen)
+    - Fix server version display in warning (Vivek)
+    - Show correct time for mails (Partha)
+    - Rename inbox/INBOX to Inbox, so it is translatable (Björn Torkelsson)
+    - Use XGMOVE if possible in IMAP4 (Jeff)
+    - Flag IMAP4 inbox properly (Björn Torkelsson)
+    - Just search the cache if IMAP4 is in offline mode (Jeff)
+
+  * All
+    - PPC fixes (Hans)
+    - Allow name selector to auth books properly (Hans)
+    - Leak fix (Kjartan Maraas)
+	
+Updated Translations:
+	- el (Kostas Papadimas, Nikos Charonitakis)
+	- nl (Vincent van Adrighem)
+	- hu (Laszlo Dvornik)
+	- da (Martin Willemoes Hansen)
+	- gu (Ankit Patel) <ankit644@yahoo.com>
+	- pl (Artur Flinta)
+	- uk (Maxim Dziumanenko)
+	- fr (Thierry Moisan)
+	- pt (Duarte Loreto)
+	- it (Marco Ciampa)
+	- nb (Kjartan Maraas)
+	- no (Kjartan Maraas)
+	- bg (Vladimir Petkov)
+	- fi (Ilkka Tuohela)
+	- ru (Leonid Kanter)
+	- sq (Laurent Dhima)
+	- bg (Vladimir Petkov)
+	- lt (Zygimantas Berucka)
+	- en_GB (David Lodge)
+	- ja (Takeshi AIHANA)
+	- ko (Changwoo Ryu)
+	- sv (Christian Rose)
+	- en_CA (Adam Weinberger)
+	- es (Francisco Javier F. Serrador)
+	- de (Frank Arnold)
+	- cs (Miloslav Trmac)
+
+Evolution Data Server 1.1.5, 2005-02-07
+---------------------------------------
+
+Bugzilla bugs fixed (see http://bugzilla.ximian.com/show_bug.cgi):
+
+  * Addressbook
+    #1069  - Support REV field in VCard (Siva)
+    #67267 - Auto-complete misses contacts with 'Title' set (Siva)
+    #68172 - Don't include function names in e-d-s messages (Siva)
+    #70918 - Importing kontact vcard causes inifinite loop (Siva)
+    #71116 - Wrong gettext initialization breaks translation (Christophe)
+    #71827 - Search after a contact with Name begins with, only searches
+               for first name (Siva)
+
+  * Calendar
+    #68541 - Invalid Response From Server Message (Chenthill)
+    #64682 - Moving a appts from one calendar to another sends update (Chenthill)
+    #72004 - Invalid connection error message (popup) - Suddenly (Chenthill)
+    #72117 - EDS crashed - Trying to create meeting appointments (Chenthill)
+
+  * Camel
+    #36142 - Don't use acronyms as verbs in messages (Michael)
+    #38671 - filtering on specific-headers needs to check each matching header
+             (Michael)
+    #38791 - GPG can make evo hang if keyserver unreachable (Michael)
+    #65329 - Regression in default folder name localisation (Michael)
+    #68741 - Evolution 2 hides Junk folder created in 1.4 (Michael)
+    #70303 - PGP signature invalid with very short emails (Michael)
+    #71847 - IMAP is broken (Jeff)
+    #72020 - Error parsing filter: Unknown identifier: adjust-score (Michael)
+
+  * All
+    #69909 - EDS logger doesn't restore logging when it shuts down (JP)
+    #72172 - Cannot delete a GW Shared folder (Partha)
+
+Other bugs
+
+  * Addressbook
+    - Changed default Groupwise port to 7191 (Siva)
+    - Online/offline fixes in LDAP backend (Siva)
+    - Build backends as modules (Hans Petter)
+    - Check Groupwise server version and notify user (Vivek)
+
+  * Calendar
+    - Changed default Groupwise port to 7191 (Siva)
+    - Fixed idle saving in file backend (Rodrigo)
+    - Fixed leak in e_cal_send_objects (JP)
+    - Removed categories-related methods in backends (Rodrigo)
+    - Improvements in communication with GW servers for tasks (Harish)
+    - Build backends as modules (Hans Petter)
+    - Fixed conflicts in IDL file (Hans Petter)
+    - Check Groupwise server version and notify user (Vivek)
+    - getQuickMessages support in GW backend (Chenthill)
+
+  * Camel
+    - Added old imap code back to build (Jeff)
+    - Improve moving between folders in GW provider (Partha)
+    - IMAP/IMAP4 compatibility work (Jeff)
+    - Updated tests to use IMAP4 (Jeff)
+    - getQuickMessages support in GW provider (Partha)
+    - Use GW SOAP mailer code to be the default (Siva)
+    - Changed default Groupwise port to 7191 (Siva)
+    - GW SOAP mailer code improvements (Partha)
+
+  * All
+    - Added 'searchable' flag for categories (Rodrigo)
+    - Fixed saving of categories config changes (Rodrigo)
+    - Use glib's i18n headers (Ross)
+    - Removed useless libgnome use (Ross)
+    - a11y improvements (Hao)
+
+Updated Translations:
+    - ca (Jordi Mallach)
+    - cs (Miloslav Trmac)
+    - de (Frank Arnold)
+    - el (Kostas Papadimas)
+    - en_CA (Adam Weinberger)
+    - en_GB (David Lodge)
+    - es (Francisco Javier F. Serrador)
+    - et (Priit Laes)
+    - ja (Takeshi AIHANA)
+    - ko (Changwoo Ryu)
+    - lt (Žygimantas Beručka)
+    - nb (Kjartan Maraas)
+    - nl (Vincent van Adrighem)
+    - no (Kjartan Maraas)
+    - pt (Duarte Loreto)
+    - pt_BR (Raphael Higino)
+    - sq (Laurent Dhima)
+    - sv (Christian Rose)
+
+Evolution Data Server 1.1.4, 2005-01-24
+----------------------------------------
+
+Bugzilla bugs fixed (see http://bugzilla.ximian.com/show_bug.cgi):
+
+  * Calendar
+
+    #57567 - calendar migration speed (Rodrigo)
+    #67974 - use proxy if necessary for webcal (Rodrigo)
+
+  * Camel
+
+    #65178 - newly created folder on local maildir doesn't show until evolution restart (Michael)
+    #71082 - Authenticated SMTP and TLS work very slowly (Jeff)
+    #69024 - Doesn't update NNTP folder in a Virtual folder (Michael)
+    #47824 - nested, identical multipart boundaries dont parse properly (Michael)
+    #70095 - deleting vfolder causes evo to hang (Michael)
+
+  * All
+    #70067 - Mask GW password when GROUPWISE_DEBUG=1 is used (Siva)
+    #28532 - Don't allow duplicate categories (Rodrigo)
+
+Other bugs
+
+  * Addressbook
+    - Fix full name queries (Siva)
+    - Order of magnitude speed fix for fetching list of contacts (Siva)
+
+  * Calendar
+    - Comply with new server api changes (Harish)
+    - Default to UTC timezone if nothing else (Chen)
+    - Handle cancelling instances via itip (Rodrigo)
+    - Handle case where events are only instances (no master) (Rodrigo)
+    - Don't save unless the file is actually dirty in the file backend (Rodrigo)
+    - Use single metric/imperial setting (David Trowbridge)
+
+  * Camel
+    - Make imap4 code have the same summary as imap (Jeff)
+    - Make imap4 code handle imap:// uri (Jeff)
+    - Fix offline syncing and journalling for imap, groupwise and exchange (Jeff)
+    - Be able to get the message status in groupwise (Partha)
+    - Restrict path lengths to 65k in lock helper (Michael, Max Vozeler)
+    - Fix groupwise offline transfers (Jeff)
+    - retain label settings in IMAP4 when offline for UIDPLUS servers (Jeff)
+    - 64 bit fixes (Michael)
+
+  * All
+    - emit source changed property if properties are totally removed (Siva)
+    - complete properly if the widget loses focus via tab (Hans)
+    - display all email addresses for a user again (Hans)
+    - fix crash pressing enter in empty completion widget (Hans)
+
+Updated Translations:
+	- it (Marco Ciampa)
+	- de (Frank Arnold)
+	- et (Priit Laes)
+	- cs (Miloslav Trmac)
+	- nb (Kjartan Maraas)
+	- lt (Zygimantas Berucka)
+	- ja (Takeshi AIHANA)
+	- es (Francisco Javier F. Serrador)
+	- en_CA (Adam Weinberger)
+
+Evolution Data Server 1.1.3, 2005-01-10
+----------------------------------------
+
+Bugzilla bugs fixed (see http://bugzilla.ximian.com/show_bug.cgi):
+
+  * Calendar
+
+    #68533 - evolution-alarm-notify appears to cause an e_data_book leak (Harish)
+
+  * Camel
+
+    #70556 - Unable load messages info from MS Exchange by IMAP (Michael)
+    #70919 - Crash during fetching mail (mail has gpg signature) (Michael)
+  
+Other bugs
+
+  * Addressbook
+    - Merge offline support for groupwise, ldap (Siva, Chen, Hans)
+
+  * Calendar
+    - Backend attachment support (Harish)
+    - Weather calendar (David Trowbridge)
+    - Handle send options for groupwise (Chen)
+    - Fixed problems when items only had detached instances (Rodrigo)
+    - Merge offline support for groupwise, ldap, webcal (Siva, Chen)
+
+  * Camel
+    - Merge groupwise SOAP mailer (Partha)
+    - IMAP4 offline support (Jeff)
+    - Groupwise offline support (JP, Jeff, Partha)
+    - 64 bit fixes (David Mosberger-Tang)
+
+  * All
+    - move e-categories and rewrite (Rodrigo)
+    - emit source_changed signal if properties change (David Trowbridge)
+    - implement e-name-selector class, without bonobo (Hans)
+
+Updated Translations:
+	- bg (Vladimir Petkov)
+	- ja (Takeshi AIHANA)
+	- ru (Leonid Kanter)
+
+Evolution Data Server 1.1.2, 2004-12-20
+----------------------------------------
+
+Bugzilla bugs fixed (see http://bugzilla.ximian.com/show_bug.cgi):
+
+  * Calendar
+
+    #70127 - Evolution Calendar does not use a User-Agent (JP)
+    #70267 - O(n^2) activity writing cache files when opening an ics webcal
+    #file (Rodrigo)
+
+  * Addressbook
+
+    #68454 - Ldap organizationalUnit show up in contact list (Siva)
+
+  * Camel
+
+    #69776 -Signed Mail with attachments displays everything with
+     multipart/boundaries stuff (NotZed)
+    #69533 - GW imap mail becomes invisble/unavailable (NotZed)
+  
+Other bugs
+
+  * Addressbook
+    - implement is_open accessor on ebook (Hans)
+    - move e-destination (Hans)
+
+  * Calendar
+    - Merge recurrence work, support for detached instances (Rodrigo)
+    - Add support for passing a modified object from sync backends (Anders Carlsson)
+    - Add static capabilities for send options (Chen)
+    - Leak fixes (Harish)
+
+  * Camel
+    - Move camel here (NotZed)
+    - Fix non-SSL build (Jeff)
+    - Add offline journalling for IMAP4 (Jeff)
+
+  * All
+    - implement a gtktreemodel contact store (Hans)
+
+Updated Translations:
+	- lt (Zygimantas Berucka)
+	- it (Marco Ciampa)
+
+Evolution Data Server 1.1.1, 2004-11-28
+----------------------------------------
+
+Bugzilla bugs fixed (see http://bugzilla.ximian.com/show_bug.cgi):
+
+  * Calendar
+
+    #69624 - make changes in evo corresponding to soap schema changes (Siva)
+
+  * All
+
+    #69056 - Translations set to wrong version (Ryan Skadzberg)
+    #68737 - Crash on Migrating (JP)
+  
+Other bugs
+
+  * Addressbook
+    - add API to determine required fields (Siva)
+
+  * All
+    - allow access to primary source selector (Harish)
+
+Updated Translations:
+	- sr (Danilo Segan)
+	- sr@Latn (Danilo Segan)
+	- cs (Miloslav Trmac)
+	- sq (Laurent Dhima)
+	- en_CA (Adam Weinberger)
+	- en_GB (David Lodge)
+
+Evolution Data Server 1.1.0, 2004-11-01
+----------------------------------------
+
+Bugzilla bugs fixed (see http://bugzilla.ximian.com/show_bug.cgi):
+
+  * Calendar
+
+    #64673 - Cannot view free/busy for GroupWise users for users outside POA (Harish)
+    #67031 - Groupwise task completion not showing (Chen)
+
+  * Address Book
+
+    #42165 - "search in any field" produces wrong results (Siva)
+    #64298 - G/W failure to authenticate (Siva)
+
+  * All
+
+    #65200 - GroupWise backend crash
+    #67031 - (Partial) show completed status properly for GroupWise tasks
+  
+Other bugs
+
+  * Address Book
+    - Fix e_book_commit_contact multiple usage crash (Diego Gonzalez)
+    - Make groupwise IM names searchable (Nat)
+
+  * Calendar
+    - Speed up free/busy gathering (Harish)
+    - Speed up getting detached instance information (Rodrigo)
+
+  * All
+    - loadable backend modules (Toshok)
+    - create libedataserverui (JP)
+
+Updated Translations:
+	- sr (Danilo Segan)
+	- sr@Latn (Danilo Segan)
+	- cs (Miloslav Trmac)
+	- sq (Laurent Dhima)
+	- en_CA (Adam Weinberger)
+	- en_GB (David Lodge)
+
+Evolution Data Server 1.0.2, 2004-10-11
+----------------------------------------
+
+Bugzilla bugs fixed (see http://bugzilla.ximian.com/show_bug.cgi):
+
+  * Calendar
+
+    #62868 - Permission denied accepting a GroupWise meeting a second time (Chen)
+    #67513 - Evolution corrupts memory if backend autobooks meeting attendees (JP)
+    #66230 - tasks from online iCal duplicate after auto-refresh (Rodrigo)
+
+  * Address Book
+
+    #66368 - VCard parser doesn't add "File under" (Hans)
+    #66574 - Make e_book_get_self work (Diego Gonzalez
+    #67600 - fix e-d-s issues on x86_64 machines (Hans)
+
+  * All
+
+    #65200 - GroupWise backend crash
+    #67031 - (Partial) show completed status properly for GroupWise tasks
+  
+Other bugs
+
+  * Address Book
+    - Restrict system address book queries to groupwise server for performance reasons (Siva)
+
+  * Calendar
+    - load system tasks backend correctly
+
+Updated Translations:
+	- fr (Craig Jeffares)
+	- zh_TW (Craig Jeffares)
+	- sk (Stanislav Visnovsky)
+	- fa (Roozbeh Pournader)
+	- id (Mohammad DAMT)
+	- ar (Arafat Medini)
+
+Evolution Data Server 1.0.1, 2004-09-24
+----------------------------------------
+                                                                                                                                                              
+Bugzilla bugs fixed (see http://bugzilla.ximian.com/show_bug.cgi):
+                                                                                                                                                              
+  * Calendar
+                                                                                                                                                              
+    #66383 - Warning fixes in calendar code (Dave Malcom)
+    #64955 - C99-ism in libecal (Vincent Noel)
+    #59904 - Calendar query caching (Rodrigo)
+    #65167 - Crash sending task to GroupWise (Chen)
+    #64685 - Appointment requests that have been replied to give "Invalid Object" error (Chen)
+    #63513 - G/W appointment acceptance fails ('invalid object') (Chen)
+    #64688 - mixing UTC and localtime in Appointment view (Chen)
+                                                                                                                                                              
+  * All
+                                                                                                                                                              
+    #66209 - only first source color change is saved to gconf (Michael)
+    #64062 - new all day recurring events do not show busy time or as all day appts (Chen)
+                                                                                                                                                              
+Other bugs
+                                                                                                                                                              
+  * Address Book
+    - disable debugging noise (William Jon McCann)
+    - don't search summary for groupwise system address book (Siva)
+                                                                                                                                                              
+  * Calendar
+    - support groupwise all day events
+                                                                                                                                                              
+  * All
+    - fix e-d-s issues on NPTL and AMD machines (Chris, Frederic Crozat, Hans, Dave Malcolm)
+                                                                                                                                                              
+Updated Translations:
+        - fr (Craig Jeffares)
+        - zh_TW (Craig Jeffares)
+        - sk (Stanislav Visnovsky)
+        - fa (Roozbeh Pournader)
+        - id (Mohammad DAMT)
+        - ar (Arafat Medini)
+
+Evolution Data Server 1.0.0, 2004-09-13
+----------------------------------------
+
+Bugzilla bugs fixed (see http://bugzilla.ximian.com/show_bug.cgi):
+
+  * Addressbook
+
+    #59582 - Contact incompletely updated to LDAP store, address information lost/not editable
+    #63385 - Evolution crash - Adding two email ids with same name 
+
+  * Calendar
+
+    #57443 - ics import crashes
+
+Updated Translations:
+	
+	- da (Martin Willemoes Hansen)
+	- ar (Arafat Medini)
+	- nn (Åsmund Skjæveland)
+	- en_GB (David Lodge)
+	- cy (Telsa Gwynne)
+	- el (Kostas Papadimas)
+	- tr (Baris Cicek)
+
+Evolution Data Server 0.0.99, 2004-08-27
+----------------------------------------
+
+Bugzilla bugs fixed (see http://bugzilla.ximian.com/show_bug.cgi):
+
+  * Addressbook
+
+    #63844 - avoid locking if authentication needed during auto completion (Siva)
+    #63255 - ignore name prefixes when completing (Siva)
+
+  * Calendar
+
+    #62857 - display recurring events upon creation for groupwise (Chen)
+    #61782 - handle importing objects with no UID (Rodrigo)
+    #62655 - don't crash with NULL uri (Hans)
+
+  * All
+
+    #63051 - solaris build fixes (notzed)
+
+Other bugs
+
+  * Calendar
+
+    - add has-alarms-in-range query type (Rodrigo)
+    - always set return value for e_cal_set_default_timezone (Frederic Crozat)
+    - don't set the same default timezone multiple times (JP)
+    - don't get all items from the groupwise server every time (Chen) 
+
+  * Addressbook
+
+    - and thread safety flag for libdb (Toshok)
+    - throw error when deleting system address book (Siva)
+    - avoid unfiltered system address book searchs (Siva)
+    - use cursors to populate the groupwise cache (Siva)
+    - prevent groupwise server crash by not doing to cursor requests at the same time (Chen)
+    - immediately show meeting status updates in GUI for groupwise (Chen)
+	
+  * All
+
+    - fix warnings (Frederic Crozat)
+    - set cache file name properly (Siva)
+
+Updated Translations:
+
+  - pt_BR (Gustavo Maciel Dias Vieira)
+  - es (Francisco Javier F. Serrador)
+  - da (Martin Willemoes Hansen)
+  - de (Christian Neumair)
+  - hu (Laszlo Dvornik)
+  - nb (Kjartan Maraas)
+  - no (Kjartan Maraas)
+  - sq (Laurent Dhima)
+  - uk (Maxim Dziumanenko)
+  - az (Metin Amiroff)
+  - ja (Takeshi AIHANA)
+  - pt (Duarte Loreto)
+  - fi (Ilkka Tuohela, Tommi Vainikainen)
+

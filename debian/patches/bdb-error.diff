@@ -1,0 +1,104 @@
+Index: addressbook/backends/file/e-book-backend-file.c
+===================================================================
+--- addressbook/backends/file/e-book-backend-file.c	(revision 4491)
++++ addressbook/backends/file/e-book-backend-file.c	(working copy)
+@@ -81,6 +81,7 @@
+ static struct {
+ 	int ref_count;
+ 	DB_ENV *env;
++	gboolean had_error;
+ } global_env;
+ 
+ static EDataBookStatus
+@@ -186,10 +187,9 @@
+ 	  const char      *vcard_req,
+ 	  EContact **contact)
+ {
+-	EDataBookStatus status = Success;
+ 	DB             *db = bf->priv->file_db;
+ 	DBT            id_dbt, vcard_dbt;
+-	int            db_error;
++	int            db_error = 0;
+ 	char           *id;
+ 	char           *vcard;
+ 	const char *rev;
+@@ -212,26 +212,29 @@
+ 
+ 	string_to_dbt (vcard, &vcard_dbt);
+ 
++	global_env.had_error = FALSE;
+ 	db_error = db->put (db, NULL, &id_dbt, &vcard_dbt, 0);
++	/* SO SO WRONG */
++	if (global_env.had_error) db_error = ENOSPC;
+ 
+ 	g_free (vcard);
+ 
+ 	if (0 == db_error) {
++		global_env.had_error = FALSE;
+ 		db_error = db->sync (db, 0);
++		/* SO SO WRONG */
++		if (global_env.had_error) db_error = ENOSPC;
+ 		if (db_error != 0) {
+ 			g_warning ("db->sync failed with %d", db_error);
+-			status = db_error_to_status (db_error);
+ 		}
+-	}
+-	else {
++	} else {
+ 		g_warning (G_STRLOC ": db->put failed with %d", db_error);
+ 		g_object_unref (*contact);
+ 		*contact = NULL;
+-		status = db_error_to_status (db_error);
+ 	}
+ 
+ 	g_free (id);
+-	return status;
++	return db_error_to_status (db_error);
+ }
+ 
+ static EBookBackendSyncStatus
+@@ -347,18 +350,25 @@
+ 	vcard_with_rev = e_vcard_to_string (E_VCARD (*contact), EVC_FORMAT_VCARD_30);
+ 	
+ 	string_to_dbt (vcard_with_rev, &vcard_dbt);	
+-
++	
++	global_env.had_error = FALSE;
+ 	db_error = db->put (db, NULL, &id_dbt, &vcard_dbt, 0);
+-
++	if (global_env.had_error) db_error = ENOSPC;
++		
+ 	if (0 == db_error) {
++		global_env.had_error = FALSE;
+ 		db_error = db->sync (db, 0);
++		if (global_env.had_error) db_error = ENOSPC;
+ 		if (db_error != 0) {
+ 			g_warning (G_STRLOC ": db->sync failed with %d", db_error);
+ 		} else {
+ 			e_book_backend_summary_remove_contact (bf->priv->summary, id);
+ 			e_book_backend_summary_add_contact (bf->priv->summary, *contact);
+ 		}
++	} else {
++		g_warning (G_STRLOC ": db->put failed with %d", db_error);
+ 	}
++
+ 	g_free (id);
+ 	g_free (vcard_with_rev);
+ 
+@@ -1055,6 +1065,8 @@
+ #endif
+ {
+ 	g_warning ("libdb error: %s", buf2);
++	/* Very wrong */
++	global_env.had_error = TRUE;
+ }
+ 
+ 
+@@ -1119,6 +1131,7 @@
+ 
+ 		global_env.env = env;
+ 		global_env.ref_count = 1;
++		global_env.had_error = FALSE;
+ 	}
+ 	g_static_mutex_unlock(&global_env_lock);
+ 

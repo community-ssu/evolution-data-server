@@ -1,0 +1,14 @@
+Index: addressbook/libebook-dbus/e-book.c
+===================================================================
+--- addressbook/libebook-dbus/e-book.c	(revision 885)
++++ addressbook/libebook-dbus/e-book.c	(working copy)
+@@ -369,7 +369,8 @@
+ 		char *uri;
+ 
+ 		filename = g_build_filename (g_get_home_dir(),
+-					     ".evolution/addressbook/local/system",
++					     ".osso-abook",
++					     "db",
+ 					     NULL);
+ 		uri = g_strdup_printf ("file://%s", filename);
+ 

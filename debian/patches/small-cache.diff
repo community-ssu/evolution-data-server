@@ -1,0 +1,13 @@
+Index: addressbook/backends/file/e-book-backend-file.c
+===================================================================
+--- addressbook/backends/file/e-book-backend-file.c	(revision 383)
++++ addressbook/backends/file/e-book-backend-file.c	(working copy)
+@@ -1070,6 +1070,8 @@
+ 
+ 		env->set_errcall (env, file_errcall);
+ 
++		env->set_cachesize (env, 0, 128 * 1024, 1);
++
+ 		/* Set the allocation routines to the non-aborting GLib functions */
+ 		env->set_alloc (env, (void *(*)(size_t))g_try_malloc, 
+ 				(void *(*)(void *, size_t))g_try_realloc,

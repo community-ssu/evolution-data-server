@@ -1,0 +1,83 @@
+-*- Mode: change-log -*-
+
+2005-09-28  Ross Burton  <ross@burtonini.com>
+
+	* configure.in:
+	Convert from ASCII to UTF-8 as some libc's don't ship with the
+	Japanese locales to save space.
+
+2005-06-09  Ross Burton  <ross@burtonini.com>
+
+	* libedataseverui/e-categories-dialog.glade:
+	* libedataseverui/e-categories-dialog.c:
+	Edit the glade to replace the file chooser widget.
+
+2005-04-26  Ross Burton  <ross@burtonini.com>
+
+	* configure.in:
+	* Makefile.am:
+	* ucamel/*
+	* addressbook/libebook/Makefile.am:
+	Add ucamel: a stripped-down copy of Camel for ebook.
+
+2005-04-26  Ross Burton  <ross@burtonini.com>
+
+	* configure.in:
+	* addressbook/Makefile.am:
+	Conditionally enable the DBus IPC code.
+
+2005-04-26  Ross Burton  <ross@burtonini.com>
+
+	* configure.in:
+	* camel/providers/Makefile.am:
+	* servers/Makefile.am:
+	* addressbook/backends/Makefile.am:
+	* addressbook/libedata-book/Makefile.am:
+	* calendar/backends/Makefile.am:
+	Add a configure flag to disable groupwise.
+	
+2005-04-26  Ross Burton  <ross@burtonini.com>
+
+	* configure.in:
+	Stop depending on libgnome where it is not needed.
+
+2005-04-25  Ross Burton  <ross@burtonini.com>
+
+	* camel/providers/groupwise/Makefile.am:
+	* camel/Makefile.am:
+	* src/Makefile.am:
+	* servers/groupwise/Makefile.am:
+	* libedataserverui/Makefile.am:
+	* libedataserver/Makefile.am:
+	* addressbook/tests/vcard/Makefile.am:
+	* addressbook/tests/ebook/Makefile.am:
+	* addressbook/libebook/Makefile.am:
+	* addressbook/backends/file/Makefile.am:
+	* addressbook/backends/groupwise/Makefile.am:
+	* addressbook/backends/vcf/Makefile.am:
+	* addressbook/libedata-book/Makefile.am:
+	* calendar/tests/ecal/Makefile.am:
+	* calendar/libedata-cal/Makefile.am:
+	* calendar/backends/weather/Makefile.am:
+	* calendar/backends/file/Makefile.am:
+	* calendar/backends/http/Makefile.am:
+	* calendar/backends/groupwise/Makefile.am:
+	* calendar/backends/contacts/Makefile.am:
+	* calendar/libecal/Makefile.am:
+	Use $(API_VERSION) instead of 1.2 where possible.
+
+	* configure.in:
+	Add an option to disable libgnome.
+
+	* src/server.c:
+	Respect libgnome being disabled by not using gnome_segv.
+
+	* libedataserverui/test-name-selector.c:
+	* libedataserverui/test-contact-store.c:
+	* libedataserverui/e-passwords.c:
+	* libedataserverui/e-categories-dialog.c:
+	* libedataserver/test-source-list.c:
+	Don't use libgnome when GLib/GTK functions are available.
+
+	* configure.in:
+	Remove libgnome deps.

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE node SYSTEM "dbus.dtd">
+
+<!--
+Author: Ross Burton <ross@openedhand.com>
+Copyright (C) 2005 Opened Hand Ltd
+-->
+<node>
+
+  <interface name="org.gnome.evolution.dataserver.addressbook.BookView">
+    <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="EDataBookView"/>
+
+    <method name="start">
+      <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_BookView_start"/>
+    </method>
+
+    <method name="stop">
+      <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_BookView_stop"/>
+    </method>
+
+    <method name="dispose">
+      <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_BookView_dispose"/>
+    </method>
+
+  </interface>
+
+</node>

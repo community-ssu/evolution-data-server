@@ -1,0 +1,108 @@
+Index: addressbook/libebook-dbus/Makefile.am
+===================================================================
+--- addressbook/libebook-dbus/Makefile.am	(revision 391)
++++ addressbook/libebook-dbus/Makefile.am	(working copy)
+@@ -24,7 +24,6 @@
+ 	e-book-view-private.h				\
+ 	e-book.c					\
+ 	e-contact.c					\
+-	e-destination.c					\
+ 	e-name-western.c				\
+ 	e-vcard.c
+ 
+@@ -36,7 +35,6 @@
+ 
+ libebook_1_2_la_LIBADD =					\
+ 	$(EVOLUTION_ADDRESSBOOK_LIBS)				\
+-	$(CAMEL_LIB) \
+ 	$(top_builddir)/libedataserver/libedataserver-$(API_VERSION).la
+ 
+ libebook_1_2_la_LDFLAGS = 							\
+@@ -53,7 +51,6 @@
+ 	e-book-types.h					\
+ 	e-book.h					\
+ 	e-contact.h					\
+-	e-destination.h					\
+ 	e-name-western.h				\
+ 	e-name-western-tables.h				\
+ 	e-vcard.h
+@@ -84,4 +81,4 @@
+ 
+ noinst_PROGRAMS = test
+ test_SOURCES = test.c
+-test_LDADD = $(EVOLUTION_ADDRESSBOOK_LIBS) $(CAMEL_LIB) libebook-1.2.la
++test_LDADD = $(EVOLUTION_ADDRESSBOOK_LIBS) libebook-1.2.la
+Index: Makefile.am
+===================================================================
+--- Makefile.am	2006-05-12 17:41:41.000000000 +0100
++++ Makefile.am.new	2006-05-12 17:41:07.000000000 +0100
+@@ -5,9 +5,9 @@
+ LIBDB = libdb
+ endif
+ 
+-SUBDIRS = $(LIBDB) libedataserver ucamel addressbook 
++SUBDIRS = $(LIBDB) libedataserver addressbook 
+ 
+-DIST_SUBDIRS= libedataserver ucamel addressbook 
++DIST_SUBDIRS= libedataserver addressbook 
+ 
+ changelogs =			\
+ 	ChangeLog
+Index: libedataserver/Makefile.am
+===================================================================
+--- libedataserver/Makefile.am	(revision 3732)
++++ libedataserver/Makefile.am	(working copy)
+@@ -19,26 +19,19 @@
+ libedataserver_1_2_la_SOURCES =		\
+ 	$(MARSHAL_GENERATED)		\
+ 	$(BONOBO_SOURCES)		\
+-	e-account-list.c		\
+-	e-account.c			\
+-	e-categories.c			\
+ 	e-data-server-module.c		\
+ 	e-file-cache.c			\
+-	e-iconv.c			\
+ 	e-iterator.c			\
+ 	e-list.c			\
+ 	e-list-iterator.c		\
+ 	e-memory.c			\
+-	e-msgport.c			\
+ 	e-sexp.c			\
+ 	e-source-group.c		\
+ 	e-source-list.c			\
+ 	e-source.c			\
+ 	e-time-utils.c			\
+ 	e-uid.c				\
+-	e-url.c				\
+ 	e-util.c			\
+-	e-trie.c			\
+ 	e-xml-hash-utils.c		\
+ 	md5-utils.c
+ 
+@@ -53,26 +46,18 @@
+ libedataserverincludedir = $(privincludedir)/libedataserver
+ 
+ libedataserverinclude_HEADERS =		\
+-	e-account-list.h		\
+-	e-account.h			\
+-	e-categories.h			\
+-	e-component-listener.h		\
+ 	e-data-server-module.h		\
+ 	e-file-cache.h			\
+-	e-iconv.h			\
+ 	e-iterator.h			\
+ 	e-list.h			\
+ 	e-list-iterator.h		\
+ 	e-memory.h			\
+-	e-msgport.h			\
+ 	e-sexp.h			\
+ 	e-source-group.h		\
+ 	e-source-list.h			\
+ 	e-source.h			\
+ 	e-time-utils.h			\
+-	e-trie.h			\
+ 	e-uid.h				\
+-	e-url.h				\
+ 	e-util.h			\
+ 	e-xml-hash-utils.h		\
+ 	md5-utils.h

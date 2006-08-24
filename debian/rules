@@ -1,0 +1,81 @@
+#!/usr/bin/make -f
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/autotools.mk
+include /usr/share/cdbs/1/class/gnome.mk
+include /usr/share/cdbs/1/rules/simple-patchsys.mk
+
+# Use soft-float and thumb mode if it enabled. 
+ifneq (,$(findstring thumb,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -mthumb
+endif
+
+ifneq (,$(findstring parallel,$(DEB_BUILD_OPTIONS)))
+    PARALLEL_JOBS := $(shell echo $(DEB_BUILD_OPTIONS) | \
+        sed -e 's/.*parallel=\([0-9]\+\).*/\1/')
+    ifeq ($(DEB_BUILD_OPTIONS),$(PARALLEL_JOBS))
+        PARALLEL_JOBS := $(shell if [ -f /proc/cpuinfo ]; \
+            then echo `cat /proc/cpuinfo | grep 'processor' | head -2 | wc -l`; \
+            else echo 1; fi)
+    endif
+    NJOBS := -j$(PARALLEL_JOBS)
+endif
+DEB_MAKE_ENVVARS := MAKEFLAGS=$(NJOBS)
+
+DEB_SHLIBDEPS_INCLUDE := debian/tmp/usr/lib
+
+DEB_DH_MAKESHLIBS_ARGS_ALL := -V
+
+DEB_CONFIGURE_EXTRA_FLAGS := \
+	--prefix=/usr \
+	--with-dbus \
+	--without-openldap \
+	--without-libgnome \
+	--disable-camel \
+	--disable-groupwise \
+	--disable-nss \
+	--without-soup \
+	--enable-nntp=no \
+	--without-bug-buddy \
+	--disable-calendar
+
+debian/stamp-autotools-files:
+	./autogen.sh $(DEB_CONFIGURE_EXTRA_FLAGS)
+	touch debian/stamp-configured
+
+common-build-arch common-build-indep:: debian/stamp-configured
+	make
+
+clean::
+	dh_clean intltool-extract intltool-merge intltool-update \
+	.po/.intltool-merge-cache
+	rm -f debian/stamp-configured
+
+LIBCAMEL_CURRENT := $(shell grep '^LIBCAMEL_CURRENT=' configure.in | sed -e 's/LIBCAMEL_CURRENT=//g')
+LIBCAMEL_AGE := $(shell grep '^LIBCAMEL_AGE=' configure.in | sed -e 's/LIBCAMEL_AGE=//g')
+LIBCAMEL_VER := $(shell expr $(LIBCAMEL_CURRENT) - $(LIBCAMEL_AGE))
+
+LIBEDATASERVER_CURRENT := $(shell grep '^LIBEDATASERVER_CURRENT=' configure.in | sed -e 's/LIBEDATASERVER_CURRENT=//g')
+LIBEDATASERVER_AGE := $(shell grep '^LIBEDATASERVER_AGE=' configure.in | sed -e 's/LIBEDATASERVER_AGE=//g')
+LIBEDATASERVER_VER := $(shell expr $(LIBEDATASERVER_CURRENT) - $(LIBEDATASERVER_AGE))
+
+LIBEBOOK_CURRENT := $(shell grep '^LIBEBOOK_CURRENT=' configure.in | sed -e 's/LIBEBOOK_CURRENT=//g')
+LIBEBOOK_AGE := $(shell grep '^LIBEBOOK_AGE=' configure.in | sed -e 's/LIBEBOOK_AGE=//g')
+LIBEBOOK_VER := $(shell expr $(LIBEBOOK_CURRENT) - $(LIBEBOOK_AGE))
+
+LIBEDATABOOK_CURRENT := $(shell grep '^LIBEDATABOOK_CURRENT=' configure.in | sed -e 's/LIBEDATABOOK_CURRENT=//g')
+LIBEDATABOOK_AGE := $(shell grep '^LIBEDATABOOK_AGE=' configure.in | sed -e 's/LIBEDATABOOK_AGE=//g')
+LIBEDATABOOK_VER := $(shell expr $(LIBEDATABOOK_CURRENT) - $(LIBEDATABOOK_AGE))
+
+update-control:
+	@echo "libedataserver   version: $(LIBEDATASERVER_VER)"
+	@echo "      libebook   version: $(LIBEBOOK_VER)"
+	@echo " libedata-book   version: $(LIBEDATABOOK_VER)"
+	sed \
+	 -e 's/libedataserver1.2-@VER@/libedataserver1.2-$(LIBEDATASERVER_VER)/g' \
+	 -e 's/libebook1.2-@VER@/libebook1.2-$(LIBEBOOK_VER)/g' \
+	 -e 's/libedata-book1.2-@VER@/libedata-book1.2-$(LIBEDATABOOK_VER)/g' \
+	debian/control.in > debian/control
+	cp debian/libedataserver1.2-@VER@.install debian/libedataserver1.2-$(LIBEDATASERVER_VER).install
+	cp debian/libebook1.2-@VER@.install debian/libebook1.2-$(LIBEBOOK_VER).install
+	cp debian/libedata-book1.2-@VER@.install debian/libedata-book1.2-$(LIBEDATABOOK_VER).install

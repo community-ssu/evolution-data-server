@@ -1,0 +1,4 @@
+debian/tmp/usr/lib/pkgconfig/libedata-book-1.2.pc
+debian/tmp/usr/lib/libedata-book-1.2.{la,so}
+debian/tmp/usr/include/evolution-data-server-1.4/libedata-book
+

@@ -1,0 +1,919 @@
+evolution-data-server (1.4.1-0osso20060613-2) unstable; urgency=low
+
+  * Don't crash if an error is returned when adding a contact
+
+ -- Ross Burton <ross@openedhand.com>  Tue, 13 Jun 2006 12:04:03 +0100
+
+evolution-data-server (1.4.1-0osso20060612-1) unstable; urgency=low
+
+  * Hack around libdb being pants, and return NoSpace if db->sync fails (#20378)
+  * Add NoSpace to libebook's error type
+
+ -- Ross Burton <ross@openedhand.com>  Mon, 12 Jun 2006 16:32:01 +0100
+
+evolution-data-server (1.4.1-0osso20060607) unstable; urgency=low
+
+  * Fix problems with SI builds (Sergey Lapin)
+
+ -- Ross Burton <ross@openedhand.com>  Wed,  7 Jun 2006 15:05:26 +0100
+
+evolution-data-server (1.4.1-0osso20060605-2) unstable; urgency=low
+
+  * Merge with upstream rev 405:
+  - e-contact.c:Always allocate and clear new structures to avoid garbage
+    in fields (#31598)
+
+ -- Ross Burton <ross@openedhand.com>  Mon,  5 Jun 2006 18:00:12 +0100
+
+evolution-data-server (1.4.1-0osso20060605) unstable; urgency=low
+
+  * Merge with upstream rev 404:
+  - try and transform BDB errors to Evo status codes (#20378)
+
+ -- Ross Burton <ross@openedhand.com>  Mon,  5 Jun 2006 13:24:39 +0100
+
+evolution-data-server (1.4.1-0osso20060531) unstable; urgency=low
+
+  * Print a backtrace on SIGSEGV and critical warnings
+  * Remove EDataBook from client-to-books map on book close
+    (#31198)
+
+ -- Jorn Baayen <jorn@openedhand.com>  Wed, 31 May 2006 13:33:33 +0300
+ 
+evolution-data-server (1.4.1-0osso20060526) unstable; urgency=low
+
+  * Merge with upstream rev 402:
+    - fix typo in e-util.c (#29939)
+
+ -- Ross Burton <ross@openedhand.com>  Fri, 26 May 2006 15:41:55 +0100
+
+evolution-data-server (1.4.1-0osso20060525) unstable; urgency=low
+
+  * Merge with upstream rev 401:
+  - fix e_vcard_attribute_remove_param_value
+
+ -- Ross Burton <ross@openedhand.com>  Thu, 25 May 2006 16:51:30 +0100
+
+evolution-data-server (1.4.1-0osso20060524) unstable; urgency=low
+
+  * Merge with upstream rev 400:
+  - Return NoSpace when we can't create the database directory
+  - Remove the anonymous union from EContactPhoto (#30247)
+
+ -- Ross Burton <ross@openedhand.com>  Wed, 24 May 2006 10:34:35 +0100
+
+evolution-data-server (1.4.1-0osso20060523) unstable; urgency=low
+
+  * Merge with upstream rev 397:
+  - Handle permission denied error from server
+  - Be more verbose in the BDB backend on errors
+  - Don't return OtherError
+  - Reduce relocations in e-name-western
+
+ -- Ross Burton <ross@openedhand.com>  Tue, 23 May 2006 11:43:52 +0100
+
+evolution-data-server (1.4.1-0osso20060516) unstable; urgency=low
+
+  * debian/patches/remove-unused.diff (replaced 01_n770.patch): remove
+    e-destination (thus ucamel), e-url, and e-iconv. This removed 125K
+    from the libraries.
+  * Merge from upstream rev 392:
+    - add error handling for async calls
+  
+ -- Ross Burton <ross@openedhand.com>  Tue, 16 May 2006 10:25:25 +0100
+
+evolution-data-server (1.4.1-0osso20060512) unstable; urgency=low
+
+  * Merge with upstream rev 391:
+    - Add backend-died signal to EBook
+    - Relicense ucamel to LGPL
+
+ -- Ross Burton <ross@openedhand.com>  Fri, 12 May 2006 11:13:53 +0100
+
+evolution-data-server (1.4.1-0osso20060511) unstable; urgency=low
+
+  * Merge with upstream rev 389:
+    - Fix code review bugs in e-address-western (#26585, #26584)
+    - Refactor error handling in backend contact creation
+
+ -- Ross Burton <ross@openedhand.com>  Thu, 11 May 2006 11:35:46 +0100
+
+evolution-data-server (1.4.1-0osso20060508) unstable; urgency=low
+
+  * Merge with upstream rev 386:
+    - Fix NoReply annotations
+    - Handle NULL books when destroying views
+    - Add X-OSSO-BOUND define
+
+ -- Ross Burton <ross@debian.org>  Mon,  8 May 2006 13:12:33 +0100
+
+evolution-data-server (1.4.1-0osso20060503) unstable; urgency=low
+
+  * Better error handling
+  * Use non-fatal allocation handlers in the backend
+  * debian/patches/small-cache.diff: reduce the BDB cache to 128K
+
+ -- Ross Burton <ross@debian.org>  Wed,  3 May 2006 09:59:17 +0100
+
+evolution-data-server (1.4.1-0osso20060428) unstable; urgency=low
+
+  * Add more useful methods to e-vcard
+  * Fix leak in e-dbhash (#28189)
+  * Fix leak in e-book-backend-sexp (#28188)
+
+ -- Ross Burton <ross@openedhand.com>  Fri, 28 Apr 2006 17:27:16 +0100
+
+evolution-data-server (1.4.1-0osso20060426) unstable; urgency=low
+
+  * Add value removal methods to e-vcard
+
+ -- Ross Burton <ross@openedhand.com>  Wed, 26 Apr 2006 18:49:23 +0100
+
+evolution-data-server (1.4.1-0osso20060425-1) unstable; urgency=low
+
+  * Patch in the correct GLib version we require
+  * Fix "if field exists" queries when using vCards
+
+ -- Ross Burton <ross@openedhand.com>  Tue, 25 Apr 2006 17:18:32 +0100
+
+evolution-data-server (1.4.1-0osso20060425) unstable; urgency=low
+
+  * Increase GLib build-deps (#26587)
+  * Clean up EBookView initialisation and deinit
+
+ -- Ross Burton <ross@openedhand.com>  Tue, 25 Apr 2006 11:32:53 +0100
+
+evolution-data-server (1.4.1-0osso15) unstable; urgency=low
+
+  * Fix queries for IM fields (#26982)
+
+ -- Ross Burton <ross@openedhand.com>  Fri, 21 Apr 2006 11:51:04 +0100
+
+evolution-data-server (1.4.1-0osso14) unstable; urgency=low
+
+  * Listen for backup_start signals and sync the database (#26284)
+
+ -- Ross Burton <ross@openedhand.com>  Thu, 20 Apr 2006 17:16:57 +0100
+
+evolution-data-server (1.4.1-0osso13) unstable; urgency=low
+
+  * Allow thumb builds
+  * Make EDataBook::Open consistant
+  * Fix NULL dereference in e-address-western
+  * Fix EContact init
+  * Fix EBook unref
+  
+ -- Ross Burton <ross@openedhand.com>  Tue, 18 Apr 2006 16:51:30 +0100
+
+evolution-data-server (1.4.1-0osso12) unstable; urgency=low
+
+  * Fix memory leaks
+  * Handle some NULL errors from DBus
+  * Only init threading once
+
+ -- Ross Burton <ross@openedhand.com>  Wed, 12 Apr 2006 13:24:11 +0100
+
+evolution-data-server (1.4.1-0osso11) unstable; urgency=low
+
+  * Return better error messages in the BDB backend
+  * Handle errors better when opening the book
+
+ -- Ross Burton <ross@openedhand.com>  Fri,  7 Apr 2006 14:54:36 +0100
+
+evolution-data-server (1.4.1-0osso10) unstable; urgency=low
+
+  * Don't spam the logs when clients disconnect
+  * Change ordering of replies when notifying changes
+
+ -- Ross Burton <ross@openedhand.com>  Tue,  4 Apr 2006 15:24:24 +0300
+
+evolution-data-server (1.4.1-0osso9) unstable; urgency=low
+
+  * New release
+  - fix e-vcard bugs
+  - clean up bookviews
+
+ -- Ross Burton <ross@openedhand.com>  Thu, 23 Mar 2006 15:31:46 +0000
+
+evolution-data-server (1.4.1-0osso8) unstable; urgency=low
+
+  * Add e_vcard_get_attribute()
+  * Add X-OSSO-CONTACT-STATE attribute
+  * Add more depends to libedataserver-dev (thanks Dmitry)
+
+ -- Ross Burton <ross@openedhand.com>  Mon, 13 Mar 2006 17:28:39 +0000
+
+evolution-data-server (1.4.1-0osso7) unstable; urgency=low
+
+  * debian/patches/02_abook-path.diff: Change the system path for address books.
+
+ -- Ross Burton <ross@openedhand.com>  Mon,  6 Mar 2006 12:23:29 +0000
+
+evolution-data-server (1.4.1-0osso6) unstable; urgency=low
+
+  * Many bug fixes and performance improvements
+
+ -- Ross Burton <ross@openedhand.com>  Thu,  2 Mar 2006 11:02:49 +0000
+
+evolution-data-server (1.4.1-0osso5) unstable; urgency=low
+
+  * repackaged for n770
+
+ -- Onne Gorter <onne.gorter@nokia.com>  Mon, 18 Jan 2006 14:30:00 +0200
+
+evolution-data-server (1.4.1-0ubuntu3) breezy; urgency=low
+
+  * debian/patches/camel-imap-store.c.patch:
+    - Ubuntu 17465: apply patch from
+    http://bugzilla.gnome.org/attachment.cgi?id=53234&action=view
+    (additional NULL pointer check)
+
+ -- Daniel Holbach <daniel.holbach@ubuntu.com>  Mon, 10 Oct 2005 11:30:56 +0200
+
+evolution-data-server (1.4.1-0ubuntu2) breezy; urgency=low
+
+  * debian/patches/e-data-cal-factory.c.patch:
+    - fix a crasher with the exchange calendar.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Sat,  8 Oct 2005 22:31:20 +0200
+
+evolution-data-server (1.4.1-0ubuntu1) breezy; urgency=low
+
+  * New upstream version:
+    - Crash when accepting a groupwise appointment
+    - Sent folder should have a unique icon
+    - Slight deviations in vCal-format causes crash
+    - 'Tentativly accept' is updated as accept
+    - Newly created mail items appear as READ in GW proxy
+    - GW: ModifyProxyAccessRights doesnt work
+    - Crash while switching to online
+    - EDS crashes frequently
+    - cannot create  recurring GW events with interval more than 1
+    - camel-lock-client looking for a non-existant camel-lock-helper
+    - Syncing passwords across components fails for Exchange
+    - In 'Attendees' tab particpants id displayed as junk 
+      after delegating meeting
+    - Evolution crashes
+    - Editing addresses in the composer is buggy
+    - Crash when dragging embedded message/rfc822 into a folder
+    - Can't Publish Free/Busy for Web-Calendars
+    - Exchange Plugin cant be enabled on a machine w/o KRB5
+    - bug about recurrent all day events
+  * debian/patches/01_fixlockmail.patch:
+    - fixed with the new version.
+  * debian/patches/01_translationfiles.patch:
+    - fix the list of files to translate.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Mon,  3 Oct 2005 19:29:01 +0200
+
+evolution-data-server (1.4.0-0ubuntu2) breezy; urgency=low
+
+  * debian/patches/01_fixlockmail.patch:
+    - fix the mail locker usage.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Mon, 12 Sep 2005 11:35:09 +0200
+
+evolution-data-server (1.4.0-0ubuntu1) breezy; urgency=low
+
+  * New upstream version:
+    - Evolution-Data-Server is now available in LGPL.
+    - Inline PGP Signature/Encryption support.
+    - Performance enhancements on Camel/GroupWise Backends.
+    - Thunderbird-compatible storage of labels on IMAP.
+    - Support for delegation of meetings (Calendar)
+  * debian/copyright:
+    - updated.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Mon,  5 Sep 2005 21:21:25 +0200
+
+evolution-data-server (1.3.8-0ubuntu2) breezy; urgency=low
+
+  * Rebuild to drop the glitz mention.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Thu, 25 Aug 2005 11:07:28 +0200
+
+evolution-data-server (1.3.8-0ubuntu1) breezy; urgency=low
+
+  * New upstream version, fixes:
+    - color labels stored to imap message store.
+    - Automatically add comma after autocompleting an address.
+    - PGP-encrypted attached messages not displayed.
+    - Synchronize doesn't work for Tasks and Calendar.
+    - RFC2047 encoding always separates the last non-ASCII UTF-8 character.
+    - Now camel should specify the translation domain explicitly to use gettext
+    - Mailbox does not appear on top in offline mode.
+    - Status tracking does not work for some items.
+    - Additional mail is sent to delegate(s) in Groupwise.
+    - Meeting request mail cannot be sent for Meeting 
+      created in 'Personal' calendar.
+    - 'make check' fails on gpg test.
+    - gw: trying to copy the mailbox folder when online copies the folder below
+      the mailbox folder.
+    - Calendar loading progress information goes beyond 100%.
+    - mh: Renaming parent folder loses subfolders.
+    - sometimes clicking on a meeting request mail or any mail related 
+      to assigned task crashes evolution.
+    - Signature shown as attachment.
+    - In GW calendar user should be able to delegate all instances together.
+    - Unable to go back to Online mode after clicking offline button.
+    - Evolution crashes moving IMAP folder to local folder.
+    - crash in camel-folder-thread.c:sort_node when generating message list.
+    - gw: Evolution crashes while starting up.
+    - Regressing 274308 - EDS crashed.
+    - gw: Unable to create a new folder(subfolder) with names like Mailbox, 
+      Sent Items, etc.
+    - Useless assignment in e-vcard.
+    - camel indexing valgrind hits.
+    - gw: evo crashes while trying to refresh the folder.
+    - crash viewing IMAP mail.
+    - imap4: sub folders not working.
+    - IOP: Implement Outlook-like handling of recurrence corner-cases.
+    - cannot decrypt an encrypted message.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Tue, 23 Aug 2005 14:57:59 +0200
+
+evolution-data-server (1.3.7-0ubuntu2) breezy; urgency=low
+
+  * Rebuild with the new cairo version
+
+ -- Sebastien Bacher <seb128@canonical.com>  Thu, 18 Aug 2005 17:15:14 +0000
+
+evolution-data-server (1.3.7-0ubuntu1) breezy; urgency=low
+
+  * New upstream version, fixes:
+    - Multiple CC headers are not processed properly.
+    - Grammar errors failing Sun's compiler 'Vulcan / Forte'.
+    - broken imap server workaround.
+    - 1.3.6 lists a pile of old folders.
+    - configure script fails to detect getaddrinfo.
+    - GW: Fwded message headers are not displayed.
+    - Description does not appear completely 
+      when using the ITIP FORMATTER plugin.
+    - problems with junk test in filters.
+    - Configuring same account for IMAP and GroupWise troubles Proxy Login.
+    - GW: Some mails do not get delivered.
+    - GW: don't see schedules from people in other post offices.
+    - Cannot create recurring 'All Day event' in groupwise calendar.
+    - evolution-data-server crashes trying to reply all.
+    - GW long delays & no status.
+    - Key /apps/evolution/lock/mail/accounts/save_password 
+      does not work correctly.
+  * debian/patches/03_imaplist.patch:
+    - fixed with the new version.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Mon,  8 Aug 2005 21:28:46 +0200
+
+evolution-data-server (1.3.6.1-0ubuntu3) breezy; urgency=low
+
+  * debian/control.in:
+    - build with the current libsoup.
+    - fixed some Depends.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Sat,  6 Aug 2005 16:22:49 +0200
+
+evolution-data-server (1.3.6.1-0ubuntu2) breezy; urgency=low
+
+  * debian/patches/03_imaplist.patch:
+    - fix the listing of IMAP folders (Ubuntu: #13110).
+
+ -- Sebastien Bacher <seb128@canonical.com>  Mon,  1 Aug 2005 13:59:09 +0200
+
+evolution-data-server (1.3.6.1-0ubuntu1) breezy; urgency=low
+
+  * New upstream version:
+    - fix the imap issues from the previous version (Ubuntu: #13059).
+  * debian/patches/03_folderslist.patch:
+    - fixed with the new version.
+  * debian/patches/04_commandimap.patch:
+    - fixed with the new version.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Fri, 29 Jul 2005 15:58:31 +0200
+
+evolution-data-server (1.3.6-0ubuntu2) breezy; urgency=low
+
+  * debian/patches/04_commandimap.patch:
+    - patch from the CVS, only use the command it the option is selected.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Wed, 27 Jul 2005 18:36:20 +0200
+
+evolution-data-server (1.3.6-0ubuntu1) breezy; urgency=low
+
+  * New upstream version.
+  * debian/patches/03_folderslist.patch:
+    - patch from the CVS to list all the folders with the subcribe to folder
+      dialog for imap.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Tue, 26 Jul 2005 21:57:58 +0200
+
+evolution-data-server (1.3.5-0ubuntu1) breezy; urgency=low
+
+  * New upstream version.
+  * debian/control.in:
+    - updated for the soname changes.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Tue, 12 Jul 2005 17:10:13 +0200
+
+evolution-data-server (1.3.4-0ubuntu1) breezy; urgency=low
+
+  * New upstream version, fix:
+    - Left pane is not updated with maildir.
+    - Inline PGP signature support (Ubuntu: #11377).
+    - Add exchange as a supported backend to e-d-s
+    - Display GW events based on date of appointment not on the received time
+    - Update addressbook cache with changes in GW System Address book.
+  * debian/control.in:
+    - new libexchange-storage1.2 packages.
+  * debian/rules:
+    - updated for the new lib.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Sun,  3 Jul 2005 22:28:27 +0200
+
+evolution-data-server (1.3.3.1-0ubuntu2) breezy; urgency=low
+
+  * debian/control.in:
+    - don't Depends on libdb4.1.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Mon, 13 Jun 2005 15:30:35 +0200
+
+evolution-data-server (1.3.3.1-0ubuntu1) breezy; urgency=low
+
+  * New upstream version.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Thu,  9 Jun 2005 21:37:17 +0200
+
+evolution-data-server (1.3.3-0ubuntu1) breezy; urgency=low
+
+  * New upstream version.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Wed,  8 Jun 2005 19:26:37 +0200
+
+evolution-data-server (1.3.2-0ubuntu1) breezy; urgency=low
+
+  * Sync with Debian.
+  * New upstream version.
+  * debian/patches/01-pc-file-fix.patch:
+    - fixed with the new version.
+  * debian/patches/04_calendar_declaration.patch:
+    - fixed with the new version.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Wed, 25 May 2005 14:26:43 +0200
+
+evolution-data-server (1.2.2-2ubuntu2) breezy; urgency=low
+
+  * debian/patches/05_encodingcrashfix.patch:
+    - patch from Ryan Lortie <desrt@desrt.ca> to not crash when forwarding
+      an email with a broken encoding.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Mon,  2 May 2005 21:35:40 +0200
+
+evolution-data-server (1.2.2-2ubuntu1) breezy; urgency=low
+
+  * Updated the version so this package is installed before the universe one.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Mon,  2 May 2005 15:08:40 +0200
+
+evolution-data-server (1.2.2-1ubuntu1) breezy; urgency=low
+
+  * New upstream version.
+  * debian/patches/03_anonymous_nntp.patch:
+    - the new version fixes that.
+  * debian/patches/04_calendar_declaration.patch:
+    - fix build issue.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Fri, 15 Apr 2005 17:48:47 +0200
+
+evolution-data-server (1.2.1-0ubuntu1) hoary; urgency=low
+
+  * New upstream release.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Thu, 17 Mar 2005 22:32:48 +0100
+
+evolution-data-server (1.2.0-0ubuntu3) hoary; urgency=low
+
+  * debian/control:
+    - Build-Depends on libkrb5-dev.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Sat, 12 Mar 2005 14:39:50 +0100
+
+evolution-data-server (1.2.0-0ubuntu2) hoary; urgency=low
+
+  * debian/control.in:
+    - Build-Depends on libkrb5-dev instead of heimdal-dev.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Fri, 11 Mar 2005 13:34:14 +0100
+
+evolution-data-server (1.2.0-0ubuntu1) hoary; urgency=low
+
+  * New upstream release.
+  * debian/patches/04_calendarproxy.patch:
+    - the fix is included in the new version.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Tue,  8 Mar 2005 12:55:57 +0100
+
+evolution-data-server (1.1.6-0ubuntu2) hoary; urgency=low
+
+  * debian/patches/04_calendarproxy.patch:
+    - fix a crash with the calendar if you use a proxy (Hoary: #7212).
+
+ -- Sebastien Bacher <seb128@canonical.com>  Sun,  6 Mar 2005 14:18:25 +0100
+
+evolution-data-server (1.1.6-0ubuntu1) hoary; urgency=low
+
+  * New upstream release.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Tue,  1 Mar 2005 11:44:16 +0100
+
+evolution-data-server (1.1.5-0ubuntu1) hoary; urgency=low
+
+  * New upstream release:
+    - fix the crash when adding a task in the calendar (Hoary: #5952).
+  * debian/control:
+    - updated for the new sonames.  
+  
+ -- Sebastien Bacher <seb128@canonical.com>  Tue,  8 Feb 2005 14:46:54 +0100
+
+evolution-data-server (1.1.4.2-0ubuntu1) hoary; urgency=low
+
+  * New upstream release:
+    - fix the filters on imap (Hoary: #5904).
+
+ -- Sebastien Bacher <seb128@canonical.com>  Thu, 27 Jan 2005 22:52:22 +0100
+
+evolution-data-server (1.1.4.1-0ubuntu1) hoary; urgency=low
+
+  * New upstream release.
+  * debian/control.in:
+    - updated the Build-Depends.
+  * debian/patches/03_anonymous_nntp.patch:
+    - patch from Jeff Bailey <jbailey@ubuntu.com> to fix the connections to
+      anonymous NNTP servers (Hoary: #3732).
+
+ -- Sebastien Bacher <seb128@canonical.com>  Wed, 26 Jan 2005 12:32:29 +0100
+
+evolution-data-server (1.1.4-0ubuntu1) hoary; urgency=low
+
+  * New upstream release, fix:
+    Calendar:
+    - calendar migration speed.
+    - use proxy if necessary for webcal.
+    Camel:
+    - newly created folder on local maildir doesn't show until 
+      evolution restart.
+    - authenticated SMTP and TLS work very slowly.
+    - doesn't update NNTP folder in a Virtual folder.
+    - deleting vfolder causes evo to hang.
+  * debian/control:
+    - updated for the new sonames.
+  * debian/control.in:
+    - fixed a typo in the descriptions (Hoary: #5843).
+    - libcamel1.2-2 Conflicts/Replaces libcamel1.2-1.
+  * debian/patches/03_sslconnect.patch:
+    - removed, the fix is in the new version.
+  * debian/patches/CAN-2005-0102.patch:
+    - removed, the fix is in the new version.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Tue, 25 Jan 2005 12:26:29 +0100
+
+evolution-data-server (1.1.3-0ubuntu10) hoary; urgency=low
+
+  * SECURITY UPDATE: fix buffer overflow
+  * Added patch CAN-2005-0102.patch:
+    - camel/camel-lock-helper.c: malloc()'ing supplied path length + 1 allowed
+      an integer overflow and malloc()ation of a 0-byte buffer, which was then
+      filled by an arbitrary amount of user-supplied data. Now restrict
+      the length of the supplied path to at most 0xFFFF characters.
+  * References:
+    CAN-2005-0102
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 24 Jan 2005 13:50:20 +0100
+
+evolution-data-server (1.1.3-0ubuntu9) hoary; urgency=low
+
+  * debian/control.in:
+    - libebook1.2-dev Depends on libcamel1.2-dev.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Wed, 19 Jan 2005 18:07:36 +0100
+
+evolution-data-server (1.1.3-0ubuntu8) hoary; urgency=low
+
+  * debian/control.in:
+    - libebook1.2-dev Depends on heimdal-dev, libnspr-dev.
+  
+ -- Sebastien Bacher <seb128@canonical.com>  Tue, 18 Jan 2005 18:33:12 +0100
+
+evolution-data-server (1.1.3-0ubuntu7) hoary; urgency=low
+
+  * debian/control.in:
+    - Build-Depends on libdb4.2-dev.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Mon, 17 Jan 2005 17:52:03 +0100
+
+evolution-data-server (1.1.3-0ubuntu6) hoary; urgency=low
+
+  * debian/control.in:
+    - Build-Depends on kerberos4kth-dev and heimdal-dev.
+  * debian/rules:
+    - --with-krb4 and --with-krb5.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Mon, 17 Jan 2005 16:49:16 +0100
+
+evolution-data-server (1.1.3-0ubuntu5) hoary; urgency=low
+
+  * debian/patches/03_sslconnect.patch:
+    - patch from the CVS to fix the SMTP authentification, thanks 
+      to Michael Rimbert <rimbert@purdue.edu> for pointing the patch
+      (Hoary: #71082).
+
+ -- Sebastien Bacher <seb128@canonical.com>  Sat, 15 Jan 2005 14:21:25 +0100
+
+evolution-data-server (1.1.3-0ubuntu4) hoary; urgency=low
+
+  * debian/control:
+    - updated from control.in so libcamel1.2-1 Depends really on libnss3 and
+      libcamel1.2-dev on libedataserver1.2-dev.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Fri, 14 Jan 2005 18:01:02 +0100
+
+evolution-data-server (1.1.3-0ubuntu3) hoary; urgency=low
+
+  * debian/evolution-data-server.postinst:
+    - fix the lock issue on /var/mail (Hoary: #5438). 
+
+ -- Sebastien Bacher <seb128@canonical.com>  Fri, 14 Jan 2005 14:47:33 +0100
+
+evolution-data-server (1.1.3-0ubuntu2) hoary; urgency=low
+
+  * libcamel1.2-1 Depends libnss3, libcamel1.2-dev Depends
+    libedataserver1.2-dev.
+
+ -- Daniel Stone <daniel.stone@canonical.com>  Fri, 14 Jan 2005 16:59:17 +1100
+
+evolution-data-server (1.1.3-0ubuntu1) hoary; urgency=low
+
+  * New upstream release:
+    Calendar:
+    - backend attachment support.
+    - weather calendar.
+    Camel:
+    - IMAP4 offline support.
+    - groupwise offline support.
+  * debian/control.in:
+    - libcamel1.2-1 Conflicts/Replaces libcamel1.2-0.
+    - libedataserver1.2-0 depends on libnspr4.
+  
+ -- Sebastien Bacher <seb128@canonical.com>  Tue, 11 Jan 2005 16:51:05 +0100
+
+evolution-data-server (1.1.2-0ubuntu3) hoary; urgency=low
+
+  * debian/patches/02_gtype.patch:
+    - patch to fix a crasher on 64bits platforms (Hoary: #4854).
+
+ -- Sebastien Bacher <seb128@canonical.com>  Tue,  4 Jan 2005 12:40:58 +0100
+
+evolution-data-server (1.1.2-0ubuntu2) hoary; urgency=low
+
+  * Made the SSL support working again (Hoary: #5093).
+  * debian/control.in:
+    - updated the Build-Depends.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Fri, 31 Dec 2004 18:18:05 +0100
+
+evolution-data-server (1.1.2-0ubuntu1) hoary; urgency=low
+
+  * New upstream release.
+  * libedata-book1.2, libedata-cal1.2 and libegroupwise1.2 soname changes.
+  * debian/control.in:
+    - add libcamel1.2-0 and libcamel1.2-dev.
+    - libedata-book1.2-1 replaces libedata-book1.2-0.
+  * debian/rules:
+    - updated for the new packages.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Tue, 21 Dec 2004 11:28:22 +0100
+
+evolution-data-server (1.1.1-0ubuntu1) hoary; urgency=low
+
+  * New upstream release.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Mon, 29 Nov 2004 22:47:45 +0100
+
+evolution-data-server (1.1.0-0ubuntu5) hoary; urgency=low
+
+  * debian/evolution-data-server.install:
+    - added some missing files.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Fri,  5 Nov 2004 23:48:10 +0100
+
+evolution-data-server (1.1.0-0ubuntu4) hoary; urgency=low
+
+  * debian/control:
+    - really fixed the Build-Depends!
+
+ -- Sebastien Bacher <seb128@canonical.com>  Fri,  5 Nov 2004 17:42:38 +0100
+
+evolution-data-server (1.1.0-0ubuntu3) hoary; urgency=low
+
+  * Rebuilt to get the control.in -> control update this time.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Fri,  5 Nov 2004 16:58:51 +0100
+
+evolution-data-server (1.1.0-0ubuntu2) hoary; urgency=low
+  
+  * debian/evolution-data-server.install:
+    - added some missing files.
+  * debian/control.in:
+    - updated the Build-Depends.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Fri,  5 Nov 2004 15:01:13 +0100
+
+evolution-data-server (1.1.0-0ubuntu1) hoary; urgency=low
+
+  * New upstream release.
+  * debian/control.in:
+    - add ibedataserverui* packages.
+    - renamed all the libraries packages.
+  * debian/*.install:
+    - updated for the new libs and names.
+  * debian/patches/02_amd64_build.patch:
+    - removed, the build should be fixed with the new version.
+  * debian/rules:
+    - updated for the new libs and names.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Tue,  2 Nov 2004 00:49:49 +0100
+
+evolution-data-server (1.0.2-2ubuntu3) hoary; urgency=low
+
+  * Really get the Conflicts/Replaces versions updated this time.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Mon,  1 Nov 2004 22:55:00 +0100
+
+evolution-data-server (1.0.2-2ubuntu2) hoary; urgency=low
+
+  * debian/control.in:
+    - updated the Conflicts/Replaces versions.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Mon,  1 Nov 2004 19:25:53 +0100
+
+evolution-data-server (1.0.2-2ubuntu1) hoary; urgency=low
+
+  * debian/patches/02_amd64_build.patch:
+    - we still need this patch to build on amd64.
+
+ -- Sebastien Bacher <seb128@canonical.com>  Fri, 29 Oct 2004 18:56:05 +0200
+
+evolution-data-server (1.0.2-2) unstable; urgency=low
+
+  * upload to unstable/main
+
+ -- Takuo KITAME <kitame@debian.org>  Tue, 19 Oct 2004 11:51:47 +0900
+
+evolution-data-server (1.0.2-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Takuo KITAME <kitame@debian.org>  Wed, 13 Oct 2004 12:00:09 +0900
+
+evolution-data-server (1.0.1-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Takuo KITAME <kitame@debian.org>  Wed, 29 Sep 2004 15:31:14 +0900
+
+evolution-data-server (1.0.0-1) experimental; urgency=low
+
+  * New upstream release, RC package for uploading into main.
+  * change package structure.
+    lib* is into own package.
+    e-d-s-dev is meta package of lib*-dev packages.
+  (closes: #270678)
+
+ -- Takuo KITAME <kitame@debian.org>  Tue, 14 Sep 2004 17:09:57 +0900
+
+evolution-data-server (0.0.99-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Takuo KITAME <kitame@debian.org>  Tue, 31 Aug 2004 13:55:25 +0900
+
+evolution-data-server (0.0.98-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Takuo KITAME <kitame@debian.org>  Mon, 16 Aug 2004 12:42:30 +0900
+
+evolution-data-server (0.0.97-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Takuo KITAME <kitame@debian.org>  Thu,  5 Aug 2004 18:58:54 +0900
+
+evolution-data-server (0.0.96-1) experimental; urgency=low
+
+  * New upstream release
+  * remove useless files in doc (closes: #257405)
+
+ -- Takuo KITAME <kitame@debian.org>  Tue, 20 Jul 2004 16:18:03 +0900
+
+evolution-data-server (0.0.95-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Takuo KITAME <kitame@debian.org>  Thu,  8 Jul 2004 18:41:50 +0900
+
+evolution-data-server (0.0.94.1-2) experimental; urgency=low
+
+  * --with-uniquename=eds (closes: #255727)
+
+ -- Takuo KITAME <kitame@debian.org>  Wed, 30 Jun 2004 00:15:58 +0900
+
+evolution-data-server (0.0.94.1-1) experimental; urgency=low
+
+  * New upstream release
+  * use cdbs instead of cdb
+
+ -- Takuo KITAME <kitame@debian.org>  Mon, 28 Jun 2004 10:59:44 +0900
+
+evolution-data-server (0.0.94-1) experimental; urgency=low
+
+  * New upstream release
+  * Conflicts: evolution1.5 (<< 1.5.9)
+
+ -- Takuo KITAME <kitame@debian.org>  Mon,  7 Jun 2004 11:50:34 +0900
+
+evolution-data-server (0.0.93-2) experimental; urgency=low
+
+  * Conflict with evolution1.5 (<< 1.5.8)
+
+ -- Takuo KITAME <kitame@debian.org>  Wed, 26 May 2004 15:36:23 +0900
+
+evolution-data-server (0.0.93-1) experimental; urgency=low
+
+  * New upstream release
+  * build against libgnutls10
+
+ -- Takuo KITAME <kitame@debian.org>  Mon, 24 May 2004 19:47:53 +0900
+
+evolution-data-server (0.0.92-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Takuo KITAME <kitame@debian.org>  Tue, 20 Apr 2004 17:02:50 +0900
+
+evolution-data-server (0.0.91-2) experimental; urgency=low
+
+  * Applied patch to fix build problem on ppc (closes: #242044)
+  * Build-Depends on gtk-doc-tools (closes: #241227)
+
+ -- Takuo KITAME <kitame@debian.org>  Mon, 12 Apr 2004 09:57:50 +0900
+
+evolution-data-server (0.0.91-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Takuo KITAME <kitame@debian.org>  Wed,  7 Apr 2004 12:35:34 +0900
+
+evolution-data-server (0.0.90-1) experimental; urgency=low
+
+  * New upstream release
+  * NOTE:
+    libsoup2.2-3 and libgtkhtml3.1-6 package had been uploaded already.
+    But it marked as NEW package and waiting for ACCEPTED.
+    So please wait for installing into archive by ftp-maintainer.
+
+ -- Takuo KITAME <kitame@debian.org>  Tue,  9 Mar 2004 12:59:34 +0900
+
+evolution-data-server (0.0.7-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Takuo KITAME <kitame@debian.org>  Thu, 19 Feb 2004 14:47:19 +0900
+
+evolution-data-server (0.0.6-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Takuo KITAME <kitame@debian.org>  Tue,  3 Feb 2004 14:23:19 +0900
+
+evolution-data-server (0.0.5-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Takuo KITAME <kitame@debian.org>  Tue, 20 Jan 2004 16:43:50 +0900
+
+evolution-data-server (0.0.4-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Takuo KITAME <kitame@debian.org>  Fri,  9 Jan 2004 14:16:21 +0900
+
+evolution-data-server (0.0.3-2) experimental; urgency=low
+
+  * fix unavailable libdb.a
+
+ -- Takuo KITAME <kitame@debian.org>  Thu, 18 Dec 2003 11:17:42 +0900
+
+evolution-data-server (0.0.3-1) experimental; urgency=low
+
+  * Initial Release.
+
+ -- Takuo KITAME <kitame@debian.org>  Mon, 15 Dec 2003 10:36:50 +0900
+
