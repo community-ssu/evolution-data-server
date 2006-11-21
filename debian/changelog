@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20061121) unstable; urgency=low
+
+  * Fix build error with new dbus-glib
+
+ -- Ross Burton <ross@openedhand.com>  Tue, 21 Nov 2006 17:05:50 +0000
+
 evolution-data-server (1.4.2.1-20061113) unstable; urgency=low
 
   * Update packaging to put the addressbook daemon into the
