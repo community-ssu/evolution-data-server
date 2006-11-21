@@ -924,35 +924,16 @@ func_check(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
 }
 
 static ESExpResult *
-func_check_vcard(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
+func_fail(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
 {
 	ESExpResult *r;
-	int truth = FALSE;
-
-#if 0
-	/* TODO: we don't currently optimise queries that index by vCard field name */
-	if (argc == 2
-	    && argv[0]->type == ESEXP_RES_STRING
-	    && argv[1]->type == ESEXP_RES_STRING) {
-		char *query_name = argv[0]->value.string;
-
-		if (!strcmp (query_name, EVC_NICKNAME) ||
-		    !strcmp (query_name, EVC_FN) ||
-		    !strcmp (query_name, EVC_X_FILE_AS) ||
-		    !strcmp (query_name, EVC_EMAIL)) {
-			truth = TRUE;
-		}
-	}
-#endif
-
 	r = e_sexp_result_new(f, ESEXP_RES_BOOL);
-	r->value.bool = truth;
-	
+	r->value.bool = FALSE;
 	return r;
 }
 
 /* 'builtin' functions */
-static struct {
+static const struct {
 	char *name;
 	ESExpFunc *func;
 	int type;		/* set to 1 if a function can perform shortcut evaluation, or
@@ -963,7 +944,7 @@ static struct {
 	{ "beginswith", func_check, 0 },
 	{ "endswith", func_check, 0 },
 	{ "exists", func_check, 0 },
-	{ "exists_vcard", func_check_vcard, 0 }
+	{ "exists_vcard", func_fail, 0 },
 };
 
 /**

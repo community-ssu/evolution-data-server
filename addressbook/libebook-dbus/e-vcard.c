@@ -979,8 +979,7 @@ e_vcard_attribute_copy (EVCardAttribute *attr)
 
 	g_return_val_if_fail (attr != NULL, NULL);
 
-	a = e_vcard_attribute_new (e_vcard_attribute_get_group (attr),
-				   e_vcard_attribute_get_name (attr));
+	a = e_vcard_attribute_new (attr->group, attr->name);
 
 	for (p = attr->values; p; p = p->next)
 		e_vcard_attribute_add_value (a, p->data);
@@ -1237,6 +1236,33 @@ e_vcard_attribute_remove_value (EVCardAttribute *attr, const char *s)
 	}
 	
 	attr->values = g_list_delete_link (attr->values, l);
+}
+
+/**
+ * e_vcard_attribute_remove_param:
+ * @attr: an #EVCardAttribute
+ * @param_name: a parameter name
+ *
+ * Removes the parameter @param_name from the attribute @attr.
+ */
+void
+e_vcard_attribute_remove_param (EVCardAttribute *attr, const char *param_name)
+{
+	GList *l;
+	EVCardAttributeParam *param;
+
+	g_return_if_fail (attr != NULL);
+	g_return_if_fail (param_name != NULL);
+	
+	for (l = attr->params; l; l = l->next) {
+		param = l->data;
+		if (g_ascii_strcasecmp (e_vcard_attribute_param_get_name (param),
+					param_name) == 0) {
+			attr->params = g_list_delete_link (attr->params, l);
+			e_vcard_attribute_param_free(param);
+			break;
+		}
+	}
 }
 
 /**
@@ -1500,16 +1526,14 @@ e_vcard_attribute_param_remove_values (EVCardAttributeParam *param)
 void
 e_vcard_attribute_remove_param_value (EVCardAttribute *attr, const char *param_name, const char *s)
 {
-	GList *l, *params;
+	GList *l;
 	EVCardAttributeParam *param;
 
 	g_return_if_fail (attr != NULL);
 	g_return_if_fail (param_name != NULL);
 	g_return_if_fail (s != NULL);
 
-	params = e_vcard_attribute_get_params (attr);
-
-	for (l = params; l; l = l->next) {
+	for (l = attr->params; l; l = l->next) {
 		param = l->data;
 		if (g_ascii_strcasecmp (e_vcard_attribute_param_get_name (param), param_name) == 0) {
 			goto found;
@@ -1556,7 +1580,7 @@ e_vcard_get_attribute (EVCard     *vcard,
         g_return_val_if_fail (E_IS_VCARD (vcard), NULL);
         g_return_val_if_fail (name != NULL, NULL);
 
-        attrs = e_vcard_get_attributes (vcard);
+        attrs = vcard->priv->attributes;
         for (l = attrs; l; l = l->next) {
                 EVCardAttribute *attr;
 		
@@ -1692,9 +1716,9 @@ e_vcard_attribute_get_value (EVCardAttribute *attr)
 
 	g_return_val_if_fail (attr != NULL, NULL);
 
-	values = e_vcard_attribute_get_values (attr);
+	values = attr->values;
 
-	if (!e_vcard_attribute_is_single_valued (attr))
+	if (values && values->next)
 		g_warning ("e_vcard_attribute_get_value called on multivalued attribute %s", attr->name);
 
 	return values ? g_strdup ((char*)values->data) : NULL;
@@ -1742,15 +1766,12 @@ e_vcard_attribute_get_value_decoded (EVCardAttribute *attr)
 gboolean
 e_vcard_attribute_has_type (EVCardAttribute *attr, const char *typestr)
 {
-	GList *params;
 	GList *p;
 
 	g_return_val_if_fail (attr != NULL, FALSE);
 	g_return_val_if_fail (typestr != NULL, FALSE);
 
-	params = e_vcard_attribute_get_params (attr);
-
-	for (p = params; p; p = p->next) {
+	for (p = attr->params; p; p = p->next) {
 		EVCardAttributeParam *param = p->data;
 
 		if (!g_ascii_strcasecmp (e_vcard_attribute_param_get_name (param), EVC_TYPE)) {
@@ -1797,14 +1818,12 @@ e_vcard_attribute_get_params (EVCardAttribute *attr)
 GList *
 e_vcard_attribute_get_param (EVCardAttribute *attr, const char *name)
 {
-	GList *params, *p;
+	GList *p;
 	
 	g_return_val_if_fail (attr != NULL, FALSE);
 	g_return_val_if_fail (name != NULL, FALSE);
 	
-	params = e_vcard_attribute_get_params (attr);
-
-	for (p = params; p; p = p->next) {
+	for (p = attr->params; p; p = p->next) {
 		EVCardAttributeParam *param = p->data;
 		if (g_ascii_strcasecmp (e_vcard_attribute_param_get_name (param), name) == 0) {
 			return e_vcard_attribute_param_get_values (param);

@@ -83,8 +83,6 @@ e_data_book_dispose (GObject *object)
 {
   EDataBook *book = E_DATA_BOOK (object);
   
-  g_message (G_STRFUNC);
-
   if (book->backend) {
     g_object_unref (book->backend);
     book->backend = NULL;

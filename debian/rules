@@ -26,7 +26,7 @@ DEB_SHLIBDEPS_INCLUDE := debian/tmp/usr/lib
 
 DEB_DH_MAKESHLIBS_ARGS_ALL := -V
 
-DEB_DH_STRIP_ARGS := --dbg-package=libedataserver --dbg-package=libedata-book --dbg-package=libebook
+DEB_DH_STRIP_ARGS := --dbg-package=evolution-data-server-addressbook --dbg-package=libedataserver --dbg-package=libedata-book --dbg-package=libebook
 
 DEB_CONFIGURE_EXTRA_FLAGS := \
 	--prefix=/usr \
@@ -51,32 +51,3 @@ clean::
 	dh_clean intltool-extract intltool-merge intltool-update \
 	.po/.intltool-merge-cache
 	rm -f debian/stamp-configured
-
-LIBCAMEL_CURRENT := $(shell grep '^LIBCAMEL_CURRENT=' configure.in | sed -e 's/LIBCAMEL_CURRENT=//g')
-LIBCAMEL_AGE := $(shell grep '^LIBCAMEL_AGE=' configure.in | sed -e 's/LIBCAMEL_AGE=//g')
-LIBCAMEL_VER := $(shell expr $(LIBCAMEL_CURRENT) - $(LIBCAMEL_AGE))
-
-LIBEDATASERVER_CURRENT := $(shell grep '^LIBEDATASERVER_CURRENT=' configure.in | sed -e 's/LIBEDATASERVER_CURRENT=//g')
-LIBEDATASERVER_AGE := $(shell grep '^LIBEDATASERVER_AGE=' configure.in | sed -e 's/LIBEDATASERVER_AGE=//g')
-LIBEDATASERVER_VER := $(shell expr $(LIBEDATASERVER_CURRENT) - $(LIBEDATASERVER_AGE))
-
-LIBEBOOK_CURRENT := $(shell grep '^LIBEBOOK_CURRENT=' configure.in | sed -e 's/LIBEBOOK_CURRENT=//g')
-LIBEBOOK_AGE := $(shell grep '^LIBEBOOK_AGE=' configure.in | sed -e 's/LIBEBOOK_AGE=//g')
-LIBEBOOK_VER := $(shell expr $(LIBEBOOK_CURRENT) - $(LIBEBOOK_AGE))
-
-LIBEDATABOOK_CURRENT := $(shell grep '^LIBEDATABOOK_CURRENT=' configure.in | sed -e 's/LIBEDATABOOK_CURRENT=//g')
-LIBEDATABOOK_AGE := $(shell grep '^LIBEDATABOOK_AGE=' configure.in | sed -e 's/LIBEDATABOOK_AGE=//g')
-LIBEDATABOOK_VER := $(shell expr $(LIBEDATABOOK_CURRENT) - $(LIBEDATABOOK_AGE))
-
-update-control:
-	@echo "libedataserver   version: $(LIBEDATASERVER_VER)"
-	@echo "      libebook   version: $(LIBEBOOK_VER)"
-	@echo " libedata-book   version: $(LIBEDATABOOK_VER)"
-	sed \
-	 -e 's/libedataserver1.2-@VER@/libedataserver1.2-$(LIBEDATASERVER_VER)/g' \
-	 -e 's/libebook1.2-@VER@/libebook1.2-$(LIBEBOOK_VER)/g' \
-	 -e 's/libedata-book1.2-@VER@/libedata-book1.2-$(LIBEDATABOOK_VER)/g' \
-	debian/control.in > debian/control
-	cp debian/libedataserver1.2-@VER@.install debian/libedataserver1.2-$(LIBEDATASERVER_VER).install
-	cp debian/libebook1.2-@VER@.install debian/libebook1.2-$(LIBEBOOK_VER).install
-	cp debian/libedata-book1.2-@VER@.install debian/libedata-book1.2-$(LIBEDATABOOK_VER).install

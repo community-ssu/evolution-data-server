@@ -60,7 +60,7 @@ DBUS_GENERATED_H = e-data-book-factory-bindings.h e-data-book-bindings.h e-data-
 	dbus-binding-tool --mode=glib-server --output=$@ --prefix=$(subst -,_,$*) $^
 
 %-bindings.h: ../libedata-book-dbus/%.xml
-	dbus-binding-tool --mode=glib-client --output=$@ $^
+	dbus-binding-tool --mode=glib-client --output=$@ --prefix=$(subst -,_,$*) $^
 
 BUILT_SOURCES = $(DBUS_GENERATED_H) $(MARSHAL_GENERATED)
 CLEANFILES    = $(BUILT_SOURCES)

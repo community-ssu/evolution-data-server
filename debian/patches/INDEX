@@ -1,0 +1,38 @@
+01_glib-version.diff
+
+Stock EDS depends on GLib 2.9.1 as it uses GSlice, but Maemo has backported them
+into GLib 2.6.6-1osso2 onwards.  Maemo specific.
+
+02_abook-path.diff
+
+Change the system addressbook path to ~/.osso-abook/db/.  Maemo specific.
+
+bdb-error.diff
+
+Hack to save errors when syncing and report them back. Should be merged upstream.
+
+contact-no-fileas.diff
+
+Remove the updating of the FILE_AS field in EContact.  Maemo doesn't use it and
+this is noticable in profiles of osso-addressbook startup.  Maemo specific.
+
+e-contact-state.diff
+
+Add E_CONTACT_OSSO_CONTACT_STATE to e-contact and e-vcard.
+
+query-visible.diff
+
+Add support for the (visible) query expression, which hides deleted contacts.
+
+remove-unused.diff
+
+Don't compile the parts of EDS that we don't use. Maemo specific.
+
+small-cache.diff
+
+Make the BDB cache smaller. Maemo specific.
+
+summary-visible.diff:
+
+Index the contact state flag in the summary files so that (visible) can be
+fast-pathed.

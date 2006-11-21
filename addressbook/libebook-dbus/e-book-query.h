@@ -2,7 +2,7 @@
 #ifndef __E_BOOK_QUERY_H__
 #define __E_BOOK_QUERY_H__
 
-#include "e-contact.h"
+#include <libebook/e-contact.h>
 
 G_BEGIN_DECLS
 

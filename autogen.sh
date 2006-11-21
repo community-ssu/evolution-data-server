@@ -1,8 +1,6 @@
 #!/bin/sh
 # Run this to generate all the initial makefiles, etc.
 
-patch -p0 -N < n770_slimdown.patch
-
 srcdir=`dirname $0`
 test -z "$srcdir" && srcdir=.
 

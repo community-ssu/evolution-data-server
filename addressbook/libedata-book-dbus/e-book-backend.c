@@ -7,7 +7,6 @@
  */
 
 #include <config.h>
-#include "e-data-book-marshal.h"
 #include "e-data-book-view.h"
 #include "e-data-book.h"
 #include "e-book-backend.h"
@@ -254,6 +253,7 @@ e_book_backend_get_contact (EBookBackend *backend,
 	g_return_if_fail (id);
 
 	g_assert (E_BOOK_BACKEND_GET_CLASS (backend)->get_contact);
+
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->get_contact) (backend, book, opid, id);
 }
 
@@ -955,10 +955,6 @@ e_book_backend_notify_connection_status (EBookBackend *backend, gboolean is_onli
 		e_data_book_report_connection_status (E_DATA_BOOK (clients->data), is_online);
 
 	g_mutex_unlock (priv->clients_mutex);
-
-
-
-
 }
 
 /**
@@ -980,8 +976,6 @@ e_book_backend_notify_auth_required (EBookBackend *backend)
 	for (clients = priv->clients; clients != NULL; clients = g_list_next (clients))
 		e_data_book_report_auth_required (E_DATA_BOOK (clients->data));
 	g_mutex_unlock (priv->clients_mutex);
-
-
 }
 
 static void
@@ -991,6 +985,7 @@ e_book_backend_init (EBookBackend *backend)
 
 	priv          = g_new0 (EBookBackendPrivate, 1);
 	priv->clients = NULL;
+	priv->source = NULL;
 	priv->views   = e_list_new((EListCopyFunc) NULL, (EListFreeFunc) NULL, NULL);
 	priv->open_mutex = g_mutex_new ();
 	priv->clients_mutex = g_mutex_new ();
@@ -1014,7 +1009,10 @@ e_book_backend_dispose (GObject *object)
 			backend->priv->views = NULL;
 		}
 
-		g_object_unref (backend->priv->source);
+		if (backend->priv->source) {
+			g_object_unref (backend->priv->source);
+			backend->priv->source = NULL;
+		}
 
 		g_mutex_free (backend->priv->open_mutex);
 		g_mutex_free (backend->priv->clients_mutex);

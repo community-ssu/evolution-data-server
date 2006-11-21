@@ -210,8 +210,6 @@ e_data_book_view_dispose (GObject *object)
   EDataBookView *book_view = E_DATA_BOOK_VIEW (object);
   EDataBookViewPrivate *priv = book_view->priv;
 
-  g_message (G_STRFUNC);
-
   if (priv->book) {
     /* Remove the weak reference */
     g_object_weak_unref (G_OBJECT (priv->book), book_destroyed_cb, book_view);
@@ -306,8 +304,6 @@ impl_BookView_stop (EDataBookView *book_view, GError **error)
 static gboolean
 impl_BookView_dispose (EDataBookView *book_view, GError **eror)
 {
-  g_message (G_STRFUNC);
-
   g_object_unref (book_view);
   
   return TRUE;

@@ -323,16 +323,20 @@ int main(int argc, char **argv)
 
 	time(&rawtime);
 	timeinfo=localtime(&rawtime);
-	strftime(buf, 10, "%l %k", timeinfo);
+	buf[0] = '\0';
+	strftime(buf, 10, "%lx%k", timeinfo);
 
-	if (strstr(buf, "l") || strstr(buf, "k"))
+	if (buf[0] == '\0' || buf[0] == 'x' || strstr(buf, "l") || strstr(buf, "k"))
 		exit(1);
 	else
 		exit(0);
 }],[
 AC_DEFINE(HAVE_LKSTRFTIME, 1, [strftime supports use of l and k])
 ac_cv_lkstrftime=yes
-],ac_cv_lkstrftime=no,ac_cv_lkstrftime=no])
+],ac_cv_lkstrftime=no,ac_cv_lkstrftime=no,[
+AC_DEFINE(HAVE_LKSTRFTIME, 1, [strftime supports use of l and k])
+ac_cv_lkstrftime=yes
+])
 AC_MSG_RESULT($ac_cv_lkstrftime)
 
 dnl ********************************************************************************
@@ -1166,7 +1170,7 @@ fi
 AC_MSG_RESULT($with_bug_buddy)
 
 if test "x${with_dbus}" = "xno"; then
-dnl        AM_PATH_ORBIT2(2.9.8)
+        dnl TODO HACK ARGH SICK AM_PATH_ORBIT2(2.9.8)
 
         AC_MSG_CHECKING(for CORBA include paths)
         IDL_INCLUDES="-I "`pkg-config --variable=idldir libbonobo-2.0`" -I "`pkg-config --variable=idldir bonobo-activation-2.0`

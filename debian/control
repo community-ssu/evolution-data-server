@@ -5,7 +5,7 @@ Maintainer: Onne Gorter <onne.gorter@nokia.com>
 Build-Depends: flex, debhelper (>= 4.0.0), cdbs, intltool (>= 0.28-2), bison, libgtk2.0-dev, gnome-common, gtk-doc-tools, libgconf2-dev, libxml2-dev, libglade2-dev
 Standards-Version: 3.6.1.0
 
-Package: evolution-data-server
+Package: evolution-data-server-addressbook
 Architecture: any
 Depends: ${shlibs:Depends}
 Description: evolution database backend server
@@ -18,6 +18,15 @@ Architecture: any
 Depends: libedata-book-dev (= ${Source-Version})
 Description: Development files for evolution-data-server (meta package)
  This package contains header files and static library of evolution-data-server.
+
+Package: evolution-data-server-addressbook-dbg
+Architecture: any
+Depends: evolution-data-server-addressbook (= ${Source-Version})
+Description: evolution database backend server (debugging symbols)
+ The data server, called "Evolution Data Server" is responsible for managing
+ calendar and addressbook information.
+ .
+ This package contains the debugging symbols.
 
 Package: libedataserver
 Section: libs

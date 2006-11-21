@@ -141,7 +141,7 @@ e_address_western_is_po_box (gchar *line)
   deemed to be the line in the form of <town, region postal-code>. */
 
 static gboolean
-e_address_western_is_postal (gchar *line)
+e_address_western_is_postal (guchar *line)
 {
 	gboolean retval;
 	int cntr;
@@ -231,15 +231,15 @@ e_address_western_extract_region (gchar *line)
 		start++;
 	
 	end = strlen(line) - 1;
-	while (end >= 0 && isspace (line[end]))
+	while (isspace (line[end]))
 		end--;
 
 	alt_end = end;
 
-	while (end >= 0 && !isspace (line[end]))
+	while (!isspace (line[end]))
 		end--;
 
-	while (end >= 0 && isspace (line[end]))
+	while (isspace (line[end]))
 		end--;
 	end++;
 
@@ -258,13 +258,13 @@ e_address_western_extract_postal_code (gchar *line)
 	int start, end;
 
 	end = strlen (line) - 1;
-	while (end >= 0 && isspace(line[end]))
+	while (isspace(line[end]))
 		end--;
 	
 	start = end;
 	end++;
 
-	while (start >= 0 && !isspace(line[start]))
+	while (!isspace(line[start]))
 		start--;
 	start++;	
 

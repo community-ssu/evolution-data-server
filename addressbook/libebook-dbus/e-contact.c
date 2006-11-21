@@ -255,7 +255,8 @@ static const EContactFieldInfo field_info[] = {
 	/* Security fields */
 	ATTR_TYPE_STRUCT_FIELD (E_CONTACT_X509_CERT,  EVC_KEY, "x509Cert",  N_("X.509 Certificate"), FALSE, "X509", cert_getter, cert_setter, e_contact_cert_get_type),
 
-	MULTI_LIST_FIELD (E_CONTACT_OSSO_CONTACT_STATE,       EVC_X_OSSO_CONTACT_STATE,       "osso-contact-state",       N_("Contact State"),    FALSE),
+	/* For TEL */
+ 	STRING_FIELD (E_CONTACT_PHONE_TELEPHONE,        EVC_TEL,       "tel",         N_("Telephone"),  FALSE),
 };
 
 #undef LIST_ELEM_STR_FIELD
@@ -269,18 +270,25 @@ static GObjectClass *parent_class;
 static void e_contact_set_property (GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void e_contact_get_property (GObject *object, guint prop_id, GValue *value, GParamSpec *pspec);
 
+static gconstpointer get_const_safe (EContact *contact, EContactField field_id);
+static gpointer contact_get_safe (EContact *contact, EContactField field_id);
+
 static void
-e_contact_dispose (GObject *object)
+e_contact_finalize (GObject *object)
 {
 	EContact *ec = E_CONTACT (object);
+	int i;
+
+	for (i = E_CONTACT_FIELD_FIRST; i < E_CONTACT_FIELD_LAST; i++) {
+		g_free (ec->priv->cached_strings[i]);
+	}
 
 	if (ec->priv) {
 		g_free (ec->priv);
 		ec->priv = NULL;
 	}
 
-	if (G_OBJECT_CLASS (parent_class)->dispose)
-		G_OBJECT_CLASS (parent_class)->dispose (object);
+	G_OBJECT_CLASS (parent_class)->finalize (object);
 }
 
 static void
@@ -293,7 +301,7 @@ e_contact_class_init (EContactClass *klass)
 
 	parent_class = g_type_class_ref (E_TYPE_VCARD);
 
-	object_class->dispose = e_contact_dispose;
+	object_class->finalize = e_contact_finalize;
 	object_class->set_property = e_contact_set_property;
 	object_class->get_property = e_contact_get_property;
 
@@ -1334,22 +1342,11 @@ e_contact_field_id_from_vcard (const char *vcard_field)
 	return 0;
 }
 
-/**
- * e_contact_get:
- * @contact: an #EContact
- * @field_id: an #EContactField
- *
- * Gets the value of @contact's field specified by @field_id.
- *
- * Return value: Depends on the field's type, owned by the caller.
- **/
-gpointer
-e_contact_get (EContact *contact, EContactField field_id)
+/* Version of e_contact_get that does not check the validity of the arguments */
+static gpointer
+contact_get_safe (EContact *contact, EContactField field_id)
 {
 	const EContactFieldInfo *info = NULL;
- 
-	g_return_val_if_fail (contact && E_IS_CONTACT (contact), NULL);
-	g_return_val_if_fail (field_id >= 1 && field_id <= E_CONTACT_FIELD_LAST, NULL);
 
 	info = &field_info[field_id];
 
@@ -1456,12 +1453,12 @@ e_contact_get (EContact *contact, EContactField field_id)
 			if (!str)
 				str = e_contact_get_const (contact, E_CONTACT_ORG);
 			if (!str) {
-				gboolean is_list = GPOINTER_TO_INT (e_contact_get (contact, E_CONTACT_IS_LIST));
+				gboolean is_list = GPOINTER_TO_INT (contact_get_safe (contact, E_CONTACT_IS_LIST));
 
 				if (is_list)
 					str = _("Unnamed List");
 				else
-					str = e_contact_get_const (contact, E_CONTACT_EMAIL_1);
+					str = get_const_safe (contact, E_CONTACT_EMAIL_1);
 			}
 
 			return g_strdup (str);
@@ -1519,12 +1516,47 @@ e_contact_get (EContact *contact, EContactField field_id)
 	return NULL;
 }
 
-static void
-free_const_data (gpointer data, GObject *where_object_was)
+/**
+ * e_contact_get:
+ * @contact: an #EContact
+ * @field_id: an #EContactField
+ *
+ * Gets the value of @contact's field specified by @field_id.
+ *
+ * Return value: Depends on the field's type, owned by the caller.
+ **/
+gpointer
+e_contact_get (EContact *contact, EContactField field_id)
 {
-	g_free (data);
+	const EContactFieldInfo *info = NULL;
+ 
+	g_return_val_if_fail (contact && E_IS_CONTACT (contact), NULL);
+	g_return_val_if_fail (field_id >= 1 && field_id <= E_CONTACT_FIELD_LAST, NULL);
+
+	return contact_get_safe (contact, field_id);
 }
 
+static gconstpointer
+get_const_safe (EContact *contact, EContactField field_id)
+{
+	gboolean is_string = FALSE;
+	gpointer value = NULL;
+
+	if (field_info [field_id].t & E_CONTACT_FIELD_TYPE_STRING)
+		is_string = TRUE;
+
+	if (is_string)
+		value = contact->priv->cached_strings[field_id];
+
+	if (!value) {
+		value = contact_get_safe (contact, field_id);
+		if (is_string && value)
+			contact->priv->cached_strings[field_id] = value;
+	}
+
+	return value;
+}
+	
 /**
  * e_contact_get_const:
  * @contact: an #EContact
@@ -1538,28 +1570,10 @@ free_const_data (gpointer data, GObject *where_object_was)
 gconstpointer
 e_contact_get_const (EContact *contact, EContactField field_id)
 {
-	gboolean is_string = FALSE;
-	gpointer value = NULL;
-
 	g_return_val_if_fail (E_IS_CONTACT (contact), NULL);
 	g_return_val_if_fail (field_id >= 1 && field_id <= E_CONTACT_LAST_SIMPLE_STRING, NULL);
 
-	if (field_info [field_id].t & E_CONTACT_FIELD_TYPE_STRING)
-		is_string = TRUE;
-
-	if (is_string)
-		value = contact->priv->cached_strings[field_id];
-
-	if (!value) {
-		value = e_contact_get (contact, field_id);
-		if (is_string && value)
-			contact->priv->cached_strings[field_id] = value;
-
-		if (value)
-			g_object_weak_ref (G_OBJECT (contact), free_const_data, value);
-	}
-
-	return value;
+	return get_const_safe (contact, field_id);
 }
 
 /**

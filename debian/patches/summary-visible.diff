@@ -1,0 +1,191 @@
+Index: addressbook/libedata-book-dbus/e-book-backend-summary.c
+===================================================================
+--- addressbook/libedata-book-dbus/e-book-backend-summary.c	(revision 7990)
++++ addressbook/libedata-book-dbus/e-book-backend-summary.c	(working copy)
+@@ -68,6 +68,7 @@
+ 	char *email_2;
+ 	char *email_3;
+ 	char *email_4;
++	char *state;
+ 	gboolean wants_html;
+ 	gboolean wants_html_set;
+ 	gboolean list;
+@@ -87,6 +88,7 @@
+ 	guint16 email_2_len;
+ 	guint16 email_3_len;
+ 	guint16 email_4_len;
++	guint16 state_len;
+ 	guint8  wants_html;
+ 	guint8  wants_html_set;
+ 	guint8  list;
+@@ -107,8 +109,9 @@
+ #define PAS_SUMMARY_FILE_VERSION_3_0 3000
+ #define PAS_SUMMARY_FILE_VERSION_4_0 4000
+ #define PAS_SUMMARY_FILE_VERSION_5_0 5000
++#define PAS_SUMMARY_FILE_VERSION_6_0 6000
+ 
+-#define PAS_SUMMARY_FILE_VERSION PAS_SUMMARY_FILE_VERSION_5_0
++#define PAS_SUMMARY_FILE_VERSION PAS_SUMMARY_FILE_VERSION_6_0
+ 
+ static void
+ free_summary_item (EBookBackendSummaryItem *item)
+@@ -123,6 +126,7 @@
+ 	g_free (item->email_2);
+ 	g_free (item->email_3);
+ 	g_free (item->email_4);
++	g_free (item->state);
+ 	g_free (item);
+ }
+ 
+@@ -157,7 +161,7 @@
+ 
+ 	summary->priv->summary_path = g_strdup (summary_path);
+ 	summary->priv->flush_timeout_millis = flush_timeout_millis;
+-	summary->priv->file_version = PAS_SUMMARY_FILE_VERSION_4_0;
++	summary->priv->file_version = PAS_SUMMARY_FILE_VERSION;
+ 
+ 	return summary;
+ }
+@@ -328,7 +332,7 @@
+ 	char *buf;
+ 	FILE *fp = summary->priv->fp;
+ 
+-	if (summary->priv->file_version >= PAS_SUMMARY_FILE_VERSION_4_0) {
++	if (summary->priv->file_version >= PAS_SUMMARY_FILE_VERSION_6_0) {
+ 		EBookBackendSummaryDiskItem disk_item;
+ 		int rv = fread (&disk_item, sizeof (disk_item), 1, fp);
+ 		if (rv != 1)
+@@ -344,6 +348,7 @@
+ 		disk_item.email_2_len = g_ntohs (disk_item.email_2_len);
+ 		disk_item.email_3_len = g_ntohs (disk_item.email_3_len);
+ 		disk_item.email_4_len = g_ntohs (disk_item.email_4_len);
++		disk_item.state_len = g_ntohs (disk_item.state_len);
+ 
+ 		item = g_new0 (EBookBackendSummaryItem, 1);
+ 
+@@ -442,6 +447,15 @@
+ 			item->email_4 = buf;
+ 		}
+ 
++		if (disk_item.state_len) {
++			buf = read_string (fp, disk_item.state_len);
++			if (!buf) {
++				free_summary_item (item);
++				return FALSE;
++			}
++			item->state = buf;
++		}
++
+ 		/* the only field that has to be there is the id */
+ 		if (!item->id) {
+ 			free_summary_item (item);
+@@ -627,6 +641,9 @@
+ 	len = item->email_4 ? strlen (item->email_4) : 0;
+ 	disk_item.email_4_len = g_htons (len);
+ 
++	len = item->state ? strlen (item->state) : 0;
++	disk_item.state_len = g_htons (len);
++
+ 	disk_item.wants_html = item->wants_html;
+ 	disk_item.wants_html_set = item->wants_html_set;
+ 	disk_item.list = item->list;
+@@ -656,6 +673,8 @@
+ 		return FALSE;
+ 	if (!save_string (item->email_4, fp))
+ 		return FALSE;
++	if (!save_string (item->state, fp))
++		return FALSE;
+ 
+ 	return TRUE;
+ }
+@@ -775,6 +794,8 @@
+ 	new_item->email_2    = e_contact_get (contact, E_CONTACT_EMAIL_2);
+ 	new_item->email_3    = e_contact_get (contact, E_CONTACT_EMAIL_3);
+ 	new_item->email_4    = e_contact_get (contact, E_CONTACT_EMAIL_4);
++	new_item->state      = e_contact_get (contact, E_CONTACT_OSSO_CONTACT_STATE);
++	
+ 	new_item->list       = GPOINTER_TO_INT (e_contact_get (contact, E_CONTACT_IS_LIST));
+ 	new_item->list_show_addresses = GPOINTER_TO_INT (e_contact_get (contact, E_CONTACT_LIST_SHOW_ADDRESSES));
+ 	new_item->wants_html = GPOINTER_TO_INT (e_contact_get (contact, E_CONTACT_WANTS_HTML));
+@@ -794,6 +815,7 @@
+ 	summary->priv->size += new_item->email_2 ? strlen (new_item->email_2) : 0;
+ 	summary->priv->size += new_item->email_3 ? strlen (new_item->email_3) : 0;
+ 	summary->priv->size += new_item->email_4 ? strlen (new_item->email_4) : 0;
++	summary->priv->size += new_item->state ? strlen (new_item->state) : 0;
+ #endif
+ 	e_book_backend_summary_touch (summary);
+ }
+@@ -932,6 +954,17 @@
+ 	return r;
+ }
+ 
++static ESExpResult *
++func_check_visible(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
++{
++	ESExpResult *r;
++
++	r = e_sexp_result_new(f, ESEXP_RES_BOOL);
++	r->value.bool = TRUE;
++	
++	return r;
++}
++
+ /* 'builtin' functions */
+ static const struct {
+ 	char *name;
+@@ -945,6 +978,7 @@
+ 	{ "endswith", func_check, 0 },
+ 	{ "exists", func_check, 0 },
+ 	{ "exists_vcard", func_fail, 0 },
++	{ "visible", func_check_visible, 0 },
+ };
+ 
+ /**
+@@ -1117,6 +1151,31 @@
+ 	return do_compare (summary, f, argc, argv, beginswith_helper);
+ }
+ 
++static ESExpResult *
++func_visible(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
++{
++	EBookBackendSummary *summary = data;
++	GPtrArray *result = g_ptr_array_new ();
++	ESExpResult *r;
++	int i;
++
++	for (i = 0; i < summary->priv->items->len; i ++) {
++		EBookBackendSummaryItem *item = g_ptr_array_index (summary->priv->items, i);
++		if (item->state) {
++			if (strstr (item->state, "DELETED") == NULL) {
++				g_ptr_array_add (result, item->id);
++			}
++		} else {
++			g_ptr_array_add (result, item->id);
++		}
++	}
++
++	r = e_sexp_result_new(f, ESEXP_RES_ARRAY_PTR);
++	r->value.ptrarray = result;
++
++	return r;
++}
++
+ /* 'builtin' functions */
+ static const struct {
+ 	char *name;
+@@ -1128,6 +1187,7 @@
+ 	{ "is", func_is, 0 },
+ 	{ "beginswith", func_beginswith, 0 },
+ 	{ "endswith", func_endswith, 0 },
++	{ "visible", func_visible, 0 },
+ };
+ 
+ /**
+@@ -1213,6 +1273,7 @@
+ 		e_contact_set (contact, E_CONTACT_EMAIL_2, item->email_2);
+ 		e_contact_set (contact, E_CONTACT_EMAIL_3, item->email_3);
+ 		e_contact_set (contact, E_CONTACT_EMAIL_4, item->email_4);
++		e_contact_set (contact, E_CONTACT_OSSO_CONTACT_STATE, item->state);
+ 
+ 		e_contact_set (contact, E_CONTACT_IS_LIST, GINT_TO_POINTER (item->list));
+ 		e_contact_set (contact, E_CONTACT_LIST_SHOW_ADDRESSES, GINT_TO_POINTER (item->list_show_addresses));

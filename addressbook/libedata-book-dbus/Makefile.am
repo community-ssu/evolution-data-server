@@ -8,9 +8,6 @@ INCLUDES =						\
 	$(EVOLUTION_ADDRESSBOOK_CFLAGS)			\
 	-DDBUS_API_SUBJECT_TO_CHANGE
 
-MARSHAL_GENERATED = e-data-book-marshal.c e-data-book-marshal.h
-@EVO_MARSHAL_RULE@
-
 # The library
 lib_LTLIBRARIES = libedata-book-1.2.la
 
@@ -24,7 +21,6 @@ glib_enum_prefix=e_data_book
 ENUM_GENERATED = e-data-book-enumtypes.h e-data-book-enumtypes.c
 
 libedata_book_1_2_la_SOURCES =				\
-	$(MARSHAL_GENERATED)				\
 	$(DBUS_GENERATED_H)				\
 	e-book-backend-factory.c			\
 	e-book-backend-sexp.c				\
@@ -71,12 +67,11 @@ servicedir = $(datadir)/dbus-1/services
 service_DATA = $(service_in_files:.service.in=.service)
 @EVO_SUBST_SERVICE_RULE@
 
-BUILT_SOURCES = $(DBUS_GENERATED_H) $(MARSHAL_GENERATED)
+BUILT_SOURCES = $(DBUS_GENERATED_H)
 CLEANFILES = $(BUILT_SOURCES) $(service_DATA)
 DISTCLEANFILES = $(pkgconfig_DATA)
 
 EXTRA_DIST = 						\
-	e-data-book-marshal.list			\
 	$(pkgconfig_DATA:-$(API_VERSION).pc=.pc.in)     \
 	$(service_in_files)
 
@@ -87,7 +82,7 @@ dist-hook:
 	dbus-binding-tool --mode=glib-server --output=$@ --prefix=$(subst -,_,$*) $^
 
 %-bindings.h: %.xml
-	dbus-binding-tool --mode=glib-client --output=$@ $^
+	dbus-binding-tool --mode=glib-client --output=$@ --prefix=$(subst -,_,$*) $^
 
 
 DBUS_BINDINGS = e-data-book-factory-bindings.h e-data-book-bindings.h e-data-book-view-bindings.h

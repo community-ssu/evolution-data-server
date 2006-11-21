@@ -1,0 +1,149 @@
+Index: addressbook/libebook-dbus/e-book-query.c
+===================================================================
+--- addressbook/libebook-dbus/e-book-query.c	(revision 460)
++++ addressbook/libebook-dbus/e-book-query.c	(working copy)
+@@ -14,7 +14,8 @@
+ 	E_BOOK_QUERY_TYPE_NOT,
+ 	E_BOOK_QUERY_TYPE_FIELD_EXISTS,
+ 	E_BOOK_QUERY_TYPE_FIELD_TEST,
+-	E_BOOK_QUERY_TYPE_ANY_FIELD_CONTAINS
++	E_BOOK_QUERY_TYPE_ANY_FIELD_CONTAINS,
++	E_BOOK_QUERY_TYPE_VISIBLE,
+ } EBookQueryType;
+ 
+ struct EBookQuery {
+@@ -261,6 +262,26 @@
+ }
+ 
+ /**
++ * e_book_query_vcard_visible:
++ *
++ * Creates a new #EBookQuery which tests if the contact would be visible in
++ * normal use.  This basically means that the contact isn't marked as deleted
++ * (Maemo-specific).
++ *
++ * Return value: the new #EBookQuery
++ **/
++EBookQuery*
++e_book_query_visible (void)
++{
++	EBookQuery *ret = g_new0 (EBookQuery, 1);
++
++	ret->type = E_BOOK_QUERY_TYPE_VISIBLE;
++
++	return ret;
++}
++
++
++/**
+  * e_book_query_unref:
+  * @q: an #EBookQuery
+  *
+@@ -529,6 +550,22 @@
+ 	return r;
+ }
+ 
++static ESExpResult *
++func_visible(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
++{
++	GList **list = data;
++	ESExpResult *r;
++
++	if (argc == 0) {
++		*list = g_list_prepend (*list, e_book_query_visible ());
++	}
++
++	r = e_sexp_result_new(f, ESEXP_RES_BOOL);
++	r->value.bool = FALSE;
++
++	return r;
++}
++
+ /* 'builtin' functions */
+ static const struct {
+ 	char *name;
+@@ -544,6 +581,7 @@
+ 	{ "beginswith", func_beginswith, 0 },
+ 	{ "endswith", func_endswith, 0 },
+ 	{ "exists", func_exists, 0 },
++	{ "visible", func_visible, 0 },
+ };
+ 
+ /**
+@@ -672,6 +710,9 @@
+ 		g_string_append_printf (str, "contains \"x-evolution-any-field\"");
+ 		e_sexp_encode_string (str, q->query.any_field_contains.value);
+ 		break;
++	case E_BOOK_QUERY_TYPE_VISIBLE:
++		g_string_append (str, "visible");
++		break;
+ 	}
+ 	 
+ 
+Index: addressbook/libebook-dbus/e-book-query.h
+===================================================================
+--- addressbook/libebook-dbus/e-book-query.h	(revision 460)
++++ addressbook/libebook-dbus/e-book-query.h	(working copy)
+@@ -49,6 +49,8 @@
+ /* a special any field contains query */
+ EBookQuery* e_book_query_any_field_contains (const char  *value);
+ 
++EBookQuery* e_book_query_visible (void);
++
+ GType       e_book_query_get_type (void);
+ EBookQuery* e_book_query_copy     (EBookQuery *q);
+ 
+Index: addressbook/libedata-book-dbus/e-book-backend-sexp.c
+===================================================================
+--- addressbook/libedata-book-dbus/e-book-backend-sexp.c	(revision 460)
++++ addressbook/libedata-book-dbus/e-book-backend-sexp.c	(working copy)
+@@ -474,6 +474,41 @@
+ 	return r;
+ }
+ 
++static ESExpResult *
++func_visible(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
++{
++	SearchContext *ctx = data;
++	ESExpResult *r;
++	/* The contact is visible unless we know otherwise */
++	int truth = TRUE;
++
++	if (argc == 0) {
++		EVCard *vcard;
++		EVCardAttribute *attr;
++		GList *values, *l;
++
++		vcard = E_VCARD (ctx->contact);
++		attr = e_vcard_get_attribute (vcard, EVC_X_OSSO_CONTACT_STATE);
++
++		if (attr) {
++			values = e_vcard_attribute_get_values (attr);
++			for (l = values; l; l = l->next) {
++				if (strcmp (l->data, "DELETED") == 0) {
++					truth = FALSE;
++					break;
++				}
++				/* We don't hide blocked contacts at the moment
++				   so that applications have less work to do */
++			}
++		}
++	}
++	
++	r = e_sexp_result_new(f, ESEXP_RES_BOOL);
++	r->value.bool = truth;
++
++	return r;
++}
++
+ /* 'builtin' functions */
+ static struct {
+ 	char *name;
+@@ -487,6 +522,7 @@
+ 	{ "endswith", func_endswith, 0 },
+ 	{ "exists", func_exists, 0 },
+ 	{ "exists_vcard", func_exists_vcard, 0 },
++	{ "visible", func_visible, 0 },
+ };
+ 
+ /**

@@ -1,3 +1,86 @@
+evolution-data-server (1.4.2.1-20061113) unstable; urgency=low
+
+  * Update packaging to put the addressbook daemon into the
+    evolution-data-server-addressbook package.
+  * Merge upstream changes to ease future syncing.
+
+ -- Ross Burton <ross@openedhand.com>  Mon, 13 Nov 2006 17:35:26 +0000
+
+evolution-data-server (1.4.2.1-20061101) unstable; urgency=low
+
+  * Add back locks in book views, and sanity check arguments when creating
+    and starting views.
+
+ -- Ross Burton <ross@openedhand.com>  Wed,  1 Nov 2006 12:28:25 +0000
+
+evolution-data-server (1.4.2.1-20061025) unstable; urgency=low
+
+  * Remove debian/patches/backtrace.diff, it doesn't work well and breaks
+    core dump debugging (Fixes: NB#45025).
+
+ -- Ross Burton <ross@openedhand.com>  Wed, 25 Oct 2006 10:59:32 +0100
+
+evolution-data-server (1.4.2.1-20061023) unstable; urgency=low
+
+  * Silence the bdb backend and EBookView
+
+ -- Ross Burton <ross@openedhand.com>  Mon, 23 Oct 2006 16:09:22 +0100
+
+evolution-data-server (1.4.2.1-20061019.1) unstable; urgency=low
+
+  * Fix crash when destroying a book that didn't load (Fixes: NB#42239)
+  * Optimise EContact
+
+ -- Ross Burton <ross@openedhand.com>  Thu, 19 Oct 2006 18:25:28 +0100
+
+evolution-data-server (1.4.2.1-20061019) unstable; urgency=low
+
+  * Suppress the exists_vcard warning
+  * Optimise e-vcard and e-contact
+
+ -- Ross Burton <ross@openedhand.com>  Fri, 13 Oct 2006 10:52:12 +0100
+
+evolution-data-server (1.4.2.1-20061012.1) unstable; urgency=low
+
+  * dependency fixed for -dbg packages
+
+ -- Dmitry Rozhkov <ext-dmitry.rozhkov@nokia.com>  Fri, 13 Oct 2006 13:30:23 +0300
+
+evolution-data-server (1.4.2.1-20061012) unstable; urgency=low
+
+  * Fix error handling on entry points in e-book.
+  * Add evolution-data-server-dbg
+  * Handle null closures (Fixes: NB#42604)
+
+ -- Ross Burton <ross@openedhand.com>  Thu, 12 Oct 2006 18:34:23 +0100
+
+evolution-data-server (1.4.2.1-20060926) unstable; urgency=low
+
+  * Cache contact state in the summary files and fast-path (visible)
+    queries.
+
+ -- Ross Burton <ross@openedhand.com>  Tue, 26 Sep 2006 13:02:48 +0100
+
+evolution-data-server (1.4.2.1-20060922) unstable; urgency=low
+
+  * Fix TEL field in EContact (Fixes: NB#30397)
+
+ -- Ross Burton <ross@openedhand.com>  Fri, 22 Sep 2006 18:08:03 +0100
+
+evolution-data-server (1.4.2.1-20060921) unstable; urgency=low
+
+  * Add Maemo-specific e_book_query_visible().
+  * Add e_vcard_attribute_remove_param().
+
+ -- Ross Burton <ross@openedhand.com>  Fri, 22 Sep 2006 10:05:58 +0100
+
+evolution-data-server (1.4.2.1-20060919) unstable; urgency=low
+
+  * Fix e_book_async_get_contact() when an error is returned
+  * More syncs with upstream
+
+ -- Ross Burton <ross@opendhand.com>  Tue, 19 Sep 2006 10:55:37 +0100
+
 evolution-data-server (1.4.2.1-20060807) unstable; urgency=low
 
   * Minor merges with upstream

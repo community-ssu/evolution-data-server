@@ -52,8 +52,6 @@ e_book_view_dispose (GObject *object)
 {
   EBookView *view = E_BOOK_VIEW (object);
 
-  g_warning ("e_book_view_dispose");
-
   if (view->priv->view_proxy) {
     org_gnome_evolution_dataserver_addressbook_BookView_dispose (view->priv->view_proxy, NULL);
     g_object_unref (view->priv->view_proxy);

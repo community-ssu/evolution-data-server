@@ -12,7 +12,7 @@
 #include <time.h>
 #include <glib-object.h>
 #include <stdio.h>
-#include "e-vcard.h"
+#include <libebook/e-vcard.h>
 
 G_BEGIN_DECLS
 
@@ -186,7 +186,7 @@ typedef enum {
 	/* Security Fields */
 	E_CONTACT_X509_CERT,     /* structured field (EContactCert) */
 
-	E_CONTACT_OSSO_CONTACT_STATE, /* list of strings */
+	E_CONTACT_PHONE_TELEPHONE,
 
 	E_CONTACT_FIELD_LAST,
 	E_CONTACT_FIELD_FIRST        = E_CONTACT_UID,
@@ -279,7 +279,7 @@ EContact*               e_contact_duplicate        (EContact *contact);
 
 gpointer                e_contact_get              (EContact *contact, EContactField field_id);
 gconstpointer		e_contact_get_const        (EContact *contact, EContactField field_id);
-void                    e_contact_set              (EContact *contact, EContactField field_id, gpointer value);
+void                    e_contact_set              (EContact *contact, EContactField field_id, const gpointer value);
 
 /* the following two calls return and take a GList of
    EVCardAttribute*'s. */
@@ -299,7 +299,7 @@ GType                   e_contact_name_get_type    (void);
 EContactName           *e_contact_name_new         (void);
 char                   *e_contact_name_to_string   (const EContactName *name);
 EContactName           *e_contact_name_from_string (const char *name_str);
-EContactName           *e_contact_name_copy        (EContactName *name);
+EContactName           *e_contact_name_copy        (EContactName *n);
 void                    e_contact_name_free        (EContactName *name);
 
 

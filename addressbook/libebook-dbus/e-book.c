@@ -86,6 +86,9 @@ e_book_error_quark (void)
   return q;
 }
 
+/*
+ * Called when the addressbook server dies.
+ */
 static void
 proxy_destroyed (gpointer data, GObject *object)
 {
@@ -410,7 +413,7 @@ e_book_new_system_addressbook (GError **error)
 	ESourceList *sources;
 	GSList *g;
 	ESource *system_source = NULL;
-	EBook *book;
+	EBook *book = NULL;
 
 	if (!e_book_get_addressbooks (&sources, error)) {
 		return FALSE;
@@ -520,8 +523,8 @@ e_book_open (EBook *book, gboolean only_if_exists, GError **error)
   GError *err = NULL;
   EBookStatus status;
 
-  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   
   if (!org_gnome_evolution_dataserver_addressbook_Book_open (book->priv->proxy, only_if_exists, &err)) {
     g_propagate_error (error, err);
@@ -560,8 +563,8 @@ e_book_async_open (EBook *book, gboolean only_if_exists, EBookCallback cb, gpoin
 {
   struct async_data *data;
 
-  e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
   data = g_new (struct async_data, 1);
   data->book = book;
@@ -577,8 +580,8 @@ e_book_remove (EBook *book, GError **error)
 {
   GError *err = NULL;
 
-  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   
   org_gnome_evolution_dataserver_addressbook_Book_remove (book->priv->proxy, &err);
   return unwrap_gerror (err, error);
@@ -599,8 +602,8 @@ e_book_async_remove (EBook *book, EBookCallback cb, gpointer closure)
 {
   struct async_data *data;
 
-  e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
   data = g_new (struct async_data, 1);
   data->book = book;
@@ -617,8 +620,8 @@ e_book_get_required_fields (EBook *book, GList **fields, GError **error)
   GError *err = NULL;
   char **list = NULL;
 
-  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
   org_gnome_evolution_dataserver_addressbook_Book_get_required_fields (book->priv->proxy, &list, &err);
   if (list) {
@@ -655,8 +658,8 @@ e_book_async_get_required_fields (EBook *book, EBookEListCallback cb, gpointer c
 {
   struct async_data *data;
 
-  e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_val_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
   data = g_new (struct async_data, 1);
   data->book = book;
@@ -673,8 +676,8 @@ e_book_get_supported_fields (EBook *book, GList **fields, GError **error)
   GError *err = NULL;
   char **list = NULL;
 
-  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
   org_gnome_evolution_dataserver_addressbook_Book_get_supported_fields (book->priv->proxy, &list, &err);
   if (list) {
@@ -709,8 +712,8 @@ e_book_async_get_supported_fields (EBook *book, EBookEListCallback cb, gpointer 
 {
   struct async_data *data;
 
-  e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_val_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
   data = g_new (struct async_data, 1);
   data->book = book;
@@ -727,8 +730,8 @@ e_book_get_supported_auth_methods (EBook *book, GList **auth_methods, GError **e
   GError *err = NULL;
   char **list = NULL;
 
-  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
   org_gnome_evolution_dataserver_addressbook_Book_get_supported_auth_methods (book->priv->proxy, &list, &err);
   if (list) {
@@ -765,8 +768,8 @@ e_book_async_get_supported_auth_methods (EBook *book, EBookEListCallback cb, gpo
 {
   struct async_data *data;
 
-  e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_val_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
   data = g_new (struct async_data, 1);
   data->book = book;
@@ -782,8 +785,8 @@ e_book_authenticate_user (EBook *book, const char *user, const char *passwd, con
 {
   GError *err = NULL;
 
-  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
   org_gnome_evolution_dataserver_addressbook_Book_authenticate_user (book->priv->proxy, user, passwd, auth_method, &err);
   return unwrap_gerror (err, error);
@@ -804,8 +807,8 @@ e_book_async_authenticate_user (EBook *book, const char *user, const char *passw
 {
   struct async_data *data;
 
-  e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_if_fail (user, E_BOOK_ERROR_INVALID_ARG);
   e_return_async_error_if_fail (passwd, E_BOOK_ERROR_INVALID_ARG);
   e_return_async_error_if_fail (auth_method, E_BOOK_ERROR_INVALID_ARG);
@@ -825,8 +828,8 @@ e_book_get_contact (EBook *book, const char  *id, EContact **contact, GError **e
   GError *err = NULL;
   char *vcard = NULL;
 
-  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   
   org_gnome_evolution_dataserver_addressbook_Book_get_contact (book->priv->proxy, id, &vcard, &err);
   if (vcard) {
@@ -841,8 +844,22 @@ get_contact_reply(DBusGProxy *proxy, char *vcard, GError *error, gpointer user_d
 {
   struct async_data *data = user_data;
   EBookContactCallback cb = data->callback;
-  if (cb)
-    cb (data->book, get_status_from_error (error), e_contact_new_from_vcard (vcard), data->closure);
+  EBookStatus status = get_status_from_error (error);
+
+  /* Protect against garbage return values on error */
+  if (error)
+	  vcard = NULL;
+
+  if (cb && error == NULL) {
+	  cb (data->book, status, e_contact_new_from_vcard (vcard), data->closure);
+  } else if (cb && error) {
+	  cb (data->book, status, NULL, data->closure);
+  } else if (cb == NULL && error) {
+	  g_warning ("Cannot get contact: %s", error->message);
+  }
+
+  if (error)
+	  g_error_free (error);
   g_free (vcard);
   g_free (data);
 }
@@ -852,8 +869,8 @@ e_book_async_get_contact (EBook *book, const char *id, EBookContactCallback cb, 
 {
   struct async_data *data;
 
-  e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_val_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_val_if_fail (id, E_BOOK_ERROR_INVALID_ARG);
 
   data = g_new (struct async_data, 1);
@@ -872,8 +889,8 @@ e_book_get_contacts (EBook *book, EBookQuery *query, GList **contacts, GError **
   char **list = NULL;
   char *sexp;
 
-  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
   sexp = e_book_query_to_string (query);
   org_gnome_evolution_dataserver_addressbook_Book_get_contact_list (book->priv->proxy, sexp, &list, &err);
@@ -917,8 +934,8 @@ e_book_async_get_contacts (EBook *book, EBookQuery *query, EBookListCallback cb,
   struct async_data *data;
   char *sexp;
 
-  e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_val_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_val_if_fail (query, E_BOOK_ERROR_INVALID_ARG);
 
   sexp = e_book_query_to_string (query);
@@ -956,8 +973,8 @@ e_book_get_changes (EBook *book, char *changeid, GList **changes, GError **error
   GError *err = NULL;
   char **list = NULL;
 
-  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
   org_gnome_evolution_dataserver_addressbook_Book_get_changes (book->priv->proxy, changeid, &list, &err);
   if (!err) {
@@ -984,8 +1001,8 @@ e_book_async_get_changes (EBook *book, char *changeid, EBookListCallback cb, gpo
 {
   struct async_data *data;
 
-  e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_val_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
   data = g_new (struct async_data, 1);
   data->book = book;
@@ -1016,8 +1033,8 @@ e_book_add_contact (EBook *book, EContact *contact, GError **error)
   GError *err = NULL;
   char *vcard, *uid = NULL;
 
-  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_error_if_fail (E_IS_CONTACT (contact), E_BOOK_ERROR_INVALID_ARG);
 
   vcard = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
@@ -1056,8 +1073,8 @@ e_book_async_add_contact (EBook *book, EContact *contact, EBookIdCallback cb, gp
   char *vcard;
   struct async_data *data;
 
-  e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_val_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_val_if_fail (E_IS_CONTACT (contact), E_BOOK_ERROR_INVALID_ARG);
 
   vcard = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
@@ -1078,8 +1095,8 @@ e_book_commit_contact (EBook *book, EContact *contact, GError **error)
   GError *err = NULL;
   char *vcard;
 
-  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_error_if_fail (E_IS_CONTACT (contact), E_BOOK_ERROR_INVALID_ARG);
 
   vcard = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
@@ -1104,8 +1121,8 @@ e_book_async_commit_contact (EBook *book, EContact *contact, EBookCallback cb, g
   char *vcard;
   struct async_data *data;
 
-  e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_if_fail (E_IS_CONTACT (contact), E_BOOK_ERROR_INVALID_ARG);
 
   vcard = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
@@ -1126,8 +1143,8 @@ e_book_remove_contact (EBook *book, const char *id, GError **error)
   GError *err = NULL;
   const char *l[2];
 
-  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_error_if_fail (id, E_BOOK_ERROR_INVALID_ARG);
 
   l[0] = id;
@@ -1153,8 +1170,8 @@ e_book_async_remove_contact (EBook *book, EContact *contact, EBookCallback cb, g
   struct async_data *data;
   const char *l[2];
 
-  e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_if_fail (E_IS_CONTACT (contact), E_BOOK_ERROR_INVALID_ARG);
 
   l[0] = e_contact_get_const (contact, E_CONTACT_UID);
@@ -1185,8 +1202,8 @@ e_book_async_remove_contact_by_id (EBook *book, const char *id, EBookCallback cb
   struct async_data *data;
   const char *l[2];
 
-  e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_if_fail (id, E_BOOK_ERROR_INVALID_ARG);
 
   l[0] = id;
@@ -1207,8 +1224,8 @@ e_book_remove_contacts (EBook *book, GList *ids, GError **error)
   GError *err = NULL;
   char **l;
 
-  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_error_if_fail (ids, E_BOOK_ERROR_INVALID_ARG);
 
   l = flatten_stringlist (ids);
@@ -1234,8 +1251,8 @@ e_book_async_remove_contacts (EBook *book, GList *id_list, EBookCallback cb, gpo
   struct async_data *data;
   char **l;
 
-  e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
   if (id_list == NULL) {
     if (cb)
@@ -1263,8 +1280,8 @@ e_book_get_book_view (EBook *book, EBookQuery *query, GList *requested_fields, i
   char **fields;
   char *sexp, *view_path;
 
-  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
   fields = flatten_stringlist (requested_fields);
 
@@ -1315,8 +1332,8 @@ e_book_async_get_book_view (EBook *book, EBookQuery *query, GList *requested_fie
   char *sexp;
   char **fields;
 
-  e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_val_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_val_if_fail (query, E_BOOK_ERROR_INVALID_ARG);
 
   data = g_new (struct async_data, 1);
@@ -1436,8 +1453,8 @@ e_book_get_uri (EBook *book)
 const char *
 e_book_get_static_capabilities (EBook *book, GError **error)
 {
-  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   
   if (!book->priv->cap_queried) {
     char *cap = NULL;

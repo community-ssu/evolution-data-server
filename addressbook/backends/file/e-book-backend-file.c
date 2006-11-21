@@ -53,7 +53,7 @@
 
 #include "e-book-backend-file.h"
 
-#define d(x) x
+#define d(x)
 
 #define CHANGES_DB_SUFFIX ".changes.db"
 
@@ -133,7 +133,7 @@ build_summary (EBookBackendFilePrivate *bfpriv)
 	db_error = db->cursor (db, NULL, &dbc, 0);
 
 	if (db_error != 0) {
-		g_warning (G_STRLOC ": db->cursor failed with %d", db_error);
+		g_warning (G_STRLOC ": db->cursor failed with %s", db_strerror (db_error));
 		return;
 	}
 
@@ -188,7 +188,6 @@ do_create(EBookBackendFile  *bf,
 	  const char      *vcard_req,
 	  EContact **contact)
 {
-	EDataBookStatus status = Success;
 	DB             *db = bf->priv->file_db;
 	DBT            id_dbt, vcard_dbt;
 	int            db_error;
@@ -221,19 +220,16 @@ do_create(EBookBackendFile  *bf,
 	if (0 == db_error) {
 		db_error = db->sync (db, 0);
 		if (db_error != 0) {
-			g_warning ("db->sync failed with %d", db_error);
-			status = db_error_to_status (db_error);
+			g_warning ("db->sync failed with %s", db_strerror (db_error));
 		}
-	}
-	else {
-		g_warning (G_STRLOC ": db->put failed with %d", db_error);
+	} else {
+		g_warning (G_STRLOC ": db->put failed with %s", db_strerror (db_error));
 		g_object_unref (*contact);
 		*contact = NULL;
-		status = db_error_to_status (db_error);
 	}
 
 	g_free (id);
-	return status;
+	return db_error_to_status (db_error);
 }
 
 static EBookBackendSyncStatus
@@ -276,7 +272,7 @@ e_book_backend_file_remove_contacts (EBookBackendSync *backend,
 
 		db_error = db->del (db, NULL, &id_dbt, 0);
 		if (0 != db_error) {
-			g_warning (G_STRLOC ": db->del failed with %d", db_error);
+			g_warning (G_STRLOC ": db->del failed with %s", db_strerror (db_error));
 			rv = db_error_to_status (db_error);
 			continue;
 		}
@@ -288,7 +284,7 @@ e_book_backend_file_remove_contacts (EBookBackendSync *backend,
 	if (removed_cards) {
 		db_error = db->sync (db, 0);
 		if (db_error != 0)
-			g_warning (G_STRLOC ": db->sync failed with %d", db_error);
+			g_warning (G_STRLOC ": db->sync failed with %s", db_strerror (db_error));
 	}
 
 	*ids = removed_cards;
@@ -339,7 +335,7 @@ e_book_backend_file_modify_contact (EBookBackendSync *backend,
 	/* get the old ecard - the one that's presently in the db */
 	db_error = db->get (db, NULL, &id_dbt, &vcard_dbt, 0);
 	if (0 != db_error) {
-		g_warning (G_STRLOC ": db->get failed with %d", db_error);
+		g_warning (G_STRLOC ": db->get failed with %s", db_strerror (db_error));
 		return GNOME_Evolution_Addressbook_ContactNotFound;
 	}
 	g_free (vcard_dbt.data);
@@ -355,12 +351,15 @@ e_book_backend_file_modify_contact (EBookBackendSync *backend,
 	if (0 == db_error) {
 		db_error = db->sync (db, 0);
 		if (db_error != 0) {
-			g_warning (G_STRLOC ": db->sync failed with %d", db_error);
+			g_warning (G_STRLOC ": db->sync failed with %s", db_strerror (db_error));
 		} else {
 			e_book_backend_summary_remove_contact (bf->priv->summary, id);
 			e_book_backend_summary_add_contact (bf->priv->summary, *contact);
 		}
+	} else {
+		g_warning (G_STRLOC ": db->put failed with %s", db_strerror(db_error));
 	}
+
 	g_free (id);
 	g_free (vcard_with_rev);
 
@@ -395,7 +394,7 @@ e_book_backend_file_get_contact (EBookBackendSync *backend,
 		*vcard = vcard_dbt.data;
 		return GNOME_Evolution_Addressbook_Success;
 	} else {
-		g_warning (G_STRLOC ": db->get failed with %d", db_error);
+		g_warning (G_STRLOC ": db->get failed with %s", db_strerror (db_error));
 		*vcard = g_strdup ("");
 		return GNOME_Evolution_Addressbook_ContactNotFound;
 	}
@@ -437,7 +436,7 @@ e_book_backend_file_get_contact_list (EBookBackendSync *backend,
 			if (db_error == 0) {
 				contact_list = g_list_prepend (contact_list, vcard_dbt.data);
 			} else {
-				g_warning (G_STRLOC ": db->get failed with %d", db_error);
+				g_warning (G_STRLOC ": db->get failed with %s", db_strerror (db_error));
 				status = db_error_to_status (db_error);
 				break;
 			}
@@ -457,7 +456,7 @@ e_book_backend_file_get_contact_list (EBookBackendSync *backend,
 		db_error = db->cursor (db, NULL, &dbc, 0);
 
 		if (db_error != 0) {
-			g_warning (G_STRLOC ": db->cursor failed with %d", db_error);
+			g_warning (G_STRLOC ": db->cursor failed with %s", db_strerror (db_error));
 			/* XXX this needs to be some CouldNotOpen error */
 			return db_error_to_status (db_error);
 		}
@@ -486,13 +485,13 @@ e_book_backend_file_get_contact_list (EBookBackendSync *backend,
 		if (db_error == DB_NOTFOUND) {
 			status = GNOME_Evolution_Addressbook_Success;
 		} else {
-			g_warning (G_STRLOC ": dbc->c_get failed with %d", db_error);
+			g_warning (G_STRLOC ": dbc->c_get failed with %s", db_strerror (db_error));
 			status = db_error_to_status (db_error);
 		}
 
 		db_error = dbc->c_close(dbc);
 		if (db_error != 0) {
-			g_warning (G_STRLOC ": dbc->c_close failed with %d", db_error);
+			g_warning (G_STRLOC ": dbc->c_close failed with %s", db_strerror (db_error));
 		}
 	}
 
@@ -543,14 +542,20 @@ get_closure (EDataBookView *book_view)
 static gpointer
 book_view_thread (gpointer data)
 {
-	EDataBookView *book_view = data;
-	FileBackendSearchClosure *closure = get_closure (book_view);
-	EBookBackendFile *bf = closure->bf;
+	EDataBookView *book_view;
+	FileBackendSearchClosure *closure;
+	EBookBackendFile *bf;
 	const char *query;
 	DB  *db;
 	DBT id_dbt, vcard_dbt;
 	int db_error;
 	gboolean stopped = FALSE, allcontacts;
+
+	g_return_val_if_fail (E_IS_DATA_BOOK_VIEW (data), NULL);
+
+	book_view = data;
+	closure = get_closure (book_view);
+	bf = closure->bf;
 
 	d(printf ("starting initial population of book view\n"));
 
@@ -571,7 +576,7 @@ book_view_thread (gpointer data)
 
 	d(printf ("signalling parent thread\n"));
 	g_mutex_lock (closure->mutex);
-	//g_cond_signal (closure->cond);
+	g_cond_signal (closure->cond);
 	g_mutex_unlock (closure->mutex);
 
 	if (e_book_backend_summary_is_summary_query (bf->priv->summary, query)) {
@@ -598,7 +603,7 @@ book_view_thread (gpointer data)
 				e_data_book_view_notify_update_prefiltered_vcard (book_view, id, vcard_dbt.data);
 			}
 			else {
-				g_warning (G_STRLOC ": db->get failed with %d", db_error);
+				g_warning (G_STRLOC ": db->get failed with %s", db_strerror (db_error));
 			}
 		}
 
@@ -666,14 +671,19 @@ static void
 e_book_backend_file_start_book_view (EBookBackend  *backend,
 				     EDataBookView *book_view)
 {
-	FileBackendSearchClosure *closure = init_closure (book_view, E_BOOK_BACKEND_FILE (backend));
+	FileBackendSearchClosure *closure;
+
+	g_return_if_fail (E_IS_BOOK_BACKEND_FILE (backend));
+	g_return_if_fail (E_IS_DATA_BOOK_VIEW (book_view));
+
+	closure = init_closure (book_view, E_BOOK_BACKEND_FILE (backend));
 
 	g_mutex_lock (closure->mutex);
 
 	d(printf ("starting book view thread\n"));
 	closure->thread = g_thread_create (book_view_thread, book_view, FALSE, NULL);
 
-	//g_cond_wait (closure->cond, closure->mutex);
+	g_cond_wait (closure->cond, closure->mutex);
 
 	/* at this point we know the book view thread is actually running */
 	g_mutex_unlock (closure->mutex);
@@ -687,6 +697,11 @@ e_book_backend_file_stop_book_view (EBookBackend  *backend,
 	FileBackendSearchClosure *closure = get_closure (book_view);
 
 	d(printf ("stopping query\n"));
+	if (!closure) {
+		/* TODO: find out why this happens! */
+		g_warning ("NULL closure when stopping query");
+		return;
+	}
 	g_mutex_lock (closure->mutex);
 	closure->stopped = TRUE;
 	g_mutex_unlock (closure->mutex);
@@ -772,7 +787,7 @@ e_book_backend_file_get_changes (EBookBackendSync *backend,
 	db_error = db->cursor (db, NULL, &dbc, 0);
 
 	if (db_error != 0) {
-		g_warning (G_STRLOC ": db->cursor failed with %d", db_error);
+		g_warning (G_STRLOC ": db->cursor failed with %s", db_strerror (db_error));
 	} else {
 		db_error = dbc->c_get(dbc, &id_dbt, &vcard_dbt, DB_FIRST);
 
@@ -958,7 +973,7 @@ e_book_backend_file_upgrade_db (EBookBackendFile *bf, char *old_version)
 
 		db_error = db->cursor (db, NULL, &dbc, 0);
 		if (db_error != 0) {
-			g_warning (G_STRLOC ": db->cursor failed with %d", db_error);
+			g_warning (G_STRLOC ": db->cursor failed with %s", db_strerror (db_error));
 			return FALSE;
 		}
 
@@ -1088,7 +1103,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 
 	db_error = e_db3_utils_maybe_recover (filename);
 	if (db_error != 0) {
-		g_warning ("db recovery failed with %d", db_error);
+		g_warning ("db recovery failed with %s", db_strerror (db_error));
 		g_free (dirname);
 		g_free (filename);
 		return db_error_to_status (db_error);
@@ -1101,7 +1116,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 	} else {
 		db_error = db_env_create (&env, 0);
 		if (db_error != 0) {
-			g_warning ("db_env_create failed with %d", db_error);
+			g_warning ("db_env_create failed with %s", db_strerror (db_error));
 			g_static_mutex_unlock(&global_env_lock);
 			g_free (dirname);
 			g_free (filename);
@@ -1118,7 +1133,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 		db_error = env->open (env, NULL, DB_CREATE | DB_INIT_MPOOL | DB_PRIVATE | DB_THREAD, 0);
 		if (db_error != 0) {
 			env->close(env, 0);
-			g_warning ("db_env_open failed with %d", db_error);
+			g_warning ("db_env_open failed with %s", db_strerror (db_error));
 			g_static_mutex_unlock(&global_env_lock);
 			g_free (dirname);
 			g_free (filename);
@@ -1134,7 +1149,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 
 	db_error = db_create (&db, env, 0);
 	if (db_error != 0) {
-		g_warning ("db_create failed with %d", db_error);
+		g_warning ("db_create failed with %s", db_strerror (db_error));
 		g_free (dirname);
 		g_free (filename);
 		return db_error_to_status (db_error);
@@ -1146,7 +1161,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 		db_error = e_db3_utils_upgrade_format (filename);
 
 		if (db_error != 0) {
-			g_warning ("db format upgrade failed with %d", db_error);
+			g_warning ("db format upgrade failed with %s", db_strerror (db_error));
 			g_free (dirname);
 			g_free (filename);
 			return db_error_to_status (db_error);
@@ -1182,7 +1197,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 
 			db_error = db->open (db, NULL, filename, NULL, DB_HASH, DB_CREATE | DB_THREAD, 0666);
 			if (db_error != 0) {
-				g_warning ("db->open (... DB_CREATE ...) failed with %d", db_error);
+				g_warning ("db->open (... DB_CREATE ...) failed with %s", db_strerror (db_error));
 			}
 			else {
 #ifdef CREATE_DEFAULT_VCARD
@@ -1340,7 +1355,7 @@ e_book_backend_file_sync (EBookBackend *backend)
 	if (bf->priv->file_db) {
 		db_error = bf->priv->file_db->sync (bf->priv->file_db, 0);
 		if (db_error != 0)
-			g_warning (G_STRLOC ": db->sync failed with %d", db_error);
+			g_warning (G_STRLOC ": db->sync failed with %s", db_strerror (db_error));
 	}
 }
 

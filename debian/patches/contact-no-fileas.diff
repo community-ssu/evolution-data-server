@@ -1,0 +1,20 @@
+Index: addressbook/libebook-dbus/e-contact.c
+===================================================================
+--- addressbook/libebook-dbus/e-contact.c	(revision 7453)
++++ addressbook/libebook-dbus/e-contact.c	(working copy)
+@@ -1179,6 +1179,7 @@
+ 	contact = g_object_new (E_TYPE_CONTACT, NULL);
+ 	e_vcard_construct (E_VCARD (contact), vcard);
+ 
++#if 0
+ 	/* Generate a FILE_AS field if needed */
+ 
+ 	file_as = e_contact_get_const (contact, E_CONTACT_FILE_AS);
+@@ -1214,6 +1215,7 @@
+ 			g_free (file_as_new);
+ 		}
+ 	}
++#endif
+ 
+ 	return contact;
+ }
