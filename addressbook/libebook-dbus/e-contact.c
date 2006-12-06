@@ -257,6 +257,8 @@ static const EContactFieldInfo field_info[] = {
 
 	/* For TEL */
  	STRING_FIELD (E_CONTACT_PHONE_TELEPHONE,        EVC_TEL,       "tel",         N_("Telephone"),  FALSE),
+
+	MULTI_LIST_FIELD (E_CONTACT_SIP, 	  EVC_X_SIP,    "sip",    N_("SIP address"),          FALSE),
 };
 
 #undef LIST_ELEM_STR_FIELD
