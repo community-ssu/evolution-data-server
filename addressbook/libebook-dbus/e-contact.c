@@ -1530,8 +1530,6 @@ contact_get_safe (EContact *contact, EContactField field_id)
 gpointer
 e_contact_get (EContact *contact, EContactField field_id)
 {
-	const EContactFieldInfo *info = NULL;
- 
 	g_return_val_if_fail (contact && E_IS_CONTACT (contact), NULL);
 	g_return_val_if_fail (field_id >= 1 && field_id <= E_CONTACT_FIELD_LAST, NULL);
 

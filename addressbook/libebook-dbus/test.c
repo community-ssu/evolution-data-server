@@ -20,6 +20,7 @@ die (const char *prefix, GError *error)
   exit(1);
 }
 
+#if 0
 static void get_contacts_cb (EBook *book, EBookStatus status, GList *list, gpointer closure)
 {
   g_print ("Got %d contacts over async\n", g_list_length (list));
@@ -27,6 +28,7 @@ static void get_contacts_cb (EBook *book, EBookStatus status, GList *list, gpoin
   g_list_free (list);
   g_main_loop_quit (loop);
 }
+#endif
 
 static void view_status_message (EBookView *book_view, const char*message, gpointer userdata)
 {

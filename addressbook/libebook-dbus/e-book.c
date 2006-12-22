@@ -954,14 +954,13 @@ static GList *
 parse_changes_array (char **arr)
 {
   GList *l = NULL;
-  char **i = arr;
-  while (*i != NULL) {
+  char **i;
+  for (i = arr; *i != NULL; i++) {
     EBookChange *change = g_new (EBookChange, 1);
     /* TODO this is a bit of a hack */
     change->change_type = atoi (*i);
     change->contact = e_contact_new_from_vcard (strchr (*i, '\n'));
     l = g_list_prepend (l, change);
-    *i++;
   }
   g_strfreev (arr);
   return g_list_reverse (l);

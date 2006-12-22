@@ -50,8 +50,8 @@ SOVERSION=	@DB_VERSION_MAJOR@.@DB_VERSION_MINOR@
 ##################################################
 # C API.
 ##################################################
-CPPFLAGS=	-I$(builddir) -I$(srcdir) -I$(srcdir)/dbinc @CPPFLAGS@
-CFLAGS=	 	-c $(CPPFLAGS) @CFLAGS@
+CPPFLAGS=	-I$(builddir) -I$(srcdir) -I$(srcdir)/dbinc -Wall @CPPFLAGS@
+CFLAGS=	 	-c $(CPPFLAGS) -Wall @CFLAGS@
 CC=		@MAKEFILE_CC@
 CCLINK=		@MAKEFILE_CCLINK@
 
