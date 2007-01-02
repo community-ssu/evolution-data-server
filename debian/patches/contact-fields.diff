@@ -1,0 +1,46 @@
+Index: addressbook/libebook-dbus/e-vcard.h
+===================================================================
+--- addressbook/libebook-dbus/e-vcard.h	(revision 31)
++++ addressbook/libebook-dbus/e-vcard.h	(working copy)
+@@ -89,6 +89,13 @@
+ #define EVC_X_GROUPWISE     	"X-GROUPWISE"
+ #define EVC_X_BOOK_URI     	"X-EVOLUTION-BOOK-URI"
+ 
++#define EVC_X_OSSO_CONTACT_STATE "X-OSSO-CONTACT-STATE"
++#define EVC_X_OSSO_LAST_USED "X-OSSO-LAST-USED"
++ 
++/* Parameter names */
++#define EVC_X_OSSO_BOUND "X-OSSO-BOUND"
++#define EVC_X_OSSO_FIELD_STATE "X-OSSO-FIELD-STATE"
++
+ typedef enum {
+ 	EVC_FORMAT_VCARD_21,
+ 	EVC_FORMAT_VCARD_30
+Index: addressbook/libebook-dbus/e-contact.c
+===================================================================
+--- addressbook/libebook-dbus/e-contact.c	(revision 31)
++++ addressbook/libebook-dbus/e-contact.c	(working copy)
+@@ -259,6 +259,9 @@
+  	STRING_FIELD (E_CONTACT_PHONE_TELEPHONE,        EVC_TEL,       "tel",         N_("Telephone"),  FALSE),
+ 
+ 	MULTI_LIST_FIELD (E_CONTACT_SIP, 	  EVC_X_SIP,    "sip",    N_("SIP address"),          FALSE),
++
++	STRING_FIELD (E_CONTACT_OSSO_CONTACT_STATE,       EVC_X_OSSO_CONTACT_STATE,       "osso-contact-state",       N_("Contact State"),    FALSE),
++	STRING_FIELD (E_CONTACT_OSSO_LAST_USED,       EVC_X_OSSO_LAST_USED,       "osso-last-used",       N_("Last Used"),    FALSE),
+ };
+ 
+ #undef LIST_ELEM_STR_FIELD
+Index: addressbook/libebook-dbus/e-contact.h
+===================================================================
+--- addressbook/libebook-dbus/e-contact.h	(revision 31)
++++ addressbook/libebook-dbus/e-contact.h	(working copy)
+@@ -190,6 +190,9 @@
+ 
+ 	E_CONTACT_SIP,
+ 
++	E_CONTACT_OSSO_CONTACT_STATE, /* string */
++	E_CONTACT_OSSO_LAST_USED, /* string */
++
+ 	E_CONTACT_FIELD_LAST,
+ 	E_CONTACT_FIELD_FIRST        = E_CONTACT_UID,
+ 

@@ -16,9 +16,9 @@ contact-no-fileas.diff
 Remove the updating of the FILE_AS field in EContact.  Maemo doesn't use it and
 this is noticable in profiles of osso-addressbook startup.  Maemo specific.
 
-e-contact-state.diff
+contact-fields.diff
 
-Add E_CONTACT_OSSO_CONTACT_STATE to e-contact and e-vcard.
+Add OSSO-specific contact field names to EVCard and EContact.
 
 query-visible.diff
 
