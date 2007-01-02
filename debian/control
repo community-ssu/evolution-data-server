@@ -8,6 +8,8 @@ Standards-Version: 3.6.1.0
 Package: evolution-data-server-addressbook
 Architecture: any
 Depends: ${shlibs:Depends}
+Provides: evolution-data-server
+Replaces: evolution-data-server
 Description: evolution database backend server
  The data server, called "Evolution Data Server" is responsible for managing
  calendar and addressbook information.
@@ -22,6 +24,7 @@ Description: Development files for evolution-data-server (meta package)
 Package: evolution-data-server-addressbook-dbg
 Architecture: any
 Depends: evolution-data-server-addressbook (= ${Source-Version})
+Replaces: evolution-data-server-dbg
 Description: evolution database backend server (debugging symbols)
  The data server, called "Evolution Data Server" is responsible for managing
  calendar and addressbook information.
