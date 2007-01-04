@@ -1,3 +1,15 @@
+evolution-data-server (1.4.2.1-20070104) unstable; urgency=low
+
+  * Add is_vcard s-exp and e_book_query_vcard_field_test, to reduce the need
+    for EContactField.
+  * Add X-OSSO-LAST-USED for better tracking of recent contacts
+  * Fix compiler warnings (Fixes: NB#50155)
+  * Add X-SIP and E_CONTACT_SIP
+  * Use g_mkdir_with_parents() instead of own copy
+  * Add Replaces/Provides to smooth upgrades
+
+ -- Ross Burton <ross@openedhand.com>  Thu,  4 Jan 2007 15:17:46 +0000
+
 evolution-data-server (1.4.2.1-20061121) unstable; urgency=low
 
   * Fix build error with new dbus-glib
