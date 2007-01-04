@@ -335,6 +335,46 @@ entry_compare(SearchContext *ctx, struct _ESExp *f,
 }
 
 static ESExpResult *
+vcard_compare(SearchContext *ctx, struct _ESExp *f,
+	      int argc, struct _ESExpResult **argv,
+	      char *(*compare)(const char*, const char*))
+{
+	ESExpResult *r;
+	int truth = FALSE;
+
+	if (argc == 2 &&
+	    argv[0]->type == ESEXP_RES_STRING &&
+	    argv[1]->type == ESEXP_RES_STRING) {
+		GList *attrs;
+		const char *field, *needle;;
+
+		field = argv[0]->value.string;
+		needle = argv[1]->value.string;
+		
+		for (attrs = e_vcard_get_attributes (E_VCARD (ctx->contact)); attrs; attrs = attrs->next) {
+			EVCardAttribute *attr = attrs->data;
+			GList *values;
+			if (g_ascii_strcasecmp (e_vcard_attribute_get_name (attr), field) != 0)
+				continue;
+			
+			values = e_vcard_attribute_get_values (attr);
+			for (; values; values = values->next) {
+				const char *value = values->data;
+				if (compare (value, needle)) {
+					truth = TRUE;
+					break;
+				}
+			}
+		}
+		
+	}
+	r = e_sexp_result_new(f, ESEXP_RES_BOOL);
+	r->value.bool = truth;
+
+	return r;
+}
+
+static ESExpResult *
 func_contains(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
 {
 	SearchContext *ctx = data;
@@ -357,6 +397,14 @@ func_is(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
 	SearchContext *ctx = data;
 
 	return entry_compare (ctx, f, argc, argv, is_helper);
+}
+
+static ESExpResult *
+func_is_vcard(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
+{
+	SearchContext *ctx = data;
+
+	return vcard_compare (ctx, f, argc, argv, is_helper);
 }
 
 static char *
@@ -483,6 +531,7 @@ static struct {
 } symbols[] = {
 	{ "contains", func_contains, 0 },
 	{ "is", func_is, 0 },
+	{ "is_vcard", func_is_vcard, 0 },
 	{ "beginswith", func_beginswith, 0 },
 	{ "endswith", func_endswith, 0 },
 	{ "exists", func_exists, 0 },

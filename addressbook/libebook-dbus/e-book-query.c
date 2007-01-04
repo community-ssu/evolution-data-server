@@ -34,6 +34,7 @@ struct EBookQuery {
 		struct {
 			EBookQueryTest test;
 			EContactField  field;
+			char          *vcard_field;
 			char          *value;
 		} field_test;
 
@@ -177,6 +178,38 @@ e_book_query_not (EBookQuery *q, gboolean unref)
 	return ret;
 }
 
+ /**
+ * e_book_query_vcard_field_test:
+ * @field: an vCard field to test
+ * @test: the test to apply
+ * @value: the value to test for
+ *
+ * Creates a new #EBookQuery which tests @field for @value using the test @test.
+ *
+ * Return value: the new #EBookQuery
+ **/
+EBookQuery *
+e_book_query_vcard_field_test (const char *field,
+			       EBookQueryTest test,
+			       const char *value)
+{
+	EBookQuery *ret;
+	
+	if (test != E_BOOK_QUERY_IS) {
+		g_warning ("Can only use IS with %s", G_STRFUNC);
+		return NULL;
+	}
+	
+	ret = g_new0 (EBookQuery, 1);
+	ret->type = E_BOOK_QUERY_TYPE_FIELD_TEST;
+	ret->query.field_test.field = 0;
+	ret->query.field_test.vcard_field = g_strdup (field);
+	ret->query.field_test.test = test;
+	ret->query.field_test.value = g_strdup (value);
+
+	return ret;
+}
+
 /**
  * e_book_query_field_test:
  * @field: an #EContactField to test
@@ -196,6 +229,7 @@ e_book_query_field_test (EContactField field,
 
 	ret->type = E_BOOK_QUERY_TYPE_FIELD_TEST;
 	ret->query.field_test.field = field;
+	ret->query.field_test.vcard_field = NULL;
 	ret->query.field_test.test = test;
 	ret->query.field_test.value = g_strdup (value);
 
@@ -288,6 +322,7 @@ e_book_query_unref (EBookQuery *q)
 		break;
 
 	case E_BOOK_QUERY_TYPE_FIELD_TEST:
+		g_free (q->query.field_test.vcard_field);
 		g_free (q->query.field_test.value);
 		break;
 
@@ -459,6 +494,31 @@ func_is(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
 }
 
 static ESExpResult *
+func_is_vcard(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
+{
+	GList **list = data;
+	ESExpResult *r;
+	
+	if (argc == 2
+	    && argv[0]->type == ESEXP_RES_STRING
+	    && argv[1]->type == ESEXP_RES_STRING) {
+		char *field = argv[0]->value.string;
+		char *str = argv[1]->value.string;
+
+		if (field)
+			*list = g_list_prepend (*list,
+						e_book_query_vcard_field_test (field,
+									       E_BOOK_QUERY_IS,
+									       str));
+	}
+
+	r = e_sexp_result_new(f, ESEXP_RES_BOOL);
+	r->value.bool = FALSE;
+
+	return r;
+}
+
+static ESExpResult *
 func_beginswith(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
 {
 	GList **list = data;
@@ -541,6 +601,7 @@ static const struct {
 	{ "not", func_not, 0 },
 	{ "contains", func_contains, 0 },
 	{ "is", func_is, 0 },
+	{ "is_vcard", func_is_vcard, 0 },
 	{ "beginswith", func_beginswith, 0 },
 	{ "endswith", func_endswith, 0 },
 	{ "exists", func_exists, 0 },
@@ -651,22 +712,41 @@ e_book_query_to_string    (EBookQuery *q)
 		}
 		break;
 	case E_BOOK_QUERY_TYPE_FIELD_TEST:
-		switch (q->query.field_test.test) {
-		case E_BOOK_QUERY_IS: s = "is"; break;
-		case E_BOOK_QUERY_CONTAINS: s = "contains"; break;
-		case E_BOOK_QUERY_BEGINS_WITH: s = "beginswith"; break;
-		case E_BOOK_QUERY_ENDS_WITH: s = "endswith"; break;
-		default:
-			g_assert_not_reached();
-			break;
+		if (q->query.field_test.vcard_field) {
+			switch (q->query.field_test.test) {
+			case E_BOOK_QUERY_IS: s = "is_vcard"; break;
+			case E_BOOK_QUERY_CONTAINS: s = "contains_vcard"; break;
+			case E_BOOK_QUERY_BEGINS_WITH: s = "beginswith_vcard"; break;
+			case E_BOOK_QUERY_ENDS_WITH: s = "endswith_vcard"; break;
+			default:
+				g_assert_not_reached();
+				break;
+			}
+
+			e_sexp_encode_string (encoded, q->query.field_test.value);
+			
+			g_string_append_printf (str, "%s \"%s\" %s",
+						s,
+						q->query.field_test.vcard_field,
+						encoded->str);
+		} else {
+			switch (q->query.field_test.test) {
+			case E_BOOK_QUERY_IS: s = "is"; break;
+			case E_BOOK_QUERY_CONTAINS: s = "contains"; break;
+			case E_BOOK_QUERY_BEGINS_WITH: s = "beginswith"; break;
+			case E_BOOK_QUERY_ENDS_WITH: s = "endswith"; break;
+			default:
+				g_assert_not_reached();
+				break;
+			}
+
+			e_sexp_encode_string (encoded, q->query.field_test.value);
+			
+			g_string_append_printf (str, "%s \"%s\" %s",
+						s,
+						e_contact_field_name (q->query.field_test.field),
+						encoded->str);
 		}
-
-		e_sexp_encode_string (encoded, q->query.field_test.value);
-
-		g_string_append_printf (str, "%s \"%s\" %s",
-					s,
-					e_contact_field_name (q->query.field_test.field),
-					encoded->str);
 		break;
 	case E_BOOK_QUERY_TYPE_ANY_FIELD_CONTAINS:
 		g_string_append_printf (str, "contains \"x-evolution-any-field\"");
