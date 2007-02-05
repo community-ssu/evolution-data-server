@@ -1,4 +1,4 @@
-/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
+/* -*- Mode: C; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 /*
  * Copyright (C) 2006 OpenedHand Ltd
  *
@@ -955,11 +955,13 @@ parse_changes_array (char **arr)
 {
   GList *l = NULL;
   char **i;
+  char *vcard;
   for (i = arr; *i != NULL; i++) {
     EBookChange *change = g_new (EBookChange, 1);
     /* TODO this is a bit of a hack */
     change->change_type = atoi (*i);
-    change->contact = e_contact_new_from_vcard (strchr (*i, '\n'));
+    vcard = strchr (*i, '\n') + 1;
+    change->contact = e_contact_new_from_vcard (vcard);
     l = g_list_prepend (l, change);
   }
   g_strfreev (arr);
@@ -989,9 +991,11 @@ get_changes_reply(DBusGProxy *proxy, char **changes, GError *error, gpointer use
 {
   struct async_data *data = user_data;
   EBookListCallback cb = data->callback;
-  GList *list = parse_changes_array (changes);
-  if (cb)
+  GList *list;
+  if (cb) {
+    list = parse_changes_array (changes);
     cb (data->book, get_status_from_error (error), list, data->closure);
+  }
   g_free (data);
 }
 
