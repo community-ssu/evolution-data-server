@@ -81,9 +81,9 @@ struct _EBookBackendFilePrivate {
 
 static GStaticMutex global_env_lock = G_STATIC_MUTEX_INIT;
 static struct {
-	int ref_count;
+	volatile int ref_count;
 	DB_ENV *env;
-} global_env;
+} global_env = { 0, NULL };
 
 static EDataBookStatus
 db_error_to_status (const int db_error)
@@ -1112,7 +1112,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 	g_static_mutex_lock(&global_env_lock);
 	if (global_env.ref_count > 0) {
 		env = global_env.env;
-		global_env.ref_count++;
+		g_atomic_int_inc (&global_env.ref_count);
 	} else {
 		db_error = db_env_create (&env, 0);
 		if (db_error != 0) {
@@ -1141,7 +1141,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 		}
 
 		global_env.env = env;
-		global_env.ref_count = 1;
+		g_atomic_int_inc (&global_env.ref_count);
 	}
 	g_static_mutex_unlock(&global_env_lock);
 
@@ -1397,29 +1397,42 @@ e_book_backend_file_dispose (GObject *object)
 
 	bf = E_BOOK_BACKEND_FILE (object);
 
-	if (bf->priv) {
-		if (bf->priv->file_db)
-			bf->priv->file_db->close (bf->priv->file_db, 0);
-
-		g_static_mutex_lock(&global_env_lock);
-		global_env.ref_count--;
-		if (global_env.ref_count == 0) {
+	if (bf->priv->file_db) {
+		bf->priv->file_db->close (bf->priv->file_db, 0);
+		bf->priv->file_db = NULL;
+	}
+	
+	g_static_mutex_lock(&global_env_lock);
+	if (g_atomic_int_get (&global_env.ref_count) > 0) {
+		if (g_atomic_int_dec_and_test (&global_env.ref_count)) {
 			global_env.env->close(global_env.env, 0);
 			global_env.env = NULL;
 		}
-		g_static_mutex_unlock(&global_env_lock);
+	}
+	g_static_mutex_unlock(&global_env_lock);
 
-		if (bf->priv->summary)
-			g_object_unref(bf->priv->summary);
-		g_free (bf->priv->filename);
-		g_free (bf->priv->dirname);
-		g_free (bf->priv->summary_filename);
-
-		g_free (bf->priv);
-		bf->priv = NULL;
+	if (bf->priv->summary) {
+		g_object_unref(bf->priv->summary);
+		bf->priv->summary = NULL;
 	}
 
 	G_OBJECT_CLASS (e_book_backend_file_parent_class)->dispose (object);	
+}
+
+static void
+e_book_backend_file_finalize (GObject *object)
+{
+	EBookBackendFile *bf;
+
+	bf = E_BOOK_BACKEND_FILE (object);
+
+	g_free (bf->priv->filename);
+	g_free (bf->priv->dirname);
+	g_free (bf->priv->summary_filename);
+	
+	g_free (bf->priv);
+
+	G_OBJECT_CLASS (e_book_backend_file_parent_class)->finalize (object);
 }
 
 #ifdef G_OS_WIN32
@@ -1499,6 +1512,7 @@ e_book_backend_file_class_init (EBookBackendFileClass *klass)
 	
 
 	object_class->dispose = e_book_backend_file_dispose;
+	object_class->finalize = e_book_backend_file_finalize;
 
 #ifdef G_OS_WIN32
 	/* Use the gstdio wrappers to open, check, rename and unlink
