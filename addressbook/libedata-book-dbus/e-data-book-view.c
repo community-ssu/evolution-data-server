@@ -1,4 +1,4 @@
-/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
+/* -*- Mode: C; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 /*
  * Copyright (C) 2006 OpenedHand Ltd
  *
@@ -32,23 +32,12 @@ static gboolean impl_BookView_dispose (EDataBookView *view, GError **eror);
 
 #include "e-data-book-view-glue.h"
 
-typedef struct {
-  char **arr;
-  int len;
-  int max;
-} ResizingArray;
-
-static ResizingArray *resizing_array_new (void);
-static void resizing_array_free (ResizingArray *array);
-static void resizing_array_resize (ResizingArray *array, int size);
-static void resizing_array_finish (ResizingArray *array);
-static void resizing_array_reset (ResizingArray *array);
+static void reset_array (GArray *array);
 
 G_DEFINE_TYPE (EDataBookView, e_data_book_view, G_TYPE_OBJECT);
 #define E_DATA_BOOK_VIEW_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), E_TYPE_DATA_BOOK_VIEW, EDataBookViewPrivate))
 
-#define DEFAULT_INITIAL_THRESHOLD 5
-#define DEFAULT_THRESHOLD_MAX 20
+#define THRESHOLD 32
 
 struct _EDataBookViewPrivate {
   EDataBook *book;
@@ -61,13 +50,9 @@ struct _EDataBookViewPrivate {
   gboolean running;
   GMutex *pending_mutex;
 
-  ResizingArray *adds;
-  ResizingArray *changes;
-  ResizingArray *removes;
-
-  int next_threshold;
-  int threshold_max;
-  int threshold_min;
+  GArray *adds;
+  GArray *changes;
+  GArray *removes;
 
   GHashTable *ids;
   guint idle_id;
@@ -149,13 +134,9 @@ e_data_book_view_init (EDataBookView *book_view)
   priv->running = FALSE;
   priv->pending_mutex = g_mutex_new ();
 
-  priv->threshold_min = DEFAULT_INITIAL_THRESHOLD;
-  priv->threshold_max = DEFAULT_THRESHOLD_MAX;
-  priv->next_threshold = priv->threshold_min;
-
-  priv->adds = resizing_array_new ();
-  priv->changes = resizing_array_new ();
-  priv->removes = resizing_array_new ();
+  priv->adds = g_array_sized_new (TRUE, TRUE, sizeof (char*), THRESHOLD);
+  priv->changes = g_array_sized_new (TRUE, TRUE, sizeof (char*), THRESHOLD);
+  priv->removes = g_array_sized_new (TRUE, TRUE, sizeof (char*), THRESHOLD);
 
   priv->ids = g_hash_table_new_full (g_str_hash, g_str_equal,
                                      g_free, NULL);
@@ -246,9 +227,9 @@ e_data_book_view_finalize (GObject *object)
   EDataBookView *book_view = E_DATA_BOOK_VIEW (object);
   EDataBookViewPrivate *priv = book_view->priv;
 
-  resizing_array_free (priv->adds);
-  resizing_array_free (priv->changes);
-  resizing_array_free (priv->removes);
+  g_strfreev ((char**)g_array_free (priv->adds, FALSE));
+  g_strfreev ((char**)g_array_free (priv->changes, FALSE));
+  g_strfreev ((char**)g_array_free (priv->removes, FALSE));
 
   g_free (priv->card_query);
 
@@ -315,8 +296,8 @@ e_data_book_view_set_thresholds (EDataBookView *book_view,
                                  int maximum_grouping_threshold)
 {
   g_return_if_fail (E_IS_DATA_BOOK_VIEW (book_view));
-  book_view->priv->threshold_min = minimum_grouping_threshold;
-  book_view->priv->threshold_max = maximum_grouping_threshold;
+  
+  g_debug ("e_data_book_view_set_thresholds does nothing in eds-dbus");
 }
 
 const char*
@@ -348,19 +329,15 @@ e_data_book_view_get_backend (EDataBookView *book_view)
 }
 
 static void
-send_pending_adds (EDataBookView *view, gboolean reset)
+send_pending_adds (EDataBookView *view)
 {
   EDataBookViewPrivate *priv = view->priv;
 
   if (priv->adds->len == 0)
     return;
 
-  resizing_array_finish (priv->adds);
-  g_signal_emit (view, signals[CONTACTS_ADDED], 0, priv->adds->arr);
-  resizing_array_reset (priv->adds);
-  
-  if (reset)
-    priv->next_threshold = priv->threshold_min;
+  g_signal_emit (view, signals[CONTACTS_ADDED], 0, priv->adds->data);
+  reset_array (priv->adds);
 }
 
 static void
@@ -371,9 +348,8 @@ send_pending_changes (EDataBookView *view)
   if (priv->changes->len == 0)
     return;
 
-  resizing_array_finish (priv->changes);
-  g_signal_emit (view, signals[CONTACTS_CHANGED], 0, priv->changes->arr);
-  resizing_array_reset (priv->changes);
+  g_signal_emit (view, signals[CONTACTS_CHANGED], 0, priv->changes->data);
+  reset_array (priv->changes);
 }
 
 static void
@@ -384,35 +360,29 @@ send_pending_removes (EDataBookView *view)
   if (priv->removes->len == 0)
     return;
 
-  resizing_array_finish (priv->removes);
-  g_signal_emit (view, signals[CONTACTS_REMOVED], 0, priv->removes->arr);
-  resizing_array_reset (priv->removes);
+  g_signal_emit (view, signals[CONTACTS_REMOVED], 0, priv->removes->data);
+  reset_array (priv->removes);
 }
 
 static void
 notify_change (EDataBookView *view, char *vcard)
 {
   EDataBookViewPrivate *priv = view->priv;
-  send_pending_adds (view, TRUE);
+  send_pending_adds (view);
   send_pending_removes (view);
   
-  if (priv->changes->len == priv->changes->max)
-    resizing_array_resize (priv->changes, 2 * (priv->changes->max + 1));
-
-  priv->changes->arr[priv->changes->len++] = vcard;
+  g_array_append_val (priv->changes, vcard);
 }
 
 static void
-notify_remove (EDataBookView *view, const char *id)
+notify_remove (EDataBookView *view, char *id)
 {
   EDataBookViewPrivate *priv = view->priv;
-  send_pending_adds (view, TRUE);
+
+  send_pending_adds (view);
   send_pending_changes (view);
 
-  if (priv->removes->len == priv->removes->max)
-    resizing_array_resize (priv->removes, 2 * (priv->removes->max + 1));
-
-  priv->removes->arr[priv->removes->len++] = g_strdup (id);
+  g_array_append_val (priv->removes, id);
   g_hash_table_remove (priv->ids, id);
 }
 
@@ -423,17 +393,10 @@ notify_add (EDataBookView *view, const char *id, char *vcard)
   send_pending_changes (view);
   send_pending_removes (view);
 
-  if (priv->adds->len == priv->adds->max) {
-    send_pending_adds (view, FALSE);
-
-    resizing_array_resize (priv->adds, priv->next_threshold);
-
-    if (priv->next_threshold < priv->threshold_max) {
-      priv->next_threshold = MIN (2 * priv->next_threshold,
-                                  priv->threshold_max);
-    }
+  if (priv->adds->len == THRESHOLD) {
+    send_pending_adds (view);
   }
-  priv->adds->arr[priv->adds->len++] = vcard;
+  g_array_append_val (priv->adds, vcard);
   g_hash_table_insert (priv->ids, g_strdup (id),
                        GUINT_TO_POINTER (1));
 }
@@ -468,7 +431,7 @@ e_data_book_view_notify_update (EDataBookView *book_view, EContact *contact)
       notify_add (book_view, id, vcard);
   } else {
     if (currently_in_view)
-      notify_remove (book_view, id);
+      notify_remove (book_view, g_strdup (id));
     /* else nothing; we're removing a card that wasn't there */
   }
 
@@ -502,7 +465,7 @@ e_data_book_view_notify_update_vcard (EDataBookView *book_view, char *vcard)
       notify_add (book_view, id, vcard);
   } else {
     if (currently_in_view)
-      notify_remove (book_view, id);
+      notify_remove (book_view, g_strdup (id));
     else
       /* else nothing; we're removing a card that wasn't there */
       g_free (vcard);
@@ -544,7 +507,7 @@ e_data_book_view_notify_remove (EDataBookView *book_view, const char *id)
     return;
 
   g_mutex_lock (priv->pending_mutex);
-  notify_remove (book_view, id);
+  notify_remove (book_view, g_strdup (id));
   g_mutex_unlock (priv->pending_mutex);
 }
 
@@ -558,7 +521,7 @@ e_data_book_view_notify_complete (EDataBookView *book_view, EDataBookStatus stat
 
   g_mutex_lock (priv->pending_mutex);
 
-  send_pending_adds (book_view, TRUE);
+  send_pending_adds (book_view);
   send_pending_changes (book_view);
   send_pending_removes (book_view);
 
@@ -581,48 +544,16 @@ e_data_book_view_notify_status_message (EDataBookView *book_view, const char *me
   g_signal_emit (book_view, signals[STATUS_MESSAGE], 0, message);
 }
 
-static ResizingArray *
-resizing_array_new (void)
-{
-  return g_new0 (ResizingArray, 1);
-}
-
 static void
-resizing_array_free (ResizingArray *array)
+reset_array (GArray *array)
 {
-  if (array->arr)
-    g_strfreev (array->arr);
+  char **l;
+  
+  /* Free the stored strings */
+  for (l = (char**)array->data; *l; l++) {
+    g_free (*l);
+  };
 
-  g_free (array);
-}
-
-static void
-resizing_array_resize (ResizingArray *array, int size)
-{
-  /* Add one extra for the terminating NULL */
-  if (array->arr) {
-    array->arr = g_renew (char *, array->arr, size + 1);
-    memset (array->arr[array->max], 0, size - array->max);
-  } else {
-    array->arr = g_new0 (char *, size + 1);
-  }
-  array->max = size;
-}
-
-static void
-resizing_array_finish (ResizingArray *array)
-{
-  array->arr[array->len] = NULL;
-}
-
-static void
-resizing_array_reset (ResizingArray *array)
-{
-  if (array->arr) {
-    g_strfreev (array->arr);
-    array->arr = NULL;
-  }
-
-  array->len = 0;
-  array->max = 0;
+  /* Force the array size to 0 */
+  g_array_set_size (array, 0);
 }
