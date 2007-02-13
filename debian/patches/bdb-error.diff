@@ -1,13 +1,13 @@
 Index: addressbook/backends/file/e-book-backend-file.c
 ===================================================================
---- addressbook/backends/file/e-book-backend-file.c	(revision 6577)
+--- addressbook/backends/file/e-book-backend-file.c	(revision 38)
 +++ addressbook/backends/file/e-book-backend-file.c	(working copy)
 @@ -83,6 +83,7 @@
  static struct {
- 	int ref_count;
+ 	volatile int ref_count;
  	DB_ENV *env;
 +	gboolean had_error;
- } global_env;
+ } global_env = { 0, NULL };
  
  static EDataBookStatus
 @@ -213,12 +214,16 @@
@@ -42,7 +42,7 @@ Index: addressbook/backends/file/e-book-backend-file.c
  		if (db_error != 0) {
  			g_warning (G_STRLOC ": db->sync failed with %s", db_strerror (db_error));
  		} else {
-@@ -1061,6 +1070,7 @@
+@@ -1077,6 +1086,7 @@
  #endif
  {
  	g_warning ("libdb error: %s", buf2);
@@ -50,11 +50,11 @@ Index: addressbook/backends/file/e-book-backend-file.c
  }
  
  
-@@ -1126,6 +1136,7 @@
+@@ -1141,6 +1151,7 @@
+ 		}
  
  		global_env.env = env;
- 		global_env.ref_count = 1;
 +		global_env.had_error = FALSE;
+ 		g_atomic_int_inc (&global_env.ref_count);
  	}
  	g_static_mutex_unlock(&global_env_lock);
- 
