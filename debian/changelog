@@ -1,3 +1,12 @@
+evolution-data-server (1.4.2.1-20070213) unstable; urgency=low
+
+  * Fix the BDB backend's dispose() function, and use atomic ints for
+    reference counting.
+  * Sanity check data in the view thread
+  * Remove hand-coded resizing array, use a single GArray instead.
+
+ -- Ross Burton <ross@openedhand.com>  Tue, 13 Feb 2007 15:48:57 +0000
+
 evolution-data-server (1.4.2.1-20070104) unstable; urgency=low
 
   * Add is_vcard s-exp and e_book_query_vcard_field_test, to reduce the need
