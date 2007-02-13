@@ -555,6 +555,10 @@ book_view_thread (gpointer data)
 
 	book_view = data;
 	closure = get_closure (book_view);
+	if (!closure) {
+		g_warning (G_STRLOC ": NULL closure in book view thread");
+		return NULL;
+	}
 	bf = closure->bf;
 
 	d(printf ("starting initial population of book view\n"));
