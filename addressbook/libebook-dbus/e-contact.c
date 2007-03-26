@@ -1571,8 +1571,9 @@ gconstpointer
 e_contact_get_const (EContact *contact, EContactField field_id)
 {
 	g_return_val_if_fail (E_IS_CONTACT (contact), NULL);
-	g_return_val_if_fail (field_id >= 1 && field_id <= E_CONTACT_LAST_SIMPLE_STRING, NULL);
-
+	g_return_val_if_fail (field_id >= 1 && field_id <= E_CONTACT_FIELD_LAST, NULL);
+	g_return_val_if_fail (field_info[field_id].t & E_CONTACT_FIELD_TYPE_STRING, NULL);
+	
 	return get_const_safe (contact, field_id);
 }
 
