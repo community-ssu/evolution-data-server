@@ -1,3 +1,11 @@
+evolution-data-server (1.4.2.1-20070330) unstable; urgency=low
+
+  * Grand merge with OpenedHand svn (rev 544)
+  * Remove GaduGadu contact fields
+  * Make e_contact_get_const() less useless
+
+ -- Ross Burton <ross@openedhand.com>  Fri, 30 Mar 2007 16:40:07 +0100
+
 evolution-data-server (1.4.2.1-20070213) unstable; urgency=low
 
   * Fix the BDB backend's dispose() function, and use atomic ints for
