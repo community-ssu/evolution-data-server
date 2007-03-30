@@ -155,7 +155,6 @@ static const EContactFieldInfo field_info[] = {
 	LIST_ELEM_STR_FIELD (E_CONTACT_ORG,      EVC_ORG, "org",      N_("Organization"),        FALSE, 0),
 	LIST_ELEM_STR_FIELD (E_CONTACT_ORG_UNIT, EVC_ORG, "org-unit", N_("Organizational Unit"), FALSE, 1),
 	LIST_ELEM_STR_FIELD (E_CONTACT_OFFICE,   EVC_ORG, "office",   N_("Office"),              FALSE, 2),
-
 	STRING_FIELD    (E_CONTACT_TITLE,     EVC_TITLE,       "title",     N_("Title"),           FALSE),
 	STRING_FIELD    (E_CONTACT_ROLE,      EVC_ROLE,        "role",      N_("Role"),            FALSE),
 	STRING_FIELD    (E_CONTACT_MANAGER,   EVC_X_MANAGER,   "manager",   N_("Manager"),         FALSE),
@@ -255,6 +254,14 @@ static const EContactFieldInfo field_info[] = {
 	/* Security fields */
 	ATTR_TYPE_STRUCT_FIELD (E_CONTACT_X509_CERT,  EVC_KEY, "x509Cert",  N_("X.509 Certificate"), FALSE, "X509", cert_getter, cert_setter, e_contact_cert_get_type),
 
+	ATTR_TYPE_STR_FIELD (E_CONTACT_IM_GADUGADU_HOME_1,  EVC_X_GADUGADU,  "im-gadugadu-home-1",  N_("Gadu-Gadu Home Id 1"), FALSE, "HOME", 0),
+	ATTR_TYPE_STR_FIELD (E_CONTACT_IM_GADUGADU_HOME_2,  EVC_X_GADUGADU,  "im-gadugadu-home-2",  N_("Gadu-Gadu Home Id 2"), FALSE, "HOME", 1),
+	ATTR_TYPE_STR_FIELD (E_CONTACT_IM_GADUGADU_HOME_3,  EVC_X_GADUGADU,  "im-gadugadu-home-3",  N_("Gadu-Gadu Home Id 3"), FALSE, "HOME", 2),
+	ATTR_TYPE_STR_FIELD (E_CONTACT_IM_GADUGADU_WORK_1,  EVC_X_GADUGADU,  "im-gadugadu-work-1",  N_("Gadu-Gadu Work Id 1"), FALSE, "WORK", 0),
+	ATTR_TYPE_STR_FIELD (E_CONTACT_IM_GADUGADU_WORK_2,  EVC_X_GADUGADU,  "im-gadugadu-work-2",  N_("Gadu-Gadu Work Id 2"), FALSE, "WORK", 1),
+	ATTR_TYPE_STR_FIELD (E_CONTACT_IM_GADUGADU_WORK_3,  EVC_X_GADUGADU,  "im-gadugadu-work-3",  N_("Gadu-Gadu Work Id 3"), FALSE, "WORK", 2),
+	MULTI_LIST_FIELD (E_CONTACT_IM_GADUGADU,  EVC_X_GADUGADU,  "im-gadugadu", N_("Gadu-Gadu Id List"), FALSE),
+
 	/* For TEL */
  	STRING_FIELD (E_CONTACT_PHONE_TELEPHONE,        EVC_TEL,       "tel",         N_("Telephone"),  FALSE),
 
@@ -316,25 +323,25 @@ e_contact_class_init (EContactClass *klass)
 		if (field_info[i].t & E_CONTACT_FIELD_TYPE_STRING)
 			pspec = g_param_spec_string (field_info[i].field_name,
 						     _(field_info[i].pretty_name),
-						     "" /* XXX blurb */,
+						    field_info[i].pretty_name,
 						     NULL,
 						     field_info[i].read_only ? E_PARAM_READABLE : E_PARAM_READWRITE);
 		else if (field_info[i].t & E_CONTACT_FIELD_TYPE_BOOLEAN)
 			pspec = g_param_spec_boolean (field_info[i].field_name,
 						      _(field_info[i].pretty_name),
-						      "" /* XXX blurb */,
+						    field_info[i].pretty_name,
 						      FALSE,
 						      field_info[i].read_only ? E_PARAM_READABLE : E_PARAM_READWRITE);
 		else if (field_info[i].t & E_CONTACT_FIELD_TYPE_STRUCT)
 			pspec = g_param_spec_boxed (field_info[i].field_name,
 						    _(field_info[i].pretty_name),
-						    "" /* XXX blurb */,
+						    field_info[i].pretty_name,
 						    field_info[i].boxed_type_getter(),
 						    field_info[i].read_only ? E_PARAM_READABLE : E_PARAM_READWRITE);
 		else
 			pspec = g_param_spec_pointer (field_info[i].field_name,
 						      _(field_info[i].pretty_name),
-						      "" /* XXX blurb */,
+						    field_info[i].pretty_name,
 						      field_info[i].read_only ? E_PARAM_READABLE : E_PARAM_READWRITE);
 
 		g_object_class_install_property (object_class, field_info[i].field_id,
@@ -385,7 +392,7 @@ e_contact_get_first_attr (EContact *contact, const char *attr_name)
 
 		name = e_vcard_attribute_get_name (attr);
 
-		if (!strcmp (name, attr_name))
+		if (!g_ascii_strcasecmp (name, attr_name))
 			return attr;
 	}
 
@@ -736,7 +743,7 @@ e_contact_set_property (GObject *object,
 				attr = l->data;
 				name = e_vcard_attribute_get_name (attr);
 
-				if (!strcmp (name, info->vcard_field_name)) {
+				if (!g_ascii_strcasecmp (name, info->vcard_field_name)) {
 					if (num_left-- == 0) {
 						found = TRUE;
 						break;
@@ -794,22 +801,22 @@ e_contact_set_property (GObject *object,
 				attr = l->data;
 				name = e_vcard_attribute_get_name (attr);
 
-				if (!strcmp (name, info->vcard_field_name)) {
+				if (!g_ascii_strcasecmp (name, info->vcard_field_name)) {
 					GList *params;
 
 					for (params = e_vcard_attribute_get_params (attr); params; params = params->next) {
 						EVCardAttributeParam *param = params->data;
 						const char *name = e_vcard_attribute_param_get_name (param);
 
-						if (!strcmp (name, EVC_TYPE)) {
+						if (!g_ascii_strcasecmp (name, EVC_TYPE)) {
 							GList *values = e_vcard_attribute_param_get_values (param);
 							if (values && values->data) {
 								gboolean matches = FALSE;
-								if (!found_needed1 && !strcasecmp ((char*)values->data, info->attr_type1)) {
+								if (!found_needed1 && !g_ascii_strcasecmp ((char*)values->data, info->attr_type1)) {
 									found_needed1 = TRUE;
 									matches = TRUE;
 								}
-								else if (!found_needed2 && !strcasecmp ((char*)values->data, info->attr_type2)) {
+								else if (!found_needed2 && !g_ascii_strcasecmp ((char*)values->data, info->attr_type2)) {
 									found_needed2 = TRUE;
 									matches = TRUE;
 								}
@@ -1059,23 +1066,23 @@ e_contact_find_attribute_with_types (EContact *contact, const char *attr_name, c
 
 		name = e_vcard_attribute_get_name (attr);
 
-		if (!strcmp (name, attr_name)) {
+		if (!g_ascii_strcasecmp (name, attr_name)) {
 			GList *params;
 
 			for (params = e_vcard_attribute_get_params (attr); params; params = params->next) {
 				EVCardAttributeParam *param = params->data;
 				const char *name = e_vcard_attribute_param_get_name (param);
 
-				if (!strcmp (name, EVC_TYPE)) {
+				if (!g_ascii_strcasecmp (name, EVC_TYPE)) {
 					GList *values = e_vcard_attribute_param_get_values (param);
 					if (values && values->data) {
 						gboolean matches = FALSE;
 
-						if (!found_needed1 && !strcasecmp ((char*)values->data, type_needed1)) {
+						if (!found_needed1 && !g_ascii_strcasecmp ((char*)values->data, type_needed1)) {
 							found_needed1 = TRUE;
 							matches = TRUE;
 						}
-						else if (!found_needed2 && !strcasecmp ((char*)values->data, type_needed2)) {
+						else if (!found_needed2 && !g_ascii_strcasecmp ((char*)values->data, type_needed2)) {
 							found_needed2 = TRUE;
 							matches = TRUE;
 						}
@@ -1400,7 +1407,7 @@ contact_get_safe (EContact *contact, EContactField field_id)
 
 				name = e_vcard_attribute_get_name (attr);
 
-				if (!strcmp (name, info->vcard_field_name)) {
+				if (!g_ascii_strcasecmp (name, info->vcard_field_name)) {
 					if (num_left-- == 0) {
 						GList *v = e_vcard_attribute_get_values (attr);
 
@@ -1501,7 +1508,7 @@ contact_get_safe (EContact *contact, EContactField field_id)
 
 			name = e_vcard_attribute_get_name (attr);
 
-			if (!strcmp (name, info->vcard_field_name)) {
+			if (!g_ascii_strcasecmp (name, info->vcard_field_name)) {
 				GList *v;
 				v = e_vcard_attribute_get_values (attr);
 
@@ -1556,7 +1563,7 @@ get_const_safe (EContact *contact, EContactField field_id)
 
 	return value;
 }
-	
+
 /**
  * e_contact_get_const:
  * @contact: an #EContact
@@ -1631,7 +1638,7 @@ e_contact_get_attributes (EContact *contact, EContactField field_id)
 
 		name = e_vcard_attribute_get_name (attr);
 
-		if (!strcmp (name, info->vcard_field_name)) {
+		if (!g_ascii_strcasecmp (name, info->vcard_field_name)) {
 			l = g_list_prepend (l, e_vcard_attribute_copy (attr));
 		}
 	}
@@ -1808,11 +1815,16 @@ e_contact_date_from_string (const char *str)
 {
 	EContactDate* date;
 	int length;
+	char *t;
 
 	g_return_val_if_fail (str != NULL, NULL);
 
 	date = e_contact_date_new();
-	length = strlen(str);
+	/* ignore time part */
+	if ((t = strchr (str, 'T')) != NULL)
+		length = t - str;
+	else
+		length = strlen(str);
 	
 	if (length == 10 ) {
 		date->year = str[0] * 1000 + str[1] * 100 + str[2] * 10 + str[3] - '0' * 1111;
@@ -1889,14 +1901,14 @@ e_contact_date_copy (EContactDate *dt)
 
 /**
  * e_contact_date_free:
- * @dt: an #EContactDate
+ * @date: an #EContactDate
  *
- * Frees the @dt struct and its contents.
- **/
+ * Frees the @date struct and its contents.
+ */
 void
-e_contact_date_free (EContactDate *dt)
+e_contact_date_free (EContactDate *date)
 {
-	g_free (dt);
+	g_free (date);
 }
 
 GType

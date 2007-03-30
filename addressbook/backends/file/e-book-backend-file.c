@@ -42,7 +42,7 @@
 
 #include "e-dbhash.h"
 #include "e-db3-utils.h"
-#include "libedataserver/e-util.h"
+#include "libedataserver/e-data-server-util.h"
 
 #include "libebook/e-contact.h"
 
@@ -81,25 +81,25 @@ struct _EBookBackendFilePrivate {
 
 static GStaticMutex global_env_lock = G_STATIC_MUTEX_INIT;
 static struct {
-	volatile int ref_count;
+	int ref_count;
 	DB_ENV *env;
 } global_env = { 0, NULL };
 
-static EDataBookStatus
+static EBookBackendSyncStatus
 db_error_to_status (const int db_error)
 {
 	switch (db_error) {
 	case 0:
-		return Success;
+		return GNOME_Evolution_Addressbook_Success;
 	case DB_NOTFOUND:
-		return ContactNotFound;
+		return GNOME_Evolution_Addressbook_ContactNotFound;
 	case EACCES:
-		return PermissionDenied;
+		return GNOME_Evolution_Addressbook_PermissionDenied;
 	case ENOMEM:
 	case ENOSPC:
-		return NoSpace;
+		return GNOME_Evolution_Addressbook_NoSpace;
 	default:
-		return OtherError;
+		return GNOME_Evolution_Addressbook_OtherError;
 	}
 }
 
@@ -359,7 +359,6 @@ e_book_backend_file_modify_contact (EBookBackendSync *backend,
 	} else {
 		g_warning (G_STRLOC ": db->put failed with %s", db_strerror(db_error));
 	}
-
 	g_free (id);
 	g_free (vcard_with_rev);
 
@@ -648,11 +647,12 @@ book_view_thread (gpointer data)
 			}
 
 			dbc->c_close (dbc);
-			if (db_error != DB_NOTFOUND)
-				g_warning ("e_book_backend_file_search: error building list\n");
+			if (db_error && db_error != DB_NOTFOUND)
+				g_warning ("e_book_backend_file_search: error building list: %s",
+					   db_strerror (db_error));
 		}
 		else if (db_error == DB_RUNRECOVERY) {
-			g_warning ("e_book_backend_file_search: error getting the cursor for %s\n",
+			g_warning ("e_book_backend_file_search: error getting the cursor for %s",
 				   bf->priv->filename);
 			abort ();
 		}
@@ -819,6 +819,7 @@ e_book_backend_file_get_changes (EBookBackendSync *backend,
 				/* check what type of change has occurred, if any */
 				switch (e_dbhash_compare (ehash, id, vcard_string)) {
 				case E_DBHASH_STATUS_SAME:
+					g_free(vcard_string);
 					break;
 				case E_DBHASH_STATUS_NOT_FOUND:
 					ctx.add_cards = g_list_append (ctx.add_cards, vcard_string);
@@ -1116,7 +1117,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 	g_static_mutex_lock(&global_env_lock);
 	if (global_env.ref_count > 0) {
 		env = global_env.env;
-		g_atomic_int_inc (&global_env.ref_count);
+		global_env.ref_count++;
 	} else {
 		db_error = db_env_create (&env, 0);
 		if (db_error != 0) {
@@ -1145,7 +1146,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 		}
 
 		global_env.env = env;
-		g_atomic_int_inc (&global_env.ref_count);
+		global_env.ref_count = 1;
 	}
 	g_static_mutex_unlock(&global_env_lock);
 
@@ -1192,11 +1193,11 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 				g_free (dirname);
 				g_free (filename);
 				if (errno == EACCES || errno == EPERM)
-					return PermissionDenied;
+					return GNOME_Evolution_Addressbook_PermissionDenied;
 				else if (errno == ENOSPC)
-					return NoSpace;
+					return GNOME_Evolution_Addressbook_NoSpace;
 				else
-					return OtherError;
+					return GNOME_Evolution_Addressbook_OtherError;
 			}
 
 			db_error = db->open (db, NULL, filename, NULL, DB_HASH, DB_CREATE | DB_THREAD, 0666);
@@ -1407,16 +1408,15 @@ e_book_backend_file_dispose (GObject *object)
 	}
 	
 	g_static_mutex_lock(&global_env_lock);
-	if (g_atomic_int_get (&global_env.ref_count) > 0) {
-		if (g_atomic_int_dec_and_test (&global_env.ref_count)) {
-			global_env.env->close(global_env.env, 0);
-			global_env.env = NULL;
-		}
+	global_env.ref_count--;
+	if (global_env.ref_count == 0) {
+		global_env.env->close (global_env.env, 0);
+		global_env.env = NULL;
 	}
-	g_static_mutex_unlock(&global_env_lock);
-
+	g_static_mutex_unlock (&global_env_lock);
+	
 	if (bf->priv->summary) {
-		g_object_unref(bf->priv->summary);
+		g_object_unref (bf->priv->summary);
 		bf->priv->summary = NULL;
 	}
 

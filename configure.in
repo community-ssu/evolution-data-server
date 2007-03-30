@@ -122,7 +122,7 @@ AC_SUBST(HAVE_JW)
 dnl I18N stuff
 AC_PROG_INTLTOOL
 
-ALL_LINGUAS="am ar az be bg bn bs ca cs cy da de el en_AU en_CA en_GB es et eu fa fi fr ga gl gu he hi hr hu id is it ja ko lt lv mk ml mn ms nb ne nl nn no pa pl pt pt_BR ro ru rw sk sl sq sr sr@Latn sv tr uk vi wa xh zh_CN zh_TW"
+ALL_LINGUAS="am ar az be bg bn bs ca cs cy da de dz el en_AU en_CA en_GB es et eu fa fi fr ga gl gu he hi hr hu id is it ja ko lt lv mk ml mn ms nb ne nl nn no pa pl pt pt_BR ro ru rw sk sl sq sr sr@Latn sv tr uk vi wa xh zh_CN zh_TW"
 AM_GLIB_GNU_GETTEXT
 
 GETTEXT_PACKAGE=evolution-data-server-$BASE_VERSION
@@ -1170,7 +1170,11 @@ fi
 AC_MSG_RESULT($with_bug_buddy)
 
 if test "x${with_dbus}" = "xno"; then
-        dnl TODO HACK ARGH SICK AM_PATH_ORBIT2(2.9.8)
+        PKG_CHECK_MODULES(ORBIT, ORBit-2.0 >= 2.9.8)
+        ORBIT_IDL=`$PKG_CONFIG --variable=orbit_idl ORBit-2.0`
+        AC_SUBST(ORBIT_CFLAGS)
+        AC_SUBST(ORBIT_LIBS)
+        AC_SUBST(ORBIT_IDL)
 
         AC_MSG_CHECKING(for CORBA include paths)
         IDL_INCLUDES="-I "`pkg-config --variable=idldir libbonobo-2.0`" -I "`pkg-config --variable=idldir bonobo-activation-2.0`
@@ -1326,7 +1330,7 @@ INTERFACE_VERSION="$BASE_VERSION"
 AC_SUBST(INTERFACE_VERSION)
 AC_DEFINE_UNQUOTED(INTERFACE_VERSION, "$INTERFACE_VERSION", [IDL interface version (Major.Minor)])
 
-EVO_SUBST_SERVER_RULE='%.server.in: %.server.in.in ; sed -e "s|\@BINDIR\@|$(bindir)|" -e "s|\@LIBEXECDIR\@|$(libexecdir)|" -e "s|\@COMPONENTDIR\@|$(componentdir)|" -e "s|\@IMPORTERSDIR\@|$(importersdir)|" -e "s|\@EXEEXT\@|$(EXEEXT)|" -e "s|\@VERSION\@|$(BASE_VERSION)|" -e "s|\@API_VERSION\@|$(API_VERSION) |" -e "s|\@INTERFACE_VERSION\@|$(INTERFACE_VERSION)|" $< > $@'
+EVO_SUBST_SERVER_RULE='%.server.in: %.server.in.in Makefile ; sed -e "s|\@BINDIR\@|$(bindir)|" -e "s|\@LIBEXECDIR\@|$(libexecdir)|" -e "s|\@COMPONENTDIR\@|$(componentdir)|" -e "s|\@IMPORTERSDIR\@|$(importersdir)|" -e "s|\@EXEEXT\@|$(EXEEXT)|" -e "s|\@VERSION\@|$(BASE_VERSION)|" -e "s|\@API_VERSION\@|$(API_VERSION) |" -e "s|\@INTERFACE_VERSION\@|$(INTERFACE_VERSION)|" $< > $@'
 EVO_NAME_SERVER_RULE='%_$(API_VERSION).server: %.server ; mv $< $@'
 AC_SUBST(EVO_SUBST_SERVER_RULE)
 AC_SUBST(EVO_NAME_SERVER_RULE)
@@ -1334,7 +1338,7 @@ AC_SUBST(EVO_NAME_SERVER_RULE)
 dnl *******************
 dnl D-BUS service stuff 
 dnl *******************
-EVO_SUBST_SERVICE_RULE='%.service: %.service.in ; sed -e "s|\@BINDIR\@|$(bindir)|" -e "s|\@LIBEXECDIR\@|$(libexecdir)|" -e "s|\@COMPONENTDIR\@|$(componentdir)|" -e "s|\@IMPORTERSDIR\@|$(importersdir)|" -e "s|\@VERSION\@|$(BASE_VERSION)|" -e "s|\@INTERFACE_VERSION\@|$(INTERFACE_VERSION)|" $< > $@'
+EVO_SUBST_SERVICE_RULE='%.service: %.service.in Makefile ; sed -e "s|\@BINDIR\@|$(bindir)|" -e "s|\@LIBEXECDIR\@|$(libexecdir)|" -e "s|\@COMPONENTDIR\@|$(componentdir)|" -e "s|\@IMPORTERSDIR\@|$(importersdir)|" -e "s|\@VERSION\@|$(BASE_VERSION)|" -e "s|\@INTERFACE_VERSION\@|$(INTERFACE_VERSION)|" $< > $@'
 AC_SUBST(EVO_SUBST_SERVICE_RULE)
 
 dnl ***********

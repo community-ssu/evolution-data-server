@@ -25,7 +25,6 @@
 #endif
 
 #include <string.h>
-#include "e-data-server-marshal.h"
 #include "e-uid.h"
 #include "e-source-group.h"
 
@@ -123,7 +122,7 @@ e_source_group_class_init (ESourceGroupClass *class)
 			      G_SIGNAL_RUN_LAST,
 			      G_STRUCT_OFFSET (ESourceGroupClass, changed),
 			      NULL, NULL,
-			      e_data_server_marshal_VOID__VOID,
+			      g_cclosure_marshal_VOID__VOID,
 			      G_TYPE_NONE, 0);
 
 	signals[SOURCE_ADDED] = 
@@ -132,7 +131,7 @@ e_source_group_class_init (ESourceGroupClass *class)
 			      G_SIGNAL_RUN_LAST,
 			      G_STRUCT_OFFSET (ESourceGroupClass, source_added),
 			      NULL, NULL,
-			      e_data_server_marshal_VOID__OBJECT,
+			      g_cclosure_marshal_VOID__OBJECT,
 			      G_TYPE_NONE, 1,
 			      G_TYPE_OBJECT);
 	signals[SOURCE_REMOVED] = 
@@ -141,7 +140,7 @@ e_source_group_class_init (ESourceGroupClass *class)
 			      G_SIGNAL_RUN_LAST,
 			      G_STRUCT_OFFSET (ESourceGroupClass, source_removed),
 			      NULL, NULL,
-			      e_data_server_marshal_VOID__OBJECT,
+			      g_cclosure_marshal_VOID__OBJECT,
 			      G_TYPE_NONE, 1,
 			      G_TYPE_OBJECT);
 }
@@ -216,6 +215,10 @@ e_source_group_new_from_xmldoc (xmlDocPtr doc)
 		goto done;
 
 	new = g_object_new (e_source_group_get_type (), NULL);
+
+	if (!new)
+		goto done;
+
 	new->priv->uid = g_strdup (uid);
 
 	e_source_group_set_name (new, name);
@@ -412,8 +415,12 @@ e_source_group_uid_from_xmldoc (xmlDocPtr doc)
 	xmlNodePtr root = doc->children;
 	xmlChar *name;
 	char *retval;
-
-	if (strcmp (root->name, "group") != 0)
+	
+	if (root && root->name) {
+		if (strcmp (root->name, "group") != 0)
+			return NULL;
+	}
+	else 
 		return NULL;
 
 	name = xmlGetProp (root, "uid");
@@ -435,7 +442,8 @@ e_source_group_set_name (ESourceGroup *group,
 	if (group->priv->readonly)
 		return;
 	
-	if (group->priv->name == name)
+	if (group->priv->name != NULL &&
+	    strcmp (group->priv->name, name) == 0)
 		return;
 
 	g_free (group->priv->name);

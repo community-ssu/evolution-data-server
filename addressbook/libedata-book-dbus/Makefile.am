@@ -72,7 +72,10 @@ CLEANFILES = $(BUILT_SOURCES) $(service_DATA)
 DISTCLEANFILES = $(pkgconfig_DATA)
 
 EXTRA_DIST = 						\
-	$(pkgconfig_DATA:-$(API_VERSION).pc=.pc.in)     \
+	e-data-book-factory.xml				\
+	e-data-book-view.xml				\
+	e-data-book.xml					\
+	$(pkgconfig_DATA:-$(API_VERSION).pc=.pc.in)	\
 	$(service_in_files)
 
 dist-hook:

@@ -22,8 +22,12 @@
 #include <config.h>
 #include <string.h>
 #include <unistd.h>
+
+#include <glib.h>
+#include <glib/gstdio.h>
+
 #include "e-file-cache.h"
-#include "e-util.h"
+#include "e-data-server-util.h"
 #include "e-xml-hash-utils.h"
 
 struct _EFileCachePrivate {
@@ -52,6 +56,12 @@ e_file_cache_set_property (GObject *object, guint property_id, const GValue *val
 	cache = E_FILE_CACHE (object);
 	priv = cache->priv;
 
+	/* FIXME: the property is being set twice. Need to investigate
+	 * why and fix. Until then, we just return when called the 
+	 * second time*/
+	if (priv->filename)
+		return;
+
 	switch (property_id) {
 	case PROP_FILENAME :
 		/* make sure the directory for the cache exists */
@@ -68,7 +78,7 @@ e_file_cache_set_property (GObject *object, guint property_id, const GValue *val
 
 		/* if opening the cache file fails, remove it and try again */
 		if (!priv->xml_hash) {
-			unlink (g_value_get_string (value));
+			g_unlink (g_value_get_string (value));
 			priv->xml_hash = e_xmlhash_new (g_value_get_string (value));
 			if (priv->xml_hash) {
 				g_message (G_STRLOC ": could not open not re-create cache file %s",
@@ -201,7 +211,7 @@ e_file_cache_remove (EFileCache *cache)
 		if (dir) {
 			while ((fname = g_dir_read_name (dir))) {
 				full_path = g_build_filename (dirname, fname, NULL);
-				if (unlink (full_path) != 0) {
+				if (g_unlink (full_path) != 0) {
 					g_free (full_path);
 					g_free (dirname);
 					g_dir_close (dir);
@@ -216,7 +226,7 @@ e_file_cache_remove (EFileCache *cache)
 		}
 
 		/* remove the directory itself */
-		success = rmdir (dirname) == 0;
+		success = g_rmdir (dirname) == 0;
 
 		/* free all memory */
 		g_free (dirname);

@@ -1,13 +1,12 @@
 INCLUDES =								\
 	-I$(top_srcdir)							\
 	-DG_LOG_DOMAIN=\"e-data-server\"				\
+	-DE_DATA_SERVER_PREFIX=\"$(prefix)\"				\
+	-DEVOLUTION_LOCALEDIR=\""$(localedir)"\"			\
 	-DE_DATA_SERVER_EXTENSIONDIR=\"$(extensiondir)\"		\
 	-DE_DATA_SERVER_IMAGESDIR=\"$(imagesdir)\"			\
+	-DE_DATA_SERVER_UI_GLADEDIR=\""$(gladedir)"\"			\
 	$(E_DATA_SERVER_CFLAGS)
-
-# The marshallers
-MARSHAL_GENERATED = e-data-server-marshal.c e-data-server-marshal.h
-@EVO_MARSHAL_RULE@
 
 lib_LTLIBRARIES = libedataserver-1.2.la
 noinst_PROGRAMS = test-source-list
@@ -17,7 +16,6 @@ BONOBO_SOURCES = e-component-listener.c
 endif
 
 libedataserver_1_2_la_SOURCES =		\
-	$(MARSHAL_GENERATED)		\
 	$(BONOBO_SOURCES)		\
 	e-account-list.c		\
 	e-account.c			\
@@ -37,9 +35,11 @@ libedataserver_1_2_la_SOURCES =		\
 	e-time-utils.c			\
 	e-uid.c				\
 	e-url.c				\
-	e-util.c			\
+	e-data-server-util.c		\
 	e-trie.c			\
+	e-xml-utils.c			\
 	e-xml-hash-utils.c		\
+	libedataserver-private.h	\
 	md5-utils.c
 
 libedataserver_1_2_la_LIBADD = 				\
@@ -73,7 +73,8 @@ libedataserverinclude_HEADERS =		\
 	e-trie.h			\
 	e-uid.h				\
 	e-url.h				\
-	e-util.h			\
+	e-data-server-util.h		\
+	e-xml-utils.h			\
 	e-xml-hash-utils.h		\
 	md5-utils.h
 

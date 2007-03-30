@@ -25,7 +25,6 @@
 #endif
 
 #include <string.h>
-#include "e-data-server-marshal.h"
 #include "e-source-list.h"
 
 struct _ESourceListPrivate {
@@ -172,7 +171,7 @@ load_from_gconf (ESourceList *list)
 
 	/* FIXME if the order changes, the function doesn't notice.  */
 
-	if (changed)
+	if (changed) 
 		g_signal_emit (list, signals[CHANGED], 0);
 }
 
@@ -266,6 +265,8 @@ impl_dispose (GObject *object)
 
 		g_object_unref (priv->gconf_client);
 		priv->gconf_client = NULL;
+	} else {
+		g_assert_not_reached ();
 	}
 
 	(* G_OBJECT_CLASS (e_source_list_parent_class)->dispose) (object);
@@ -305,7 +306,7 @@ e_source_list_class_init (ESourceListClass *class)
 			      G_SIGNAL_RUN_LAST,
 			      G_STRUCT_OFFSET (ESourceListClass, changed),
 			      NULL, NULL,
-			      e_data_server_marshal_VOID__VOID,
+			      g_cclosure_marshal_VOID__VOID,
 			      G_TYPE_NONE, 0);
 
 	signals[GROUP_REMOVED] = 
@@ -314,7 +315,7 @@ e_source_list_class_init (ESourceListClass *class)
 			      G_SIGNAL_RUN_LAST,
 			      G_STRUCT_OFFSET (ESourceListClass, group_removed),
 			      NULL, NULL,
-			      e_data_server_marshal_VOID__OBJECT,
+			      g_cclosure_marshal_VOID__OBJECT,
 			      G_TYPE_NONE, 1,
 			      G_TYPE_POINTER);
 
@@ -324,7 +325,7 @@ e_source_list_class_init (ESourceListClass *class)
 			      G_SIGNAL_RUN_LAST,
 			      G_STRUCT_OFFSET (ESourceListClass, group_added),
 			      NULL, NULL,
-			      e_data_server_marshal_VOID__OBJECT,
+			      g_cclosure_marshal_VOID__OBJECT,
 			      G_TYPE_NONE, 1,
 			      G_TYPE_POINTER);
 }
@@ -339,12 +340,26 @@ e_source_list_init (ESourceList *source_list)
 	source_list->priv = priv;
 }
 
+/* returns the type */
+static GType
+get_source_list_type (void) 
+{
+	static GType type = 0;
+	
+	if (!type) {
+		if (!(type = g_type_from_name ("ESourceList")))
+			type = e_source_list_get_type ();
+	}
+
+	return type;
+}
+
 /* Public methods.  */
 
 ESourceList *
 e_source_list_new (void)
 {
-	ESourceList *list = g_object_new (e_source_list_get_type (), NULL);
+	ESourceList *list = g_object_new (get_source_list_type (), NULL);
 
 	return list;
 }
@@ -358,7 +373,7 @@ e_source_list_new_for_gconf (GConfClient *client,
 	g_return_val_if_fail (GCONF_IS_CLIENT (client), NULL);
 	g_return_val_if_fail (path != NULL, NULL);
 
-	list = g_object_new (e_source_list_get_type (), NULL);
+	list = g_object_new (get_source_list_type (), NULL);
 
 	list->priv->gconf_path = g_strdup (path);
 	list->priv->gconf_client = client;
@@ -382,7 +397,7 @@ e_source_list_new_for_gconf_default (const char  *path)
 
 	g_return_val_if_fail (path != NULL, NULL);
 
-	list = g_object_new (e_source_list_get_type (), NULL);
+	list = g_object_new (get_source_list_type (), NULL);
 
 	list->priv->gconf_path = g_strdup (path);
 	list->priv->gconf_client = gconf_client_get_default ();
@@ -574,14 +589,111 @@ e_source_list_sync (ESourceList *list,
 		conf_list = g_slist_prepend (conf_list, e_source_group_to_xml (E_SOURCE_GROUP (p->data)));
 	conf_list = g_slist_reverse (conf_list);
 
-	retval = gconf_client_set_list (list->priv->gconf_client,
-					list->priv->gconf_path,
-					GCONF_VALUE_STRING,
-					conf_list,
-					error);
+	if (!e_source_list_is_gconf_updated (list))
+		retval = gconf_client_set_list (list->priv->gconf_client,
+						list->priv->gconf_path,
+						GCONF_VALUE_STRING,
+						conf_list,
+						error);
+	else
+		retval = TRUE;
 
 	g_slist_foreach (conf_list, (GFunc) g_free, NULL);
 	g_slist_free (conf_list);
 
 	return retval;
+}
+
+gboolean
+e_source_list_is_gconf_updated (ESourceList *list)
+{
+	char *source_group_xml = NULL;
+	char *gconf_xml = NULL;
+	char *group_uid = NULL;
+	GSList *conf_list = NULL, *temp = NULL, *p = NULL;
+	xmlDocPtr xmldoc;
+	ESourceGroup *group = NULL;
+	GSList *groups = NULL;	
+	gboolean conf_to_list = TRUE, list_to_conf = TRUE;
+	
+	g_return_val_if_fail (list != NULL, FALSE);
+
+	conf_list = gconf_client_get_list (list->priv->gconf_client,
+					   list->priv->gconf_path,
+					   GCONF_VALUE_STRING, NULL);
+
+	/* From conf to list */
+
+	for (temp = conf_list; temp != NULL; temp = temp->next) {
+		gconf_xml = (char *)temp->data;
+		xmldoc = xmlParseDoc ((const xmlChar *)gconf_xml);
+
+		group_uid = e_source_group_uid_from_xmldoc (xmldoc);
+		group = e_source_list_peek_group_by_uid (list, group_uid);
+		g_free (group_uid);
+		xmlFreeDoc (xmldoc);
+
+		if (group) {
+			source_group_xml = e_source_group_to_xml (group);
+			if (!strcmp (gconf_xml, source_group_xml)) {
+				g_free (source_group_xml);
+				continue;
+			}
+			else {
+				conf_to_list  = FALSE;
+				g_free (source_group_xml);
+				break;
+			}
+		} else {
+			conf_to_list = FALSE;	
+			break;
+		}
+	}
+
+
+	/* If there is mismatch, free the conf_list and return FALSE */
+	if (!conf_to_list) {
+		for (p = conf_list; p != NULL ; p = p->next) {
+			gconf_xml = (char *) p->data;
+			g_free (gconf_xml);
+		}
+		g_slist_free (conf_list);
+		return FALSE;
+	}
+	
+	groups = e_source_list_peek_groups (list);
+	
+	/* From list to conf */	
+
+	for (p = groups ; p != NULL; p = p->next) {
+		group = E_SOURCE_GROUP (p->data);
+		source_group_xml = e_source_group_to_xml (group);
+
+		for (temp = conf_list; temp != NULL; temp = temp->next) {
+			gconf_xml = (char *)temp->data;
+			if (strcmp (gconf_xml, source_group_xml))
+				continue;
+			else
+				break; 
+		}
+		g_free (source_group_xml);
+
+		if (!temp) {
+			list_to_conf = FALSE;
+			break;
+		}
+
+	}
+
+	for (p = conf_list; p != NULL ; p = p->next) {
+		gconf_xml = (char *) p->data;
+		g_free (gconf_xml);
+	}
+	g_slist_free (conf_list);
+
+	/* If there is mismatch return FALSE */
+	if (!list_to_conf)
+		return FALSE;
+	
+	return TRUE;
 }

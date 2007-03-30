@@ -16,6 +16,7 @@ lib_LTLIBRARIES = libebook-1.2.la
 
 libebook_1_2_la_SOURCES =					\
 	$(MARSHAL_GENERATED)				\
+	$(DBUS_GENERATED_H)				\
 	e-address-western.c				\
 	e-book-query.c					\
 	e-book-view.c					\
@@ -24,7 +25,9 @@ libebook_1_2_la_SOURCES =					\
 	e-contact.c					\
 	e-destination.c					\
 	e-name-western.c				\
-	e-vcard.c
+	e-name-western-tables.h				\
+	e-vcard.c					\
+	e-error.h
 
 libebook_1_2_la_LIBADD =					\
 	$(EVOLUTION_ADDRESSBOOK_LIBS)				\
@@ -37,7 +40,6 @@ libebook_1_2_la_LDFLAGS = 							\
 libebookincludedir = $(privincludedir)/libebook
 
 libebookinclude_HEADERS =				\
-	$(DBUS_GENERATED_H)				\
 	e-address-western.h				\
 	e-book-query.h					\
 	e-book-view.h					\
@@ -46,7 +48,6 @@ libebookinclude_HEADERS =				\
 	e-contact.h					\
 	e-destination.h					\
 	e-name-western.h				\
-	e-name-western-tables.h				\
 	e-vcard.h
 
 %-$(API_VERSION).pc: %.pc
@@ -56,10 +57,10 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libebook-$(API_VERSION).pc
 
 DBUS_GENERATED_H = e-data-book-factory-bindings.h e-data-book-bindings.h e-data-book-view-bindings.h
-%-glue.h: ../libedata-book-dbus/%.xml
+%-glue.h: $(top_srcdir)/addressbook/libedata-book-dbus/%.xml
 	dbus-binding-tool --mode=glib-server --output=$@ --prefix=$(subst -,_,$*) $^
 
-%-bindings.h: ../libedata-book-dbus/%.xml
+%-bindings.h: $(top_srcdir)/addressbook/libedata-book-dbus/%.xml
 	dbus-binding-tool --mode=glib-client --output=$@ --prefix=$(subst -,_,$*) $^
 
 BUILT_SOURCES = $(DBUS_GENERATED_H) $(MARSHAL_GENERATED)
@@ -73,6 +74,9 @@ EXTRA_DIST = 						\
 dist-hook:
 	cd $(distdir); rm -f $(BUILT_SOURCES)
 
-noinst_PROGRAMS = test
-test_SOURCES = test.c
-test_LDADD = $(EVOLUTION_ADDRESSBOOK_LIBS) libebook-1.2.la
+
+check_PROGRAMS = test-econtact
+test_econtact_SOURCES = test-econtact.c
+test_econtact_LDADD = ./libebook-1.2.la -lcheck
+
+TESTS = test-econtact

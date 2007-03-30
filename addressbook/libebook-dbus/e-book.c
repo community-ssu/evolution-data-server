@@ -1692,18 +1692,20 @@ e_book_check_static_capability (EBook *book, const char *cap)
  * alone.
  */
 static gboolean
-unwrap_gerror(GError *error, GError **client_error)
+unwrap_gerror (GError *error, GError **client_error)
 {
   if (error == NULL)
     return TRUE;
+  
   if (error->domain == DBUS_GERROR && error->code == DBUS_GERROR_REMOTE_EXCEPTION) {
     GError *new;
     gint code;
-    code = get_status_from_error (error);
-    new = g_error_new_literal (E_BOOK_ERROR, code, error->message);
-    g_error_free (error);
-    if (client_error)
+    if (client_error) {
+      code = get_status_from_error (error);
+      new = g_error_new_literal (E_BOOK_ERROR, code, error->message);
       *client_error = new;
+    }
+    g_error_free (error);
   } else {
     if (client_error)
       *client_error = error;

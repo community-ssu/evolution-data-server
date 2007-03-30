@@ -37,8 +37,7 @@ DEB_CONFIGURE_EXTRA_FLAGS := \
 	--disable-nss \
 	--without-soup \
 	--disable-nntp \
-	--without-bug-buddy \
-	--disable-calendar
+	--without-bug-buddy
 
 debian/stamp-autotools-files:
 	./autogen.sh $(DEB_CONFIGURE_EXTRA_FLAGS)

@@ -20,7 +20,7 @@
 
 #include <string.h>
 #include <libedataserver/e-sexp.h>
-#include <libedataserver/e-util.h>
+#include <libedataserver/e-data-server-util.h>
 #include "e-book-backend-sexp.h"
 
 static GObjectClass *parent_class;
@@ -88,6 +88,14 @@ compare_im_yahoo (EContact *contact, const char *str,
 {
 	return compare_im (contact, str, compare, E_CONTACT_IM_YAHOO);
 }
+
+static gboolean
+compare_im_gadugadu (EContact *contact, const char *str,
+		  char *(*compare)(const char*, const char*))
+{
+	return compare_im (contact, str, compare, E_CONTACT_IM_GADUGADU);
+}
+
 
 static gboolean
 compare_im_jabber (EContact *contact, const char *str,
@@ -385,7 +393,7 @@ func_contains(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data
 static char *
 is_helper (const char *s1, const char *s2)
 {
-	if (!strcasecmp(s1, s2))
+	if (!e_util_utf8_strcasecmp (s1, s2))
 		return (char*)s1;
 	else
 		return NULL;

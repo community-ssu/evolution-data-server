@@ -22,10 +22,11 @@
 
 #include "e-uid.h"
 
+#include <glib.h>
+
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-
 
 /**
  * e_uid_new:
@@ -38,10 +39,13 @@
 char *
 e_uid_new (void)
 {
-	static char *hostname;
 	static int serial;
+	static char *hostname;
 
 	if (!hostname) {
+#if GLIB_CHECK_VERSION (2, 8, 0)
+		hostname = (char *) g_get_host_name ();
+#else
 		static char buffer [512];
 
 		if ((gethostname (buffer, sizeof (buffer) - 1) == 0) &&
@@ -49,6 +53,8 @@ e_uid_new (void)
 			hostname = buffer;
 		else
 			hostname = "localhost";
+
+#endif
 	}
 
 	return g_strdup_printf ("%lu.%lu.%d@%s",

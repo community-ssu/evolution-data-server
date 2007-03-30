@@ -66,6 +66,7 @@ typedef enum {
 #define GNOME_Evolution_Addressbook_BookMode EDataBookMode
 #define GNOME_Evolution_Addressbook_Success Success
 #define GNOME_Evolution_Addressbook_ContactNotFound ContactNotFound
+#define GNOME_Evolution_Addressbook_NoSpace NoSpace
 #define GNOME_Evolution_Addressbook_OtherError OtherError
 #define GNOME_Evolution_Addressbook_PermissionDenied PermissionDenied
 #define GNOME_Evolution_Addressbook_CouldNotCancel CouldNotCancel

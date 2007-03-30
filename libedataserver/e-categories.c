@@ -23,10 +23,12 @@
 
 #include <string.h>
 #include <libxml/parser.h>
-#include <glib/ghash.h>
-#include <glib/gi18n-lib.h>
+#include <glib.h>
+#include <glib/gi18n.h>
 #include <gconf/gconf-client.h>
 #include "e-categories.h"
+
+#include "libedataserver-private.h"
 
 typedef struct {
 	char *category;
@@ -35,228 +37,363 @@ typedef struct {
 	gboolean searchable;
 } CategoryInfo;
 
+static CategoryInfo default_categories[] = {
+	{ N_("Anniversary") },
+	{ N_("Birthday"), "category_birthday_16.png" },
+	{ N_("Business"), "category_business_16.png" },
+	{ N_("Competition") },
+	{ N_("Favorites"), "category_favorites_16.png" },
+	{ N_("Gifts"), "category_gifts_16.png" },
+	{ N_("Goals/Objectives"), "category_goals_16.png" },
+	{ N_("Holiday"), "category_holiday_16.png" },
+	{ N_("Holiday Cards"), "category_holiday-cards_16.png" },
+	/* important people (e.g. new business partners) */
+	{ N_("Hot Contacts"), "category_hot-contacts_16.png" },
+	{ N_("Ideas"), "category_ideas_16.png" },
+	{ N_("International"), "category_international_16.png" },
+	{ N_("Key Customer"), "category_key-customer_16.png" },
+	{ N_("Miscellaneous"), "category_miscellaneous_16.png" },
+	{ N_("Personal"), "category_personal_16.png" },
+	{ N_("Phone Calls"), "category_phonecalls_16.png" },
+	{ N_("Status"), "category_status_16.png" },
+	{ N_("Strategies"), "category_strategies_16.png" },
+	{ N_("Suppliers"), "category_suppliers_16.png" },
+	{ N_("Time & Expenses"), "category_time-and-expenses_16.png" },
+	{ N_("VIP") },
+	{ N_("Waiting") },
+	{ NULL }
+};
+
 static gboolean initialized = FALSE;
 static GHashTable *categories_table = NULL;
-static GConfClient *conf_client = NULL;
-static gboolean conf_is_dirty = FALSE;
+static gboolean save_is_pending = FALSE;
 static guint idle_id = 0;
+
+static gchar *
+build_categories_filename (void)
+{
+	return g_build_filename (g_get_home_dir (),
+		".evolution", "categories.xml", NULL);
+}
 
 static void
 free_category_info (CategoryInfo *cat_info)
 {
-	if (cat_info->category)
-		g_free (cat_info->category);
-	if (cat_info->icon_file)
-		g_free (cat_info->icon_file);
-	if (cat_info->color)
-		g_free (cat_info->color);
-
+	g_free (cat_info->category);
+	g_free (cat_info->icon_file);
+	g_free (cat_info->color);
 	g_free (cat_info);
 }
 
-static char *
-escape_string (const char *source)
+static gchar *
+escape_string (const gchar *source)
 {
-	GString *str;
-	char *dest;
+	GString *buffer;
 
-	str = g_string_new ("");
+	buffer = g_string_sized_new (strlen (source));
 
 	while (*source) {
 		switch (*source) {
-                case '<':
-                        str = g_string_append (str, "&lt;");
-                        break;
-                case '>':
-                        str = g_string_append (str, "&gt;");
-                        break;
-                case '&':
-                        str = g_string_append (str, "&amp;");
-                        break;
-                case '"':
-                        str = g_string_append (str, "&quot;");
-                        break;
-
-                default:
-                        str = g_string_append_c (str, *source);
-                        break;
-                }
-                source++;
+		case '<':
+			g_string_append_len (buffer, "&lt;", 4);
+			break;
+		case '>':
+			g_string_append_len (buffer, "&gt;", 4);
+			break;
+		case '&':
+			g_string_append_len (buffer, "&amp;", 5);
+			break;
+		case '"':
+			g_string_append_len (buffer, "&quot;", 6);
+			break;
+		default:
+			g_string_append_c (buffer, *source);
+			break;
+		}
+		source++;
 	}
 
-	dest = str->str;
-	g_string_free (str, FALSE);
-
-	return dest;
+	return g_string_free (buffer, FALSE);
 }
 
 static void
 hash_to_xml_string (gpointer key, gpointer value, gpointer user_data)
 {
 	CategoryInfo *cat_info = value;
-	GString **str = user_data;
-	char *s;
+	GString *string = user_data;
+	gchar *category;
 
-	*str = g_string_append (*str, "<category a=\"");
+	g_string_append_len (string, "\t<category", 10);
 
-	s = escape_string (cat_info->category);
-	*str = g_string_append (*str, s);
-	g_free (s);
+	category = escape_string (cat_info->category);
+	g_string_append_printf (string, " a=\"%s\"", category);
+	g_free (category);
 
-	*str = g_string_append_c (*str, '"');
-	if (cat_info->color) {
-		*str = g_string_append (*str, " color=\"");
-		*str = g_string_append (*str, cat_info->color);
-		*str = g_string_append_c (*str, '"');
-	}
-	if (cat_info->icon_file) {
-		*str = g_string_append (*str, " icon=\"");
-		*str = g_string_append (*str, cat_info->icon_file);
-		*str = g_string_append_c (*str, '"');
-	}
+	if (cat_info->icon_file != NULL)
+		g_string_append_printf (
+			string, " icon=\"%s\"", cat_info->icon_file);
 
-	*str = g_string_append (*str, " searchable=\"");
-	*str = g_string_append_c (*str, cat_info->searchable ? '1' : '0');
-	*str = g_string_append_c (*str, '"');
+	if (cat_info->color != NULL)
+		g_string_append_printf (
+			string, " color=\"%s\"", cat_info->color);
 
-	*str = g_string_append (*str, "/>");
+	g_string_append_printf (
+		string, " searchable=\"%d\"", cat_info->searchable);
+
+	g_string_append_len (string, "/>\n", 3);
 }
 
 static gboolean
 idle_saver_cb (gpointer user_data)
 {
-	if (conf_is_dirty) {
-		GString *str = g_string_new ("<categories>");
+	GString *buffer;
+	gchar *contents;
+	gchar *filename;
+	GError *error = NULL;
 
-		g_hash_table_foreach (categories_table, (GHFunc) hash_to_xml_string, &str);
-		str = g_string_append (str, "</categories>");
-		gconf_client_set_string (conf_client, "/apps/evolution/general/category_master_list", str->str, NULL);
+	if (!save_is_pending)
+		goto exit;
 
-		g_string_free (str, TRUE);
+	filename = build_categories_filename ();
 
-		conf_is_dirty = FALSE;
+	g_debug ("Saving categories to \"%s\"", filename);
+
+	/* build the file contents */
+	buffer = g_string_new ("<categories>\n");
+	g_hash_table_foreach (categories_table, hash_to_xml_string, buffer);
+	g_string_append_len (buffer, "</categories>\n", 14);
+	contents = g_string_free (buffer, FALSE);
+
+	if (!g_file_set_contents (filename, contents, -1, &error)) {
+		g_warning ("Unable to save categories: %s", error->message);
+		g_error_free (error);
 	}
 
-	idle_id = 0;
+	g_free (contents);
+	g_free (filename);
+	save_is_pending = FALSE;
 
+exit:
+	idle_id = 0;
 	return FALSE;
 }
 
 static void
-save_config (void)
+save_categories (void)
 {
-	conf_is_dirty = TRUE;
-	if (!idle_id) {
-		idle_id = g_idle_add ((GSourceFunc) idle_saver_cb, NULL);
+	save_is_pending = TRUE;
+
+	if (idle_id == 0)
+		idle_id = g_idle_add (idle_saver_cb, NULL);
+}
+
+static gint
+parse_categories (const gchar *contents, gsize length)
+{
+	xmlDocPtr doc;
+	xmlNodePtr node;
+	gint n_added = 0;
+
+	doc = xmlParseMemory (contents, length);
+	if (doc == NULL) {
+		g_warning ("Unable to parse categories");
+		return 0;
+	}
+
+	node = xmlDocGetRootElement (doc);
+	if (node == NULL) {
+		g_warning ("Unable to parse categories");
+		xmlFreeDoc (doc);
+		return 0;
+	}
+
+	for (node = node->xmlChildrenNode; node != NULL; node = node->next) {
+		xmlChar *category, *icon, *color, *searchable;
+
+		category = xmlGetProp (node, (xmlChar *) "a");
+		icon = xmlGetProp (node, (xmlChar *) "icon");
+		color = xmlGetProp (node, (xmlChar *) "color");
+		searchable = xmlGetProp (node, (xmlChar *) "searchable");
+
+		if (category != NULL) {
+			e_categories_add (
+				(gchar *) category,
+				(gchar *) color,
+				(gchar *) icon,
+				(searchable != NULL) &&
+				strcmp ((gchar *) searchable, "0") != 0);
+			n_added++;
+		}
+
+		xmlFree (category);
+		xmlFree (icon);
+		xmlFree (color);
+		xmlFree (searchable);
+	}
+
+	xmlFreeDoc (doc);
+
+	return n_added;
+}
+
+static gint
+load_categories (void)
+{
+	gchar *contents;
+	gchar *filename;
+	gsize length;
+	gint n_added = 0;
+	GError *error = NULL;
+
+	contents = NULL;
+	filename = build_categories_filename ();
+
+	if (!g_file_test (filename, G_FILE_TEST_EXISTS))
+		goto exit;
+
+	g_debug ("Loading categories from \"%s\"", filename);
+
+	if (!g_file_get_contents (filename, &contents, &length, &error)) {
+		g_warning ("Unable to load categories: %s", error->message);
+		g_error_free (error);
+		goto exit;
+	}
+
+	n_added = parse_categories (contents, length);
+
+exit:
+	g_free (contents);
+	g_free (filename);
+
+	return n_added;
+}
+
+static void
+migrate_old_icon_file (gpointer key, gpointer value, gpointer user_data)
+{
+	CategoryInfo *info = value;
+	gchar *basename;
+
+	if (info->icon_file == NULL)
+		return;
+
+	/* We can't be sure where the old icon files were stored, but
+         * a good guess is (E_DATA_SERVER_IMAGESDIR "-2.x").  Convert
+         * any such paths to just E_DATA_SERVER_IMAGESDIR. */
+	if (g_str_has_prefix (info->icon_file, E_DATA_SERVER_IMAGESDIR)) {
+		basename = g_path_get_basename (info->icon_file);
+		g_free (info->icon_file);
+		info->icon_file = g_build_filename (
+			E_DATA_SERVER_IMAGESDIR, basename, NULL);
+		g_free (basename);
+	}
+}
+
+static gboolean
+migrate_old_categories (void)
+{
+	/* Try migrating old category settings from GConf to the new
+         * category XML file.  If successful, unset the old GConf key
+         * so that this is a one-time-only operation. */
+
+	const gchar *key = "/apps/evolution/general/category_master_list";
+
+	GConfClient *client;
+	gchar *string;
+	gint n_added = 0;
+
+	client = gconf_client_get_default ();
+	string = gconf_client_get_string (client, key, NULL);
+	if (string == NULL || *string == '\0')
+		goto exit;
+
+	g_debug ("Loading categories from GConf key \"%s\"", key);
+
+	n_added = parse_categories (string, strlen (string));
+	if (n_added == 0)
+		goto exit;
+
+	/* default icon files are now in an unversioned directory */
+	g_hash_table_foreach (categories_table, migrate_old_icon_file, NULL);
+
+	gconf_client_unset (client, key, NULL);
+
+exit:
+	g_object_unref (client);
+	g_free (string);
+
+	return n_added;
+}
+
+static void
+load_default_categories (void)
+{
+	CategoryInfo *cat_info = default_categories;
+
+	/* Note: All default categories are searchable. */
+	while (cat_info->category != NULL) {
+		if (cat_info->icon_file != NULL)
+			cat_info->icon_file = g_build_filename (E_DATA_SERVER_IMAGESDIR, cat_info->icon_file, NULL);
+		e_categories_add (
+			gettext (cat_info->category),
+			NULL, cat_info->icon_file, TRUE);
+		g_free (cat_info->icon_file);
+		cat_info++;
 	}
 }
 
 static void
-cleanup_at_exit (void)
+finalize_categories (void)
 {
-	if (conf_is_dirty)
+	if (save_is_pending)
 		idle_saver_cb (NULL);
 
-	g_source_remove (idle_id);
-	idle_id = 0;
-
-	if (categories_table) {
-		g_hash_table_destroy (categories_table);
-		categories_table = NULL;
+	if (idle_id > 0) {
+		g_source_remove (idle_id);
+		idle_id = 0;
 	}
 
-	if (conf_client) {
-		g_object_unref (conf_client);
-		conf_client = NULL;
+	if (categories_table != NULL) {
+		g_hash_table_destroy (categories_table);
+		categories_table = NULL;
 	}
 
 	initialized = FALSE;
 }
 
 static void
-add_category_if_not_present (const char *name, const char *color, const char *icon_file, gboolean searchable)
+initialize_categories (void)
 {
-	if (!e_categories_exist (name))
-		e_categories_add (name, color, icon_file, searchable);
-}
-
-static void
-initialize_categories_config (void)
-{
-	char *str;
+	gint n_added;
 
 	if (initialized)
 		return;
 
 	initialized = TRUE;
 
-	/* create all the internal data we need */
-	categories_table = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) free_category_info);
+	categories_table = g_hash_table_new_full (
+		g_str_hash, g_str_equal, g_free,
+		(GDestroyNotify) free_category_info);
 
-	conf_client = gconf_client_get_default ();
+	g_atexit (finalize_categories);
 
-	g_atexit (cleanup_at_exit);
-
-	/* load the categories config from the config database */
-	str = gconf_client_get_string (conf_client, "/apps/evolution/general/category_master_list", NULL);
-	if (str) {
-		xmlDoc *doc;
-		xmlNode *node, *children;
-
-		doc = xmlParseMemory (str, strlen (str));
-		if (doc) {
-			xmlChar *name, *color, *icon, *searchable;
-
-			node = xmlDocGetRootElement (doc);
-			for (children = node->xmlChildrenNode; children != NULL; children = children->next) {
-				gboolean b = TRUE;
-
-				name = xmlGetProp (children, "a");
-				color = xmlGetProp (children, "color");
-				icon = xmlGetProp (children, "icon");
-				searchable = xmlGetProp (children, "searchable");
-
-				if (searchable) {
-					if (!strcmp (searchable, "0"))
-						b = FALSE;
-				}
-
-				e_categories_add (name, color, icon, b ? TRUE : FALSE);
-			}
-
-			xmlFreeDoc (doc);
-		}
-
-		g_free (str);
-
-		conf_is_dirty = FALSE;
+	n_added = load_categories ();
+	if (n_added > 0) {
+		g_debug ("Loaded %d categories", n_added);
+		save_is_pending = FALSE;
+		return;
 	}
 
-	/* Make sure we have all categories */
-	add_category_if_not_present (_("Anniversary"), NULL, NULL, TRUE);
-	add_category_if_not_present (_("Birthday"), NULL, E_DATA_SERVER_IMAGESDIR "/category_birthday_16.png", TRUE);
-	add_category_if_not_present (_("Business"), NULL, E_DATA_SERVER_IMAGESDIR "/category_business_16.png", TRUE);
-	add_category_if_not_present (_("Competition"), NULL, NULL, TRUE);
-	add_category_if_not_present (_("Favorites"), NULL, E_DATA_SERVER_IMAGESDIR "/category_favorites_16.png", TRUE);
-	add_category_if_not_present (_("Gifts"), NULL, E_DATA_SERVER_IMAGESDIR "/category_gifts_16.png", TRUE);
-	add_category_if_not_present (_("Goals/Objectives"), NULL, E_DATA_SERVER_IMAGESDIR "/category_goals_16.png", TRUE);
-	add_category_if_not_present (_("Holiday"), NULL, E_DATA_SERVER_IMAGESDIR "/category_holiday_16.png", TRUE);
-	add_category_if_not_present (_("Holiday Cards"), NULL, E_DATA_SERVER_IMAGESDIR "/category_holiday-cards_16.png", TRUE);
-	add_category_if_not_present (_("Hot Contacts"), NULL, E_DATA_SERVER_IMAGESDIR "/category_hot-contacts_16.png", TRUE);
-	add_category_if_not_present (_("Ideas"), NULL, E_DATA_SERVER_IMAGESDIR "/category_ideas_16.png", TRUE);
-	add_category_if_not_present (_("International"), NULL, E_DATA_SERVER_IMAGESDIR "/category_international_16.png", TRUE);
-	add_category_if_not_present (_("Key Customer"), NULL, E_DATA_SERVER_IMAGESDIR "/category_key-customer_16.png", TRUE);
-	add_category_if_not_present (_("Miscellaneous"), NULL, E_DATA_SERVER_IMAGESDIR "/category_miscellaneous_16.png", TRUE);
-	add_category_if_not_present (_("Personal"), NULL, E_DATA_SERVER_IMAGESDIR "/category_personal_16.png", TRUE);
-	add_category_if_not_present (_("Phone Calls"), NULL, E_DATA_SERVER_IMAGESDIR "/category_phonecalls_16.png", TRUE);
-	add_category_if_not_present (_("Status"), NULL, E_DATA_SERVER_IMAGESDIR "/category_status_16.png", TRUE);
-	add_category_if_not_present (_("Strategies"), NULL, E_DATA_SERVER_IMAGESDIR "/category_strategies_16.png", TRUE);
-	add_category_if_not_present (_("Suppliers"), NULL, E_DATA_SERVER_IMAGESDIR "/category_suppliers_16.png", TRUE);
-	add_category_if_not_present (_("Time & Expenses"), NULL, E_DATA_SERVER_IMAGESDIR "/category_time-and-expenses_16.png", TRUE);
-	add_category_if_not_present (_("VIP"), NULL, NULL, TRUE);
-        add_category_if_not_present (_("Waiting"), NULL, NULL, TRUE);
+	n_added = migrate_old_categories ();
+	if (n_added > 0) {
+		g_debug ("Loaded %d categories", n_added);
+		save_categories ();
+		return;
+	}
 
-	save_config ();
+	load_default_categories ();
+	g_debug ("Loaded default categories");
+	save_categories ();
 }
 
 static void
@@ -264,17 +401,17 @@ add_hash_to_list (gpointer key, gpointer value, gpointer user_data)
 {
 	GList **list = user_data;
 
-	*list = g_list_append (*list, key);
+	*list = g_list_prepend (*list, key);
 }
 
 /**
  * e_categories_get_list:
  *
- * Returns a list of all the category names currently configured.
+ * Returns a sorted list of all the category names currently configured.
  *
- * Return value: a GList containing the names of the categories. The list
- * should be freed using g_list_free, but the names of the categories should
- * not be touched at all, they are internal strings.
+ * Return value: a sorted GList containing the names of the categories. The
+ * list should be freed using g_list_free, but the names of the categories
+ * should not be touched at all, they are internal strings.
  */
 GList *
 e_categories_get_list (void)
@@ -282,11 +419,11 @@ e_categories_get_list (void)
 	GList *list = NULL;
 
 	if (!initialized)
-		initialize_categories_config ();
+		initialize_categories ();
 
-	g_hash_table_foreach (categories_table, (GHFunc) add_hash_to_list, &list);
+	g_hash_table_foreach (categories_table, add_hash_to_list, &list);
 
-	return list;
+	return g_list_sort (list, (GCompareFunc) g_utf8_collate);
 }
 
 /**
@@ -304,23 +441,21 @@ e_categories_add (const char *category, const char *color, const char *icon_file
 {
 	CategoryInfo *cat_info;
 
-	if (!initialized)
-		initialize_categories_config ();
+	g_return_if_fail (category != NULL);
 
-	/* remove the category if already in the hash table */
-	if (g_hash_table_lookup (categories_table, category))
-		g_hash_table_remove (categories_table, category);
+	if (!initialized)
+		initialize_categories ();
 
 	/* add the new category */
 	cat_info = g_new0 (CategoryInfo, 1);
 	cat_info->category = g_strdup (category);
-	cat_info->color = color ? g_strdup (color) : NULL;
-	cat_info->icon_file = icon_file ? g_strdup (icon_file) : NULL;
+	cat_info->color = g_strdup (color);
+	cat_info->icon_file = g_strdup (icon_file);
 	cat_info->searchable = searchable;
 
 	g_hash_table_insert (categories_table, g_strdup (category), cat_info);
 
-	save_config ();
+	save_categories ();
 }
 
 /**
@@ -335,13 +470,10 @@ e_categories_remove (const char *category)
 	g_return_if_fail (category != NULL);
 
 	if (!initialized)
-		initialize_categories_config ();
+		initialize_categories ();
 
-	if (g_hash_table_lookup (categories_table, category)) {
-		g_hash_table_remove (categories_table, category);
-
-		save_config ();
-	}
+	if (g_hash_table_remove (categories_table, category))
+		save_categories ();
 }
 
 /**
@@ -355,14 +487,12 @@ e_categories_remove (const char *category)
 gboolean
 e_categories_exist (const char *category)
 {
-	CategoryInfo *cat_info;
+	g_return_val_if_fail (category != NULL, FALSE);
 
 	if (!initialized)
-		initialize_categories_config ();
+		initialize_categories ();
 
-	cat_info = g_hash_table_lookup (categories_table, category);
-
-	return cat_info ? TRUE : FALSE;
+	return (g_hash_table_lookup (categories_table, category) != NULL);
 }
 
 /**
@@ -378,14 +508,15 @@ e_categories_get_color_for (const char *category)
 {
 	CategoryInfo *cat_info;
 
+	g_return_val_if_fail (category != NULL, NULL);
+
 	if (!initialized)
-		initialize_categories_config ();
+		initialize_categories ();
 
 	cat_info = g_hash_table_lookup (categories_table, category);
-	if (!cat_info)
-		return NULL;
+	g_return_val_if_fail (cat_info != NULL, NULL);
 
-	return (const char *) cat_info->color;
+	return cat_info->color;
 }
 
 /**
@@ -400,18 +531,17 @@ e_categories_set_color_for (const char *category, const char *color)
 {
 	CategoryInfo *cat_info;
 
+	g_return_if_fail (category != NULL);
+
 	if (!initialized)
-		initialize_categories_config ();
+		initialize_categories ();
 
 	cat_info = g_hash_table_lookup (categories_table, category);
-	if (!cat_info)
-		return;
+	g_return_if_fail (cat_info != NULL);
 
-	if (cat_info->color)
-		g_free (cat_info->color);
+	g_free (cat_info->color);
 	cat_info->color = g_strdup (color);
-
-	save_config ();
+	save_categories ();
 }
 
 /**
@@ -427,14 +557,15 @@ e_categories_get_icon_file_for (const char *category)
 {
 	CategoryInfo *cat_info;
 
+	g_return_val_if_fail (category != NULL, NULL);
+
 	if (!initialized)
-		initialize_categories_config ();
+		initialize_categories ();
 
 	cat_info = g_hash_table_lookup (categories_table, category);
-	if (!cat_info)
-		return NULL;
+	g_return_val_if_fail (cat_info != NULL, NULL);
 
-	return (const char *) cat_info->icon_file;
+	return cat_info->icon_file;
 }
 
 /**
@@ -449,18 +580,17 @@ e_categories_set_icon_file_for (const char *category, const char *icon_file)
 {
 	CategoryInfo *cat_info;
 
+	g_return_if_fail (category != NULL);
+
 	if (!initialized)
-		initialize_categories_config ();
+		initialize_categories ();
 
 	cat_info = g_hash_table_lookup (categories_table, category);
-	if (!cat_info)
-		return;
+	g_return_if_fail (cat_info != NULL);
 
-	if (cat_info->icon_file)
-		g_free (cat_info->icon_file);
+	g_free (cat_info->icon_file);
 	cat_info->icon_file = g_strdup (icon_file);
-
-	save_config ();
+	save_categories ();
 }
 
 /**
@@ -476,12 +606,13 @@ e_categories_is_searchable (const char *category)
 {
 	CategoryInfo *cat_info;
 
+	g_return_val_if_fail (category != NULL, FALSE);
+
 	if (!initialized)
-		initialize_categories_config ();
+		initialize_categories ();
 
 	cat_info = g_hash_table_lookup (categories_table, category);
-	if (!cat_info)
-		return FALSE;
+	g_return_val_if_fail (cat_info != NULL, FALSE);
 
 	return cat_info->searchable;
 }

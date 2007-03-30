@@ -11,3 +11,4 @@ GROUPWISE_SUBDIR =
 endif
 
 SUBDIRS = file $(LDAP_SUBDIR) $(GROUPWISE_SUBDIR)
+DIST_SUBDIRS = file ldap groupwise vcf

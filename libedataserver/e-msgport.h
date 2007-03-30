@@ -56,6 +56,7 @@ typedef struct _EMsgPort EMsgPort;
 typedef struct _EMsg {
 	EDListNode ln;
 	EMsgPort *reply_port;
+	gint flags;
 } EMsg;
 
 EMsgPort *e_msgport_new(void);
@@ -70,6 +71,7 @@ void e_msgport_reply(EMsg *msg);
 struct PRFileDesc *e_msgport_prfd(EMsgPort *mp);
 #endif
 
+#ifndef EDS_DISABLE_DEPRECATED
 /* e threads, a server thread with a message based request-response, and flexible queuing */
 typedef struct _EThread EThread;
 
@@ -91,6 +93,7 @@ void e_thread_set_reply_port(EThread *e, EMsgPort *reply_port);
 void e_thread_set_msg_received(EThread *e, EThreadFunc received, void *data);
 void e_thread_put(EThread *e, EMsg *msg);
 int e_thread_busy(EThread *e);
+#endif
 
 /* sigh, another mutex interface, this one allows different mutex types, portably */
 typedef struct _EMutex EMutex;
