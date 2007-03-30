@@ -1,0 +1,70 @@
+Index: addressbook/libebook-dbus/e-contact.c
+===================================================================
+--- addressbook/libebook-dbus/e-contact.c	(revision 45)
++++ addressbook/libebook-dbus/e-contact.c	(working copy)
+@@ -254,14 +254,6 @@
+ 	/* Security fields */
+ 	ATTR_TYPE_STRUCT_FIELD (E_CONTACT_X509_CERT,  EVC_KEY, "x509Cert",  N_("X.509 Certificate"), FALSE, "X509", cert_getter, cert_setter, e_contact_cert_get_type),
+ 
+-	ATTR_TYPE_STR_FIELD (E_CONTACT_IM_GADUGADU_HOME_1,  EVC_X_GADUGADU,  "im-gadugadu-home-1",  N_("Gadu-Gadu Home Id 1"), FALSE, "HOME", 0),
+-	ATTR_TYPE_STR_FIELD (E_CONTACT_IM_GADUGADU_HOME_2,  EVC_X_GADUGADU,  "im-gadugadu-home-2",  N_("Gadu-Gadu Home Id 2"), FALSE, "HOME", 1),
+-	ATTR_TYPE_STR_FIELD (E_CONTACT_IM_GADUGADU_HOME_3,  EVC_X_GADUGADU,  "im-gadugadu-home-3",  N_("Gadu-Gadu Home Id 3"), FALSE, "HOME", 2),
+-	ATTR_TYPE_STR_FIELD (E_CONTACT_IM_GADUGADU_WORK_1,  EVC_X_GADUGADU,  "im-gadugadu-work-1",  N_("Gadu-Gadu Work Id 1"), FALSE, "WORK", 0),
+-	ATTR_TYPE_STR_FIELD (E_CONTACT_IM_GADUGADU_WORK_2,  EVC_X_GADUGADU,  "im-gadugadu-work-2",  N_("Gadu-Gadu Work Id 2"), FALSE, "WORK", 1),
+-	ATTR_TYPE_STR_FIELD (E_CONTACT_IM_GADUGADU_WORK_3,  EVC_X_GADUGADU,  "im-gadugadu-work-3",  N_("Gadu-Gadu Work Id 3"), FALSE, "WORK", 2),
+-	MULTI_LIST_FIELD (E_CONTACT_IM_GADUGADU,  EVC_X_GADUGADU,  "im-gadugadu", N_("Gadu-Gadu Id List"), FALSE),
+-
+ 	/* For TEL */
+  	STRING_FIELD (E_CONTACT_PHONE_TELEPHONE,        EVC_TEL,       "tel",         N_("Telephone"),  FALSE),
+ 
+Index: addressbook/libebook-dbus/e-contact.h
+===================================================================
+--- addressbook/libebook-dbus/e-contact.h	(revision 45)
++++ addressbook/libebook-dbus/e-contact.h	(working copy)
+@@ -186,15 +186,6 @@
+ 	/* Security Fields */
+ 	E_CONTACT_X509_CERT,     /* structured field (EContactCert) */
+ 
+-	E_CONTACT_IM_GADUGADU_HOME_1,  /* Synthetic string field */
+-	E_CONTACT_IM_GADUGADU_HOME_2,  /* Synthetic string field */
+-	E_CONTACT_IM_GADUGADU_HOME_3,  /* Synthetic string field */
+-	E_CONTACT_IM_GADUGADU_WORK_1,  /* Synthetic string field */
+-	E_CONTACT_IM_GADUGADU_WORK_2,  /* Synthetic string field */
+-	E_CONTACT_IM_GADUGADU_WORK_3,  /* Synthetic string field */
+-
+-	E_CONTACT_IM_GADUGADU,   /* Multi-valued */
+-	
+ 	E_CONTACT_PHONE_TELEPHONE,
+ 
+ 	E_CONTACT_SIP,
+Index: addressbook/libebook-dbus/e-vcard.h
+===================================================================
+--- addressbook/libebook-dbus/e-vcard.h	(revision 45)
++++ addressbook/libebook-dbus/e-vcard.h	(working copy)
+@@ -86,7 +86,6 @@
+ #define EVC_X_VIDEO_URL     	"X-EVOLUTION-VIDEO-URL"
+ #define EVC_X_WANTS_HTML    	"X-MOZILLA-HTML"
+ #define EVC_X_YAHOO         	"X-YAHOO"
+-#define EVC_X_GADUGADU        "X-GADUGADU"
+ #define EVC_X_GROUPWISE     	"X-GROUPWISE"
+ #define EVC_X_BOOK_URI     	"X-EVOLUTION-BOOK-URI"
+ 
+Index: addressbook/libedata-book-dbus/e-book-backend-sexp.c
+===================================================================
+--- addressbook/libedata-book-dbus/e-book-backend-sexp.c	(revision 45)
++++ addressbook/libedata-book-dbus/e-book-backend-sexp.c	(working copy)
+@@ -90,14 +90,6 @@
+ }
+ 
+ static gboolean
+-compare_im_gadugadu (EContact *contact, const char *str,
+-		  char *(*compare)(const char*, const char*))
+-{
+-	return compare_im (contact, str, compare, E_CONTACT_IM_GADUGADU);
+-}
+-
+-
+-static gboolean
+ compare_im_jabber (EContact *contact, const char *str,
+ 		   char *(*compare)(const char*, const char*))
+ {
