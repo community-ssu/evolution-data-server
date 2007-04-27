@@ -33,6 +33,12 @@
 #include "e-book.h"
 #include "e-name-western.h"
 
+#ifdef G_OS_WIN32
+#include <libedataserver/e-data-server-util.h>
+#undef EVOLUTION_LOCALEDIR
+#define EVOLUTION_LOCALEDIR e_util_get_localedir ()
+#endif
+
 #define d(x)
 
 struct _EContactPrivate {
@@ -1323,7 +1329,6 @@ EContactField
 e_contact_field_id (const char *field_name)
 {
 	int i;
-
 	for (i = E_CONTACT_FIELD_FIRST; i < E_CONTACT_FIELD_LAST; i ++) {
 		if (!strcmp (field_info[i].field_name, field_name))
 			return field_info[i].field_id;
@@ -1680,7 +1685,7 @@ e_contact_set_attributes (EContact *contact, EContactField field_id, GList *attr
  * Return value: A new #EContactName struct.
  **/
 EContactName*
-e_contact_name_new ()
+e_contact_name_new (void)
 {
 	return g_new0 (EContactName, 1);
 }

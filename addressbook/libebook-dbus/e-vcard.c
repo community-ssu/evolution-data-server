@@ -690,7 +690,7 @@ e_vcard_construct (EVCard *evc, const char *str)
  * Return value: A new, blank #EVCard.
  **/
 EVCard *
-e_vcard_new ()
+e_vcard_new (void)
 {
 	return e_vcard_new_from_string ("");
 }
@@ -1122,6 +1122,7 @@ void
 e_vcard_attribute_add_value (EVCardAttribute *attr, const char *value)
 {
 	g_return_if_fail (attr != NULL);
+	g_return_if_fail (value != NULL);
 
 	attr->values = g_list_append (attr->values, g_strdup (value));
 }
@@ -1820,8 +1821,8 @@ e_vcard_attribute_get_param (EVCardAttribute *attr, const char *name)
 {
 	GList *p;
 	
-	g_return_val_if_fail (attr != NULL, FALSE);
-	g_return_val_if_fail (name != NULL, FALSE);
+	g_return_val_if_fail (attr != NULL, NULL);
+	g_return_val_if_fail (name != NULL, NULL);
 	
 	for (p = attr->params; p; p = p->next) {
 		EVCardAttributeParam *param = p->data;

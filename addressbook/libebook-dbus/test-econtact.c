@@ -2,6 +2,8 @@
 #include <string.h>
 #include <libebook/e-contact.h>
 
+#define MAEMO 1
+
 START_TEST (test_get_names_full)
 {
   EContact *contact;
@@ -66,6 +68,7 @@ START_TEST (test_get_names_empty)
 }
 END_TEST
 
+#if MAEMO
 START_TEST (test_get_contact_state)
 {
   EContact *contact;
@@ -82,7 +85,24 @@ START_TEST (test_get_contact_state)
   const_state = e_contact_get_const (contact, E_CONTACT_OSSO_CONTACT_STATE);
   fail_unless (const_state != NULL, "Cannot get constant contact state");
 
-  g_object_unref (contact);  
+  g_object_unref (contact);
+}
+END_TEST
+#endif
+
+START_TEST (test_fn_magic)
+{
+  EContact *contact;
+  EVCardAttribute *fn_attr;
+  char *name;
+
+  contact = e_contact_new_from_vcard ("BEGIN:VCARD\nVERSION:3.0\nUID:1\nN:Family;Given;Additional;Prefixes;Suffixes\nEND:VCARD");
+
+  fn_attr = e_vcard_get_attribute (E_VCARD (contact), EVC_FN);
+
+  name = e_vcard_attribute_get_value (fn_attr);
+  fail_unless (strcmp (name, "Prefixes Given Additional Family Suffixes") == 0, "Generated FN incorrect");
+  g_free (name);
 }
 END_TEST
 
@@ -94,7 +114,10 @@ contact_suite (void)
   TCase *tc_get = tcase_create ("Getters");
   tcase_add_test (tc_get, test_get_names_empty);
   tcase_add_test (tc_get, test_get_names_full);
+#if MAEMO
   tcase_add_test (tc_get, test_get_contact_state);
+#endif
+  tcase_add_test (tc_get, test_fn_magic);
   suite_add_tcase (s, tc_get);
   
   return s;

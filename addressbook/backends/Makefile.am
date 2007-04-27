@@ -4,11 +4,6 @@ else
 LDAP_SUBDIR =
 endif
 
-if WITH_SOUP
-GROUPWISE_SUBDIR = groupwise
-else
-GROUPWISE_SUBDIR =
-endif
-
-SUBDIRS = file $(LDAP_SUBDIR) $(GROUPWISE_SUBDIR)
+# groupwise isn't ported yet.
+SUBDIRS = file $(LDAP_SUBDIR)
 DIST_SUBDIRS = file ldap groupwise vcf

@@ -323,7 +323,7 @@ e_book_new (ESource *source, GError **error)
   e_return_error_if_fail (E_IS_SOURCE (source), E_BOOK_ERROR_INVALID_ARG);
   
   if (!e_book_activate (&err)) {
-    g_warning ("Cannot activate book: %s\n", err->message);
+    g_warning (G_STRLOC ": cannot activate book: %s\n", err->message);
     g_propagate_error (error, err);
     return NULL;
   }
@@ -336,7 +336,7 @@ e_book_new (ESource *source, GError **error)
   address = dbus_bus_get_unique_name (dbus_g_connection_get_connection (connection));
 
   if (!org_gnome_evolution_dataserver_addressbook_BookFactory_get_book (factory_proxy, address, book->priv->uri, &path, &err)) {
-    g_warning ("Cannot get book from factory: %s", err ? err->message : "[no error]");
+    g_warning (G_STRLOC ": cannot get book from factory: %s", err ? err->message : "[no error]");
     g_propagate_error (error, err);
     g_object_unref (book);
     return NULL;
@@ -347,7 +347,7 @@ e_book_new (ESource *source, GError **error)
                                                        "org.gnome.evolution.dataserver.addressbook.Book",
                                                        &err);
   if (!book->priv->proxy) {
-    g_warning ("Cannot get proxy for book %s: %s", path, err->message);
+    g_warning (G_STRLOC ": cannot get proxy for book %s: %s", path, err->message);
     g_propagate_error (error, err);
     g_free (path);
     g_object_unref (book);
@@ -850,12 +850,12 @@ get_contact_reply(DBusGProxy *proxy, char *vcard, GError *error, gpointer user_d
   if (error)
 	  vcard = NULL;
 
-  if (cb && error == NULL) {
-	  cb (data->book, status, e_contact_new_from_vcard (vcard), data->closure);
-  } else if (cb && error) {
-	  cb (data->book, status, NULL, data->closure);
-  } else if (cb == NULL && error) {
-	  g_warning ("Cannot get contact: %s", error->message);
+  if (cb) {
+    if (error == NULL) {
+      cb (data->book, status, e_contact_new_from_vcard (vcard), data->closure);
+    } else {
+      cb (data->book, status, NULL, data->closure);
+    }
   }
 
   if (error)
@@ -1738,7 +1738,7 @@ get_status_from_error (GError *error)
     } else if (strcmp (name, "org.gnome.evolution.dataserver.addressbook.Book.othererror") == 0) {
       return E_BOOK_ERROR_OTHER_ERROR;
     } else {
-      g_warning ("Unmatched error name %s", name);
+      g_warning (G_STRLOC ": unmatched error name %s", name);
       return E_BOOK_ERROR_OTHER_ERROR;
     }
   } else {

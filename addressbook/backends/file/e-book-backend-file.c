@@ -810,7 +810,7 @@ e_book_backend_file_get_changes (EBookBackendSync *backend,
 				 */
 				contact = create_contact (id_dbt.data, vcard_dbt.data);
 
-#if notyet
+#ifdef notyet
 				g_object_set (card, "last_use", NULL, "use_score", 0.0, NULL);
 #endif
 				vcard_string = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
@@ -1024,7 +1024,7 @@ e_book_backend_file_upgrade_db (EBookBackendFile *bf, char *old_version)
 		}
 
 		if (card_failed) {
-			g_warning ("failed to update %d cards\n", card_failed);
+			g_warning ("failed to update %d cards", card_failed);
 			return FALSE;
 		}
 	}
@@ -1180,6 +1180,15 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 	if (db_error == 0) {
 		writable = TRUE;
 	} else {
+		db->close (db, 0);
+		
+        	db_error = db_create (&db, env, 0);
+        	if (db_error != 0) {
+                	g_warning ("db_create failed with %s", db_strerror (db_error));
+                	g_free (dirname);
+                	g_free (filename);
+                	return GNOME_Evolution_Addressbook_OtherError;
+        	}
 		db_error = db->open (db, NULL, filename, NULL, DB_HASH, DB_RDONLY | DB_THREAD, 0666);
 
 		if (db_error != 0 && !only_if_exists) {
@@ -1187,6 +1196,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 
 			/* the database didn't exist, so we create the
 			   directory then the .db */
+			db->close (db, 0);
 			rv = g_mkdir_with_parents (dirname, 0777);
 			if (rv == -1 && errno != EEXIST) {
 				g_warning ("failed to make directory %s: %s", dirname, strerror (errno));
@@ -1200,8 +1210,17 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 					return GNOME_Evolution_Addressbook_OtherError;
 			}
 
+			db_error = db_create (&db, env, 0);
+			if (db_error != 0) {
+ 				g_warning ("db_create failed with %s", db_strerror (db_error));
+				g_free (dirname);
+				g_free (filename);
+				return GNOME_Evolution_Addressbook_OtherError;
+			}
+
 			db_error = db->open (db, NULL, filename, NULL, DB_HASH, DB_CREATE | DB_THREAD, 0666);
 			if (db_error != 0) {
+				db->close (db, 0);
 				g_warning ("db->open (... DB_CREATE ...) failed with %s", db_strerror (db_error));
 			}
 			else {
@@ -1341,7 +1360,7 @@ e_book_backend_file_cancel_operation (EBookBackend *backend, EDataBook *book)
 	return GNOME_Evolution_Addressbook_CouldNotCancel;
 }
 static void 
-e_book_backend_file_set_mode (EBookBackend *backend,  EDataBookMode mode)
+e_book_backend_file_set_mode (EBookBackend *backend,  GNOME_Evolution_Addressbook_BookMode mode)
 {
 	if (e_book_backend_is_loaded (backend)) {
 		e_book_backend_notify_writable (backend, TRUE);
