@@ -1,3 +1,12 @@
+evolution-data-server (1.4.2.1-20070523) unstable; urgency=low
+
+  * Add function for bulk commits
+  * Speed up build by not doing it twice
+  * Some syncs with upstream
+  * Remove all UI build-deps
+
+ -- Ross Burton <ross@openedhand.com>  Wed, 23 May 2007 12:25:52 +0100
+
 evolution-data-server (1.4.2.1-20070330) unstable; urgency=low
 
   * Grand merge with OpenedHand svn (rev 544)
