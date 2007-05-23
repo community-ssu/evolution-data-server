@@ -83,7 +83,7 @@ static GStaticMutex global_env_lock = G_STATIC_MUTEX_INIT;
 static struct {
 	int ref_count;
 	DB_ENV *env;
-} global_env = { 0, NULL };
+} global_env;
 
 static EBookBackendSyncStatus
 db_error_to_status (const int db_error)
@@ -183,7 +183,7 @@ set_revision (EContact *contact)
 	
 }
 
-static EDataBookStatus
+static EBookBackendSyncStatus
 do_create(EBookBackendFile  *bf,
 	  const char      *vcard_req,
 	  EContact **contact)
@@ -239,11 +239,11 @@ e_book_backend_file_create_contact (EBookBackendSync *backend,
 				    const char *vcard,
 				    EContact **contact)
 {
-	EDataBookStatus status;
+	EBookBackendSyncStatus status;
 	EBookBackendFile *bf = E_BOOK_BACKEND_FILE (backend);
 
 	status = do_create (bf, vcard, contact);
-	if (status == Success) {
+	if (status == GNOME_Evolution_Addressbook_Success) {
 		e_book_backend_summary_add_contact (bf->priv->summary, *contact);
 	}
 	return status;
