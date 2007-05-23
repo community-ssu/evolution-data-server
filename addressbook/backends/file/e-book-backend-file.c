@@ -298,74 +298,132 @@ e_book_backend_file_remove_contacts (EBookBackendSync *backend,
 }
 
 static EBookBackendSyncStatus
+modify_contact (EBookBackendFile *bf, const char *vcard, EContact **contact)
+{
+	DB *db;
+	int db_error;
+	char *vcard_with_rev;
+	const char *id, *dbt_id;
+	DBT id_dbt, vcard_dbt;
+
+	g_assert (bf);
+	g_assert (vcard);
+	g_assert (contact);
+	g_assert (*contact == NULL);
+
+	db = bf->priv->file_db;
+
+	*contact = e_contact_new_from_vcard (vcard);
+	id = e_contact_get_const (*contact, E_CONTACT_UID);
+
+	if (id == NULL)
+		return GNOME_Evolution_Addressbook_OtherError;
+	
+	/* update the revision (modified time of contact) */
+	set_revision (*contact);
+	vcard_with_rev = e_vcard_to_string (E_VCARD (*contact), EVC_FORMAT_VCARD_30);
+
+	/*
+	 * This is disgusting, but for a time cards were added with IDs that are
+	 * no longer used (they contained both the URI and the ID). If we
+	 * recognize it as a URI (file:///...) trim off everything before the
+	 * last '/', and use that as the ID.
+	 */
+	if (!strncmp (id, "file:///", strlen ("file:///")))
+		dbt_id = strrchr (id, '/') + 1;
+	else
+		dbt_id = id;
+	
+	string_to_dbt (dbt_id, &id_dbt);
+	string_to_dbt (vcard_with_rev, &vcard_dbt);
+
+	db_error = db->put (db, NULL, &id_dbt, &vcard_dbt, 0);
+
+	g_free (vcard_with_rev);
+	
+	if (db_error == 0) {
+		return GNOME_Evolution_Addressbook_Success;
+	} else {
+		g_warning (G_STRLOC ": db->put failed with %s", db_strerror (db_error));
+		return db_error_to_status (db_error);
+	}
+
+}
+
+static EBookBackendSyncStatus
 e_book_backend_file_modify_contact (EBookBackendSync *backend,
 				    EDataBook *book,
 				    guint32 opid,
 				    const char *vcard,
 				    EContact **contact)
 {
+	EBookBackendSyncStatus status;
 	EBookBackendFile *bf = E_BOOK_BACKEND_FILE (backend);
 	DB             *db = bf->priv->file_db;
-	DBT            id_dbt, vcard_dbt;
 	int            db_error;
-	char          *id, *lookup_id;
-	char          *vcard_with_rev;
 
-	*contact = e_contact_new_from_vcard (vcard);
-	id = e_contact_get(*contact, E_CONTACT_UID);
-
-	if (id == NULL)
-		return GNOME_Evolution_Addressbook_OtherError;
-
-	/* This is disgusting, but for a time cards were added with
-           ID's that are no longer used (they contained both the uri
-           and the id.) If we recognize it as a uri (file:///...) trim
-           off everything before the last '/', and use that as the
-           id.*/
-	if (!strncmp (id, "file:///", strlen ("file:///"))) {
-		lookup_id = strrchr (id, '/') + 1;
-	}
-	else
-		lookup_id = id;
-
-	string_to_dbt (lookup_id, &id_dbt);	
-	memset (&vcard_dbt, 0, sizeof (vcard_dbt));
-	vcard_dbt.flags = DB_DBT_MALLOC;
-
-	/* get the old ecard - the one that's presently in the db */
-	db_error = db->get (db, NULL, &id_dbt, &vcard_dbt, 0);
-	if (0 != db_error) {
-		g_warning (G_STRLOC ": db->get failed with %s", db_strerror (db_error));
-		return GNOME_Evolution_Addressbook_ContactNotFound;
-	}
-	g_free (vcard_dbt.data);
-
-	/* update the revisio (modified time of contact) */
-	set_revision (*contact);
-	vcard_with_rev = e_vcard_to_string (E_VCARD (*contact), EVC_FORMAT_VCARD_30);
+	status = modify_contact (bf, vcard, contact);
 	
-	string_to_dbt (vcard_with_rev, &vcard_dbt);	
-
-	db_error = db->put (db, NULL, &id_dbt, &vcard_dbt, 0);
-
-	if (0 == db_error) {
+	if (status == GNOME_Evolution_Addressbook_Success) {
 		db_error = db->sync (db, 0);
-		if (db_error != 0) {
-			g_warning (G_STRLOC ": db->sync failed with %s", db_strerror (db_error));
-		} else {
-			e_book_backend_summary_remove_contact (bf->priv->summary, id);
+		if (db_error == 0) {
+			e_book_backend_summary_remove_contact (bf->priv->summary,
+							       e_contact_get_const (*contact, E_CONTACT_UID));
 			e_book_backend_summary_add_contact (bf->priv->summary, *contact);
+			
+			return GNOME_Evolution_Addressbook_Success;
+		} else {
+			g_warning (G_STRLOC ": db->sync failed with %s", db_strerror (db_error));
+			return db_error_to_status (db_error);
 		}
 	} else {
-		g_warning (G_STRLOC ": db->put failed with %s", db_strerror(db_error));
+		return status;
 	}
-	g_free (id);
-	g_free (vcard_with_rev);
+}
 
-	if (0 == db_error)
-		return GNOME_Evolution_Addressbook_Success;
-	else
+static EBookBackendSyncStatus
+e_book_backend_file_modify_contacts (EBookBackendSync *backend,
+				    EDataBook *book,
+				    guint32 opid,
+				    const char **vcards,
+				    GList **contacts)
+{
+	EBookBackendFile *bf;
+	EBookBackendSyncStatus status;
+	EContact *contact;
+	DB *db;
+	int db_error;
+
+	bf = E_BOOK_BACKEND_FILE (backend);
+	db = bf->priv->file_db;
+	
+	/* Commit each of the new contacts, aborting if there was an error.
+	   Really this should be in a transaction... */
+	for (; *vcards; vcards++) {
+		contact = NULL;
+
+		/* Commit the contact */
+		status = modify_contact (bf, *vcards, &contact);
+		if (status != GNOME_Evolution_Addressbook_Success)
+			goto done;
+
+		/* Update the summary */
+		e_book_backend_summary_remove_contact (bf->priv->summary,
+						       e_contact_get_const (contact, E_CONTACT_UID));
+		e_book_backend_summary_add_contact (bf->priv->summary, contact);
+
+		/* Pass the contact back to the server for view updates */
+		*contacts = g_list_prepend (*contacts, contact);
+	}
+
+	/* Sync the database */
+	db_error = db->sync (db, 0);
+	if (db_error != 0) {
 		return db_error_to_status (db_error);
+	}
+
+ done:
+	return status;
 }
 
 static EBookBackendSyncStatus
@@ -1526,6 +1584,7 @@ e_book_backend_file_class_init (EBookBackendFileClass *klass)
 	sync_class->create_contact_sync        = e_book_backend_file_create_contact;
 	sync_class->remove_contacts_sync       = e_book_backend_file_remove_contacts;
 	sync_class->modify_contact_sync        = e_book_backend_file_modify_contact;
+	sync_class->modify_contacts_sync        = e_book_backend_file_modify_contacts;
 	sync_class->get_contact_sync           = e_book_backend_file_get_contact;
 	sync_class->get_contact_list_sync      = e_book_backend_file_get_contact_list;
 	sync_class->get_changes_sync           = e_book_backend_file_get_changes;

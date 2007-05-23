@@ -1,4 +1,3 @@
-/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /*
  * Copyright (C) 2006 OpenedHand Ltd
  *
@@ -41,6 +40,7 @@ static gboolean impl_AddressBook_Book_getContactList(EDataBook *book, const char
 static gboolean impl_AddressBook_Book_authenticateUser(EDataBook *book, const char *IN_user, const char *IN_passwd, const char *IN_auth_method, DBusGMethodInvocation *context);
 static gboolean impl_AddressBook_Book_addContact(EDataBook *book, const char *IN_vcard, DBusGMethodInvocation *context);
 static gboolean impl_AddressBook_Book_modifyContact(EDataBook *book, const char *IN_vcard, DBusGMethodInvocation *context);
+static gboolean impl_AddressBook_Book_modifyContacts(EDataBook *book, const char **IN_vcards, DBusGMethodInvocation *context);
 static gboolean impl_AddressBook_Book_removeContacts(EDataBook *book, const char **IN_uids, DBusGMethodInvocation *context);
 static gboolean impl_AddressBook_Book_getStaticCapabilities(EDataBook *book, char **OUT_capabilities, GError **error);
 static gboolean impl_AddressBook_Book_getSupportedFields(EDataBook *book, DBusGMethodInvocation *context);
@@ -311,6 +311,35 @@ e_data_book_respond_modify (EDataBook *book, guint32 opid, EDataBookStatus statu
     dbus_g_method_return_error (GINT_TO_POINTER (opid), g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot modify contact")));
   } else {
     e_book_backend_notify_update (e_data_book_get_backend (book), contact);
+    e_book_backend_notify_complete (e_data_book_get_backend (book));
+
+    dbus_g_method_return (GINT_TO_POINTER (opid));
+  }
+}
+
+static gboolean
+impl_AddressBook_Book_modifyContacts(EDataBook *book, const char **IN_vcards, DBusGMethodInvocation *context)
+{
+  if (IN_vcards == NULL) {
+    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, InvalidQuery, _("Cannot modify contact")));
+    return FALSE;
+  }
+
+  e_book_backend_modify_contacts (e_data_book_get_backend (book), book,
+                                 GPOINTER_TO_INT (context), IN_vcards);
+
+  return TRUE;
+}
+
+void
+e_data_book_respond_modify_contacts (EDataBook *book, guint32 opid, EDataBookStatus status, GList *contacts)
+{
+  if (status != Success) {
+    dbus_g_method_return_error (GINT_TO_POINTER (opid), g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot modify contacts")));
+  } else {
+    for (; contacts; contacts = contacts->next) {
+      e_book_backend_notify_update (e_data_book_get_backend (book), contacts->data);
+    }
     e_book_backend_notify_complete (e_data_book_get_backend (book));
 
     dbus_g_method_return (GINT_TO_POINTER (opid));

@@ -66,6 +66,12 @@ Copyright (C) 2005 Opened Hand Ltd
       <arg name="vcard" type="s" direction="in"/>
     </method>
 
+    <method name="modifyContacts">
+      <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_AddressBook_Book_modifyContacts"/>
+      <annotation name="org.freedesktop.DBus.GLib.Async" value=""/>
+      <arg name="vcards" type="as" direction="in"/>
+    </method>
+
     <method name="getStaticCapabilities">
       <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_AddressBook_Book_getStaticCapabilities"/>
       <arg name="capabilities" type="s" direction="out"/>

@@ -233,6 +233,31 @@ e_book_backend_modify_contact (EBookBackend *backend,
 }
 
 /**
+ * e_book_backend_modify_contacts:
+ * @backend: an #EBookBackend
+ * @book: an #EDataBook
+ * @opid: the ID to use for this operation
+ * @vcards: the VCards to update
+ *
+ * Executes a 'modify contacts' request specified by @opid on @book
+ * using @backend.
+ **/
+void
+e_book_backend_modify_contacts (EBookBackend *backend,
+				EDataBook    *book,
+				guint32       opid,
+				const char  **vcards)
+{
+	g_return_if_fail (E_IS_BOOK_BACKEND (backend));
+	g_return_if_fail (E_IS_DATA_BOOK (book));
+	g_return_if_fail (vcards);
+
+	g_assert (E_BOOK_BACKEND_GET_CLASS (backend)->modify_contacts);
+
+	(* E_BOOK_BACKEND_GET_CLASS (backend)->modify_contacts) (backend, book, opid, vcards);
+}
+
+/**
  * e_book_backend_get_contact:
  * @backend: an #EBookBackend
  * @book: an #EDataBook

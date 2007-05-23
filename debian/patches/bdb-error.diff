@@ -7,7 +7,7 @@ Index: addressbook/backends/file/e-book-backend-file.c
  	int ref_count;
  	DB_ENV *env;
 +	gboolean had_error;
- } global_env = { 0, NULL };
+ } global_env;
  
  static EDataBookStatus
 @@ -213,12 +214,16 @@
@@ -27,21 +27,36 @@ Index: addressbook/backends/file/e-book-backend-file.c
  		if (db_error != 0) {
  			g_warning ("db->sync failed with %s", db_strerror (db_error));
  		}
-@@ -346,10 +351,14 @@
- 	
- 	string_to_dbt (vcard_with_rev, &vcard_dbt);	
+@@ -337,7 +337,9 @@
+ 	string_to_dbt (dbt_id, &id_dbt);
+ 	string_to_dbt (vcard_with_rev, &vcard_dbt);
  
 +	global_env.had_error = FALSE;
  	db_error = db->put (db, NULL, &id_dbt, &vcard_dbt, 0);
 +	if (global_env.had_error) db_error = ENOSPC;
  
- 	if (0 == db_error) {
+ 	g_free (vcard_with_rev);
+ 	
+@@ -365,7 +367,9 @@
+ 	status = modify_contact (bf, vcard, contact);
+ 	
+ 	if (status == GNOME_Evolution_Addressbook_Success) {
 +		global_env.had_error = FALSE;
  		db_error = db->sync (db, 0);
 +		if (global_env.had_error) db_error = ENOSPC;
- 		if (db_error != 0) {
- 			g_warning (G_STRLOC ": db->sync failed with %s", db_strerror (db_error));
- 		} else {
+ 		if (db_error == 0) {
+ 			e_book_backend_summary_remove_contact (bf->priv->summary,
+ 							       e_contact_get_const (*contact, E_CONTACT_UID));
+@@ -417,7 +421,9 @@
+ 	}
+ 
+ 	/* Sync the database */
++	global_env.had_error = FALSE;
+ 	db_error = db->sync (db, 0);
++	if (global_env.had_error) db_error = ENOSPC;
+ 	if (db_error != 0) {
+ 		return db_error_to_status (db_error);
+ 	}
 @@ -1077,6 +1086,7 @@
  #endif
  {

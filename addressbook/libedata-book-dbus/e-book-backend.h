@@ -72,9 +72,10 @@ struct _EBookBackendClass {
 	/* Notification signals */
 	void (* last_client_gone) (EBookBackend *backend);
 
-	/* Padding for future expansion */
 	void (*sync) (EBookBackend *backend);
-	void (*_pas_reserved1) (void);
+	void (*modify_contacts)  (EBookBackend *backend, EDataBook *book, guint32 opid, const char **vcards);
+
+	/* Padding for future expansion */
 	void (*_pas_reserved2) (void);
 	void (*_pas_reserved3) (void);
 	void (*_pas_reserved4) (void);
@@ -119,6 +120,10 @@ void        e_book_backend_modify_contact           (EBookBackend             *b
 						     EDataBook                *book,
 						     guint32                   opid,
 						     const char               *vcard);
+void        e_book_backend_modify_contacts          (EBookBackend             *backend,
+						     EDataBook                *book,
+						     guint32                   opid,
+						     const char              **vcards);
 void        e_book_backend_get_contact              (EBookBackend             *backend,
 						     EDataBook                *book,
 						     guint32                   opid,

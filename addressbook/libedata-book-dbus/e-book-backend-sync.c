@@ -147,6 +147,36 @@ e_book_backend_sync_modify_contact (EBookBackendSync *backend,
 }
 
 /**
+ * e_book_backend_sync_modify_contacts:
+ * @backend: an #EBookBackendSync
+ * @book: an #EDataBook
+ * @opid: the unique ID of the operation
+ * @vcard: the string representation of a contact
+ * @contact: a pointer to a location to store the resulting #EContact
+ * 
+ * Modifies the contact specified by the ID embedded in @vcard, to
+ * reflect the full contents of @vcard.
+ *
+ * Return value: An #EBookBackendSyncStatus indicating the outcome of the operation.
+ **/
+EBookBackendSyncStatus
+e_book_backend_sync_modify_contacts (EBookBackendSync *backend,
+				    EDataBook *book,
+				    guint32 opid,
+				    const char **vcards,
+				    GList **contacts)
+{
+	g_return_val_if_fail (E_IS_BOOK_BACKEND_SYNC (backend), GNOME_Evolution_Addressbook_OtherError);
+	g_return_val_if_fail (E_IS_DATA_BOOK (book), GNOME_Evolution_Addressbook_OtherError);
+	g_return_val_if_fail (vcards, GNOME_Evolution_Addressbook_OtherError);
+	g_return_val_if_fail (contacts, GNOME_Evolution_Addressbook_OtherError);
+
+	g_assert (E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->modify_contacts_sync);
+
+	return (* E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->modify_contacts_sync) (backend, book, opid, vcards, contacts);
+}
+
+/**
  * e_book_backend_sync_get_contact:
  * @backend: an #EBookBackendSync
  * @book: an #EDataBook
@@ -414,6 +444,23 @@ _e_book_backend_modify_contact (EBookBackend *backend,
 }
 
 static void
+_e_book_backend_modify_contacts (EBookBackend *backend,
+				EDataBook    *book,
+				guint32       opid,
+				const char  **vcards)
+{
+	EBookBackendSyncStatus status;
+	GList *contacts = NULL;
+
+	status = e_book_backend_sync_modify_contacts (E_BOOK_BACKEND_SYNC (backend), book, opid, vcards, &contacts);
+
+	e_data_book_respond_modify_contacts (book, opid, status, contacts);
+
+	g_list_foreach (contacts, (GFunc)g_object_unref, NULL);
+	g_list_free (contacts);
+}
+
+static void
 _e_book_backend_get_contact (EBookBackend *backend,
 			     EDataBook    *book,
 			     guint32       opid,
@@ -567,6 +614,7 @@ e_book_backend_sync_class_init (EBookBackendSyncClass *klass)
 	backend_class->create_contact = _e_book_backend_create_contact;
 	backend_class->remove_contacts = _e_book_backend_remove_contacts;
 	backend_class->modify_contact = _e_book_backend_modify_contact;
+	backend_class->modify_contacts = _e_book_backend_modify_contacts;
 	backend_class->get_contact = _e_book_backend_get_contact;
 	backend_class->get_contact_list = _e_book_backend_get_contact_list;
 	backend_class->get_changes = _e_book_backend_get_changes;

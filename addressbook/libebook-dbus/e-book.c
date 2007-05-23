@@ -1141,6 +1141,63 @@ e_book_async_commit_contact (EBook *book, EContact *contact, EBookCallback cb, g
 }
 
 gboolean
+e_book_commit_contacts (EBook *book, GList *contacts, GError **error)
+{
+  GError *err = NULL;
+  char **vcards, **i;
+
+  e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
+  e_return_error_if_fail (contacts != NULL, E_BOOK_ERROR_INVALID_ARG);
+
+  vcards = g_new0 (char*, g_list_length (contacts)+1);
+  for (i = vcards; contacts; contacts = contacts->next, i++) {
+    *i = e_vcard_to_string (E_VCARD (contacts->data), EVC_FORMAT_VCARD_30);
+  }
+
+  org_gnome_evolution_dataserver_addressbook_Book_modify_contacts (book->priv->proxy, (const char**)vcards, &err);
+
+  g_strfreev (vcards);
+
+  return unwrap_gerror (err, error);
+}
+
+static void
+modify_contacts_reply (DBusGProxy *proxy, GError *error, gpointer user_data)
+{
+  struct async_data *data = user_data;
+  EBookCallback cb = data->callback;
+  if (cb)
+    cb (data->book, get_status_from_error (error), data->closure);
+  g_free (data);
+}
+
+guint
+e_book_async_commit_contacts (EBook *book, GList *contacts, EBookCallback cb, gpointer closure)
+{
+  char **vcards, **i;
+  struct async_data *data;
+
+  e_return_async_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
+  e_return_async_error_if_fail (contacts != NULL, E_BOOK_ERROR_INVALID_ARG);
+
+  vcards = g_new0 (char*, g_list_length (contacts)+1);
+  for (i = vcards; contacts; contacts = contacts->next, i++) {
+    *i = e_vcard_to_string (E_VCARD (contacts->data), EVC_FORMAT_VCARD_30);
+  }
+
+  data = g_new (struct async_data, 1);
+  data->book = book;
+  data->callback = cb;
+  data->closure = closure;
+
+  org_gnome_evolution_dataserver_addressbook_Book_modify_contacts_async (book->priv->proxy, (const char**)vcards, modify_contacts_reply, data);
+  g_strfreev (vcards);
+  return 0;
+}
+
+gboolean
 e_book_remove_contact (EBook *book, const char *id, GError **error)
 {
   GError *err = NULL;

@@ -186,6 +186,15 @@ guint e_book_async_commit_contact          (EBook                 *book,
 					    EBookCallback          cb,
 					    gpointer               closure);
 
+gboolean e_book_commit_contacts            (EBook  *book,
+					    GList  *contacts,
+					    GError **error);
+
+guint e_book_async_commit_contacts         (EBook        *book,
+					    GList        *contacts,
+					    EBookCallback cb,
+					    gpointer      closure);
+
 /* Returns a live view of a query. */
 gboolean e_book_get_book_view              (EBook       *book,
 					    EBookQuery  *query,

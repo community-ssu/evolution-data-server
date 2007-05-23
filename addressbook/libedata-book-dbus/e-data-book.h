@@ -66,6 +66,7 @@ void e_data_book_respond_get_contact_list (EDataBook *book, guint32 opid, EDataB
 void e_data_book_respond_remove_contacts (EDataBook *book, guint32 opid, EDataBookStatus  status, GList *ids);
 void e_data_book_respond_remove (EDataBook *book, guint32 opid, EDataBookStatus status);
 void e_data_book_respond_modify (EDataBook *book, guint32 opid, EDataBookStatus status, EContact *contact);
+void e_data_book_respond_modify_contacts (EDataBook *book, guint32 opid, EDataBookStatus status, GList *contacts);
 void e_data_book_respond_create (EDataBook *book, guint32 opid, EDataBookStatus status, EContact *contact);
 void e_data_book_respond_get_changes (EDataBook *book, guint32 opid, EDataBookStatus status, GList *changes);
 void e_data_book_respond_authenticate_user (EDataBook *book, guint32 opid, EDataBookStatus status);
