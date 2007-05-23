@@ -1799,7 +1799,9 @@ get_status_from_error (GError *error)
       return E_BOOK_ERROR_OTHER_ERROR;
     }
   } else {
-    /* In this case the error was caused by DBus */
+    /* In this case the error was caused by DBus. Dump the message to the
+       console as otherwise we have no idea what the problem is. */
+    g_warning ("DBus error: %s", error->message);
     return E_BOOK_ERROR_CORBA_EXCEPTION;
   }
 }
