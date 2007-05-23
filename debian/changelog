@@ -1,3 +1,10 @@
+evolution-data-server (1.4.2.1-20070523.1) unstable; urgency=low
+
+  * Enable POSIX mutexes in libdb, because the provided assembler mutexes
+    don't work in Thumb.
+
+ -- Ross Burton <ross@openedhand.com>  Wed, 23 May 2007 18:07:12 +0100
+
 evolution-data-server (1.4.2.1-20070523) unstable; urgency=low
 
   * Add function for bulk commits
