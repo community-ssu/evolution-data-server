@@ -28,6 +28,8 @@ DEB_DH_MAKESHLIBS_ARGS_ALL := -V
 
 DEB_DH_STRIP_ARGS := --dbg-package=evolution-data-server-addressbook --dbg-package=libedataserver --dbg-package=libedata-book --dbg-package=libebook
 
+DEB_CONFIGURE_SCRIPT := ./autogen.sh
+
 DEB_CONFIGURE_EXTRA_FLAGS := \
 	--prefix=/usr \
 	--with-dbus \
@@ -39,14 +41,6 @@ DEB_CONFIGURE_EXTRA_FLAGS := \
 	--disable-nntp \
 	--without-bug-buddy
 
-debian/stamp-autotools-files:
-	./autogen.sh $(DEB_CONFIGURE_EXTRA_FLAGS)
-	touch debian/stamp-configured
-
-common-build-arch common-build-indep:: debian/stamp-configured
-	make
-
 clean::
 	dh_clean intltool-extract intltool-merge intltool-update \
 	.po/.intltool-merge-cache
-	rm -f debian/stamp-configured
