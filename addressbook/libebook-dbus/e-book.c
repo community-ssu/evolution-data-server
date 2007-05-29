@@ -96,7 +96,7 @@ proxy_destroyed (gpointer data, GObject *object)
 
   g_assert (E_IS_BOOK (book));
 
-  g_warning ("e-d-s proxy died");
+  g_warning (G_STRLOC ": e-d-s proxy died");
 
   /* Ensure that everything relevant is NULL */
   factory_proxy = NULL;
@@ -856,6 +856,8 @@ get_contact_reply(DBusGProxy *proxy, char *vcard, GError *error, gpointer user_d
     } else {
       cb (data->book, status, NULL, data->closure);
     }
+  } else {
+    g_warning (G_STRLOC ": cannot get contact: %s", error->message);
   }
 
   if (error)
