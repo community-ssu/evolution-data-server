@@ -40,8 +40,8 @@
 #include <glib/gstdio.h>
 #include <glib/gi18n-lib.h>
 
-#include "e-dbhash.h"
-#include "e-db3-utils.h"
+#include "libedataserver/e-dbhash.h"
+#include "libedataserver/e-db3-utils.h"
 #include "libedataserver/e-data-server-util.h"
 
 #include "libebook/e-contact.h"
