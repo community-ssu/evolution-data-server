@@ -1,6 +1,7 @@
 INCLUDES =								\
 	-I$(top_srcdir)							\
 	-DG_LOG_DOMAIN=\"e-data-server\"				\
+	$(DB_CFLAGS)							\
 	-DE_DATA_SERVER_PREFIX=\"$(prefix)\"				\
 	-DEVOLUTION_LOCALEDIR=\""$(localedir)"\"			\
 	-DE_DATA_SERVER_EXTENSIONDIR=\"$(extensiondir)\"		\
@@ -21,6 +22,8 @@ libedataserver_1_2_la_SOURCES =		\
 	e-account.c			\
 	e-categories.c			\
 	e-data-server-module.c		\
+	e-dbhash.c			\
+	e-db3-utils.c			\
 	e-file-cache.c			\
 	e-iconv.c			\
 	e-iterator.c			\
@@ -45,6 +48,7 @@ libedataserver_1_2_la_SOURCES =		\
 libedataserver_1_2_la_LIBADD = 				\
 	$(E_DATA_SERVER_LIBS)				\
 	$(ICONV_LIBS)					\
+	$(DB_LIBS)					\
 	$(SOCKET_LIBS)
 
 libedataserver_1_2_la_LDFLAGS = \
@@ -58,6 +62,8 @@ libedataserverinclude_HEADERS =		\
 	e-categories.h			\
 	e-component-listener.h		\
 	e-data-server-module.h		\
+	e-db3-utils.h			\
+	e-dbhash.h			\
 	e-file-cache.h			\
 	e-iconv.h			\
 	e-iterator.h			\
