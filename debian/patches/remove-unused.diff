@@ -28,9 +28,9 @@ Index: addressbook/libebook-dbus/Makefile.am
  	e-vcard.h
 Index: libedataserver/Makefile.am
 ===================================================================
---- libedataserver/Makefile.am	(revision 3732)
+--- libedataserver/Makefile.am	(revision 105)
 +++ libedataserver/Makefile.am	(working copy)
-@@ -17,26 +17,19 @@
+@@ -18,28 +18,21 @@
  
  libedataserver_1_2_la_SOURCES =		\
  	$(BONOBO_SOURCES)		\
@@ -38,6 +38,8 @@ Index: libedataserver/Makefile.am
 -	e-account.c			\
 -	e-categories.c			\
  	e-data-server-module.c		\
+ 	e-dbhash.c			\
+ 	e-db3-utils.c			\
  	e-file-cache.c			\
 -	e-iconv.c			\
  	e-iterator.c			\
@@ -57,7 +59,7 @@ Index: libedataserver/Makefile.am
  	e-xml-utils.c			\
  	e-xml-hash-utils.c		\
  	libedataserver-private.h	\
-@@ -53,26 +46,18 @@
+@@ -57,28 +50,20 @@
  libedataserverincludedir = $(privincludedir)/libedataserver
  
  libedataserverinclude_HEADERS =		\
@@ -66,6 +68,8 @@ Index: libedataserver/Makefile.am
 -	e-categories.h			\
 -	e-component-listener.h		\
  	e-data-server-module.h		\
+ 	e-db3-utils.h			\
+ 	e-dbhash.h			\
  	e-file-cache.h			\
 -	e-iconv.h			\
  	e-iterator.h			\
