@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20070625) unstable; urgency=low
+
+  * Link against the system libdb (libdb4.2)
+
+ -- Ross Burton <ross@openedhand.com>  Mon, 25 Jun 2007 19:36:30 +0100
+
 evolution-data-server (1.4.2.1-20070523.1) unstable; urgency=low
 
   * Enable POSIX mutexes in libdb, because the provided assembler mutexes

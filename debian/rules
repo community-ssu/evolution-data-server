@@ -33,15 +33,14 @@ DEB_CONFIGURE_SCRIPT := ./autogen.sh
 DEB_CONFIGURE_EXTRA_FLAGS := \
 	--prefix=/usr \
 	--with-dbus \
+	--with-libdb=/usr \
 	--without-openldap \
 	--without-libgnome \
 	--disable-groupwise \
 	--disable-nss \
 	--without-soup \
 	--disable-nntp \
-	--without-bug-buddy \
-	--enable-pthreadsmutexes \
-	--enable-posixmutexes
+	--without-bug-buddy
 
 clean::
 	dh_clean intltool-extract intltool-merge intltool-update \
