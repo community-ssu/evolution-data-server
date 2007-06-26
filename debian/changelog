@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20070626) unstable; urgency=low
+
+  * Don't install .la files.
+
+ -- Ross Burton <ross@openedhand.com>  Tue, 26 Jun 2007 12:09:10 +0100
+
 evolution-data-server (1.4.2.1-20070625) unstable; urgency=low
 
   * Link against the system libdb (libdb4.2)
