@@ -1,0 +1,228 @@
+=== modified file 'addressbook/libebook-dbus/e-book.c'
+--- addressbook/libebook-dbus/e-book.c	2007-06-27 10:44:51 +0000
++++ addressbook/libebook-dbus/e-book.c	2007-06-27 10:45:12 +0000
+@@ -1338,9 +1338,10 @@
+ e_book_get_book_view (EBook *book, EBookQuery *query, GList *requested_fields, int max_results, EBookView **book_view, GError **error)
+ {
+   GError *err = NULL;
++  DBusGConnection *view_conn;
+   DBusGProxy *view_proxy;
+   char **fields;
+-  char *sexp, *view_path;
++  char *sexp, *address;
+ 
+   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+   e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
+@@ -1349,41 +1350,80 @@
+ 
+   sexp = e_book_query_to_string (query);
+   
+-  if (!org_gnome_evolution_dataserver_addressbook_Book_get_book_view (book->priv->proxy, sexp, (const char **) fields, max_results, &view_path, &err)) {
++  if (!org_gnome_evolution_dataserver_addressbook_Book_get_book_view (book->priv->proxy, sexp, (const char **) fields, max_results, &address, &err)) {
+     *book_view = NULL;
++    g_free (fields);
+     g_free (sexp);
+     return unwrap_gerror (err, error);
+   }
+-  view_proxy = dbus_g_proxy_new_for_name_owner (connection,
+-                                                E_DATA_BOOK_FACTORY_SERVICE_NAME, view_path,
+-                                                "org.gnome.evolution.dataserver.addressbook.BookView", error);
+-  /* TODO: handle failures properly here too */
++  g_free (fields);
++  g_free (sexp);
++
++  view_conn = dbus_g_connection_open (address, &err);
++  g_free (address);
++  if (!view_conn) {
++    return unwrap_gerror (err, error);
++  }
++
++  view_proxy = dbus_g_proxy_new_for_peer (view_conn, "/", "org.gnome.evolution.dataserver.addressbook.BookView");
+   if (!view_proxy) {
++    dbus_g_connection_unref (view_conn);
+     *book_view = NULL;
++    g_set_error (error, E_BOOK_ERROR,
++                 E_BOOK_ERROR_CORBA_EXCEPTION,
++                 "Cannot open connection to book view");
++    return FALSE;
+   } else {
+     *book_view = e_book_view_new (book, view_proxy);
++    return TRUE;
+   }
+-  g_free (view_path);
+-  g_free (sexp);
+-  g_free (fields);
+-  return TRUE;
+ }
+ 
+ static void
+-get_book_view_reply (DBusGProxy *proxy, char *view_path, GError *error, gpointer user_data)
++get_book_view_reply (DBusGProxy *proxy, char *address, GError *error, gpointer user_data)
+ {
+   struct async_data *data = user_data;
++  GError *err = NULL;
+   EBookView *view;
+   EBookBookViewCallback cb = data->callback;
++  DBusGConnection *view_conn;
+   DBusGProxy *view_proxy;
+ 
+-  view_proxy = dbus_g_proxy_new_for_name_owner (connection, E_DATA_BOOK_FACTORY_SERVICE_NAME, view_path,
+-                                           "org.gnome.evolution.dataserver.addressbook.BookView", NULL);
+-  /* TODO: handle errors */
++  if (error) {
++    if (cb)
++      cb (data->book, get_status_from_error (error), NULL, data->closure);
++    g_error_free (error);
++    g_free (data);
++    return;
++  }
++  
++  
++  view_conn = dbus_g_connection_open (address, &err);
++  if (!view_conn) {
++    g_warning (G_STRLOC ": cannot get connection: %s", err->message);
++    g_error_free (err);
++    if (cb)
++      cb (data->book, E_BOOK_ERROR_CORBA_EXCEPTION, NULL, data->closure);
++    goto done;
++  }
++
++  view_proxy = dbus_g_proxy_new_for_peer (view_conn, "/", "org.gnome.evolution.dataserver.addressbook.BookView");
++  if (!view_proxy) {
++    g_warning (G_STRLOC ": cannot create proxy");
++    if (cb)
++      cb (data->book, E_BOOK_ERROR_CORBA_EXCEPTION, NULL, data->closure);
++    goto done;
++  }
++
+   view = e_book_view_new (data->book, view_proxy);
+-
++  
+   if (cb)
+-    cb (data->book, get_status_from_error (error), view, data->closure);
++    cb (data->book, E_BOOK_ERROR_OK, view, data->closure);
++  
++ done:
++  /* We don't care about the connection any more, the proxy will keep it open */
++  if (view_conn)
++    g_object_unref (view_conn);
+   g_free (data);
+ }
+ 
+
+=== modified file 'addressbook/libedata-book-dbus/e-data-book-view.c'
+--- addressbook/libedata-book-dbus/e-data-book-view.c	2007-05-18 13:51:45 +0000
++++ addressbook/libedata-book-dbus/e-data-book-view.c	2007-05-18 14:15:23 +0000
+@@ -21,11 +21,10 @@
+ #include <config.h>
+ #include <string.h>
+ #include <dbus/dbus.h>
++#include <dbus/dbus-glib-lowlevel.h>
+ #include <libebook/e-contact.h>
+ #include "e-data-book-view.h"
+ 
+-extern DBusGConnection *connection;
+-
+ static gboolean impl_BookView_start (EDataBookView *view, GError **error);
+ static gboolean impl_BookView_stop (EDataBookView *view, GError **error);
+ static gboolean impl_BookView_dispose (EDataBookView *view, GError **eror);
+@@ -152,10 +151,30 @@
+   g_object_unref (view);
+ }
+ 
++/* Oh dear god, think of the children. */
++#define _DBUS_POINTER_SHIFT(p)   ((void*) (((char*)p) + sizeof (void*)))
++#define DBUS_G_CONNECTION_FROM_CONNECTION(x)     ((DBusGConnection*) _DBUS_POINTER_SHIFT(x))
++
++static void
++new_connection_func (DBusServer *server, DBusConnection *conn, gpointer user_data)
++{
++  EDataBookView *view = user_data;
++
++  dbus_connection_ref (conn);
++  dbus_connection_setup_with_g_main (conn, NULL);
++
++  dbus_g_connection_register_g_object
++    (DBUS_G_CONNECTION_FROM_CONNECTION (conn), "/", G_OBJECT (view));
++
++  /* This is a one-shot server */
++  dbus_server_unref (server);
++  dbus_server_disconnect (server);
++}
++
+ /**
+  * e_data_book_view_new:
+  * @book: The #EDataBook to search
+- * @path: The object path that this book view should have
++ * @path: The socket path that this book view should open
+  * @card_query: The query as a string
+  * @card_sexp: The query as an #EBookBackendSExp
+  * @max_results: The maximum number of results to return
+@@ -166,9 +185,23 @@
+ EDataBookView *
+ e_data_book_view_new (EDataBook *book, const char *path, const char *card_query, EBookBackendSExp *card_sexp, int max_results)
+ {
++  DBusError error;
++  DBusServer *server;
+   EDataBookView *view;
+   EDataBookViewPrivate *priv;
+ 
++  g_return_val_if_fail (E_IS_DATA_BOOK (book), NULL);
++  g_return_val_if_fail (path, NULL);
++
++  dbus_error_init (&error);
++  server = dbus_server_listen (path, &error);
++  if (!server) {
++    g_warning ("Cannot create server: %s", error.message);
++    dbus_error_free (&error);
++    return NULL;
++  }
++  dbus_server_setup_with_g_main (server, NULL);
++  
+   view = g_object_new (E_TYPE_DATA_BOOK_VIEW, NULL);
+   priv = view->priv;
+ 
+@@ -180,7 +213,7 @@
+   priv->card_sexp = card_sexp;
+   priv->max_results = max_results;
+ 
+-  dbus_g_connection_register_g_object (connection, path, G_OBJECT (view));
++  dbus_server_set_new_connection_function (server, new_connection_func, view, NULL);
+ 
+   return view;
+ }
+
+=== modified file 'addressbook/libedata-book-dbus/e-data-book.c'
+--- addressbook/libedata-book-dbus/e-data-book.c	2007-06-27 10:44:52 +0000
++++ addressbook/libedata-book-dbus/e-data-book.c	2007-06-27 10:45:12 +0000
+@@ -435,8 +435,14 @@
+ static char*
+ construct_bookview_path (void)
+ {
+-  static guint counter = 1; /* TODO: add mutex for possible future threading */
+-  return g_strdup_printf ("/org/gnome/evolution/dataserver/addressbook/BookView/%d/%d", getpid(), counter++);
++#ifdef __linux__
++  /* TODO: take randomisation code from gvfs? */
++  static guint counter = 1;
++  return g_strdup_printf ("unix:abstract=/e-addressbook-view-%d-%d", getpid(), counter++);
++#else
++# error construct_bookview_path unimplemented on non-Linux systems
++  /* TODO: check for abstract sockets at configure time */
++#endif
+ }
+ 
+ static gboolean
+
+=== modified file 'addressbook/libedata-book-dbus/e-data-book.xml'
+--- addressbook/libedata-book-dbus/e-data-book.xml	2007-06-27 10:44:52 +0000
++++ addressbook/libedata-book-dbus/e-data-book.xml	2007-06-27 10:45:13 +0000
+@@ -101,7 +101,7 @@
+       <arg name="query" type="s" direction="in"/>
+       <arg name="fields" type="as" direction="in"/>
+       <arg name="max_results" type="u" direction="in"/>
+-      <arg name="view" type="o" direction="out"/>
++      <arg name="address" type="s" direction="out"/>
+     </method>
+ 
+     <method name="getChanges">
+

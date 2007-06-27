@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20070627) unstable; urgency=low
+
+  * Add patch to use peer connections in book views.
+
+ -- Ross Burton <ross@openedhand.com>  Wed, 27 Jun 2007 14:48:21 +0100
+
 evolution-data-server (1.4.2.1-20070626) unstable; urgency=low
 
   * Don't install .la files.
