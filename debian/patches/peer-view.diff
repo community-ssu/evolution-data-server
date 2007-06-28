@@ -1,6 +1,6 @@
 === modified file 'addressbook/libebook-dbus/e-book.c'
 --- addressbook/libebook-dbus/e-book.c	2007-06-27 10:44:51 +0000
-+++ addressbook/libebook-dbus/e-book.c	2007-06-27 10:45:12 +0000
++++ addressbook/libebook-dbus/e-book.c	2007-06-28 15:01:58 +0000
 @@ -1338,9 +1338,10 @@
  e_book_get_book_view (EBook *book, EBookQuery *query, GList *requested_fields, int max_results, EBookView **book_view, GError **error)
  {
@@ -105,7 +105,7 @@
 + done:
 +  /* We don't care about the connection any more, the proxy will keep it open */
 +  if (view_conn)
-+    g_object_unref (view_conn);
++    dbus_g_connection_unref (view_conn);
    g_free (data);
  }
  

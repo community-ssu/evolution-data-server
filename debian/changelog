@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20070628) unstable; urgency=low
+
+  * Use correct unref when creating book views (Fixes: NB#61994).
+
+ -- Ross Burton <ross@openedhand.com>  Thu, 28 Jun 2007 16:07:57 +0100
+
 evolution-data-server (1.4.2.1-20070627) unstable; urgency=low
 
   * Add patch to use peer connections in book views.
