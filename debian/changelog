@@ -294,7 +294,7 @@ evolution-data-server (1.4.1-0osso20060508) unstable; urgency=low
     - Handle NULL books when destroying views
     - Add X-OSSO-BOUND define
 
- -- Ross Burton <ross@debian.org>  Mon,  8 May 2006 13:12:33 +0100
+ -- Ross Burton <ross@openedhand.com>  Mon,  8 May 2006 13:12:33 +0100
 
 evolution-data-server (1.4.1-0osso20060503) unstable; urgency=low
 
@@ -302,7 +302,7 @@ evolution-data-server (1.4.1-0osso20060503) unstable; urgency=low
   * Use non-fatal allocation handlers in the backend
   * debian/patches/small-cache.diff: reduce the BDB cache to 128K
 
- -- Ross Burton <ross@debian.org>  Wed,  3 May 2006 09:59:17 +0100
+ -- Ross Burton <ross@openedhand.com>  Wed,  3 May 2006 09:59:17 +0100
 
 evolution-data-server (1.4.1-0osso20060428) unstable; urgency=low
 
