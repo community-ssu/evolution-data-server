@@ -507,7 +507,10 @@ e_data_book_view_notify_remove (EDataBookView *book_view, const char *id)
     return;
 
   g_mutex_lock (priv->pending_mutex);
-  notify_remove (book_view, g_strdup (id));
+
+  if (g_hash_table_lookup (priv->ids, id))
+    notify_remove (book_view, g_strdup (id));
+  
   g_mutex_unlock (priv->pending_mutex);
 }
 
