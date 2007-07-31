@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20070731) unstable; urgency=low
+
+  * Only send remove notifications if the contact was in the view originally.
+
+ -- Ross Burton <ross@openedhand.com>  Tue, 31 Jul 2007 15:30:54 +0100
+
 evolution-data-server (1.4.2.1-20070730) unstable; urgency=low
 
   * Add build-dep on libc6-dev >= 2.5 for the new threading operations.
