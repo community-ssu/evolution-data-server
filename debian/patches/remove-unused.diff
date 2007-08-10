@@ -30,7 +30,7 @@ Index: libedataserver/Makefile.am
 ===================================================================
 --- libedataserver/Makefile.am	(revision 105)
 +++ libedataserver/Makefile.am	(working copy)
-@@ -18,28 +18,21 @@
+@@ -18,26 +18,19 @@
  
  libedataserver_1_2_la_SOURCES =		\
  	$(BONOBO_SOURCES)		\
@@ -38,8 +38,6 @@ Index: libedataserver/Makefile.am
 -	e-account.c			\
 -	e-categories.c			\
  	e-data-server-module.c		\
- 	e-dbhash.c			\
- 	e-db3-utils.c			\
  	e-file-cache.c			\
 -	e-iconv.c			\
  	e-iterator.c			\
@@ -59,7 +57,7 @@ Index: libedataserver/Makefile.am
  	e-xml-utils.c			\
  	e-xml-hash-utils.c		\
  	libedataserver-private.h	\
-@@ -57,28 +50,20 @@
+@@ -57,26 +50,18 @@
  libedataserverincludedir = $(privincludedir)/libedataserver
  
  libedataserverinclude_HEADERS =		\
@@ -68,8 +66,6 @@ Index: libedataserver/Makefile.am
 -	e-categories.h			\
 -	e-component-listener.h		\
  	e-data-server-module.h		\
- 	e-db3-utils.h			\
- 	e-dbhash.h			\
  	e-file-cache.h			\
 -	e-iconv.h			\
  	e-iterator.h			\
