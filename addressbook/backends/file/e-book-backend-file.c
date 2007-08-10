@@ -389,7 +389,7 @@ e_book_backend_file_modify_contacts (EBookBackendSync *backend,
 				    GList **contacts)
 {
 	EBookBackendFile *bf;
-	EBookBackendSyncStatus status;
+	EBookBackendSyncStatus status = GNOME_Evolution_Addressbook_OtherError;
 	EContact *contact;
 	DB *db;
 	int db_error;
