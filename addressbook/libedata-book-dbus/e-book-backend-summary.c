@@ -945,6 +945,7 @@ static const struct {
 } check_symbols[] = {
 	{ "contains", func_check, 0 },
 	{ "is", func_check, 0 },
+	{ "is_vcard", func_fail, 0 },
 	{ "beginswith", func_check, 0 },
 	{ "endswith", func_check, 0 },
 	{ "exists", func_check, 0 },

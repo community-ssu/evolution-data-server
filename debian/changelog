@@ -1,3 +1,10 @@
+evolution-data-server (1.4.2.1-20070815) unstable; urgency=low
+
+  * Handle is_vcard when checking for summary queries, removing a console
+    warning.
+
+ -- Ross Burton <ross@openedhand.com>  Wed, 15 Aug 2007 11:20:43 +0100
+
 evolution-data-server (1.4.2.1-20070810) unstable; urgency=low
 
   * Fix licensing issue by moving libdb-linking code entirely into the server.
