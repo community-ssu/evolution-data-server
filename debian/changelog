@@ -1,3 +1,11 @@
+evolution-data-server (1.4.2.1-20070823) unstable; urgency=low
+
+  * Don't treat client name changes as disconnects, fixing "random" closing
+    of EDS.  
+  * Register the bus name earlier
+
+ -- Ross Burton <ross@openedhand.com>  Thu, 23 Aug 2007 16:35:49 +0100
+
 evolution-data-server (1.4.2.1-20070815) unstable; urgency=low
 
   * Handle is_vcard when checking for summary queries, removing a console

@@ -274,7 +274,7 @@ name_owner_changed (DBusGProxy *proxy,
                     const char *new_owner,
                     EDataBookFactory *factory)
 {
-  if (strcmp (new_owner, "") == 0) {
+  if (strcmp (new_owner, "") == 0 && strcmp (name, prev_owner) == 0) {
     char *key;
     GList *list = NULL;
     g_mutex_lock (factory->priv->connections_lock);
@@ -335,19 +335,10 @@ main (int argc, char **argv)
   if (connection == NULL)
     die ("Failed to open connection to bus", error);
 
-  factory = g_object_new (E_TYPE_DATA_BOOK_FACTORY, NULL);
-  dbus_g_connection_register_g_object (connection,
-                                       "/org/gnome/evolution/dataserver/addressbook/BookFactory",
-                                       G_OBJECT (factory));
-
   bus_proxy = dbus_g_proxy_new_for_name (connection,
                                             DBUS_SERVICE_DBUS,
                                             DBUS_PATH_DBUS,
                                             DBUS_INTERFACE_DBUS);
-
-  dbus_g_proxy_add_signal (bus_proxy, "NameOwnerChanged",
-                           G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INVALID);
-  dbus_g_proxy_connect_signal (bus_proxy, "NameOwnerChanged", G_CALLBACK (name_owner_changed), factory, NULL);
 
   if (!org_freedesktop_DBus_request_name (bus_proxy, E_DATA_BOOK_FACTORY_SERVICE_NAME,
 					  0, &request_name_ret, &error))
@@ -357,6 +348,15 @@ main (int argc, char **argv)
     g_error ("Got result code %u from requesting name", request_name_ret);
     exit (1);
   }
+
+  dbus_g_proxy_add_signal (bus_proxy, "NameOwnerChanged",
+                           G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INVALID);
+  dbus_g_proxy_connect_signal (bus_proxy, "NameOwnerChanged", G_CALLBACK (name_owner_changed), factory, NULL);
+
+  factory = g_object_new (E_TYPE_DATA_BOOK_FACTORY, NULL);
+  dbus_g_connection_register_g_object (connection,
+                                       "/org/gnome/evolution/dataserver/addressbook/BookFactory",
+                                       G_OBJECT (factory));
 
   /* Nokia 770 specific code: listen for backup starting signals */
   backup_proxy = dbus_g_proxy_new_for_name (connection,
