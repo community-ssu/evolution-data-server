@@ -1,3 +1,10 @@
+evolution-data-server (1.4.2.1-20070828) unstable; urgency=low
+
+  * Don't crash when a client disconnects
+  * Fix e_book_is_self()
+
+ -- Ross Burton <ross@openedhand.com>  Tue, 28 Aug 2007 10:38:18 +0100
+
 evolution-data-server (1.4.2.1-20070823) unstable; urgency=low
 
   * Don't treat client name changes as disconnects, fixing "random" closing
