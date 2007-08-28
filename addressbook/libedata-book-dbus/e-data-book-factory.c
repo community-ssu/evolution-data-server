@@ -349,14 +349,14 @@ main (int argc, char **argv)
     exit (1);
   }
 
-  dbus_g_proxy_add_signal (bus_proxy, "NameOwnerChanged",
-                           G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INVALID);
-  dbus_g_proxy_connect_signal (bus_proxy, "NameOwnerChanged", G_CALLBACK (name_owner_changed), factory, NULL);
-
   factory = g_object_new (E_TYPE_DATA_BOOK_FACTORY, NULL);
   dbus_g_connection_register_g_object (connection,
                                        "/org/gnome/evolution/dataserver/addressbook/BookFactory",
                                        G_OBJECT (factory));
+
+  dbus_g_proxy_add_signal (bus_proxy, "NameOwnerChanged",
+                           G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INVALID);
+  dbus_g_proxy_connect_signal (bus_proxy, "NameOwnerChanged", G_CALLBACK (name_owner_changed), factory, NULL);
 
   /* Nokia 770 specific code: listen for backup starting signals */
   backup_proxy = dbus_g_proxy_new_for_name (connection,
