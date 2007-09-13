@@ -1572,6 +1572,17 @@ e_vcard_get_attributes (EVCard *evcard)
 	return evcard->priv->attributes;
 }
 
+/**
+ * e_vcard_get_attribute:
+ * @evc: an #EVCard
+ * @name: the name of the attribute to get
+ *
+ * Get the attribute @name from @evc.  The #EVCardAttribute is owned by
+ * @evcard and should not be freed. If the attribute does not exist, #NULL is
+ * returned.
+ *
+ * Return value: An #EVCardAttribute if found, or #NULL.
+ **/
 EVCardAttribute *
 e_vcard_get_attribute (EVCard     *vcard,
 		       const char *name)

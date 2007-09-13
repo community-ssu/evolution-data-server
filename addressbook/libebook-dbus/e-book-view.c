@@ -237,6 +237,12 @@ e_book_view_get_book (EBookView *book_view)
   return book_view->priv->book;
 }
 
+/**
+ * e_book_view_start:
+ * @book_view: an #EBookView
+ *
+ * Tells @book_view to start processing events.
+ */
 void
 e_book_view_start (EBookView *book_view)
 {
@@ -255,6 +261,12 @@ e_book_view_start (EBookView *book_view)
   }
 }
 
+/**
+ * e_book_view_stop:
+ * @book_view: an #EBookView
+ *
+ * Tells @book_view to stop processing events.
+ **/
 void
 e_book_view_stop (EBookView *book_view)
 {

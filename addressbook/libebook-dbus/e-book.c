@@ -302,7 +302,6 @@ e_book_get_addressbooks (ESourceList **addressbook_sources, GError **error)
 
 /**
  * e_book_new:
- *
  * @source: An #ESource pointer
  * @error: A #GError pointer
  *
@@ -369,7 +368,6 @@ e_book_new (ESource *source, GError **error)
 
 /**
  * e_book_new_from_uri:
- *
  * @uri: the URI to load
  * @error: A #GError pointer
  *
@@ -397,7 +395,6 @@ e_book_new_from_uri (const char *uri, GError **error)
 
 /**
  * e_book_new_system_addressbook:
- *
  * @uri: the URI to load
  * @error: A #GError pointer
  *
@@ -461,7 +458,6 @@ e_book_new_system_addressbook (GError **error)
 
 /**
  * e_book_new_default_addressbook:
- *
  * @uri: the URI to load
  * @error: A #GError pointer
  *
@@ -509,6 +505,14 @@ e_book_new_default_addressbook   (GError **error)
 	return book;
 }
 
+/**
+ * e_book_get_source:
+ * @book: an #EBook
+ *
+ * Get the #ESource that this book has loaded.
+ *
+ * Return value: The source.
+ */
 ESource*
 e_book_get_source (EBook *book)
 {
@@ -517,6 +521,16 @@ e_book_get_source (EBook *book)
   return book->priv->source;
 }
 
+/**
+ * e_book_open:
+ * @book: an #EBook
+ * @only_if_exists: if %TRUE, fail if this book doesn't already exist, otherwise create it first
+ * @error: a #GError to set on failure
+ *
+ * Opens the addressbook, making it ready for queries and other operations.
+ *
+ * Return value: %TRUE if the book was successfully opened, %FALSE otherwise.
+ */
 gboolean
 e_book_open (EBook *book, gboolean only_if_exists, GError **error)
 {
@@ -558,6 +572,18 @@ open_reply(DBusGProxy *proxy, GError *error, gpointer user_data)
   g_free (data);
 }
 
+/**
+ * e_book_async_open:
+ * @book: an #EBook
+ * @only_if_exists: if %TRUE, fail if this book doesn't already exist, otherwise create it first
+ * @open_response: a function to call when the operation finishes
+ * @closure: data to pass to callback function
+ *
+ * Opens the addressbook, making it ready for queries and other operations.
+ * This function does not block.
+ *
+ * Return value: %FALSE if successful, %TRUE otherwise.
+ **/
 guint
 e_book_async_open (EBook *book, gboolean only_if_exists, EBookCallback cb, gpointer closure)
 {
@@ -575,6 +601,16 @@ e_book_async_open (EBook *book, gboolean only_if_exists, EBookCallback cb, gpoin
   return 0;
 }
 
+/**
+ * e_book_remove:
+ * @book: an #EBook
+ * @error: a #GError to set on failure
+ *
+ * Removes the backing data for this #EBook. For example, with the file backend this
+ * deletes the database file. You cannot get it back!
+ *
+ * Return value: %TRUE on success, %FALSE on failure.
+ */
 gboolean
 e_book_remove (EBook *book, GError **error)
 {
@@ -597,6 +633,17 @@ remove_reply(DBusGProxy *proxy, GError *error, gpointer user_data)
   g_free (data);
 }
 
+/**
+ * e_book_async_remove:
+ * @book: an #EBook
+ * @cb: a function to call when the operation finishes
+ * @closure: data to pass to callback function
+ *
+ * Remove the backing data for this #EBook. For example, with the file backend this
+ * deletes the database file. You cannot get it back!
+ *
+ * Return value: %FALSE if successful, %TRUE otherwise.
+ **/
 guint
 e_book_async_remove (EBook *book, EBookCallback cb, gpointer closure)
 {
@@ -614,6 +661,19 @@ e_book_async_remove (EBook *book, EBookCallback cb, gpointer closure)
   return 0;
 }
 
+/**
+ * e_book_get_required_fields:
+ * @book: an #EBook
+ * @fields: a #GList of fields to set on success
+ * @error: a #GError to set on failure
+ *
+ * Gets a list of fields that are required to be filled in for
+ * all contacts in this @book. The list will contain pointers
+ * to allocated strings, and both the #GList and the strings
+ * must be freed by the caller.
+ *
+ * Return value: %TRUE if successful, %FALSE otherwise.
+ **/
 gboolean
 e_book_get_required_fields (EBook *book, GList **fields, GError **error)
 {
@@ -653,6 +713,17 @@ get_required_fields_reply(DBusGProxy *proxy, char **fields, GError *error, gpoin
   g_free (fields);
 }
 
+/**
+ * e_book_async_get_required_fields:
+ * @book: an #EBook
+ * @cb: function to call when the operation finishes
+ * @closure: data to pass to callback function
+ *
+ * Gets a list of fields that are required to be filled in for
+ * all contacts in this @book. This function does not block.
+ *
+ * Return value: %TRUE if the operation was started, %FALSE otherwise.
+ **/
 guint
 e_book_async_get_required_fields (EBook *book, EBookEListCallback cb, gpointer closure)
 {
@@ -670,6 +741,19 @@ e_book_async_get_required_fields (EBook *book, EBookEListCallback cb, gpointer c
   return 0;
 }
 
+/**
+ * e_book_get_supported_fields:
+ * @book: an #EBook
+ * @fields: a #GList of fields to set on success
+ * @error: a #GError to set on failure
+ *
+ * Gets a list of fields that can be stored for contacts
+ * in this @book. Other fields may be discarded. The list
+ * will contain pointers to allocated strings, and both the
+ * #GList and the strings must be freed by the caller.
+ *
+ * Return value: %TRUE if successful, %FALSE otherwise
+ **/
 gboolean
 e_book_get_supported_fields (EBook *book, GList **fields, GError **error)
 {
@@ -707,6 +791,18 @@ get_supported_fields_reply(DBusGProxy *proxy, char **fields, GError *error, gpoi
   g_free (fields);
 }
 
+/**
+ * e_book_async_get_supported_fields:
+ * @book: an #EBook
+ * @cb: function to call when the operation finishes
+ * @closure: data to pass to callback function
+ *
+ * Gets a list of fields that can be stored for contacts
+ * in this @book. Other fields may be discarded. This
+ * function does not block.
+ *
+ * Return value: %TRUE if successful, %FALSE otherwise.
+ **/
 guint
 e_book_async_get_supported_fields (EBook *book, EBookEListCallback cb, gpointer closure)
 {
@@ -724,6 +820,18 @@ e_book_async_get_supported_fields (EBook *book, EBookEListCallback cb, gpointer 
   return 0;
 }
 
+/**
+ * e_book_get_supported_auth_methods:
+ * @book: an #EBook
+ * @auth_methods: a #GList of auth methods to set on success
+ * @error: a #GError to set on failure
+ *
+ * Queries @book for the list of authentication methods it supports.
+ * The list will contain pointers to allocated strings, and both the
+ * #GList and the strings must be freed by the caller.
+ *
+ * Return value: %TRUE if successful, %FALSE otherwise
+ **/
 gboolean
 e_book_get_supported_auth_methods (EBook *book, GList **auth_methods, GError **error)
 {
@@ -763,7 +871,17 @@ get_supported_auth_methods_reply(DBusGProxy *proxy, char **methods, GError *erro
   g_free (methods);
 }
 
-guint
+/**
+ * e_book_async_get_supported_auth_methods:
+ * @book: an #EBook
+ * @cb: function to call when the operation finishes
+ * @closure: data to pass to callback function
+ *
+ * Queries @book for the list of authentication methods it supports.
+ * This function does not block.
+ *
+ * Return value: %TRUE if successful, %FALSE otherwise.
+ **/guint
 e_book_async_get_supported_auth_methods (EBook *book, EBookEListCallback cb, gpointer closure)
 {
   struct async_data *data;
@@ -780,6 +898,20 @@ e_book_async_get_supported_auth_methods (EBook *book, EBookEListCallback cb, gpo
   return 0;
 }
 
+/**
+ * e_book_authenticate_user:
+ * @book: an #EBook
+ * @user: a string
+ * @passwd: a string
+ * @auth_method: a string
+ * @error: a #GError to set on failure
+ *
+ * Authenticates @user with @passwd, using the auth method
+ * @auth_method.  @auth_method must be one of the authentication
+ * methods returned using e_book_get_supported_auth_methods.
+ *
+ * Return value: %TRUE if successful, %FALSE otherwise
+ **/
 gboolean
 e_book_authenticate_user (EBook *book, const char *user, const char *passwd, const char *auth_method, GError **error)
 {
@@ -802,6 +934,22 @@ authenticate_user_reply(DBusGProxy *proxy, GError *error, gpointer user_data)
   g_free (data);
 }
 
+/**
+ * e_book_async_authenticate_user:
+ * @book: an #EBook
+ * @user: user name
+ * @passwd: password
+ * @auth_method: string indicating authentication method
+ * @cb: function to call when the operation finishes
+ * @closure: data to pass to callback function
+ *
+ * Authenticate @user with @passwd, using the auth method
+ * @auth_method. @auth_method must be one of the authentication
+ * methods returned using e_book_get_supported_auth_methods.
+ * This function does not block.
+ *
+ * Return value: %FALSE if successful, %TRUE otherwise.
+ **/
 guint
 e_book_async_authenticate_user (EBook *book, const char *user, const char *passwd, const char *auth_method, EBookCallback cb, gpointer closure)
 {
@@ -822,6 +970,18 @@ e_book_async_authenticate_user (EBook *book, const char *user, const char *passw
   return 0;
 }
 
+/**
+ * e_book_get_contact:
+ * @book: an #EBook
+ * @id: a unique string ID specifying the contact
+ * @contact: an #EContact
+ * @error: a #GError to set on failure
+ *
+ * Fills in @contact with the contents of the vcard in @book
+ * corresponding to @id.
+ *
+ * Return value: %TRUE if successful, %FALSE otherwise
+ **/
 gboolean
 e_book_get_contact (EBook *book, const char  *id, EContact **contact, GError **error)
 {
@@ -866,6 +1026,17 @@ get_contact_reply(DBusGProxy *proxy, char *vcard, GError *error, gpointer user_d
   g_free (data);
 }
 
+/**
+ * e_book_async_get_contact:
+ * @book: an #EBook
+ * @id: a unique string ID specifying the contact
+ * @cb: function to call when operation finishes
+ * @closure: data to pass to callback function
+ *
+ * Retrieves a contact specified by @id from @book.
+ *
+ * Return value: %FALSE if successful, %TRUE otherwise
+ **/
 guint
 e_book_async_get_contact (EBook *book, const char *id, EBookContactCallback cb, gpointer closure)
 {
@@ -884,6 +1055,18 @@ e_book_async_get_contact (EBook *book, const char *id, EBookContactCallback cb, 
   return 0;
 }
 
+/**
+ * e_book_get_contacts:
+ * @book: an #EBook
+ * @query: an #EBookQuery
+ * @contacts: a #GList pointer, will be set to the list of contacts
+ * @error: a #GError to set on failure
+ *
+ * Query @book with @query, setting @contacts to the list of contacts which
+ * matched. On failed, @error will be set and %FALSE returned.
+ *
+ * Return value: %TRUE on success, %FALSE otherwise
+ **/
 gboolean
 e_book_get_contacts (EBook *book, EBookQuery *query, GList **contacts, GError **error)
 {
@@ -930,6 +1113,17 @@ get_contacts_reply(DBusGProxy *proxy, char **vcards, GError *error, gpointer use
   g_free (data);
 }
 
+/**
+ * e_book_async_get_contacts:
+ * @book: an #EBook
+ * @query: an #EBookQuery
+ * @cb: a function to call when the operation finishes
+ * @closure: data to pass to callback function
+ *
+ * Query @book with @query.
+ *
+ * Return value: %FALSE on success, %TRUE otherwise
+ **/
 guint
 e_book_async_get_contacts (EBook *book, EBookQuery *query, EBookListCallback cb, gpointer closure)
 {
@@ -970,6 +1164,18 @@ parse_changes_array (char **arr)
   return g_list_reverse (l);
 }
 
+/**
+ * e_book_get_changes:
+ * @book: an #EBook
+ * @changeid:  the change ID
+ * @changes: return location for a #GList of #EBookChange items
+ * @error: a #GError to set on failure.
+ *
+ * Get the set of changes since the previous call to #e_book_get_changes for a
+ * given change ID.
+ *
+ * Return value: TRUE on success, FALSE otherwise
+ */
 gboolean
 e_book_get_changes (EBook *book, char *changeid, GList **changes, GError **error)
 {
@@ -1001,6 +1207,18 @@ get_changes_reply(DBusGProxy *proxy, char **changes, GError *error, gpointer use
   g_free (data);
 }
 
+/**
+ * e_book_async_get_changes:
+ * @book: an #EBook
+ * @changeid:  the change ID
+ * @cb: function to call when operation finishes
+ * @closure: data to pass to callback function
+ *
+ * Get the set of changes since the previous call to #e_book_async_get_changes
+ * for a given change ID.
+ *
+ * Return value: TRUE on success, FALSE otherwise
+ */
 guint
 e_book_async_get_changes (EBook *book, char *changeid, EBookListCallback cb, gpointer closure)
 {
@@ -1018,6 +1236,12 @@ e_book_async_get_changes (EBook *book, char *changeid, EBookListCallback cb, gpo
   return 0;
 }
 
+/**
+ * e_book_free_change_list:
+ * @change_list: a #GList of #EBookChange items
+ *
+ * Free the contents of #change_list, and the list itself.
+ */
 void
 e_book_free_change_list (GList *change_list)
 {
@@ -1032,6 +1256,16 @@ e_book_free_change_list (GList *change_list)
 	g_list_free (change_list);
 }
 
+/**
+ * e_book_add_contact:
+ * @book: an #EBook
+ * @contact: an #EContact
+ * @error: a #GError to set on failure
+ *
+ * Adds @contact to @book.
+ *
+ * Return value: %TRUE if successful, %FALSE otherwise.
+ **/
 gboolean
 e_book_add_contact (EBook *book, EContact *contact, GError **error)
 {
@@ -1072,6 +1306,17 @@ add_contact_reply (DBusGProxy *proxy, char *uid, GError *error, gpointer user_da
   g_free (data);
 }
 
+/**
+ * e_book_async_add_contact:
+ * @book: an #EBook
+ * @contact: an #EContact
+ * @cb: function to call when the operation finishes
+ * @closure: data to pass to callback function
+ *
+ * Adds @contact to @book without blocking. 
+ *
+ * Return value: %TRUE if the operation was started, %FALSE otherwise.
+ **/
 gboolean
 e_book_async_add_contact (EBook *book, EContact *contact, EBookIdCallback cb, gpointer closure)
 {
@@ -1094,6 +1339,17 @@ e_book_async_add_contact (EBook *book, EContact *contact, EBookIdCallback cb, gp
   return 0;
 }
 
+/**
+ * e_book_commit_contact:
+ * @book: an #EBook
+ * @contact: an #EContact
+ * @error: a #GError to set on failure
+ *
+ * Applies the changes made to @contact to the stored version in
+ * @book.
+ *
+ * Return value: %TRUE if successful, %FALSE otherwise
+ **/
 gboolean
 e_book_commit_contact (EBook *book, EContact *contact, GError **error)
 {
@@ -1120,6 +1376,18 @@ modify_contact_reply (DBusGProxy *proxy, GError *error, gpointer user_data)
   g_free (data);
 }
 
+/**
+ * e_book_async_commit_contact:
+ * @book: an #EBook
+ * @contact: an #EContact
+ * @cb: function to call when the operation finishes
+ * @closure: data to pass to callback function
+ *
+ * Applies the changes made to @contact to the stored version in
+ * @book without blocking.
+ *
+ * Return value: %TRUE if the operation was started, %FALSE otherwise.
+ **/
 guint
 e_book_async_commit_contact (EBook *book, EContact *contact, EBookCallback cb, gpointer closure)
 {
@@ -1199,6 +1467,16 @@ e_book_async_commit_contacts (EBook *book, GList *contacts, EBookCallback cb, gp
   return 0;
 }
 
+/**
+ * e_book_remove_contact:
+ * @book: an #EBook
+ * @id: a string
+ * @error: a #GError to set on failure
+ *
+ * Removes the contact with id @id from @book.
+ *
+ * Return value: %TRUE if successful, %FALSE otherwise
+ **/
 gboolean
 e_book_remove_contact (EBook *book, const char *id, GError **error)
 {
@@ -1226,7 +1504,17 @@ remove_contact_reply (DBusGProxy *proxy, GError *error, gpointer user_data)
   g_free (data);
 }
 
-guint
+/**
+ * e_book_async_remove_contact:
+ * @book: an #EBook
+ * @contact: an #EContact
+ * @cb: a function to call when the operation finishes
+ * @closure: data to pass to callback function
+ *
+ * Removes @contact from @book.
+ *
+ * Return value: %TRUE if successful, %FALSE otherwise
+ **/guint
 e_book_async_remove_contact (EBook *book, EContact *contact, EBookCallback cb, gpointer closure)
 {
   struct async_data *data;
@@ -1258,6 +1546,17 @@ remove_contact_by_id_reply (DBusGProxy *proxy, GError *error, gpointer user_data
   g_free (data);
 }
 
+/**
+ * e_book_async_remove_contact_by_id:
+ * @book: an #EBook
+ * @id: a unique ID string specifying the contact
+ * @cb: a function to call when the operation finishes
+ * @closure: data to pass to callback function
+ *
+ * Removes the contact with id @id from @book.
+ *
+ * Return value: %TRUE if successful, %FALSE otherwise
+ **/
 guint
 e_book_async_remove_contact_by_id (EBook *book, const char *id, EBookCallback cb, gpointer closure)
 {
@@ -1280,6 +1579,19 @@ e_book_async_remove_contact_by_id (EBook *book, const char *id, EBookCallback cb
   return 0;
 }
 
+/**
+ * e_book_remove_contacts:
+ * @book: an #EBook
+ * @ids: an #GList of const char *id's
+ * @error: a #GError to set on failure
+ *
+ * Removes the contacts with ids from the list @ids from @book.  This is
+ * always more efficient than calling e_book_remove_contact_by_id if you
+ * have more than one id to remove, as some backends can implement it
+ * as a batch request.
+ *
+ * Return value: %TRUE if successful, %FALSE otherwise
+ **/
 gboolean
 e_book_remove_contacts (EBook *book, GList *ids, GError **error)
 {
@@ -1307,6 +1619,20 @@ remove_contacts_reply (DBusGProxy *proxy, GError *error, gpointer user_data)
   g_free (data);
 }
 
+/**
+ * e_book_async_remove_contacts:
+ * @book: an #EBook
+ * @ids: a #GList of const char *id's
+ * @cb: a function to call when the operation finishes
+ * @closure: data to pass to callback function
+ *
+ * Removes the contacts with ids from the list @ids from @book.  This is
+ * always more efficient than calling e_book_remove_contact_by_id() if you
+ * have more than one id to remove, as some backends can implement it
+ * as a batch request.
+ *
+ * Return value: %TRUE if successful, %FALSE otherwise
+ **/
 guint
 e_book_async_remove_contacts (EBook *book, GList *id_list, EBookCallback cb, gpointer closure)
 {
@@ -1334,6 +1660,21 @@ e_book_async_remove_contacts (EBook *book, GList *id_list, EBookCallback cb, gpo
   return 0;
 }
 
+/**
+ * e_book_get_book_view:
+ * @book: an #EBook
+ * @query: an #EBookQuery
+ * @requested_fields: a #GList containing the names of fields to return, or NULL for all
+ * @max_results: the maximum number of contacts to show (or 0 for all)
+ * @book_view: A #EBookView pointer, will be set to the view
+ * @error: a #GError to set on failure
+ *
+ * Query @book with @query, creating a #EBookView in @book_view with the fields
+ * specified by @requested_fields and limited at @max_results records. On an
+ * error, @error is set and %FALSE returned.
+ *
+ * Return value: %TRUE if successful, %FALSE otherwise
+ **/
 gboolean
 e_book_get_book_view (EBook *book, EBookQuery *query, GList *requested_fields, int max_results, EBookView **book_view, GError **error)
 {
@@ -1387,6 +1728,20 @@ get_book_view_reply (DBusGProxy *proxy, char *view_path, GError *error, gpointer
   g_free (data);
 }
 
+/**
+ * e_book_async_get_book_view:
+ * @book: an #EBook
+ * @query: an #EBookQuery
+ * @requested_fields: a #GList containing the names of fields to return, or NULL for all
+ * @max_results: the maximum number of contacts to show (or 0 for all)
+ * @cb: a function to call when the operation finishes
+ * @closure: data to pass to callback function
+ *
+ * Query @book with @query, creating a #EBookView with the fields
+ * specified by @requested_fields and limited at @max_results records.
+ *
+ * Return value: %FALSE if successful, %TRUE otherwise
+ **/
 guint
 e_book_async_get_book_view (EBook *book, EBookQuery *query, GList *requested_fields, int max_results, EBookBookViewCallback cb, gpointer closure)
 {
