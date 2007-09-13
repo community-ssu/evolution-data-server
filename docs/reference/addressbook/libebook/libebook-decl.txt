@@ -1,0 +1,2367 @@
+<FUNCTION>
+<NAME>e_book_view_new</NAME>
+<RETURNS>EBookView *</RETURNS>
+EBook *book, DBusGProxy *view_proxy
+</FUNCTION>
+<STRUCT>
+<NAME>EAddressWestern</NAME>
+typedef struct {
+	
+	/* Public */
+	char *po_box;
+	char *extended;  /* I'm not sure what this is. */
+	char *street;
+	char *locality;  /* For example, the city or town. */
+	char *region;	/* The state or province. */
+	char *postal_code;
+	char *country;
+} EAddressWestern;
+</STRUCT>
+<FUNCTION>
+<NAME>e_address_western_parse</NAME>
+<RETURNS>EAddressWestern *</RETURNS>
+const char *in_address
+</FUNCTION>
+<FUNCTION>
+<NAME>e_address_western_free</NAME>
+<RETURNS>void </RETURNS>
+EAddressWestern *eaw
+</FUNCTION>
+<MACRO>
+<NAME>E_TYPE_BOOK</NAME>
+#define E_TYPE_BOOK        (e_book_get_type ())
+</MACRO>
+<MACRO>
+<NAME>E_BOOK</NAME>
+#define E_BOOK(o)          (G_TYPE_CHECK_INSTANCE_CAST ((o), E_TYPE_BOOK, EBook))
+</MACRO>
+<MACRO>
+<NAME>E_BOOK_CLASS</NAME>
+#define E_BOOK_CLASS(k)    (G_TYPE_CHECK_CLASS_CAST ((k), E_TYPE_BOOK, EBookClass))
+</MACRO>
+<MACRO>
+<NAME>E_IS_BOOK</NAME>
+#define E_IS_BOOK(o)       (G_TYPE_CHECK_INSTANCE_TYPE ((o), E_TYPE_BOOK))
+</MACRO>
+<MACRO>
+<NAME>E_IS_BOOK_CLASS</NAME>
+#define E_IS_BOOK_CLASS(k) (G_TYPE_CHECK_CLASS_TYPE ((k), E_TYPE_BOOK))
+</MACRO>
+<MACRO>
+<NAME>E_BOOK_GET_CLASS</NAME>
+#define E_BOOK_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), E_TYPE_BOOK, EBookClass))
+</MACRO>
+<STRUCT>
+<NAME>EBook</NAME>
+</STRUCT>
+<STRUCT>
+<NAME>EBookClass</NAME>
+</STRUCT>
+<STRUCT>
+<NAME>EBookPrivate</NAME>
+</STRUCT>
+<USER_FUNCTION>
+<NAME>EBookCallback</NAME>
+<RETURNS>void </RETURNS>
+EBook *book, EBookStatus status, gpointer closure
+</USER_FUNCTION>
+<USER_FUNCTION>
+<NAME>EBookOpenProgressCallback</NAME>
+<RETURNS>void </RETURNS>
+EBook          *book,
+					       const char     *status_message,
+					       short           percent,
+					       gpointer        closure
+</USER_FUNCTION>
+<USER_FUNCTION>
+<NAME>EBookIdCallback</NAME>
+<RETURNS>void </RETURNS>
+EBook *book, EBookStatus status, const char *id, gpointer closure
+</USER_FUNCTION>
+<USER_FUNCTION>
+<NAME>EBookContactCallback</NAME>
+<RETURNS>void </RETURNS>
+EBook *book, EBookStatus status, EContact *contact, gpointer closure
+</USER_FUNCTION>
+<USER_FUNCTION>
+<NAME>EBookListCallback</NAME>
+<RETURNS>void </RETURNS>
+EBook *book, EBookStatus status, GList *list, gpointer closure
+</USER_FUNCTION>
+<USER_FUNCTION>
+<NAME>EBookBookViewCallback</NAME>
+<RETURNS>void </RETURNS>
+EBook *book, EBookStatus status, EBookView *book_view, gpointer closure
+</USER_FUNCTION>
+<USER_FUNCTION>
+<NAME>EBookEListCallback</NAME>
+<RETURNS>void </RETURNS>
+EBook *book, EBookStatus status, EList *list, gpointer closure
+</USER_FUNCTION>
+<STRUCT>
+<NAME>EBook</NAME>
+struct _EBook {
+	GObject       parent;
+	/*< private >*/
+	EBookPrivate *priv;
+};
+</STRUCT>
+<STRUCT>
+<NAME>EBookClass</NAME>
+struct _EBookClass {
+	GObjectClass parent;
+
+	/*
+	 * Signals.
+	 */
+	void (* writable_status) (EBook *book, gboolean writable);
+	void (* connection_status) (EBook *book, gboolean connected);
+	void (* auth_required) (EBook *book);
+	void (* backend_died)    (EBook *book);
+
+	/* Padding for future expansion */
+	void (*_ebook_reserved0) (void);
+	void (*_ebook_reserved1) (void);
+	void (*_ebook_reserved2) (void);
+	void (*_ebook_reserved3) (void);
+	void (*_ebook_reserved4) (void);
+};
+</STRUCT>
+<FUNCTION>
+<NAME>e_book_new</NAME>
+<RETURNS>EBook    *</RETURNS>
+ESource *source, GError **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_new_from_uri</NAME>
+<RETURNS>EBook    *</RETURNS>
+const char *uri, GError **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_new_system_addressbook</NAME>
+<RETURNS>EBook    *</RETURNS>
+GError **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_new_default_addressbook</NAME>
+<RETURNS>EBook    *</RETURNS>
+GError **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_open</NAME>
+<RETURNS>gboolean </RETURNS>
+EBook       *book,gboolean     only_if_exists,GError     **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_async_open</NAME>
+<RETURNS>guint    </RETURNS>
+EBook         *book,gboolean       only_if_exists,EBookCallback  open_response,gpointer       closure
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_remove</NAME>
+<RETURNS>gboolean </RETURNS>
+EBook       *book,GError     **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_async_remove</NAME>
+<RETURNS>guint    </RETURNS>
+EBook   *book,EBookCallback cb,gpointer closure
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_get_required_fields</NAME>
+<RETURNS>gboolean </RETURNS>
+EBook       *book,GList      **fields,GError     **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_async_get_required_fields</NAME>
+<RETURNS>guint    </RETURNS>
+EBook              *book,EBookEListCallback  cb,gpointer            closure
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_get_supported_fields</NAME>
+<RETURNS>gboolean </RETURNS>
+EBook       *book,GList      **fields,GError     **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_async_get_supported_fields</NAME>
+<RETURNS>guint    </RETURNS>
+EBook              *book,EBookEListCallback  cb,gpointer            closure
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_get_supported_auth_methods</NAME>
+<RETURNS>gboolean </RETURNS>
+EBook       *book,GList      **auth_methods,GError     **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_async_get_supported_auth_methods</NAME>
+<RETURNS>guint    </RETURNS>
+EBook              *book,EBookEListCallback  cb,gpointer            closure
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_authenticate_user</NAME>
+<RETURNS>gboolean </RETURNS>
+EBook       *book,const char  *user,const char  *passwd,const char  *auth_method,GError     **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_async_authenticate_user</NAME>
+<RETURNS>guint </RETURNS>
+EBook                 *book,const char            *user,const char            *passwd,const char            *auth_method,EBookCallback         cb,gpointer              closure
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_get_contact</NAME>
+<RETURNS>gboolean </RETURNS>
+EBook       *book,const char  *id,EContact   **contact,GError     **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_async_get_contact</NAME>
+<RETURNS>guint     </RETURNS>
+EBook                 *book,const char            *id,EBookContactCallback   cb,gpointer               closure
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_remove_contact</NAME>
+<RETURNS>gboolean </RETURNS>
+EBook       *book,const char  *id,GError     **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_async_remove_contact</NAME>
+<RETURNS>guint    </RETURNS>
+EBook                 *book,EContact              *contact,EBookCallback          cb,gpointer               closure
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_async_remove_contact_by_id</NAME>
+<RETURNS>guint    </RETURNS>
+EBook                 *book,const char            *id,EBookCallback          cb,gpointer               closure
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_remove_contacts</NAME>
+<RETURNS>gboolean </RETURNS>
+EBook       *book,GList       *ids,GError     **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_async_remove_contacts</NAME>
+<RETURNS>guint    </RETURNS>
+EBook                 *book,GList                 *ids,EBookCallback          cb,gpointer               closure
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_add_contact</NAME>
+<RETURNS>gboolean </RETURNS>
+EBook           *book,EContact        *contact,GError         **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_async_add_contact</NAME>
+<RETURNS>gboolean </RETURNS>
+EBook           *book,EContact        *contact,EBookIdCallback  cb,gpointer         closure
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_commit_contact</NAME>
+<RETURNS>gboolean </RETURNS>
+EBook       *book,EContact    *contact,GError     **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_async_commit_contact</NAME>
+<RETURNS>guint </RETURNS>
+EBook                 *book,EContact              *contact,EBookCallback          cb,gpointer               closure
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_commit_contacts</NAME>
+<RETURNS>gboolean </RETURNS>
+EBook  *book,GList  *contacts,GError **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_async_commit_contacts</NAME>
+<RETURNS>guint </RETURNS>
+EBook        *book,GList        *contacts,EBookCallback cb,gpointer      closure
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_get_book_view</NAME>
+<RETURNS>gboolean </RETURNS>
+EBook       *book,EBookQuery  *query,GList       *requested_fields,int          max_results,EBookView  **book_view,GError     **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_async_get_book_view</NAME>
+<RETURNS>guint </RETURNS>
+EBook                 *book,EBookQuery            *query,GList                 *requested_fields,int                    max_results,EBookBookViewCallback  cb,gpointer               closure
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_get_contacts</NAME>
+<RETURNS>gboolean </RETURNS>
+EBook       *book,EBookQuery  *query,GList      **contacts,GError     **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_async_get_contacts</NAME>
+<RETURNS>guint     </RETURNS>
+EBook             *book,EBookQuery        *query,EBookListCallback  cb,gpointer           closure
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_get_changes</NAME>
+<RETURNS>gboolean </RETURNS>
+EBook       *book,char        *changeid,GList      **changes,GError     **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_async_get_changes</NAME>
+<RETURNS>guint    </RETURNS>
+EBook             *book,char              *changeid,EBookListCallback  cb,gpointer           closure
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_free_change_list</NAME>
+<RETURNS>void     </RETURNS>
+GList       *change_list
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_get_uri</NAME>
+<RETURNS>const char *</RETURNS>
+EBook       *book
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_get_source</NAME>
+<RETURNS>ESource    *</RETURNS>
+EBook       *book
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_get_static_capabilities</NAME>
+<RETURNS>const char *</RETURNS>
+EBook    *book,GError  **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_check_static_capability</NAME>
+<RETURNS>gboolean    </RETURNS>
+EBook       *book,const char  *cap
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_is_opened</NAME>
+<RETURNS>gboolean    </RETURNS>
+EBook       *book
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_is_writable</NAME>
+<RETURNS>gboolean    </RETURNS>
+EBook       *book
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_is_online</NAME>
+<RETURNS>gboolean    </RETURNS>
+EBook       *book
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_cancel</NAME>
+<RETURNS>gboolean    </RETURNS>
+EBook   *book,GError **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_get_self</NAME>
+<RETURNS>gboolean    </RETURNS>
+EContact **contact, EBook **book, GError **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_set_self</NAME>
+<RETURNS>gboolean    </RETURNS>
+EBook *book, EContact *contact, GError **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_is_self</NAME>
+<RETURNS>gboolean    </RETURNS>
+EContact *contact
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_set_default_addressbook</NAME>
+<RETURNS>gboolean    </RETURNS>
+EBook  *book, GError **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_set_default_source</NAME>
+<RETURNS>gboolean    </RETURNS>
+ESource *source, GError **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_get_addressbooks</NAME>
+<RETURNS>gboolean    </RETURNS>
+ESourceList** addressbook_sources, GError **error
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_get_type</NAME>
+<RETURNS>GType        </RETURNS>
+void
+</FUNCTION>
+<MACRO>
+<NAME>E_TYPE_DESTINATION</NAME>
+#define E_TYPE_DESTINATION           (e_destination_get_type ())
+</MACRO>
+<MACRO>
+<NAME>E_DESTINATION</NAME>
+#define E_DESTINATION(o)             (G_TYPE_CHECK_INSTANCE_CAST ((o), E_TYPE_DESTINATION, EDestination))
+</MACRO>
+<MACRO>
+<NAME>E_DESTINATION_CLASS</NAME>
+#define E_DESTINATION_CLASS(k)       (G_TYPE_CHECK_CLASS_CAST ((k), E_TYPE_DESTINATION, EDestinationClass))
+</MACRO>
+<MACRO>
+<NAME>E_IS_DESTINATION</NAME>
+#define E_IS_DESTINATION(o)          (G_TYPE_CHECK_INSTANCE_TYPE ((o), E_TYPE_DESTINATION))
+</MACRO>
+<MACRO>
+<NAME>E_IS_DESTINATION_CLASS</NAME>
+#define E_IS_DESTINATION_CLASS(k)    (G_TYPE_CHECK_CLASS_TYPE ((k), E_TYPE_DESTINATION))
+</MACRO>
+<MACRO>
+<NAME>E_DESTINATION_GET_CLASS</NAME>
+#define E_DESTINATION_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), E_TYPE_DESTINATION, EDestinationClass))
+</MACRO>
+<STRUCT>
+<NAME>EDestination</NAME>
+</STRUCT>
+<STRUCT>
+<NAME>EDestinationClass</NAME>
+</STRUCT>
+<STRUCT>
+<NAME>EDestination</NAME>
+struct _EDestination {
+	GObject object;
+
+	struct _EDestinationPrivate *priv;
+};
+</STRUCT>
+<STRUCT>
+<NAME>EDestinationClass</NAME>
+struct _EDestinationClass {
+	GObjectClass parent_class;
+
+	/* Signals */
+	void (* changed) (EDestination *destination);
+
+	/* Padding for future expansion */
+	void (*_ebook_reserved1) (void);
+	void (*_ebook_reserved2) (void);
+	void (*_ebook_reserved3) (void);
+	void (*_ebook_reserved4) (void);
+};
+</STRUCT>
+<FUNCTION>
+<NAME>e_destination_get_type</NAME>
+<RETURNS>GType </RETURNS>
+void
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_new</NAME>
+<RETURNS>EDestination  *</RETURNS>
+void
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_copy</NAME>
+<RETURNS>EDestination  *</RETURNS>
+const EDestination *dest
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_empty</NAME>
+<RETURNS>gboolean       </RETURNS>
+const EDestination *dest
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_equal</NAME>
+<RETURNS>gboolean       </RETURNS>
+const EDestination *a, const EDestination *b
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_set_contact</NAME>
+<RETURNS>void           </RETURNS>
+EDestination *dest, EContact *contact, int email_num
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_set_contact_uid</NAME>
+<RETURNS>void           </RETURNS>
+EDestination *dest, const char *uid, gint email_num
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_set_book</NAME>
+<RETURNS>void           </RETURNS>
+EDestination *dest, EBook *book
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_get_contact</NAME>
+<RETURNS>EContact      *</RETURNS>
+const EDestination *dest
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_get_source_uid</NAME>
+<RETURNS>const char    *</RETURNS>
+const EDestination *dest
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_get_contact_uid</NAME>
+<RETURNS>const char    *</RETURNS>
+const EDestination *dest
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_get_email_num</NAME>
+<RETURNS>int            </RETURNS>
+const EDestination *dest
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_set_name</NAME>
+<RETURNS>void           </RETURNS>
+EDestination *dest, const char *name
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_set_email</NAME>
+<RETURNS>void           </RETURNS>
+EDestination *dest, const char *email
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_get_name</NAME>
+<RETURNS>const char    *</RETURNS>
+const EDestination *dest
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_get_email</NAME>
+<RETURNS>const char    *</RETURNS>
+const EDestination *dest
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_get_address</NAME>
+<RETURNS>const char    *</RETURNS>
+const EDestination *dest
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_is_evolution_list</NAME>
+<RETURNS>gboolean       </RETURNS>
+const EDestination *dest
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_list_show_addresses</NAME>
+<RETURNS>gboolean       </RETURNS>
+const EDestination *dest
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_list_get_dests</NAME>
+<RETURNS>const GList   *</RETURNS>
+const EDestination *dest
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_is_ignored</NAME>
+<RETURNS>gboolean       </RETURNS>
+const EDestination *dest
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_set_ignored</NAME>
+<RETURNS>void           </RETURNS>
+EDestination *dest, gboolean ignored
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_set_html_mail_pref</NAME>
+<RETURNS>void           </RETURNS>
+EDestination *dest, gboolean flag
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_get_html_mail_pref</NAME>
+<RETURNS>gboolean       </RETURNS>
+const EDestination *dest
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_is_auto_recipient</NAME>
+<RETURNS>gboolean       </RETURNS>
+const EDestination *dest
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_set_auto_recipient</NAME>
+<RETURNS>void           </RETURNS>
+EDestination *dest, gboolean value
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_set_raw</NAME>
+<RETURNS>void           </RETURNS>
+EDestination *dest, const char *raw
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_get_textrep</NAME>
+<RETURNS>const char    *</RETURNS>
+const EDestination *dest, gboolean include_email
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_get_textrepv</NAME>
+<RETURNS>char          *</RETURNS>
+EDestination **destv
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_export</NAME>
+<RETURNS>char          *</RETURNS>
+const EDestination *dest
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_exportv</NAME>
+<RETURNS>char          *</RETURNS>
+EDestination **destv
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_import</NAME>
+<RETURNS>EDestination  *</RETURNS>
+const char *str
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_importv</NAME>
+<RETURNS>EDestination **</RETURNS>
+const char *str
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_export_to_vcard_attribute</NAME>
+<RETURNS>void          </RETURNS>
+EDestination *dest, EVCardAttribute *attr
+</FUNCTION>
+<FUNCTION>
+<NAME>e_destination_freev</NAME>
+<RETURNS>void           </RETURNS>
+EDestination **destv
+</FUNCTION>
+<MACRO>
+<NAME>EVC_ADR</NAME>
+#define EVC_ADR             "ADR"
+</MACRO>
+<MACRO>
+<NAME>EVC_BDAY</NAME>
+#define EVC_BDAY            "BDAY"
+</MACRO>
+<MACRO>
+<NAME>EVC_CALURI</NAME>
+#define EVC_CALURI          "CALURI"
+</MACRO>
+<MACRO>
+<NAME>EVC_CATEGORIES</NAME>
+#define EVC_CATEGORIES      "CATEGORIES"
+</MACRO>
+<MACRO>
+<NAME>EVC_EMAIL</NAME>
+#define EVC_EMAIL           "EMAIL"
+</MACRO>
+<MACRO>
+<NAME>EVC_ENCODING</NAME>
+#define EVC_ENCODING        "ENCODING"
+</MACRO>
+<MACRO>
+<NAME>EVC_FBURL</NAME>
+#define EVC_FBURL           "FBURL"
+</MACRO>
+<MACRO>
+<NAME>EVC_FN</NAME>
+#define EVC_FN              "FN"
+</MACRO>
+<MACRO>
+<NAME>EVC_ICSCALENDAR</NAME>
+#define EVC_ICSCALENDAR     "ICSCALENDAR" /* XXX should this be X-EVOLUTION-ICSCALENDAR? */
+</MACRO>
+<MACRO>
+<NAME>EVC_KEY</NAME>
+#define EVC_KEY             "KEY"
+</MACRO>
+<MACRO>
+<NAME>EVC_LABEL</NAME>
+#define EVC_LABEL           "LABEL"
+</MACRO>
+<MACRO>
+<NAME>EVC_LOGO</NAME>
+#define EVC_LOGO            "LOGO"
+</MACRO>
+<MACRO>
+<NAME>EVC_MAILER</NAME>
+#define EVC_MAILER          "MAILER"
+</MACRO>
+<MACRO>
+<NAME>EVC_NICKNAME</NAME>
+#define EVC_NICKNAME        "NICKNAME"
+</MACRO>
+<MACRO>
+<NAME>EVC_N</NAME>
+#define EVC_N               "N"
+</MACRO>
+<MACRO>
+<NAME>EVC_NOTE</NAME>
+#define EVC_NOTE            "NOTE"
+</MACRO>
+<MACRO>
+<NAME>EVC_ORG</NAME>
+#define EVC_ORG             "ORG"
+</MACRO>
+<MACRO>
+<NAME>EVC_PHOTO</NAME>
+#define EVC_PHOTO           "PHOTO"
+</MACRO>
+<MACRO>
+<NAME>EVC_PRODID</NAME>
+#define EVC_PRODID          "PRODID"
+</MACRO>
+<MACRO>
+<NAME>EVC_QUOTEDPRINTABLE</NAME>
+#define EVC_QUOTEDPRINTABLE "QUOTED-PRINTABLE"
+</MACRO>
+<MACRO>
+<NAME>EVC_REV</NAME>
+#define EVC_REV             "REV"
+</MACRO>
+<MACRO>
+<NAME>EVC_ROLE</NAME>
+#define EVC_ROLE            "ROLE"
+</MACRO>
+<MACRO>
+<NAME>EVC_TEL</NAME>
+#define EVC_TEL             "TEL"
+</MACRO>
+<MACRO>
+<NAME>EVC_TITLE</NAME>
+#define EVC_TITLE           "TITLE"
+</MACRO>
+<MACRO>
+<NAME>EVC_TYPE</NAME>
+#define EVC_TYPE            "TYPE"
+</MACRO>
+<MACRO>
+<NAME>EVC_UID</NAME>
+#define EVC_UID             "UID"
+</MACRO>
+<MACRO>
+<NAME>EVC_URL</NAME>
+#define EVC_URL             "URL"
+</MACRO>
+<MACRO>
+<NAME>EVC_VALUE</NAME>
+#define EVC_VALUE           "VALUE"
+</MACRO>
+<MACRO>
+<NAME>EVC_VERSION</NAME>
+#define EVC_VERSION         "VERSION"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_AIM</NAME>
+#define EVC_X_AIM              "X-AIM"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_ANNIVERSARY</NAME>
+#define EVC_X_ANNIVERSARY      "X-EVOLUTION-ANNIVERSARY"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_ASSISTANT</NAME>
+#define EVC_X_ASSISTANT        "X-EVOLUTION-ASSISTANT"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_BIRTHDAY</NAME>
+#define EVC_X_BIRTHDAY         "X-EVOLUTION-BIRTHDAY"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_BLOG_URL</NAME>
+#define EVC_X_BLOG_URL         "X-EVOLUTION-BLOG-URL"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_CALLBACK</NAME>
+#define EVC_X_CALLBACK         "X-EVOLUTION-CALLBACK"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_COMPANY</NAME>
+#define EVC_X_COMPANY          "X-EVOLUTION-COMPANY"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_DEST_CONTACT_UID</NAME>
+#define EVC_X_DEST_CONTACT_UID "X-EVOLUTION-DEST-CONTACT-UID"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_DEST_EMAIL</NAME>
+#define EVC_X_DEST_EMAIL       "X-EVOLUTION-DEST-EMAIL"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_DEST_EMAIL_NUM</NAME>
+#define EVC_X_DEST_EMAIL_NUM   "X-EVOLUTION-DEST-EMAIL-NUM"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_DEST_HTML_MAIL</NAME>
+#define EVC_X_DEST_HTML_MAIL   "X-EVOLUTION-DEST-HTML-MAIL"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_DEST_NAME</NAME>
+#define EVC_X_DEST_NAME        "X-EVOLUTION-DEST-NAME"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_DEST_SOURCE_UID</NAME>
+#define EVC_X_DEST_SOURCE_UID  "X-EVOLUTION-DEST-SOURCE-UID"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_FILE_AS</NAME>
+#define EVC_X_FILE_AS          "X-EVOLUTION-FILE-AS"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_ICQ</NAME>
+#define EVC_X_ICQ              "X-ICQ"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_JABBER</NAME>
+#define EVC_X_JABBER           "X-JABBER"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_LIST_SHOW_ADDRESSES</NAME>
+#define EVC_X_LIST_SHOW_ADDRESSES "X-EVOLUTION-LIST-SHOW_ADDRESSES"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_LIST</NAME>
+#define EVC_X_LIST          	"X-EVOLUTION-LIST"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_MANAGER</NAME>
+#define EVC_X_MANAGER       	"X-EVOLUTION-MANAGER"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_MSN</NAME>
+#define EVC_X_MSN           	"X-MSN"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_RADIO</NAME>
+#define EVC_X_RADIO         	"X-EVOLUTION-RADIO"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_SIP</NAME>
+#define EVC_X_SIP           	"X-SIP"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_SPOUSE</NAME>
+#define EVC_X_SPOUSE        	"X-EVOLUTION-SPOUSE"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_TELEX</NAME>
+#define EVC_X_TELEX         	"X-EVOLUTION-TELEX"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_TTYTDD</NAME>
+#define EVC_X_TTYTDD        	"X-EVOLUTION-TTYTDD"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_VIDEO_URL</NAME>
+#define EVC_X_VIDEO_URL     	"X-EVOLUTION-VIDEO-URL"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_WANTS_HTML</NAME>
+#define EVC_X_WANTS_HTML    	"X-MOZILLA-HTML"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_YAHOO</NAME>
+#define EVC_X_YAHOO         	"X-YAHOO"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_GROUPWISE</NAME>
+#define EVC_X_GROUPWISE     	"X-GROUPWISE"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_BOOK_URI</NAME>
+#define EVC_X_BOOK_URI     	"X-EVOLUTION-BOOK-URI"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_OSSO_CONTACT_STATE</NAME>
+#define EVC_X_OSSO_CONTACT_STATE "X-OSSO-CONTACT-STATE"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_OSSO_LAST_USED</NAME>
+#define EVC_X_OSSO_LAST_USED "X-OSSO-LAST-USED"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_OSSO_BOUND</NAME>
+#define EVC_X_OSSO_BOUND "X-OSSO-BOUND"
+</MACRO>
+<MACRO>
+<NAME>EVC_X_OSSO_FIELD_STATE</NAME>
+#define EVC_X_OSSO_FIELD_STATE "X-OSSO-FIELD-STATE"
+</MACRO>
+<ENUM>
+<NAME>EVCardFormat</NAME>
+typedef enum {
+	EVC_FORMAT_VCARD_21,
+	EVC_FORMAT_VCARD_30
+} EVCardFormat;
+</ENUM>
+<MACRO>
+<NAME>E_TYPE_VCARD</NAME>
+#define E_TYPE_VCARD            (e_vcard_get_type ())
+</MACRO>
+<MACRO>
+<NAME>E_VCARD</NAME>
+#define E_VCARD(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), E_TYPE_VCARD, EVCard))
+</MACRO>
+<MACRO>
+<NAME>E_VCARD_CLASS</NAME>
+#define E_VCARD_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), E_TYPE_VCARD, EVCardClass))
+</MACRO>
+<MACRO>
+<NAME>E_IS_VCARD</NAME>
+#define E_IS_VCARD(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), E_TYPE_VCARD))
+</MACRO>
+<MACRO>
+<NAME>E_IS_VCARD_CLASS</NAME>
+#define E_IS_VCARD_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), E_TYPE_VCARD))
+</MACRO>
+<MACRO>
+<NAME>E_VCARD_GET_CLASS</NAME>
+#define E_VCARD_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), E_TYPE_VCARD, EVCardClass))
+</MACRO>
+<STRUCT>
+<NAME>EVCard</NAME>
+</STRUCT>
+<STRUCT>
+<NAME>EVCardClass</NAME>
+</STRUCT>
+<STRUCT>
+<NAME>EVCardPrivate</NAME>
+</STRUCT>
+<STRUCT>
+<NAME>EVCardAttribute</NAME>
+</STRUCT>
+<STRUCT>
+<NAME>EVCardAttributeParam</NAME>
+</STRUCT>
+<STRUCT>
+<NAME>EVCard</NAME>
+struct _EVCard {
+	GObject parent;
+	/*< private >*/
+	EVCardPrivate *priv;
+};
+</STRUCT>
+<STRUCT>
+<NAME>EVCardClass</NAME>
+struct _EVCardClass {
+	GObjectClass parent_class;
+
+	/* Padding for future expansion */
+	void (*_ebook_reserved0) (void);
+	void (*_ebook_reserved1) (void);
+	void (*_ebook_reserved2) (void);
+	void (*_ebook_reserved3) (void);
+	void (*_ebook_reserved4) (void);
+};
+</STRUCT>
+<FUNCTION>
+<NAME>e_vcard_get_type</NAME>
+<RETURNS>GType   </RETURNS>
+void
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_construct</NAME>
+<RETURNS>void    </RETURNS>
+EVCard *evc, const char *str
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_new</NAME>
+<RETURNS>EVCard*</RETURNS>
+void
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_new_from_string</NAME>
+<RETURNS>EVCard*</RETURNS>
+const char *str
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_to_string</NAME>
+<RETURNS>char*</RETURNS>
+EVCard *evc, EVCardFormat format
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_dump_structure</NAME>
+<RETURNS>void    </RETURNS>
+EVCard *evc
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_new</NAME>
+<RETURNS>EVCardAttribute *</RETURNS>
+const char *attr_group, const char *attr_name
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_free</NAME>
+<RETURNS>void             </RETURNS>
+EVCardAttribute *attr
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_copy</NAME>
+<RETURNS>EVCardAttribute *</RETURNS>
+EVCardAttribute *attr
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_remove_attributes</NAME>
+<RETURNS>void             </RETURNS>
+EVCard *evc, const char *attr_group, const char *attr_name
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_remove_attribute</NAME>
+<RETURNS>void             </RETURNS>
+EVCard *evc, EVCardAttribute *attr
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_add_attribute</NAME>
+<RETURNS>void             </RETURNS>
+EVCard *evc, EVCardAttribute *attr
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_add_attribute_with_value</NAME>
+<RETURNS>void             </RETURNS>
+EVCard *evcard, EVCardAttribute *attr, const char *value
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_add_attribute_with_values</NAME>
+<RETURNS>void             </RETURNS>
+EVCard *evcard, EVCardAttribute *attr, ...
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_add_value</NAME>
+<RETURNS>void             </RETURNS>
+EVCardAttribute *attr, const char *value
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_add_value_decoded</NAME>
+<RETURNS>void             </RETURNS>
+EVCardAttribute *attr, const char *value, int len
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_add_values</NAME>
+<RETURNS>void             </RETURNS>
+EVCardAttribute *attr, ...
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_remove_value</NAME>
+<RETURNS>void             </RETURNS>
+EVCardAttribute *attr, const char *s
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_remove_values</NAME>
+<RETURNS>void             </RETURNS>
+EVCardAttribute *attr
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_remove_params</NAME>
+<RETURNS>void             </RETURNS>
+EVCardAttribute *attr
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_remove_param</NAME>
+<RETURNS>void             </RETURNS>
+EVCardAttribute *attr, const char *param_name
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_remove_param_value</NAME>
+<RETURNS>void             </RETURNS>
+EVCardAttribute *attr, const char *param_name, const char *s
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_param_new</NAME>
+<RETURNS>EVCardAttributeParam*</RETURNS>
+const char *name
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_param_free</NAME>
+<RETURNS>void                  </RETURNS>
+EVCardAttributeParam *param
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_param_copy</NAME>
+<RETURNS>EVCardAttributeParam*</RETURNS>
+EVCardAttributeParam *param
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_add_param</NAME>
+<RETURNS>void                  </RETURNS>
+EVCardAttribute *attr, EVCardAttributeParam *param
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_add_param_with_value</NAME>
+<RETURNS>void                  </RETURNS>
+EVCardAttribute *attr,EVCardAttributeParam *param, const char *value
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_add_param_with_values</NAME>
+<RETURNS>void                  </RETURNS>
+EVCardAttribute *attr,EVCardAttributeParam *param, ...
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_param_add_value</NAME>
+<RETURNS>void                  </RETURNS>
+EVCardAttributeParam *param,const char *value
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_param_add_values</NAME>
+<RETURNS>void                  </RETURNS>
+EVCardAttributeParam *param,...
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_param_remove_values</NAME>
+<RETURNS>void                  </RETURNS>
+EVCardAttributeParam *param
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_get_attribute</NAME>
+<RETURNS>EVCardAttribute *</RETURNS>
+EVCard *evc, const char *name
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_get_attributes</NAME>
+<RETURNS>GList*</RETURNS>
+EVCard *evcard
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_get_group</NAME>
+<RETURNS>const char*</RETURNS>
+EVCardAttribute *attr
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_get_name</NAME>
+<RETURNS>const char*</RETURNS>
+EVCardAttribute *attr
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_get_values</NAME>
+<RETURNS>GList*</RETURNS>
+EVCardAttribute *attr
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_get_values_decoded</NAME>
+<RETURNS>GList*</RETURNS>
+EVCardAttribute *attr
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_is_single_valued</NAME>
+<RETURNS>gboolean              </RETURNS>
+EVCardAttribute *attr
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_get_value</NAME>
+<RETURNS>char*</RETURNS>
+EVCardAttribute *attr
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_get_value_decoded</NAME>
+<RETURNS>GString*</RETURNS>
+EVCardAttribute *attr
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_get_params</NAME>
+<RETURNS>GList*</RETURNS>
+EVCardAttribute *attr
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_get_param</NAME>
+<RETURNS>GList*</RETURNS>
+EVCardAttribute *attr, const char *name
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_param_get_name</NAME>
+<RETURNS>const char*</RETURNS>
+EVCardAttributeParam *param
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_param_get_values</NAME>
+<RETURNS>GList*</RETURNS>
+EVCardAttributeParam *param
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_attribute_has_type</NAME>
+<RETURNS>gboolean         </RETURNS>
+EVCardAttribute *attr, const char *typestr
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_escape_string</NAME>
+<RETURNS>char*</RETURNS>
+const char *s
+</FUNCTION>
+<FUNCTION>
+<NAME>e_vcard_unescape_string</NAME>
+<RETURNS>char*</RETURNS>
+const char *s
+</FUNCTION>
+<MACRO>
+<NAME>E_TYPE_CONTACT</NAME>
+#define E_TYPE_CONTACT            (e_contact_get_type ())
+</MACRO>
+<MACRO>
+<NAME>E_CONTACT</NAME>
+#define E_CONTACT(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), E_TYPE_CONTACT, EContact))
+</MACRO>
+<MACRO>
+<NAME>E_CONTACT_CLASS</NAME>
+#define E_CONTACT_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), E_TYPE_CONTACT, EContactClass))
+</MACRO>
+<MACRO>
+<NAME>E_IS_CONTACT</NAME>
+#define E_IS_CONTACT(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), E_TYPE_CONTACT))
+</MACRO>
+<MACRO>
+<NAME>E_IS_CONTACT_CLASS</NAME>
+#define E_IS_CONTACT_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), E_TYPE_CONTACT))
+</MACRO>
+<MACRO>
+<NAME>E_CONTACT_GET_CLASS</NAME>
+#define E_CONTACT_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), E_TYPE_CONTACT, EContactClass))
+</MACRO>
+<MACRO>
+<NAME>E_TYPE_CONTACT_DATE</NAME>
+#define E_TYPE_CONTACT_DATE       (e_contact_date_get_type ())
+</MACRO>
+<MACRO>
+<NAME>E_TYPE_CONTACT_NAME</NAME>
+#define E_TYPE_CONTACT_NAME       (e_contact_name_get_type ())
+</MACRO>
+<MACRO>
+<NAME>E_TYPE_CONTACT_PHOTO</NAME>
+#define E_TYPE_CONTACT_PHOTO      (e_contact_photo_get_type ())
+</MACRO>
+<MACRO>
+<NAME>E_TYPE_CONTACT_CERT</NAME>
+#define E_TYPE_CONTACT_CERT       (e_contact_cert_get_type ())
+</MACRO>
+<MACRO>
+<NAME>E_TYPE_CONTACT_ADDRESS</NAME>
+#define E_TYPE_CONTACT_ADDRESS    (e_contact_address_get_type ())
+</MACRO>
+<STRUCT>
+<NAME>EContact</NAME>
+</STRUCT>
+<STRUCT>
+<NAME>EContactClass</NAME>
+</STRUCT>
+<STRUCT>
+<NAME>EContactPrivate</NAME>
+</STRUCT>
+<ENUM>
+<NAME>EContactField</NAME>
+typedef enum {
+
+	E_CONTACT_UID = 1,     	 /* string field */
+	E_CONTACT_FILE_AS,     	 /* string field */
+	E_CONTACT_BOOK_URI,      /* string field */
+
+	/* Name fields */
+	E_CONTACT_FULL_NAME,   	 /* string field */
+	E_CONTACT_GIVEN_NAME,  	 /* synthetic string field */
+	E_CONTACT_FAMILY_NAME, 	 /* synthetic string field */
+	E_CONTACT_NICKNAME,    	 /* string field */
+
+	/* Email fields */
+	E_CONTACT_EMAIL_1,     	 /* synthetic string field */
+	E_CONTACT_EMAIL_2,     	 /* synthetic string field */
+	E_CONTACT_EMAIL_3,     	 /* synthetic string field */
+	E_CONTACT_EMAIL_4,       /* synthetic string field */
+
+	E_CONTACT_MAILER,        /* string field */
+
+	/* Address Labels */
+	E_CONTACT_ADDRESS_LABEL_HOME,  /* synthetic string field */
+	E_CONTACT_ADDRESS_LABEL_WORK,  /* synthetic string field */
+	E_CONTACT_ADDRESS_LABEL_OTHER, /* synthetic string field */
+
+	/* Phone fields */
+	E_CONTACT_PHONE_ASSISTANT,
+	E_CONTACT_PHONE_BUSINESS,
+	E_CONTACT_PHONE_BUSINESS_2,
+	E_CONTACT_PHONE_BUSINESS_FAX,
+	E_CONTACT_PHONE_CALLBACK,
+	E_CONTACT_PHONE_CAR,
+	E_CONTACT_PHONE_COMPANY,
+	E_CONTACT_PHONE_HOME,
+	E_CONTACT_PHONE_HOME_2,
+	E_CONTACT_PHONE_HOME_FAX,
+	E_CONTACT_PHONE_ISDN,
+	E_CONTACT_PHONE_MOBILE,
+	E_CONTACT_PHONE_OTHER,
+	E_CONTACT_PHONE_OTHER_FAX,
+	E_CONTACT_PHONE_PAGER,
+	E_CONTACT_PHONE_PRIMARY,
+	E_CONTACT_PHONE_RADIO,
+	E_CONTACT_PHONE_TELEX,
+	E_CONTACT_PHONE_TTYTDD,
+
+	/* Organizational fields */
+	E_CONTACT_ORG,        	 /* string field */
+	E_CONTACT_ORG_UNIT,   	 /* string field */
+	E_CONTACT_OFFICE,     	 /* string field */
+	E_CONTACT_TITLE,      	 /* string field */
+	E_CONTACT_ROLE,       	 /* string field */
+	E_CONTACT_MANAGER,    	 /* string field */
+	E_CONTACT_ASSISTANT,  	 /* string field */
+
+	/* Web fields */
+	E_CONTACT_HOMEPAGE_URL,  /* string field */
+	E_CONTACT_BLOG_URL,      /* string field */
+
+	/* Contact categories */
+	E_CONTACT_CATEGORIES,    /* string field */
+
+	/* Collaboration fields */
+	E_CONTACT_CALENDAR_URI,  /* string field */
+	E_CONTACT_FREEBUSY_URL,  /* string field */
+	E_CONTACT_ICS_CALENDAR,  /* string field */
+	E_CONTACT_VIDEO_URL,      /* string field */
+
+	/* misc fields */
+	E_CONTACT_SPOUSE,        /* string field */
+	E_CONTACT_NOTE,          /* string field */
+
+	E_CONTACT_IM_AIM_HOME_1,       /* Synthetic string field */
+	E_CONTACT_IM_AIM_HOME_2,       /* Synthetic string field */
+	E_CONTACT_IM_AIM_HOME_3,       /* Synthetic string field */
+	E_CONTACT_IM_AIM_WORK_1,       /* Synthetic string field */
+	E_CONTACT_IM_AIM_WORK_2,       /* Synthetic string field */
+	E_CONTACT_IM_AIM_WORK_3,       /* Synthetic string field */
+	E_CONTACT_IM_GROUPWISE_HOME_1, /* Synthetic string field */
+	E_CONTACT_IM_GROUPWISE_HOME_2, /* Synthetic string field */
+	E_CONTACT_IM_GROUPWISE_HOME_3, /* Synthetic string field */
+	E_CONTACT_IM_GROUPWISE_WORK_1, /* Synthetic string field */
+	E_CONTACT_IM_GROUPWISE_WORK_2, /* Synthetic string field */
+	E_CONTACT_IM_GROUPWISE_WORK_3, /* Synthetic string field */
+	E_CONTACT_IM_JABBER_HOME_1,    /* Synthetic string field */
+	E_CONTACT_IM_JABBER_HOME_2,    /* Synthetic string field */
+	E_CONTACT_IM_JABBER_HOME_3,    /* Synthetic string field */
+	E_CONTACT_IM_JABBER_WORK_1,    /* Synthetic string field */
+	E_CONTACT_IM_JABBER_WORK_2,    /* Synthetic string field */
+	E_CONTACT_IM_JABBER_WORK_3,    /* Synthetic string field */
+	E_CONTACT_IM_YAHOO_HOME_1,     /* Synthetic string field */
+	E_CONTACT_IM_YAHOO_HOME_2,     /* Synthetic string field */
+	E_CONTACT_IM_YAHOO_HOME_3,     /* Synthetic string field */
+	E_CONTACT_IM_YAHOO_WORK_1,     /* Synthetic string field */
+	E_CONTACT_IM_YAHOO_WORK_2,     /* Synthetic string field */
+	E_CONTACT_IM_YAHOO_WORK_3,     /* Synthetic string field */
+	E_CONTACT_IM_MSN_HOME_1,       /* Synthetic string field */
+	E_CONTACT_IM_MSN_HOME_2,       /* Synthetic string field */
+	E_CONTACT_IM_MSN_HOME_3,       /* Synthetic string field */
+	E_CONTACT_IM_MSN_WORK_1,       /* Synthetic string field */
+	E_CONTACT_IM_MSN_WORK_2,       /* Synthetic string field */
+	E_CONTACT_IM_MSN_WORK_3,       /* Synthetic string field */
+	E_CONTACT_IM_ICQ_HOME_1,       /* Synthetic string field */
+	E_CONTACT_IM_ICQ_HOME_2,       /* Synthetic string field */
+	E_CONTACT_IM_ICQ_HOME_3,       /* Synthetic string field */
+	E_CONTACT_IM_ICQ_WORK_1,       /* Synthetic string field */
+	E_CONTACT_IM_ICQ_WORK_2,       /* Synthetic string field */
+	E_CONTACT_IM_ICQ_WORK_3,       /* Synthetic string field */
+
+	/* Convenience field for getting a name from the contact.
+	   Returns the first one of [File-As, Full Name, Org, Email1]
+	   to be set */
+	E_CONTACT_REV,     /* string field to hold  time of last update to this vcard*/
+	E_CONTACT_NAME_OR_ORG,
+
+	/* Address fields */
+	E_CONTACT_ADDRESS,       /* Multi-valued structured (EContactAddress) */
+	E_CONTACT_ADDRESS_HOME,  /* synthetic structured field (EContactAddress) */
+	E_CONTACT_ADDRESS_WORK,  /* synthetic structured field (EContactAddress) */
+	E_CONTACT_ADDRESS_OTHER, /* synthetic structured field (EContactAddress) */
+
+	E_CONTACT_CATEGORY_LIST, /* multi-valued */
+
+	/* Photo/Logo */
+	E_CONTACT_PHOTO,       	 /* structured field (EContactPhoto) */
+	E_CONTACT_LOGO,       	 /* structured field (EContactPhoto) */
+
+	E_CONTACT_NAME,        	 /* structured field (EContactName) */
+	E_CONTACT_EMAIL,       	 /* Multi-valued */
+
+	/* Instant Messaging fields */
+	E_CONTACT_IM_AIM,     	 /* Multi-valued */
+	E_CONTACT_IM_GROUPWISE,  /* Multi-valued */
+	E_CONTACT_IM_JABBER,  	 /* Multi-valued */
+	E_CONTACT_IM_YAHOO,   	 /* Multi-valued */
+	E_CONTACT_IM_MSN,     	 /* Multi-valued */
+	E_CONTACT_IM_ICQ,     	 /* Multi-valued */
+       
+	E_CONTACT_WANTS_HTML,    /* boolean field */
+
+	/* fields used for describing contact lists.  a contact list
+	   is just a contact with _IS_LIST set to true.  the members
+	   are listed in the _EMAIL field. */
+	E_CONTACT_IS_LIST,             /* boolean field */
+	E_CONTACT_LIST_SHOW_ADDRESSES, /* boolean field */
+
+
+	E_CONTACT_BIRTH_DATE,    /* structured field (EContactDate) */
+	E_CONTACT_ANNIVERSARY,   /* structured field (EContactDate) */
+
+	/* Security Fields */
+	E_CONTACT_X509_CERT,     /* structured field (EContactCert) */
+
+	E_CONTACT_PHONE_TELEPHONE,
+
+	E_CONTACT_SIP,
+
+	E_CONTACT_OSSO_CONTACT_STATE, /* string */
+	E_CONTACT_OSSO_LAST_USED, /* string */
+
+	E_CONTACT_FIELD_LAST,
+	E_CONTACT_FIELD_FIRST        = E_CONTACT_UID,
+
+	/* useful constants */
+	E_CONTACT_LAST_SIMPLE_STRING = E_CONTACT_NAME_OR_ORG,
+	E_CONTACT_FIRST_PHONE_ID     = E_CONTACT_PHONE_ASSISTANT,
+	E_CONTACT_LAST_PHONE_ID      = E_CONTACT_PHONE_TTYTDD,
+	E_CONTACT_FIRST_EMAIL_ID     = E_CONTACT_EMAIL_1,
+	E_CONTACT_LAST_EMAIL_ID      = E_CONTACT_EMAIL_4,
+	E_CONTACT_FIRST_ADDRESS_ID   = E_CONTACT_ADDRESS_HOME,
+	E_CONTACT_LAST_ADDRESS_ID    = E_CONTACT_ADDRESS_OTHER,
+	E_CONTACT_FIRST_LABEL_ID     = E_CONTACT_ADDRESS_LABEL_HOME,
+	E_CONTACT_LAST_LABEL_ID      = E_CONTACT_ADDRESS_LABEL_OTHER
+
+} EContactField;
+</ENUM>
+<STRUCT>
+<NAME>EContactName</NAME>
+typedef struct {
+	char *family;
+	char *given;
+	char *additional;
+ 	char *prefixes;
+	char *suffixes;
+} EContactName;
+</STRUCT>
+<ENUM>
+<NAME>EContactPhotoType</NAME>
+typedef enum {
+	E_CONTACT_PHOTO_TYPE_INLINED,
+	E_CONTACT_PHOTO_TYPE_URI
+} EContactPhotoType;
+</ENUM>
+<STRUCT>
+<NAME>EContactPhoto</NAME>
+typedef struct {
+	EContactPhotoType type;
+	union {
+		struct {
+			char *mime_type;
+			int length;
+			guchar *data;
+		} inlined;
+		char *uri;
+	} data;
+} EContactPhoto;
+</STRUCT>
+<STRUCT>
+<NAME>EContactAddress</NAME>
+typedef struct {
+	char *address_format; /* the two letter country code that
+				 determines the format/meaning of the
+				 following fields */
+	char *po;
+	char *ext;
+	char *street;
+	char *locality;
+	char *region;
+	char *code;
+	char *country;
+} EContactAddress;
+</STRUCT>
+<STRUCT>
+<NAME>EContactDate</NAME>
+typedef struct {
+	int year;
+	int month;
+	int day;
+} EContactDate;
+</STRUCT>
+<STRUCT>
+<NAME>EContactCert</NAME>
+typedef struct {
+	int length;
+	char *data;
+} EContactCert;
+</STRUCT>
+<STRUCT>
+<NAME>EContact</NAME>
+struct _EContact {
+	EVCard parent;
+	/*< private >*/
+	EContactPrivate *priv;
+};
+</STRUCT>
+<STRUCT>
+<NAME>EContactClass</NAME>
+struct _EContactClass {
+	EVCardClass parent_class;
+
+	/* Padding for future expansion */
+	void (*_ebook_reserved0) (void);
+	void (*_ebook_reserved1) (void);
+	void (*_ebook_reserved2) (void);
+	void (*_ebook_reserved3) (void);
+	void (*_ebook_reserved4) (void);
+};
+</STRUCT>
+<FUNCTION>
+<NAME>e_contact_get_type</NAME>
+<RETURNS>GType                   </RETURNS>
+void
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_new</NAME>
+<RETURNS>EContact*</RETURNS>
+void
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_new_from_vcard</NAME>
+<RETURNS>EContact*</RETURNS>
+const char *vcard
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_duplicate</NAME>
+<RETURNS>EContact*</RETURNS>
+EContact *contact
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_get</NAME>
+<RETURNS>gpointer                </RETURNS>
+EContact *contact, EContactField field_id
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_get_const</NAME>
+<RETURNS>gconstpointer		</RETURNS>
+EContact *contact, EContactField field_id
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_set</NAME>
+<RETURNS>void                    </RETURNS>
+EContact *contact, EContactField field_id, const gpointer value
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_get_attributes</NAME>
+<RETURNS>GList*</RETURNS>
+EContact *contact, EContactField field_id
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_set_attributes</NAME>
+<RETURNS>void                    </RETURNS>
+EContact *contact, EContactField field_id, GList *attributes
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_date_get_type</NAME>
+<RETURNS>GType                   </RETURNS>
+void
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_date_new</NAME>
+<RETURNS>EContactDate           *</RETURNS>
+void
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_date_from_string</NAME>
+<RETURNS>EContactDate           *</RETURNS>
+const char *str
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_date_to_string</NAME>
+<RETURNS>char                   *</RETURNS>
+EContactDate *dt
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_date_equal</NAME>
+<RETURNS>gboolean                </RETURNS>
+EContactDate *dt1,EContactDate *dt2
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_date_free</NAME>
+<RETURNS>void                    </RETURNS>
+EContactDate *date
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_name_get_type</NAME>
+<RETURNS>GType                   </RETURNS>
+void
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_name_new</NAME>
+<RETURNS>EContactName           *</RETURNS>
+void
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_name_to_string</NAME>
+<RETURNS>char                   *</RETURNS>
+const EContactName *name
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_name_from_string</NAME>
+<RETURNS>EContactName           *</RETURNS>
+const char *name_str
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_name_copy</NAME>
+<RETURNS>EContactName           *</RETURNS>
+EContactName *n
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_name_free</NAME>
+<RETURNS>void                    </RETURNS>
+EContactName *name
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_photo_get_type</NAME>
+<RETURNS>GType                   </RETURNS>
+void
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_photo_free</NAME>
+<RETURNS>void                    </RETURNS>
+EContactPhoto *photo
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_cert_get_type</NAME>
+<RETURNS>GType                   </RETURNS>
+void
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_cert_free</NAME>
+<RETURNS>void                    </RETURNS>
+EContactCert *cert
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_address_get_type</NAME>
+<RETURNS>GType                   </RETURNS>
+void
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_address_free</NAME>
+<RETURNS>void                    </RETURNS>
+EContactAddress *address
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_field_name</NAME>
+<RETURNS>const char*</RETURNS>
+EContactField field_id
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_pretty_name</NAME>
+<RETURNS>const char*</RETURNS>
+EContactField field_id
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_vcard_attribute</NAME>
+<RETURNS>const char*</RETURNS>
+EContactField field_id
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_field_id</NAME>
+<RETURNS>EContactField           </RETURNS>
+const char *field_name
+</FUNCTION>
+<FUNCTION>
+<NAME>e_contact_field_id_from_vcard</NAME>
+<RETURNS>EContactField           </RETURNS>
+const char *vcard_field
+</FUNCTION>
+<MACRO>
+<NAME>E_TYPE_BOOK_QUERY</NAME>
+#define E_TYPE_BOOK_QUERY (e_book_query_get_type ())
+</MACRO>
+<TYPEDEF>
+<NAME>EBookQuery</NAME>
+typedef struct EBookQuery EBookQuery;
+</TYPEDEF>
+<ENUM>
+<NAME>EBookQueryTest</NAME>
+typedef enum {
+  E_BOOK_QUERY_IS,
+  E_BOOK_QUERY_CONTAINS,
+  E_BOOK_QUERY_BEGINS_WITH,
+  E_BOOK_QUERY_ENDS_WITH,
+
+  /*
+    Consider these "coming soon". 
+
+    E_BOOK_QUERY_LT,
+    E_BOOK_QUERY_LE,
+    E_BOOK_QUERY_GT,
+    E_BOOK_QUERY_GE,
+    E_BOOK_QUERY_EQ,
+  */
+} EBookQueryTest;
+</ENUM>
+<FUNCTION>
+<NAME>e_book_query_from_string</NAME>
+<RETURNS>EBookQuery*</RETURNS>
+const char *query_string
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_query_to_string</NAME>
+<RETURNS>char*</RETURNS>
+EBookQuery *q
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_query_ref</NAME>
+<RETURNS>EBookQuery*</RETURNS>
+EBookQuery *q
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_query_unref</NAME>
+<RETURNS>void        </RETURNS>
+EBookQuery *q
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_query_and</NAME>
+<RETURNS>EBookQuery*</RETURNS>
+int nqs, EBookQuery **qs, gboolean unref
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_query_andv</NAME>
+<RETURNS>EBookQuery*</RETURNS>
+EBookQuery *q, ...
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_query_or</NAME>
+<RETURNS>EBookQuery*</RETURNS>
+int nqs, EBookQuery **qs, gboolean unref
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_query_orv</NAME>
+<RETURNS>EBookQuery*</RETURNS>
+EBookQuery *q, ...
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_query_not</NAME>
+<RETURNS>EBookQuery*</RETURNS>
+EBookQuery *q, gboolean unref
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_query_field_exists</NAME>
+<RETURNS>EBookQuery*</RETURNS>
+EContactField   field
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_query_vcard_field_exists</NAME>
+<RETURNS>EBookQuery*</RETURNS>
+const char *field
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_query_field_test</NAME>
+<RETURNS>EBookQuery*</RETURNS>
+EContactField   field,EBookQueryTest     test,const char        *value
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_query_vcard_field_test</NAME>
+<RETURNS>EBookQuery*</RETURNS>
+const char    *field,EBookQueryTest test,const char    *value
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_query_any_field_contains</NAME>
+<RETURNS>EBookQuery*</RETURNS>
+const char  *value
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_query_visible</NAME>
+<RETURNS>EBookQuery*</RETURNS>
+void
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_query_get_type</NAME>
+<RETURNS>GType       </RETURNS>
+void
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_query_copy</NAME>
+<RETURNS>EBookQuery*</RETURNS>
+EBookQuery *q
+</FUNCTION>
+<MACRO>
+<NAME>e_return_error_if_fail</NAME>
+#define e_return_error_if_fail(expr,error_code)	G_STMT_START{		\
+     if G_LIKELY(expr) { } else						\
+       {								\
+	 g_log (G_LOG_DOMAIN,						\
+		G_LOG_LEVEL_CRITICAL,					\
+		"file %s: line %d (%s): assertion `%s' failed",		\
+		__FILE__,						\
+		__LINE__,						\
+		__PRETTY_FUNCTION__,					\
+		#expr);							\
+	 g_set_error (error, E_BOOK_ERROR, (error_code),                \
+		"file %s: line %d (%s): assertion `%s' failed",		\
+		__FILE__,						\
+		__LINE__,						\
+		__PRETTY_FUNCTION__,					\
+		#expr);							\
+	 return FALSE;							\
+       };				}G_STMT_END
+</MACRO>
+<MACRO>
+<NAME>E_BOOK_ERROR</NAME>
+#define E_BOOK_ERROR e_book_error_quark()
+</MACRO>
+<FUNCTION>
+<NAME>e_book_error_quark</NAME>
+<RETURNS>GQuark </RETURNS>
+void
+</FUNCTION>
+<ENUM>
+<NAME>EBookStatus</NAME>
+typedef enum {
+	E_BOOK_ERROR_OK,
+	E_BOOK_ERROR_INVALID_ARG,
+	E_BOOK_ERROR_BUSY,
+	E_BOOK_ERROR_REPOSITORY_OFFLINE,
+	E_BOOK_ERROR_NO_SUCH_BOOK,
+	E_BOOK_ERROR_NO_SELF_CONTACT,
+	E_BOOK_ERROR_SOURCE_NOT_LOADED,
+	E_BOOK_ERROR_SOURCE_ALREADY_LOADED,
+	E_BOOK_ERROR_PERMISSION_DENIED,
+	E_BOOK_ERROR_CONTACT_NOT_FOUND,
+	E_BOOK_ERROR_CONTACT_ID_ALREADY_EXISTS,
+	E_BOOK_ERROR_PROTOCOL_NOT_SUPPORTED,
+	E_BOOK_ERROR_CANCELLED,
+	E_BOOK_ERROR_COULD_NOT_CANCEL,
+	E_BOOK_ERROR_AUTHENTICATION_FAILED,
+	E_BOOK_ERROR_AUTHENTICATION_REQUIRED,
+	E_BOOK_ERROR_TLS_NOT_AVAILABLE,
+	E_BOOK_ERROR_CORBA_EXCEPTION,
+	E_BOOK_ERROR_NO_SUCH_SOURCE,
+	E_BOOK_ERROR_OFFLINE_UNAVAILABLE,
+	E_BOOK_ERROR_OTHER_ERROR,
+	E_BOOK_ERROR_INVALID_SERVER_VERSION,
+	E_BOOK_ERROR_NO_SPACE
+} EBookStatus;
+</ENUM>
+<ENUM>
+<NAME>EBookViewStatus</NAME>
+typedef enum {
+	E_BOOK_VIEW_STATUS_OK,
+	E_BOOK_VIEW_STATUS_TIME_LIMIT_EXCEEDED,
+	E_BOOK_VIEW_STATUS_SIZE_LIMIT_EXCEEDED,
+	E_BOOK_VIEW_ERROR_INVALID_QUERY,
+	E_BOOK_VIEW_ERROR_QUERY_REFUSED,
+	E_BOOK_VIEW_ERROR_OTHER_ERROR
+} EBookViewStatus;
+</ENUM>
+<ENUM>
+<NAME>EBookChangeType</NAME>
+typedef enum {
+	E_BOOK_CHANGE_CARD_ADDED,
+	E_BOOK_CHANGE_CARD_DELETED,
+	E_BOOK_CHANGE_CARD_MODIFIED
+} EBookChangeType;
+</ENUM>
+<STRUCT>
+<NAME>EBookChange</NAME>
+typedef struct {
+	EBookChangeType  change_type;
+	EContact        *contact;
+} EBookChange;
+</STRUCT>
+<MACRO>
+<NAME>E_PARAM_READABLE</NAME>
+#define E_PARAM_READABLE G_PARAM_READABLE|G_PARAM_STATIC_NAME|G_PARAM_STATIC_NICK|G_PARAM_STATIC_BLURB
+</MACRO>
+<MACRO>
+<NAME>E_PARAM_READWRITE</NAME>
+#define E_PARAM_READWRITE G_PARAM_READWRITE|G_PARAM_STATIC_NAME|G_PARAM_STATIC_NICK|G_PARAM_STATIC_BLURB
+</MACRO>
+<MACRO>
+<NAME>E_TYPE_BOOK_VIEW</NAME>
+#define E_TYPE_BOOK_VIEW           (e_book_view_get_type ())
+</MACRO>
+<MACRO>
+<NAME>E_BOOK_VIEW</NAME>
+#define E_BOOK_VIEW(o)             (G_TYPE_CHECK_INSTANCE_CAST ((o), E_TYPE_BOOK_VIEW, EBookView))
+</MACRO>
+<MACRO>
+<NAME>E_BOOK_VIEW_CLASS</NAME>
+#define E_BOOK_VIEW_CLASS(k)       (G_TYPE_CHECK_CLASS_CAST((k), E_TYPE_BOOK_VIEW, EBookViewClass))
+</MACRO>
+<MACRO>
+<NAME>E_IS_BOOK_VIEW</NAME>
+#define E_IS_BOOK_VIEW(o)          (G_TYPE_CHECK_INSTANCE_TYPE ((o), E_TYPE_BOOK_VIEW))
+</MACRO>
+<MACRO>
+<NAME>E_IS_BOOK_VIEW_CLASS</NAME>
+#define E_IS_BOOK_VIEW_CLASS(k)    (G_TYPE_CHECK_CLASS_TYPE ((k), E_TYPE_BOOK_VIEW))
+</MACRO>
+<MACRO>
+<NAME>E_BOOK_VIEW_GET_CLASS</NAME>
+#define E_BOOK_VIEW_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), E_TYPE_BOOK_VIEW, EBookViewClass))
+</MACRO>
+<STRUCT>
+<NAME>EBookView</NAME>
+</STRUCT>
+<STRUCT>
+<NAME>EBookViewClass</NAME>
+</STRUCT>
+<STRUCT>
+<NAME>EBookViewPrivate</NAME>
+</STRUCT>
+<STRUCT>
+<NAME>EBookView</NAME>
+struct _EBookView {
+	GObject     parent;
+	/*< private >*/
+	EBookViewPrivate *priv;
+};
+</STRUCT>
+<STRUCT>
+<NAME>EBookViewClass</NAME>
+struct _EBookViewClass {
+	GObjectClass parent;
+
+	/*
+	 * Signals.
+	 */
+	void (* contacts_changed)  (EBookView *book_view, const GList *contacts);
+	void (* contacts_removed)  (EBookView *book_view, const GList *ids);
+	void (* contacts_added)    (EBookView *book_view, const GList *contacts);
+	void (* sequence_complete) (EBookView *book_view, EBookViewStatus status);
+	void (* status_message)    (EBookView *book_view, const char *message);
+
+	/* Padding for future expansion */
+	void (*_ebook_reserved0) (void);
+	void (*_ebook_reserved1) (void);
+	void (*_ebook_reserved2) (void);
+	void (*_ebook_reserved3) (void);
+	void (*_ebook_reserved4) (void);
+};
+</STRUCT>
+<FUNCTION>
+<NAME>e_book_view_get_type</NAME>
+<RETURNS>GType              </RETURNS>
+void
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_view_start</NAME>
+<RETURNS>void               </RETURNS>
+EBookView *book_view
+</FUNCTION>
+<FUNCTION>
+<NAME>e_book_view_stop</NAME>
+<RETURNS>void               </RETURNS>
+EBookView *book_view
+</FUNCTION>
+<STRUCT>
+<NAME>ENameWestern</NAME>
+typedef struct {
+
+	/* Public */
+	char *prefix;
+	char *first;
+	char *middle;
+	char *nick;
+	char *last;
+	char *suffix;
+
+	/* Private */
+	char *full;
+} ENameWestern;
+</STRUCT>
+<FUNCTION>
+<NAME>e_name_western_parse</NAME>
+<RETURNS>ENameWestern *</RETURNS>
+const char   *full_name
+</FUNCTION>
+<FUNCTION>
+<NAME>e_name_western_free</NAME>
+<RETURNS>void          </RETURNS>
+ENameWestern *w
+</FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_BookFactory_get_book</NAME>
+<RETURNS>gboolean</RETURNS>
+DBusGProxy *proxy, const char * IN_client, const char * IN_source, char** OUT_path, GError **error){return dbus_g_proxy_call (proxy, "getBook", error, G_TYPE_STRING, IN_client, G_TYPE_STRING, IN_source, G_TYPE_INVALID, DBUS_TYPE_G_OBJECT_PATH, OUT_path, G_TYPE_INVALID
+</FUNCTION>
+<USER_FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_BookFactory_get_book_reply</NAME>
+<RETURNS>void </RETURNS>
+DBusGProxy *proxy, char *OUT_path, GError *error, gpointer userdata
+</USER_FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_BookFactory_get_book_async</NAME>
+<RETURNS>DBusGProxyCall *</RETURNS>
+DBusGProxy *proxy, const char * IN_client, const char * IN_source, org_gnome_evolution_dataserver_addressbook_BookFactory_get_book_reply callback, gpointer userdata){DBusGAsyncData *stuff;stuff = g_new (DBusGAsyncData, 1
+</FUNCTION>
+<FUNCTION>
+<NAME>dbus_g_proxy_begin_call</NAME>
+<RETURNS>return </RETURNS>
+proxy, "getBook", org_gnome_evolution_dataserver_addressbook_BookFactory_get_book_async_callback, stuff, g_free, G_TYPE_STRING, IN_client, G_TYPE_STRING, IN_source, G_TYPE_INVALID
+</FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_open</NAME>
+<RETURNS>gboolean</RETURNS>
+DBusGProxy *proxy, const gboolean IN_only_if_exists, GError **error){return dbus_g_proxy_call (proxy, "open", error, G_TYPE_BOOLEAN, IN_only_if_exists, G_TYPE_INVALID, G_TYPE_INVALID
+</FUNCTION>
+<USER_FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_open_reply</NAME>
+<RETURNS>void </RETURNS>
+DBusGProxy *proxy, GError *error, gpointer userdata
+</USER_FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_open_async</NAME>
+<RETURNS>DBusGProxyCall *</RETURNS>
+DBusGProxy *proxy, const gboolean IN_only_if_exists, org_gnome_evolution_dataserver_addressbook_Book_open_reply callback, gpointer userdata){DBusGAsyncData *stuff;stuff = g_new (DBusGAsyncData, 1
+</FUNCTION>
+<FUNCTION>
+<NAME>dbus_g_proxy_begin_call</NAME>
+<RETURNS>return </RETURNS>
+proxy, "open", org_gnome_evolution_dataserver_addressbook_Book_open_async_callback, stuff, g_free, G_TYPE_BOOLEAN, IN_only_if_exists, G_TYPE_INVALID
+</FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_remove</NAME>
+<RETURNS>gboolean</RETURNS>
+DBusGProxy *proxy, GError **error){return dbus_g_proxy_call (proxy, "remove", error, G_TYPE_INVALID, G_TYPE_INVALID
+</FUNCTION>
+<USER_FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_remove_reply</NAME>
+<RETURNS>void </RETURNS>
+DBusGProxy *proxy, GError *error, gpointer userdata
+</USER_FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_remove_async</NAME>
+<RETURNS>DBusGProxyCall *</RETURNS>
+DBusGProxy *proxy, org_gnome_evolution_dataserver_addressbook_Book_remove_reply callback, gpointer userdata){DBusGAsyncData *stuff;stuff = g_new (DBusGAsyncData, 1
+</FUNCTION>
+<FUNCTION>
+<NAME>dbus_g_proxy_begin_call</NAME>
+<RETURNS>return </RETURNS>
+proxy, "remove", org_gnome_evolution_dataserver_addressbook_Book_remove_async_callback, stuff, g_free, G_TYPE_INVALID
+</FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_contact</NAME>
+<RETURNS>gboolean</RETURNS>
+DBusGProxy *proxy, const char * IN_uid, char ** OUT_vcard, GError **error){return dbus_g_proxy_call (proxy, "getContact", error, G_TYPE_STRING, IN_uid, G_TYPE_INVALID, G_TYPE_STRING, OUT_vcard, G_TYPE_INVALID
+</FUNCTION>
+<USER_FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_contact_reply</NAME>
+<RETURNS>void </RETURNS>
+DBusGProxy *proxy, char * OUT_vcard, GError *error, gpointer userdata
+</USER_FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_contact_async</NAME>
+<RETURNS>DBusGProxyCall *</RETURNS>
+DBusGProxy *proxy, const char * IN_uid, org_gnome_evolution_dataserver_addressbook_Book_get_contact_reply callback, gpointer userdata){DBusGAsyncData *stuff;stuff = g_new (DBusGAsyncData, 1
+</FUNCTION>
+<FUNCTION>
+<NAME>dbus_g_proxy_begin_call</NAME>
+<RETURNS>return </RETURNS>
+proxy, "getContact", org_gnome_evolution_dataserver_addressbook_Book_get_contact_async_callback, stuff, g_free, G_TYPE_STRING, IN_uid, G_TYPE_INVALID
+</FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_contact_list</NAME>
+<RETURNS>gboolean</RETURNS>
+DBusGProxy *proxy, const char * IN_query, char *** OUT_vcards, GError **error){return dbus_g_proxy_call (proxy, "getContactList", error, G_TYPE_STRING, IN_query, G_TYPE_INVALID, G_TYPE_STRV, OUT_vcards, G_TYPE_INVALID
+</FUNCTION>
+<USER_FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_contact_list_reply</NAME>
+<RETURNS>void </RETURNS>
+DBusGProxy *proxy, char * *OUT_vcards, GError *error, gpointer userdata
+</USER_FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_contact_list_async</NAME>
+<RETURNS>DBusGProxyCall *</RETURNS>
+DBusGProxy *proxy, const char * IN_query, org_gnome_evolution_dataserver_addressbook_Book_get_contact_list_reply callback, gpointer userdata){DBusGAsyncData *stuff;stuff = g_new (DBusGAsyncData, 1
+</FUNCTION>
+<FUNCTION>
+<NAME>dbus_g_proxy_begin_call</NAME>
+<RETURNS>return </RETURNS>
+proxy, "getContactList", org_gnome_evolution_dataserver_addressbook_Book_get_contact_list_async_callback, stuff, g_free, G_TYPE_STRING, IN_query, G_TYPE_INVALID
+</FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_authenticate_user</NAME>
+<RETURNS>gboolean</RETURNS>
+DBusGProxy *proxy, const char * IN_user, const char * IN_passwd, const char * IN_auth_method, GError **error){return dbus_g_proxy_call (proxy, "authenticateUser", error, G_TYPE_STRING, IN_user, G_TYPE_STRING, IN_passwd, G_TYPE_STRING, IN_auth_method, G_TYPE_INVALID, G_TYPE_INVALID
+</FUNCTION>
+<USER_FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_authenticate_user_reply</NAME>
+<RETURNS>void </RETURNS>
+DBusGProxy *proxy, GError *error, gpointer userdata
+</USER_FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_authenticate_user_async</NAME>
+<RETURNS>DBusGProxyCall *</RETURNS>
+DBusGProxy *proxy, const char * IN_user, const char * IN_passwd, const char * IN_auth_method, org_gnome_evolution_dataserver_addressbook_Book_authenticate_user_reply callback, gpointer userdata){DBusGAsyncData *stuff;stuff = g_new (DBusGAsyncData, 1
+</FUNCTION>
+<FUNCTION>
+<NAME>dbus_g_proxy_begin_call</NAME>
+<RETURNS>return </RETURNS>
+proxy, "authenticateUser", org_gnome_evolution_dataserver_addressbook_Book_authenticate_user_async_callback, stuff, g_free, G_TYPE_STRING, IN_user, G_TYPE_STRING, IN_passwd, G_TYPE_STRING, IN_auth_method, G_TYPE_INVALID
+</FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_add_contact</NAME>
+<RETURNS>gboolean</RETURNS>
+DBusGProxy *proxy, const char * IN_vcard, char ** OUT_uid, GError **error){return dbus_g_proxy_call (proxy, "addContact", error, G_TYPE_STRING, IN_vcard, G_TYPE_INVALID, G_TYPE_STRING, OUT_uid, G_TYPE_INVALID
+</FUNCTION>
+<USER_FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_add_contact_reply</NAME>
+<RETURNS>void </RETURNS>
+DBusGProxy *proxy, char * OUT_uid, GError *error, gpointer userdata
+</USER_FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_add_contact_async</NAME>
+<RETURNS>DBusGProxyCall *</RETURNS>
+DBusGProxy *proxy, const char * IN_vcard, org_gnome_evolution_dataserver_addressbook_Book_add_contact_reply callback, gpointer userdata){DBusGAsyncData *stuff;stuff = g_new (DBusGAsyncData, 1
+</FUNCTION>
+<FUNCTION>
+<NAME>dbus_g_proxy_begin_call</NAME>
+<RETURNS>return </RETURNS>
+proxy, "addContact", org_gnome_evolution_dataserver_addressbook_Book_add_contact_async_callback, stuff, g_free, G_TYPE_STRING, IN_vcard, G_TYPE_INVALID
+</FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_remove_contacts</NAME>
+<RETURNS>gboolean</RETURNS>
+DBusGProxy *proxy, const char ** IN_list, GError **error){return dbus_g_proxy_call (proxy, "removeContacts", error, G_TYPE_STRV, IN_list, G_TYPE_INVALID, G_TYPE_INVALID
+</FUNCTION>
+<USER_FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_remove_contacts_reply</NAME>
+<RETURNS>void </RETURNS>
+DBusGProxy *proxy, GError *error, gpointer userdata
+</USER_FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_remove_contacts_async</NAME>
+<RETURNS>DBusGProxyCall *</RETURNS>
+DBusGProxy *proxy, const char ** IN_list, org_gnome_evolution_dataserver_addressbook_Book_remove_contacts_reply callback, gpointer userdata){DBusGAsyncData *stuff;stuff = g_new (DBusGAsyncData, 1
+</FUNCTION>
+<FUNCTION>
+<NAME>dbus_g_proxy_begin_call</NAME>
+<RETURNS>return </RETURNS>
+proxy, "removeContacts", org_gnome_evolution_dataserver_addressbook_Book_remove_contacts_async_callback, stuff, g_free, G_TYPE_STRV, IN_list, G_TYPE_INVALID
+</FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_modify_contact</NAME>
+<RETURNS>gboolean</RETURNS>
+DBusGProxy *proxy, const char * IN_vcard, GError **error){return dbus_g_proxy_call (proxy, "modifyContact", error, G_TYPE_STRING, IN_vcard, G_TYPE_INVALID, G_TYPE_INVALID
+</FUNCTION>
+<USER_FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_modify_contact_reply</NAME>
+<RETURNS>void </RETURNS>
+DBusGProxy *proxy, GError *error, gpointer userdata
+</USER_FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_modify_contact_async</NAME>
+<RETURNS>DBusGProxyCall *</RETURNS>
+DBusGProxy *proxy, const char * IN_vcard, org_gnome_evolution_dataserver_addressbook_Book_modify_contact_reply callback, gpointer userdata){DBusGAsyncData *stuff;stuff = g_new (DBusGAsyncData, 1
+</FUNCTION>
+<FUNCTION>
+<NAME>dbus_g_proxy_begin_call</NAME>
+<RETURNS>return </RETURNS>
+proxy, "modifyContact", org_gnome_evolution_dataserver_addressbook_Book_modify_contact_async_callback, stuff, g_free, G_TYPE_STRING, IN_vcard, G_TYPE_INVALID
+</FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_modify_contacts</NAME>
+<RETURNS>gboolean</RETURNS>
+DBusGProxy *proxy, const char ** IN_vcards, GError **error){return dbus_g_proxy_call (proxy, "modifyContacts", error, G_TYPE_STRV, IN_vcards, G_TYPE_INVALID, G_TYPE_INVALID
+</FUNCTION>
+<USER_FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_modify_contacts_reply</NAME>
+<RETURNS>void </RETURNS>
+DBusGProxy *proxy, GError *error, gpointer userdata
+</USER_FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_modify_contacts_async</NAME>
+<RETURNS>DBusGProxyCall *</RETURNS>
+DBusGProxy *proxy, const char ** IN_vcards, org_gnome_evolution_dataserver_addressbook_Book_modify_contacts_reply callback, gpointer userdata){DBusGAsyncData *stuff;stuff = g_new (DBusGAsyncData, 1
+</FUNCTION>
+<FUNCTION>
+<NAME>dbus_g_proxy_begin_call</NAME>
+<RETURNS>return </RETURNS>
+proxy, "modifyContacts", org_gnome_evolution_dataserver_addressbook_Book_modify_contacts_async_callback, stuff, g_free, G_TYPE_STRV, IN_vcards, G_TYPE_INVALID
+</FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_static_capabilities</NAME>
+<RETURNS>gboolean</RETURNS>
+DBusGProxy *proxy, char ** OUT_capabilities, GError **error){return dbus_g_proxy_call (proxy, "getStaticCapabilities", error, G_TYPE_INVALID, G_TYPE_STRING, OUT_capabilities, G_TYPE_INVALID
+</FUNCTION>
+<USER_FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_static_capabilities_reply</NAME>
+<RETURNS>void </RETURNS>
+DBusGProxy *proxy, char * OUT_capabilities, GError *error, gpointer userdata
+</USER_FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_static_capabilities_async</NAME>
+<RETURNS>DBusGProxyCall *</RETURNS>
+DBusGProxy *proxy, org_gnome_evolution_dataserver_addressbook_Book_get_static_capabilities_reply callback, gpointer userdata){DBusGAsyncData *stuff;stuff = g_new (DBusGAsyncData, 1
+</FUNCTION>
+<FUNCTION>
+<NAME>dbus_g_proxy_begin_call</NAME>
+<RETURNS>return </RETURNS>
+proxy, "getStaticCapabilities", org_gnome_evolution_dataserver_addressbook_Book_get_static_capabilities_async_callback, stuff, g_free, G_TYPE_INVALID
+</FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_required_fields</NAME>
+<RETURNS>gboolean</RETURNS>
+DBusGProxy *proxy, char *** OUT_fields, GError **error){return dbus_g_proxy_call (proxy, "getRequiredFields", error, G_TYPE_INVALID, G_TYPE_STRV, OUT_fields, G_TYPE_INVALID
+</FUNCTION>
+<USER_FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_required_fields_reply</NAME>
+<RETURNS>void </RETURNS>
+DBusGProxy *proxy, char * *OUT_fields, GError *error, gpointer userdata
+</USER_FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_required_fields_async</NAME>
+<RETURNS>DBusGProxyCall *</RETURNS>
+DBusGProxy *proxy, org_gnome_evolution_dataserver_addressbook_Book_get_required_fields_reply callback, gpointer userdata){DBusGAsyncData *stuff;stuff = g_new (DBusGAsyncData, 1
+</FUNCTION>
+<FUNCTION>
+<NAME>dbus_g_proxy_begin_call</NAME>
+<RETURNS>return </RETURNS>
+proxy, "getRequiredFields", org_gnome_evolution_dataserver_addressbook_Book_get_required_fields_async_callback, stuff, g_free, G_TYPE_INVALID
+</FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_supported_fields</NAME>
+<RETURNS>gboolean</RETURNS>
+DBusGProxy *proxy, char *** OUT_fields, GError **error){return dbus_g_proxy_call (proxy, "getSupportedFields", error, G_TYPE_INVALID, G_TYPE_STRV, OUT_fields, G_TYPE_INVALID
+</FUNCTION>
+<USER_FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_supported_fields_reply</NAME>
+<RETURNS>void </RETURNS>
+DBusGProxy *proxy, char * *OUT_fields, GError *error, gpointer userdata
+</USER_FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_supported_fields_async</NAME>
+<RETURNS>DBusGProxyCall *</RETURNS>
+DBusGProxy *proxy, org_gnome_evolution_dataserver_addressbook_Book_get_supported_fields_reply callback, gpointer userdata){DBusGAsyncData *stuff;stuff = g_new (DBusGAsyncData, 1
+</FUNCTION>
+<FUNCTION>
+<NAME>dbus_g_proxy_begin_call</NAME>
+<RETURNS>return </RETURNS>
+proxy, "getSupportedFields", org_gnome_evolution_dataserver_addressbook_Book_get_supported_fields_async_callback, stuff, g_free, G_TYPE_INVALID
+</FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_supported_auth_methods</NAME>
+<RETURNS>gboolean</RETURNS>
+DBusGProxy *proxy, char *** OUT_auth_methods, GError **error){return dbus_g_proxy_call (proxy, "getSupportedAuthMethods", error, G_TYPE_INVALID, G_TYPE_STRV, OUT_auth_methods, G_TYPE_INVALID
+</FUNCTION>
+<USER_FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_supported_auth_methods_reply</NAME>
+<RETURNS>void </RETURNS>
+DBusGProxy *proxy, char * *OUT_auth_methods, GError *error, gpointer userdata
+</USER_FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_supported_auth_methods_async</NAME>
+<RETURNS>DBusGProxyCall *</RETURNS>
+DBusGProxy *proxy, org_gnome_evolution_dataserver_addressbook_Book_get_supported_auth_methods_reply callback, gpointer userdata){DBusGAsyncData *stuff;stuff = g_new (DBusGAsyncData, 1
+</FUNCTION>
+<FUNCTION>
+<NAME>dbus_g_proxy_begin_call</NAME>
+<RETURNS>return </RETURNS>
+proxy, "getSupportedAuthMethods", org_gnome_evolution_dataserver_addressbook_Book_get_supported_auth_methods_async_callback, stuff, g_free, G_TYPE_INVALID
+</FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_book_view</NAME>
+<RETURNS>gboolean</RETURNS>
+DBusGProxy *proxy, const char * IN_query, const char ** IN_fields, const guint IN_max_results, char ** OUT_address, GError **error){return dbus_g_proxy_call (proxy, "getBookView", error, G_TYPE_STRING, IN_query, G_TYPE_STRV, IN_fields, G_TYPE_UINT, IN_max_results, G_TYPE_INVALID, G_TYPE_STRING, OUT_address, G_TYPE_INVALID
+</FUNCTION>
+<USER_FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_book_view_reply</NAME>
+<RETURNS>void </RETURNS>
+DBusGProxy *proxy, char * OUT_address, GError *error, gpointer userdata
+</USER_FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_book_view_async</NAME>
+<RETURNS>DBusGProxyCall *</RETURNS>
+DBusGProxy *proxy, const char * IN_query, const char ** IN_fields, const guint IN_max_results, org_gnome_evolution_dataserver_addressbook_Book_get_book_view_reply callback, gpointer userdata){DBusGAsyncData *stuff;stuff = g_new (DBusGAsyncData, 1
+</FUNCTION>
+<FUNCTION>
+<NAME>dbus_g_proxy_begin_call</NAME>
+<RETURNS>return </RETURNS>
+proxy, "getBookView", org_gnome_evolution_dataserver_addressbook_Book_get_book_view_async_callback, stuff, g_free, G_TYPE_STRING, IN_query, G_TYPE_STRV, IN_fields, G_TYPE_UINT, IN_max_results, G_TYPE_INVALID
+</FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_changes</NAME>
+<RETURNS>gboolean</RETURNS>
+DBusGProxy *proxy, const char * IN_change_id, char *** OUT_changes, GError **error){return dbus_g_proxy_call (proxy, "getChanges", error, G_TYPE_STRING, IN_change_id, G_TYPE_INVALID, G_TYPE_STRV, OUT_changes, G_TYPE_INVALID
+</FUNCTION>
+<USER_FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_changes_reply</NAME>
+<RETURNS>void </RETURNS>
+DBusGProxy *proxy, char * *OUT_changes, GError *error, gpointer userdata
+</USER_FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_get_changes_async</NAME>
+<RETURNS>DBusGProxyCall *</RETURNS>
+DBusGProxy *proxy, const char * IN_change_id, org_gnome_evolution_dataserver_addressbook_Book_get_changes_reply callback, gpointer userdata){DBusGAsyncData *stuff;stuff = g_new (DBusGAsyncData, 1
+</FUNCTION>
+<FUNCTION>
+<NAME>dbus_g_proxy_begin_call</NAME>
+<RETURNS>return </RETURNS>
+proxy, "getChanges", org_gnome_evolution_dataserver_addressbook_Book_get_changes_async_callback, stuff, g_free, G_TYPE_STRING, IN_change_id, G_TYPE_INVALID
+</FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_cancel_operation</NAME>
+<RETURNS>gboolean</RETURNS>
+DBusGProxy *proxy, GError **error){return dbus_g_proxy_call (proxy, "cancelOperation", error, G_TYPE_INVALID, G_TYPE_INVALID
+</FUNCTION>
+<USER_FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_cancel_operation_reply</NAME>
+<RETURNS>void </RETURNS>
+DBusGProxy *proxy, GError *error, gpointer userdata
+</USER_FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_cancel_operation_async</NAME>
+<RETURNS>DBusGProxyCall *</RETURNS>
+DBusGProxy *proxy, org_gnome_evolution_dataserver_addressbook_Book_cancel_operation_reply callback, gpointer userdata){DBusGAsyncData *stuff;stuff = g_new (DBusGAsyncData, 1
+</FUNCTION>
+<FUNCTION>
+<NAME>dbus_g_proxy_begin_call</NAME>
+<RETURNS>return </RETURNS>
+proxy, "cancelOperation", org_gnome_evolution_dataserver_addressbook_Book_cancel_operation_async_callback, stuff, g_free, G_TYPE_INVALID
+</FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_close</NAME>
+<RETURNS>gboolean</RETURNS>
+DBusGProxy *proxy, GError **error){return dbus_g_proxy_call (proxy, "close", error, G_TYPE_INVALID, G_TYPE_INVALID
+</FUNCTION>
+<USER_FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_close_reply</NAME>
+<RETURNS>void </RETURNS>
+DBusGProxy *proxy, GError *error, gpointer userdata
+</USER_FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_Book_close_async</NAME>
+<RETURNS>DBusGProxyCall *</RETURNS>
+DBusGProxy *proxy, org_gnome_evolution_dataserver_addressbook_Book_close_reply callback, gpointer userdata){DBusGAsyncData *stuff;stuff = g_new (DBusGAsyncData, 1
+</FUNCTION>
+<FUNCTION>
+<NAME>dbus_g_proxy_begin_call</NAME>
+<RETURNS>return </RETURNS>
+proxy, "close", org_gnome_evolution_dataserver_addressbook_Book_close_async_callback, stuff, g_free, G_TYPE_INVALID
+</FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_BookView_start</NAME>
+<RETURNS>gboolean</RETURNS>
+DBusGProxy *proxy, GError **error){return dbus_g_proxy_call (proxy, "start", error, G_TYPE_INVALID, G_TYPE_INVALID
+</FUNCTION>
+<USER_FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_BookView_start_reply</NAME>
+<RETURNS>void </RETURNS>
+DBusGProxy *proxy, GError *error, gpointer userdata
+</USER_FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_BookView_start_async</NAME>
+<RETURNS>DBusGProxyCall *</RETURNS>
+DBusGProxy *proxy, org_gnome_evolution_dataserver_addressbook_BookView_start_reply callback, gpointer userdata){DBusGAsyncData *stuff;stuff = g_new (DBusGAsyncData, 1
+</FUNCTION>
+<FUNCTION>
+<NAME>dbus_g_proxy_begin_call</NAME>
+<RETURNS>return </RETURNS>
+proxy, "start", org_gnome_evolution_dataserver_addressbook_BookView_start_async_callback, stuff, g_free, G_TYPE_INVALID
+</FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_BookView_stop</NAME>
+<RETURNS>gboolean</RETURNS>
+DBusGProxy *proxy, GError **error){return dbus_g_proxy_call (proxy, "stop", error, G_TYPE_INVALID, G_TYPE_INVALID
+</FUNCTION>
+<USER_FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_BookView_stop_reply</NAME>
+<RETURNS>void </RETURNS>
+DBusGProxy *proxy, GError *error, gpointer userdata
+</USER_FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_BookView_stop_async</NAME>
+<RETURNS>DBusGProxyCall *</RETURNS>
+DBusGProxy *proxy, org_gnome_evolution_dataserver_addressbook_BookView_stop_reply callback, gpointer userdata){DBusGAsyncData *stuff;stuff = g_new (DBusGAsyncData, 1
+</FUNCTION>
+<FUNCTION>
+<NAME>dbus_g_proxy_begin_call</NAME>
+<RETURNS>return </RETURNS>
+proxy, "stop", org_gnome_evolution_dataserver_addressbook_BookView_stop_async_callback, stuff, g_free, G_TYPE_INVALID
+</FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_BookView_dispose</NAME>
+<RETURNS>gboolean</RETURNS>
+DBusGProxy *proxy, GError **error){return dbus_g_proxy_call (proxy, "dispose", error, G_TYPE_INVALID, G_TYPE_INVALID
+</FUNCTION>
+<USER_FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_BookView_dispose_reply</NAME>
+<RETURNS>void </RETURNS>
+DBusGProxy *proxy, GError *error, gpointer userdata
+</USER_FUNCTION>
+<FUNCTION>
+<NAME>org_gnome_evolution_dataserver_addressbook_BookView_dispose_async</NAME>
+<RETURNS>DBusGProxyCall *</RETURNS>
+DBusGProxy *proxy, org_gnome_evolution_dataserver_addressbook_BookView_dispose_reply callback, gpointer userdata){DBusGAsyncData *stuff;stuff = g_new (DBusGAsyncData, 1
+</FUNCTION>
+<FUNCTION>
+<NAME>dbus_g_proxy_begin_call</NAME>
+<RETURNS>return </RETURNS>
+proxy, "dispose", org_gnome_evolution_dataserver_addressbook_BookView_dispose_async_callback, stuff, g_free, G_TYPE_INVALID
+</FUNCTION>

@@ -5,9 +5,7 @@ if ! WITH_LIBDB
 LIBDB = libdb
 endif
 
-SUBDIRS = $(LIBDB) libedataserver addressbook 
-
-DIST_SUBDIRS= libedataserver addressbook 
+SUBDIRS = $(LIBDB) libedataserver addressbook docs
 
 changelogs =			\
 	ChangeLog

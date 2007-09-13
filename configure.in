@@ -1350,7 +1350,7 @@ AM_GCONF_SOURCE_2
 dnl *************
 dnl Gtk Doc stuff
 dnl *************
-GTK_DOC_CHECK(1.0)
+GTK_DOC_CHECK([1.0])
 
 dnl ******************************
 dnl Makefiles
@@ -1388,6 +1388,11 @@ addressbook/backends/groupwise/Makefile
 addressbook/tests/Makefile
 addressbook/tests/ebook/Makefile
 addressbook/tests/vcard/Makefile
+docs/Makefile
+docs/reference/Makefile
+docs/reference/addressbook/Makefile
+docs/reference/addressbook/libebook/Makefile
+docs/reference/libedataserver/Makefile
 libdb/Makefile
 libedataserver/Makefile
 libedataserver/libedataserver.pc
