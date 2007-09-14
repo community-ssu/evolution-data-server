@@ -8,6 +8,7 @@ Standards-Version: 3.6.1.0
 Package: evolution-data-server-addressbook
 Architecture: any
 Depends: ${shlibs:Depends}
+Conflicts: evolution-data-server
 Provides: evolution-data-server
 Replaces: evolution-data-server
 Description: evolution database backend server
@@ -120,3 +121,9 @@ Description: Backend library for evolution address books
  distributed suite from Novell, Inc.
  .
  This package is backend library for evolution address book.
+
+Package: evolution-data-server-doc
+Section: doc
+Architecture: all
+Description: API documentation for evolution-data-server
+ API documentation for evolution-data-server.

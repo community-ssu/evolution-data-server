@@ -40,7 +40,8 @@ DEB_CONFIGURE_EXTRA_FLAGS := \
 	--disable-nss \
 	--without-soup \
 	--disable-nntp \
-	--without-bug-buddy
+	--without-bug-buddy \
+	--enable-gtk-doc
 
 clean::
 	dh_clean intltool-extract intltool-merge intltool-update \
