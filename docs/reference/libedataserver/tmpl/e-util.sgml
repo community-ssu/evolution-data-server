@@ -17,14 +17,10 @@ Miscellaneous utility functions for evolution-data-server.
 <!-- ##### SECTION Stability_Level ##### -->
 
 
-<!-- ##### FUNCTION e_util_mkdir_hier ##### -->
+<!-- ##### STRUCT tm ##### -->
 <para>
 
 </para>
-
-@path: 
-@mode: 
-@Returns: 
 
 
 <!-- ##### FUNCTION e_util_strstrcase ##### -->
@@ -55,9 +51,6 @@ Miscellaneous utility functions for evolution-data-server.
 @haystack: 
 @needle: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@s1: 
-@s2: 
 
 
 <!-- ##### FUNCTION e_util_utf8_strstrcasedecomp ##### -->
@@ -70,7 +63,7 @@ Miscellaneous utility functions for evolution-data-server.
 @Returns: 
 
 
-<!-- ##### FUNCTION e_strftime ##### -->
+<!-- ##### FUNCTION e_utf8_strftime ##### -->
 <para>
 
 </para>
@@ -82,7 +75,7 @@ Miscellaneous utility functions for evolution-data-server.
 @Returns: 
 
 
-<!-- ##### FUNCTION e_utf8_strftime ##### -->
+<!-- ##### FUNCTION e_strftime ##### -->
 <para>
 
 </para>
