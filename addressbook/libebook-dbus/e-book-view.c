@@ -200,6 +200,17 @@ complete_cb (DBusGProxy *proxy, guint status, EBookView *book_view)
   g_signal_emit (book_view, signals[SEQUENCE_COMPLETE], 0, status);
 }
 
+/**
+ * e_book_view_new:
+ * @book: an #EBook
+ * @view_proxy: The #DBusGProxy to get signals from
+ *
+ * Creates a new #EBookView based on #EBook and listening to @view_proxy.  This
+ * is a private function, applications should call #e_book_get_book_view or
+ * #e_book_async_get_book_view.
+ *
+ * Return value: A new #EBookView.
+ **/
 EBookView*
 e_book_view_new (EBook *book, DBusGProxy *view_proxy)
 {

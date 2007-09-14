@@ -1087,7 +1087,7 @@ e_vcard_add_attribute_with_value (EVCard *evcard,
  * e_vcard_add_attribute_with_values:
  * @evcard: an @EVCard
  * @attr: an #EVCardAttribute to add
- * @...: a %NULL-terminated list of values to assign to the attribute
+ * @Varargs: a %NULL-terminated list of values to assign to the attribute
  *
  * Adds @attr to @evcard, assigning the list of values to it.
  **/
@@ -1168,7 +1168,7 @@ e_vcard_attribute_add_value_decoded (EVCardAttribute *attr, const char *value, i
 /**
  * e_vcard_attribute_add_values:
  * @attr: an #EVCardAttribute
- * ...: a %NULL-terminated list of strings
+ * @Varargs: a %NULL-terminated list of strings
  *
  * Adds a list of values to @attr.
  **/
@@ -1428,7 +1428,7 @@ e_vcard_attribute_param_add_value_with_len (EVCardAttributeParam *param,
 /**
  * e_vcard_attribute_param_add_values:
  * @param: an #EVCardAttributeParam
- * ...: a %NULL-terminated list of strings
+ * @Varargs: a %NULL-terminated list of strings
  *
  * Adds a list of values to @param.
  **/
@@ -1474,7 +1474,7 @@ e_vcard_attribute_add_param_with_value (EVCardAttribute *attr,
  * e_vcard_attribute_add_param_with_values:
  * @attr: an #EVCardAttribute
  * @param: an #EVCardAttributeParam
- * ...: a %NULL-terminated list of strings
+ * @Varargs: a %NULL-terminated list of strings
  *
  * Adds the list of values to @param, then adds @param
  * to @attr.
