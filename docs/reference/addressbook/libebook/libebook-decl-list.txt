@@ -177,12 +177,9 @@ EVC_X_TTYTDD
 EVC_X_VIDEO_URL
 EVC_X_WANTS_HTML
 EVC_X_YAHOO
+EVC_X_GADUGADU
 EVC_X_GROUPWISE
 EVC_X_BOOK_URI
-EVC_X_OSSO_CONTACT_STATE
-EVC_X_OSSO_LAST_USED
-EVC_X_OSSO_BOUND
-EVC_X_OSSO_FIELD_STATE
 EVCardFormat
 EVCardPrivate
 EVCardAttribute
@@ -355,7 +352,6 @@ e_book_query_vcard_field_exists
 e_book_query_field_test
 e_book_query_vcard_field_test
 e_book_query_any_field_contains
-e_book_query_visible
 e_book_query_get_type
 e_book_query_copy
 </SECTION>

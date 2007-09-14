@@ -1,7 +1,7 @@
-82% symbol docs coverage.
-333 symbols documented.
-3 symbols incomplete.
-73 not documented.
+83% symbol docs coverage.
+338 symbols documented.
+0 symbols incomplete.
+69 not documented.
 
 
 EAddressWestern
@@ -52,6 +52,7 @@ EVC_X_DEST_EMAIL_NUM
 EVC_X_DEST_HTML_MAIL
 EVC_X_DEST_NAME
 EVC_X_DEST_SOURCE_UID
+EVC_X_GADUGADU
 EVC_X_GROUPWISE
 EVC_X_LIST
 EVC_X_LIST_SHOW_ADDRESSES
@@ -66,14 +67,6 @@ EVCardFormat
 E_BOOK_ERROR
 e_book_error_quark
 e_book_query_copy
-e_book_view_new
-e_book_view_start
-e_book_view_stop
-e_name_western_parse
-e_vcard_attribute_add_param_with_values (Varargs)
-e_vcard_attribute_add_values (Varargs)
-e_vcard_attribute_param_add_values (Varargs)
-e_vcard_get_attribute
 
 
 e-address-western:Long_Description

@@ -839,28 +839,16 @@ EDestination **destv
 #define EVC_X_YAHOO         	"X-YAHOO"
 </MACRO>
 <MACRO>
+<NAME>EVC_X_GADUGADU</NAME>
+#define EVC_X_GADUGADU        "X-GADUGADU"
+</MACRO>
+<MACRO>
 <NAME>EVC_X_GROUPWISE</NAME>
 #define EVC_X_GROUPWISE     	"X-GROUPWISE"
 </MACRO>
 <MACRO>
 <NAME>EVC_X_BOOK_URI</NAME>
 #define EVC_X_BOOK_URI     	"X-EVOLUTION-BOOK-URI"
-</MACRO>
-<MACRO>
-<NAME>EVC_X_OSSO_CONTACT_STATE</NAME>
-#define EVC_X_OSSO_CONTACT_STATE "X-OSSO-CONTACT-STATE"
-</MACRO>
-<MACRO>
-<NAME>EVC_X_OSSO_LAST_USED</NAME>
-#define EVC_X_OSSO_LAST_USED "X-OSSO-LAST-USED"
-</MACRO>
-<MACRO>
-<NAME>EVC_X_OSSO_BOUND</NAME>
-#define EVC_X_OSSO_BOUND "X-OSSO-BOUND"
-</MACRO>
-<MACRO>
-<NAME>EVC_X_OSSO_FIELD_STATE</NAME>
-#define EVC_X_OSSO_FIELD_STATE "X-OSSO-FIELD-STATE"
 </MACRO>
 <ENUM>
 <NAME>EVCardFormat</NAME>
@@ -1372,12 +1360,18 @@ typedef enum {
 	/* Security Fields */
 	E_CONTACT_X509_CERT,     /* structured field (EContactCert) */
 
+	E_CONTACT_IM_GADUGADU_HOME_1,  /* Synthetic string field */
+	E_CONTACT_IM_GADUGADU_HOME_2,  /* Synthetic string field */
+	E_CONTACT_IM_GADUGADU_HOME_3,  /* Synthetic string field */
+	E_CONTACT_IM_GADUGADU_WORK_1,  /* Synthetic string field */
+	E_CONTACT_IM_GADUGADU_WORK_2,  /* Synthetic string field */
+	E_CONTACT_IM_GADUGADU_WORK_3,  /* Synthetic string field */
+
+	E_CONTACT_IM_GADUGADU,   /* Multi-valued */
+	
 	E_CONTACT_PHONE_TELEPHONE,
 
 	E_CONTACT_SIP,
-
-	E_CONTACT_OSSO_CONTACT_STATE, /* string */
-	E_CONTACT_OSSO_LAST_USED, /* string */
 
 	E_CONTACT_FIELD_LAST,
 	E_CONTACT_FIELD_FIRST        = E_CONTACT_UID,
@@ -1733,11 +1727,6 @@ const char    *field,EBookQueryTest test,const char    *value
 <NAME>e_book_query_any_field_contains</NAME>
 <RETURNS>EBookQuery*</RETURNS>
 const char  *value
-</FUNCTION>
-<FUNCTION>
-<NAME>e_book_query_visible</NAME>
-<RETURNS>EBookQuery*</RETURNS>
-void
 </FUNCTION>
 <FUNCTION>
 <NAME>e_book_query_get_type</NAME>
