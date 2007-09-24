@@ -1,3 +1,10 @@
+evolution-data-server (1.4.2.1-20070924) unstable; urgency=low
+
+  * Unref the view connection to stop leaking sockets
+  * Remove 01_glib_version.diff, it isn't required now
+
+ -- Ross Burton <ross@openedhand.com>  Mon, 24 Sep 2007 11:15:05 +0100
+
 evolution-data-server (1.4.2.1-20070914) unstable; urgency=low
 
   * Add evolution-data-server-doc with API docs

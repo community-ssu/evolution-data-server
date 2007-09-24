@@ -38,8 +38,8 @@
 +  }
 +
 +  view_proxy = dbus_g_proxy_new_for_peer (view_conn, "/", "org.gnome.evolution.dataserver.addressbook.BookView");
++  dbus_g_connection_unref (view_conn);
    if (!view_proxy) {
-+    dbus_g_connection_unref (view_conn);
      *book_view = NULL;
 +    g_set_error (error, E_BOOK_ERROR,
 +                 E_BOOK_ERROR_CORBA_EXCEPTION,
