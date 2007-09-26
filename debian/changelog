@@ -1,3 +1,11 @@
+evolution-data-server (1.4.2.1-20070926) unstable; urgency=low
+
+  * Fix a leak (Fixes: NB#71061)
+  * Close the view connection server-side so it closes the socket (Fixes:
+    NB#70975).
+
+ -- Ross Burton <ross@openedhand.com>  Wed, 26 Sep 2007 13:42:01 +0100
+
 evolution-data-server (1.4.2.1-20070924) unstable; urgency=low
 
   * Unref the view connection to stop leaking sockets
