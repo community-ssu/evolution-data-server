@@ -13,7 +13,7 @@
  
    e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
    e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
-@@ -1349,41 +1350,80 @@
+@@ -1349,41 +1350,82 @@
  
    sexp = e_book_query_to_string (query);
    
@@ -73,12 +73,14 @@
 +    if (cb)
 +      cb (data->book, get_status_from_error (error), NULL, data->closure);
 +    g_error_free (error);
++    g_free (address);
 +    g_free (data);
 +    return;
 +  }
 +  
 +  
 +  view_conn = dbus_g_connection_open (address, &err);
++  g_free (address);
 +  if (!view_conn) {
 +    g_warning (G_STRLOC ": cannot get connection: %s", err->message);
 +    g_error_free (err);
