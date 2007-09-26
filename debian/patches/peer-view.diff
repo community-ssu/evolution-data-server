@@ -127,7 +127,15 @@
  static gboolean impl_BookView_start (EDataBookView *view, GError **error);
  static gboolean impl_BookView_stop (EDataBookView *view, GError **error);
  static gboolean impl_BookView_dispose (EDataBookView *view, GError **eror);
-@@ -152,10 +151,30 @@
+@@ -42,6 +41,7 @@
+ struct _EDataBookViewPrivate {
+   EDataBook *book;
+   EBookBackend *backend;
++  DBusConnection *conn;
+ 
+   char* card_query; /* TODO: unused */
+   EBookBackendSExp *card_sexp;
+@@ -152,10 +152,32 @@
    g_object_unref (view);
  }
  
@@ -149,6 +157,8 @@
 +  /* This is a one-shot server */
 +  dbus_server_unref (server);
 +  dbus_server_disconnect (server);
++
++  view->priv->conn = conn;
 +}
 +
  /**
@@ -159,7 +169,7 @@
   * @card_query: The query as a string
   * @card_sexp: The query as an #EBookBackendSExp
   * @max_results: The maximum number of results to return
-@@ -166,9 +185,23 @@
+@@ -166,9 +188,23 @@
  EDataBookView *
  e_data_book_view_new (EDataBook *book, const char *path, const char *card_query, EBookBackendSExp *card_sexp, int max_results)
  {
@@ -183,7 +193,7 @@
    view = g_object_new (E_TYPE_DATA_BOOK_VIEW, NULL);
    priv = view->priv;
  
-@@ -180,7 +213,7 @@
+@@ -180,7 +216,7 @@
    priv->card_sexp = card_sexp;
    priv->max_results = max_results;
  
@@ -192,6 +202,15 @@
  
    return view;
  }
+@@ -237,6 +273,8 @@
+ 
+   g_hash_table_destroy (priv->ids);
+ 
++  dbus_connection_close (priv->conn);
++
+   G_OBJECT_CLASS (e_data_book_view_parent_class)->finalize (object);
+ }
+ 
 
 === modified file 'addressbook/libedata-book-dbus/e-data-book.c'
 --- addressbook/libedata-book-dbus/e-data-book.c	2007-06-27 10:44:52 +0000
