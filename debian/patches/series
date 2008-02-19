@@ -1,0 +1,10 @@
+02_abook-path.diff -p0
+03_bdb-error.diff -p0
+04_contact-fields.diff -p0
+05_contact-no-fileas.diff -p0
+06_no-gadu.diff -p0
+07_peer-view.diff -p0
+09_query-visible.diff -p0
+10_remove-unused.diff -p0
+11_small-cache.diff -p0
+12_summary-visible.diff -p0
