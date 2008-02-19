@@ -1,3 +1,5 @@
+Change the system addressbook path.
+
 Index: addressbook/libebook-dbus/e-book.c
 ===================================================================
 --- addressbook/libebook-dbus/e-book.c.orig	2008-02-19 11:04:22.000000000 +0000

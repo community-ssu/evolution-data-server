@@ -1,3 +1,6 @@
+Reduce the size of the cache to save some memory.  I'm thinking we should drop
+this now that the N810 has more memory.
+
 Index: addressbook/backends/file/e-book-backend-file.c
 ===================================================================
 --- addressbook/backends/file/e-book-backend-file.c.orig	2008-02-19 11:07:09.000000000 +0000

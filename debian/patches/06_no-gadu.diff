@@ -1,3 +1,5 @@
+Remove the gadugadu field to preserve ABI.  When EDS can break ABI, remove this patch.
+
 Index: addressbook/libebook-dbus/e-contact.c
 ===================================================================
 --- addressbook/libebook-dbus/e-contact.c.orig	2008-02-19 11:07:13.000000000 +0000

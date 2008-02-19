@@ -1,3 +1,5 @@
+Don't generate a file-as field, we never use it and this takes time.
+
 Index: addressbook/libebook-dbus/e-contact.c
 ===================================================================
 --- addressbook/libebook-dbus/e-contact.c.orig	2008-02-19 11:07:11.000000000 +0000

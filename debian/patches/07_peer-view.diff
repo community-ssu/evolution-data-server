@@ -1,3 +1,7 @@
+Nasty, nasty hack to send book views over a point-to-point DBus connection
+instead of the session bus.  Neglible performance increase in benchmarks but
+should help congestion.
+
 === modified file 'addressbook/libebook-dbus/e-book.c'
 Index: addressbook/libebook-dbus/e-book.c
 ===================================================================

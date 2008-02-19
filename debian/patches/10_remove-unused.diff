@@ -1,31 +1,5 @@
-Index: addressbook/libebook-dbus/Makefile.am
-===================================================================
---- addressbook/libebook-dbus/Makefile.am.orig	2008-02-19 11:04:19.000000000 +0000
-+++ addressbook/libebook-dbus/Makefile.am	2008-02-19 11:07:20.000000000 +0000
-@@ -23,7 +23,6 @@
- 	e-book-view-private.h				\
- 	e-book.c					\
- 	e-contact.c					\
--	e-destination.c					\
- 	e-name-western.c				\
- 	e-name-western-tables.h				\
- 	e-vcard.c					\
-@@ -31,7 +30,6 @@
- 
- libebook_1_2_la_LIBADD =					\
- 	$(EVOLUTION_ADDRESSBOOK_LIBS)				\
--	$(top_builddir)/camel/libcamel-$(API_VERSION).la \
- 	$(top_builddir)/libedataserver/libedataserver-$(API_VERSION).la
- 
- libebook_1_2_la_LDFLAGS = 							\
-@@ -46,7 +44,6 @@
- 	e-book-types.h					\
- 	e-book.h					\
- 	e-contact.h					\
--	e-destination.h					\
- 	e-name-western.h				\
- 	e-vcard.h
- 
+Remove some source which we don't use, to save a little bit of disk space.
+
 Index: libedataserver/Makefile.am
 ===================================================================
 --- libedataserver/Makefile.am.orig	2008-02-19 11:04:19.000000000 +0000

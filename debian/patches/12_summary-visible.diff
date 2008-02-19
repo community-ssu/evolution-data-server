@@ -1,3 +1,6 @@
+Add the X-OSSO-CONTACT-STATE field to the summary database, and implement the
+(visible) query.
+
 Index: addressbook/libedata-book-dbus/e-book-backend-summary.c
 ===================================================================
 --- addressbook/libedata-book-dbus/e-book-backend-summary.c.orig	2008-02-19 11:04:18.000000000 +0000
