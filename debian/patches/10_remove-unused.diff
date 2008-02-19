@@ -2,9 +2,9 @@ Remove some source which we don't use, to save a little bit of disk space.
 
 Index: libedataserver/Makefile.am
 ===================================================================
---- libedataserver/Makefile.am.orig	2008-02-19 11:04:19.000000000 +0000
-+++ libedataserver/Makefile.am	2008-02-19 11:07:20.000000000 +0000
-@@ -17,26 +17,19 @@
+--- libedataserver/Makefile.am.orig	2008-02-19 14:00:04.000000000 +0000
++++ libedataserver/Makefile.am	2008-02-19 14:06:10.000000000 +0000
+@@ -17,17 +17,12 @@
  
  libedataserver_1_2_la_SOURCES =		\
  	$(BONOBO_SOURCES)		\
@@ -22,16 +22,15 @@ Index: libedataserver/Makefile.am
  	e-sexp.c			\
  	e-source-group.c		\
  	e-source-list.c			\
- 	e-source.c			\
- 	e-time-utils.c			\
+@@ -36,7 +31,6 @@
  	e-uid.c				\
--	e-url.c				\
+ 	e-url.c				\
  	e-data-server-util.c		\
 -	e-trie.c			\
  	e-xml-utils.c			\
  	e-xml-hash-utils.c		\
  	libedataserver-private.h	\
-@@ -53,26 +46,18 @@
+@@ -53,24 +47,17 @@
  libedataserverincludedir = $(privincludedir)/libedataserver
  
  libedataserverinclude_HEADERS =		\
@@ -54,7 +53,5 @@ Index: libedataserver/Makefile.am
  	e-time-utils.h			\
 -	e-trie.h			\
  	e-uid.h				\
--	e-url.h				\
+ 	e-url.h				\
  	e-data-server-util.h		\
- 	e-xml-utils.h			\
- 	e-xml-hash-utils.h		\
