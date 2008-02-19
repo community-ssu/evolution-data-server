@@ -1029,7 +1029,7 @@ e_book_backend_file_upgrade_db (EBookBackendFile *bf, char *old_version)
 
 	if (!strcmp (old_version, "0.1")) {
 		/* we just loop through all the cards in the db,
-                   giving them valid ids if they don't have them */
+		   giving them valid ids if they don't have them */
 		DBT  id_dbt, vcard_dbt;
 		DBC *dbc;
 		int  card_failed = 0;
@@ -1240,13 +1240,13 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 	} else {
 		db->close (db, 0);
 		
-        	db_error = db_create (&db, env, 0);
-        	if (db_error != 0) {
-                	g_warning ("db_create failed with %s", db_strerror (db_error));
-                	g_free (dirname);
-                	g_free (filename);
-                	return GNOME_Evolution_Addressbook_OtherError;
-        	}
+		db_error = db_create (&db, env, 0);
+		if (db_error != 0) {
+			g_warning ("db_create failed with %s", db_strerror (db_error));
+			g_free (dirname);
+			g_free (filename);
+			return GNOME_Evolution_Addressbook_OtherError;
+		}
 		db_error = db->open (db, NULL, filename, NULL, DB_HASH, DB_RDONLY | DB_THREAD, 0666);
 
 		if (db_error != 0 && !only_if_exists) {
