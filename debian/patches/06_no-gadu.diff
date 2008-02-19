@@ -1,8 +1,8 @@
 Index: addressbook/libebook-dbus/e-contact.c
 ===================================================================
---- addressbook/libebook-dbus/e-contact.c	(revision 45)
-+++ addressbook/libebook-dbus/e-contact.c	(working copy)
-@@ -254,14 +254,6 @@
+--- addressbook/libebook-dbus/e-contact.c.orig	2008-02-19 11:07:13.000000000 +0000
++++ addressbook/libebook-dbus/e-contact.c	2008-02-19 11:07:15.000000000 +0000
+@@ -260,14 +260,6 @@
  	/* Security fields */
  	ATTR_TYPE_STRUCT_FIELD (E_CONTACT_X509_CERT,  EVC_KEY, "x509Cert",  N_("X.509 Certificate"), FALSE, "X509", cert_getter, cert_setter, e_contact_cert_get_type),
  
@@ -19,8 +19,8 @@ Index: addressbook/libebook-dbus/e-contact.c
  
 Index: addressbook/libebook-dbus/e-contact.h
 ===================================================================
---- addressbook/libebook-dbus/e-contact.h	(revision 45)
-+++ addressbook/libebook-dbus/e-contact.h	(working copy)
+--- addressbook/libebook-dbus/e-contact.h.orig	2008-02-19 11:07:11.000000000 +0000
++++ addressbook/libebook-dbus/e-contact.h	2008-02-19 11:07:15.000000000 +0000
 @@ -186,15 +186,6 @@
  	/* Security Fields */
  	E_CONTACT_X509_CERT,     /* structured field (EContactCert) */
@@ -39,8 +39,8 @@ Index: addressbook/libebook-dbus/e-contact.h
  	E_CONTACT_SIP,
 Index: addressbook/libebook-dbus/e-vcard.h
 ===================================================================
---- addressbook/libebook-dbus/e-vcard.h	(revision 45)
-+++ addressbook/libebook-dbus/e-vcard.h	(working copy)
+--- addressbook/libebook-dbus/e-vcard.h.orig	2008-02-19 11:07:11.000000000 +0000
++++ addressbook/libebook-dbus/e-vcard.h	2008-02-19 11:07:15.000000000 +0000
 @@ -86,7 +86,6 @@
  #define EVC_X_VIDEO_URL     	"X-EVOLUTION-VIDEO-URL"
  #define EVC_X_WANTS_HTML    	"X-MOZILLA-HTML"
@@ -51,8 +51,8 @@ Index: addressbook/libebook-dbus/e-vcard.h
  
 Index: addressbook/libedata-book-dbus/e-book-backend-sexp.c
 ===================================================================
---- addressbook/libedata-book-dbus/e-book-backend-sexp.c	(revision 45)
-+++ addressbook/libedata-book-dbus/e-book-backend-sexp.c	(working copy)
+--- addressbook/libedata-book-dbus/e-book-backend-sexp.c.orig	2008-02-19 11:04:21.000000000 +0000
++++ addressbook/libedata-book-dbus/e-book-backend-sexp.c	2008-02-19 11:07:15.000000000 +0000
 @@ -90,14 +90,6 @@
  }
  

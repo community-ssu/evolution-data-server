@@ -1,16 +1,16 @@
 Index: addressbook/libebook-dbus/Makefile.am
 ===================================================================
---- addressbook/libebook-dbus/Makefile.am	(revision 391)
-+++ addressbook/libebook-dbus/Makefile.am	(working copy)
-@@ -24,7 +24,6 @@
+--- addressbook/libebook-dbus/Makefile.am.orig	2008-02-19 11:04:19.000000000 +0000
++++ addressbook/libebook-dbus/Makefile.am	2008-02-19 11:07:20.000000000 +0000
+@@ -23,7 +23,6 @@
  	e-book-view-private.h				\
  	e-book.c					\
  	e-contact.c					\
 -	e-destination.c					\
  	e-name-western.c				\
- 	e-vcard.c
- 
-@@ -36,7 +35,6 @@
+ 	e-name-western-tables.h				\
+ 	e-vcard.c					\
+@@ -31,7 +30,6 @@
  
  libebook_1_2_la_LIBADD =					\
  	$(EVOLUTION_ADDRESSBOOK_LIBS)				\
@@ -18,19 +18,19 @@ Index: addressbook/libebook-dbus/Makefile.am
  	$(top_builddir)/libedataserver/libedataserver-$(API_VERSION).la
  
  libebook_1_2_la_LDFLAGS = 							\
-@@ -53,7 +51,6 @@
+@@ -46,7 +44,6 @@
  	e-book-types.h					\
  	e-book.h					\
  	e-contact.h					\
 -	e-destination.h					\
  	e-name-western.h				\
- 	e-name-western-tables.h				\
  	e-vcard.h
+ 
 Index: libedataserver/Makefile.am
 ===================================================================
---- libedataserver/Makefile.am	(revision 105)
-+++ libedataserver/Makefile.am	(working copy)
-@@ -18,26 +18,19 @@
+--- libedataserver/Makefile.am.orig	2008-02-19 11:04:19.000000000 +0000
++++ libedataserver/Makefile.am	2008-02-19 11:07:20.000000000 +0000
+@@ -17,26 +17,19 @@
  
  libedataserver_1_2_la_SOURCES =		\
  	$(BONOBO_SOURCES)		\
@@ -57,7 +57,7 @@ Index: libedataserver/Makefile.am
  	e-xml-utils.c			\
  	e-xml-hash-utils.c		\
  	libedataserver-private.h	\
-@@ -57,26 +50,18 @@
+@@ -53,26 +46,18 @@
  libedataserverincludedir = $(privincludedir)/libedataserver
  
  libedataserverinclude_HEADERS =		\

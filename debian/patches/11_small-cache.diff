@@ -1,8 +1,8 @@
 Index: addressbook/backends/file/e-book-backend-file.c
 ===================================================================
---- addressbook/backends/file/e-book-backend-file.c	(revision 383)
-+++ addressbook/backends/file/e-book-backend-file.c	(working copy)
-@@ -1070,6 +1070,8 @@
+--- addressbook/backends/file/e-book-backend-file.c.orig	2008-02-19 11:07:09.000000000 +0000
++++ addressbook/backends/file/e-book-backend-file.c	2008-02-19 11:07:23.000000000 +0000
+@@ -1200,6 +1200,8 @@
  
  		env->set_errcall (env, file_errcall);
  

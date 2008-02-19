@@ -1,7 +1,7 @@
 Index: addressbook/backends/file/e-book-backend-file.c
 ===================================================================
---- addressbook/backends/file/e-book-backend-file.c	(revision 38)
-+++ addressbook/backends/file/e-book-backend-file.c	(working copy)
+--- addressbook/backends/file/e-book-backend-file.c.orig	2008-02-19 11:04:22.000000000 +0000
++++ addressbook/backends/file/e-book-backend-file.c	2008-02-19 11:07:09.000000000 +0000
 @@ -83,6 +83,7 @@
  static struct {
  	int ref_count;
@@ -9,7 +9,7 @@ Index: addressbook/backends/file/e-book-backend-file.c
 +	gboolean had_error;
  } global_env;
  
- static EDataBookStatus
+ static EBookBackendSyncStatus
 @@ -213,12 +214,16 @@
  
  	string_to_dbt (vcard, &vcard_dbt);
@@ -27,7 +27,7 @@ Index: addressbook/backends/file/e-book-backend-file.c
  		if (db_error != 0) {
  			g_warning ("db->sync failed with %s", db_strerror (db_error));
  		}
-@@ -337,7 +337,9 @@
+@@ -337,7 +342,9 @@
  	string_to_dbt (dbt_id, &id_dbt);
  	string_to_dbt (vcard_with_rev, &vcard_dbt);
  
@@ -37,7 +37,7 @@ Index: addressbook/backends/file/e-book-backend-file.c
  
  	g_free (vcard_with_rev);
  	
-@@ -365,7 +367,9 @@
+@@ -365,7 +372,9 @@
  	status = modify_contact (bf, vcard, contact);
  	
  	if (status == GNOME_Evolution_Addressbook_Success) {
@@ -47,7 +47,7 @@ Index: addressbook/backends/file/e-book-backend-file.c
  		if (db_error == 0) {
  			e_book_backend_summary_remove_contact (bf->priv->summary,
  							       e_contact_get_const (*contact, E_CONTACT_UID));
-@@ -417,7 +421,9 @@
+@@ -417,7 +426,9 @@
  	}
  
  	/* Sync the database */
@@ -57,7 +57,7 @@ Index: addressbook/backends/file/e-book-backend-file.c
  	if (db_error != 0) {
  		return db_error_to_status (db_error);
  	}
-@@ -1077,6 +1086,7 @@
+@@ -1140,6 +1151,7 @@
  #endif
  {
  	g_warning ("libdb error: %s", buf2);
@@ -65,7 +65,7 @@ Index: addressbook/backends/file/e-book-backend-file.c
  }
  
  
-@@ -1141,6 +1151,7 @@
+@@ -1204,6 +1216,7 @@
  		}
  
  		global_env.env = env;

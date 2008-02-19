@@ -1,8 +1,8 @@
 Index: addressbook/libebook-dbus/e-vcard.h
 ===================================================================
---- addressbook/libebook-dbus/e-vcard.h	(revision 31)
-+++ addressbook/libebook-dbus/e-vcard.h	(working copy)
-@@ -89,6 +89,13 @@
+--- addressbook/libebook-dbus/e-vcard.h.orig	2008-02-19 11:04:22.000000000 +0000
++++ addressbook/libebook-dbus/e-vcard.h	2008-02-19 11:07:11.000000000 +0000
+@@ -90,6 +90,13 @@
  #define EVC_X_GROUPWISE     	"X-GROUPWISE"
  #define EVC_X_BOOK_URI     	"X-EVOLUTION-BOOK-URI"
  
@@ -18,9 +18,9 @@ Index: addressbook/libebook-dbus/e-vcard.h
  	EVC_FORMAT_VCARD_30
 Index: addressbook/libebook-dbus/e-contact.c
 ===================================================================
---- addressbook/libebook-dbus/e-contact.c	(revision 31)
-+++ addressbook/libebook-dbus/e-contact.c	(working copy)
-@@ -259,6 +259,9 @@
+--- addressbook/libebook-dbus/e-contact.c.orig	2008-02-19 11:04:22.000000000 +0000
++++ addressbook/libebook-dbus/e-contact.c	2008-02-19 11:07:11.000000000 +0000
+@@ -272,6 +272,9 @@
   	STRING_FIELD (E_CONTACT_PHONE_TELEPHONE,        EVC_TEL,       "tel",         N_("Telephone"),  FALSE),
  
  	MULTI_LIST_FIELD (E_CONTACT_SIP, 	  EVC_X_SIP,    "sip",    N_("SIP address"),          FALSE),
@@ -32,9 +32,9 @@ Index: addressbook/libebook-dbus/e-contact.c
  #undef LIST_ELEM_STR_FIELD
 Index: addressbook/libebook-dbus/e-contact.h
 ===================================================================
---- addressbook/libebook-dbus/e-contact.h	(revision 31)
-+++ addressbook/libebook-dbus/e-contact.h	(working copy)
-@@ -190,6 +190,9 @@
+--- addressbook/libebook-dbus/e-contact.h.orig	2008-02-19 11:04:22.000000000 +0000
++++ addressbook/libebook-dbus/e-contact.h	2008-02-19 11:07:11.000000000 +0000
+@@ -199,6 +199,9 @@
  
  	E_CONTACT_SIP,
  

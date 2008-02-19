@@ -1,7 +1,7 @@
 Index: addressbook/libebook-dbus/e-book-query.c
 ===================================================================
---- addressbook/libebook-dbus/e-book-query.c	(revision 460)
-+++ addressbook/libebook-dbus/e-book-query.c	(working copy)
+--- addressbook/libebook-dbus/e-book-query.c.orig	2008-02-19 11:04:19.000000000 +0000
++++ addressbook/libebook-dbus/e-book-query.c	2008-02-19 11:07:18.000000000 +0000
 @@ -14,7 +14,8 @@
  	E_BOOK_QUERY_TYPE_NOT,
  	E_BOOK_QUERY_TYPE_FIELD_EXISTS,
@@ -12,7 +12,7 @@ Index: addressbook/libebook-dbus/e-book-query.c
  } EBookQueryType;
  
  struct EBookQuery {
-@@ -261,6 +262,26 @@
+@@ -295,6 +296,26 @@
  }
  
  /**
@@ -39,7 +39,7 @@ Index: addressbook/libebook-dbus/e-book-query.c
   * e_book_query_unref:
   * @q: an #EBookQuery
   *
-@@ -529,6 +550,22 @@
+@@ -589,6 +610,22 @@
  	return r;
  }
  
@@ -62,7 +62,7 @@ Index: addressbook/libebook-dbus/e-book-query.c
  /* 'builtin' functions */
  static const struct {
  	char *name;
-@@ -544,6 +581,7 @@
+@@ -605,6 +642,7 @@
  	{ "beginswith", func_beginswith, 0 },
  	{ "endswith", func_endswith, 0 },
  	{ "exists", func_exists, 0 },
@@ -70,7 +70,7 @@ Index: addressbook/libebook-dbus/e-book-query.c
  };
  
  /**
-@@ -672,6 +710,9 @@
+@@ -752,6 +790,9 @@
  		g_string_append_printf (str, "contains \"x-evolution-any-field\"");
  		e_sexp_encode_string (str, q->query.any_field_contains.value);
  		break;
@@ -82,9 +82,9 @@ Index: addressbook/libebook-dbus/e-book-query.c
  
 Index: addressbook/libebook-dbus/e-book-query.h
 ===================================================================
---- addressbook/libebook-dbus/e-book-query.h	(revision 460)
-+++ addressbook/libebook-dbus/e-book-query.h	(working copy)
-@@ -49,6 +49,8 @@
+--- addressbook/libebook-dbus/e-book-query.h.orig	2008-02-19 11:04:19.000000000 +0000
++++ addressbook/libebook-dbus/e-book-query.h	2008-02-19 11:07:18.000000000 +0000
+@@ -52,6 +52,8 @@
  /* a special any field contains query */
  EBookQuery* e_book_query_any_field_contains (const char  *value);
  
@@ -95,9 +95,9 @@ Index: addressbook/libebook-dbus/e-book-query.h
  
 Index: addressbook/libedata-book-dbus/e-book-backend-sexp.c
 ===================================================================
---- addressbook/libedata-book-dbus/e-book-backend-sexp.c	(revision 460)
-+++ addressbook/libedata-book-dbus/e-book-backend-sexp.c	(working copy)
-@@ -474,6 +474,41 @@
+--- addressbook/libedata-book-dbus/e-book-backend-sexp.c.orig	2008-02-19 11:07:15.000000000 +0000
++++ addressbook/libedata-book-dbus/e-book-backend-sexp.c	2008-02-19 11:07:18.000000000 +0000
+@@ -522,6 +522,41 @@
  	return r;
  }
  
@@ -139,7 +139,7 @@ Index: addressbook/libedata-book-dbus/e-book-backend-sexp.c
  /* 'builtin' functions */
  static struct {
  	char *name;
-@@ -487,6 +522,7 @@
+@@ -536,6 +571,7 @@
  	{ "endswith", func_endswith, 0 },
  	{ "exists", func_exists, 0 },
  	{ "exists_vcard", func_exists_vcard, 0 },
