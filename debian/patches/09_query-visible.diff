@@ -2,8 +2,8 @@ Add a (visible) query which means "all contacts which are not deleted".
 
 Index: addressbook/libebook-dbus/e-book-query.c
 ===================================================================
---- addressbook/libebook-dbus/e-book-query.c.orig	2008-02-19 11:04:19.000000000 +0000
-+++ addressbook/libebook-dbus/e-book-query.c	2008-02-19 11:07:18.000000000 +0000
+--- addressbook/libebook-dbus/e-book-query.c.orig	2008-02-21 16:02:10.000000000 +0000
++++ addressbook/libebook-dbus/e-book-query.c	2008-02-21 16:06:18.000000000 +0000
 @@ -14,7 +14,8 @@
  	E_BOOK_QUERY_TYPE_NOT,
  	E_BOOK_QUERY_TYPE_FIELD_EXISTS,
@@ -41,7 +41,7 @@ Index: addressbook/libebook-dbus/e-book-query.c
   * e_book_query_unref:
   * @q: an #EBookQuery
   *
-@@ -589,6 +610,22 @@
+@@ -608,6 +629,22 @@
  	return r;
  }
  
@@ -64,15 +64,15 @@ Index: addressbook/libebook-dbus/e-book-query.c
  /* 'builtin' functions */
  static const struct {
  	char *name;
-@@ -605,6 +642,7 @@
- 	{ "beginswith", func_beginswith, 0 },
+@@ -625,6 +662,7 @@
  	{ "endswith", func_endswith, 0 },
  	{ "exists", func_exists, 0 },
-+	{ "visible", func_visible, 0 },
+ 	{ "exists_vcard", func_exists_vcard, 0 },
++ 	{ "visible", func_visible, 0 },
  };
  
  /**
-@@ -752,6 +790,9 @@
+@@ -772,6 +810,9 @@
  		g_string_append_printf (str, "contains \"x-evolution-any-field\"");
  		e_sexp_encode_string (str, q->query.any_field_contains.value);
  		break;
@@ -84,8 +84,8 @@ Index: addressbook/libebook-dbus/e-book-query.c
  
 Index: addressbook/libebook-dbus/e-book-query.h
 ===================================================================
---- addressbook/libebook-dbus/e-book-query.h.orig	2008-02-19 11:04:19.000000000 +0000
-+++ addressbook/libebook-dbus/e-book-query.h	2008-02-19 11:07:18.000000000 +0000
+--- addressbook/libebook-dbus/e-book-query.h.orig	2008-02-21 16:00:19.000000000 +0000
++++ addressbook/libebook-dbus/e-book-query.h	2008-02-21 16:05:53.000000000 +0000
 @@ -52,6 +52,8 @@
  /* a special any field contains query */
  EBookQuery* e_book_query_any_field_contains (const char  *value);
@@ -97,8 +97,8 @@ Index: addressbook/libebook-dbus/e-book-query.h
  
 Index: addressbook/libedata-book-dbus/e-book-backend-sexp.c
 ===================================================================
---- addressbook/libedata-book-dbus/e-book-backend-sexp.c.orig	2008-02-19 11:07:15.000000000 +0000
-+++ addressbook/libedata-book-dbus/e-book-backend-sexp.c	2008-02-19 11:07:18.000000000 +0000
+--- addressbook/libedata-book-dbus/e-book-backend-sexp.c.orig	2008-02-21 16:03:23.000000000 +0000
++++ addressbook/libedata-book-dbus/e-book-backend-sexp.c	2008-02-21 16:05:53.000000000 +0000
 @@ -522,6 +522,41 @@
  	return r;
  }
