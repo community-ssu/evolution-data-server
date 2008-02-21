@@ -68,7 +68,7 @@ Index: addressbook/libebook-dbus/e-book-query.c
  	{ "endswith", func_endswith, 0 },
  	{ "exists", func_exists, 0 },
  	{ "exists_vcard", func_exists_vcard, 0 },
-+ 	{ "visible", func_visible, 0 },
++	{ "visible", func_visible, 0 },
  };
  
  /**
