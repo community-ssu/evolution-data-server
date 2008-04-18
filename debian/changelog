@@ -1,3 +1,10 @@
+evolution-data-server (1.4.2.1-20080418) unstable; urgency=low
+
+  * Check if there ever even was a DBusConnection, before closing it; Fixes:
+    NB#84207
+
+ -- Joergen Scheibengruber <Jorgen.Scheibengruber@nokia.com>  Fri, 18 Apr 2008 13:47:52 +0300
+
 evolution-data-server (1.4.2.1-20070926) unstable; urgency=low
 
   * Fix a leak (Fixes: NB#71061)

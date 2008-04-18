@@ -208,11 +208,13 @@ Index: addressbook/libedata-book-dbus/e-data-book-view.c
  
    return view;
  }
-@@ -237,6 +273,8 @@
+@@ -237,6 +273,10 @@
  
    g_hash_table_destroy (priv->ids);
  
-+  dbus_connection_close (priv->conn);
++  if (priv->conn) {
++    dbus_connection_close (priv->conn);
++  }
 +
    G_OBJECT_CLASS (e_data_book_view_parent_class)->finalize (object);
  }
