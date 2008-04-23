@@ -10,8 +10,6 @@ INCLUDES =						\
 extension_LTLIBRARIES = libebookbackendfile.la
 
 libebookbackendfile_la_SOURCES =			\
-	e-db3-utils.c e-db3-utils.h \
-	e-dbhash.c e-dbhash.h \
 	e-book-backend-file.c				\
 	e-book-backend-file.h				\
 	e-book-backend-file-factory.c

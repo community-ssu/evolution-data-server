@@ -2,9 +2,9 @@ Remove some source which we don't use, to save a little bit of disk space.
 
 Index: libedataserver/Makefile.am
 ===================================================================
---- libedataserver/Makefile.am.orig	2008-02-19 14:00:04.000000000 +0000
-+++ libedataserver/Makefile.am	2008-02-19 14:06:10.000000000 +0000
-@@ -17,17 +17,12 @@
+--- libedataserver/Makefile.am.orig	2008-04-23 17:00:08.000000000 +0100
++++ libedataserver/Makefile.am	2008-04-23 17:01:49.000000000 +0100
+@@ -18,18 +18,13 @@
  
  libedataserver_1_2_la_SOURCES =		\
  	$(BONOBO_SOURCES)		\
@@ -13,6 +13,7 @@ Index: libedataserver/Makefile.am
 -	e-categories.c			\
  	e-data-server-module.c		\
  	e-file-cache.c			\
+ 	e-flag.c			\
 -	e-iconv.c			\
  	e-iterator.c			\
  	e-list.c			\
@@ -22,7 +23,7 @@ Index: libedataserver/Makefile.am
  	e-sexp.c			\
  	e-source-group.c		\
  	e-source-list.c			\
-@@ -36,7 +31,6 @@
+@@ -38,7 +33,6 @@
  	e-uid.c				\
  	e-url.c				\
  	e-data-server-util.c		\
@@ -30,7 +31,7 @@ Index: libedataserver/Makefile.am
  	e-xml-utils.c			\
  	e-xml-hash-utils.c		\
  	libedataserver-private.h	\
-@@ -53,24 +47,17 @@
+@@ -56,25 +50,18 @@
  libedataserverincludedir = $(privincludedir)/libedataserver
  
  libedataserverinclude_HEADERS =		\
@@ -40,6 +41,7 @@ Index: libedataserver/Makefile.am
 -	e-component-listener.h		\
  	e-data-server-module.h		\
  	e-file-cache.h			\
+ 	e-flag.h			\
 -	e-iconv.h			\
  	e-iterator.h			\
  	e-list.h			\

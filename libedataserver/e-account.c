@@ -13,8 +13,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -50,25 +50,25 @@ G_DEFINE_TYPE (EAccount, e_account, G_TYPE_OBJECT);
 lock mail accounts	Relatively difficult -- involves redesign of the XML blobs which describe accounts
 disable adding mail accounts	Simple -- can be done with just a Gconf key and some UI work to make assoc. widgets unavailable
 disable editing mail accounts	Relatively difficult -- involves redesign of the XML blobs which describe accounts
-disable removing mail accounts	
+disable removing mail accounts
 lock default character encoding	Simple -- Gconf key + a little UI work to desensitize widgets, etc
-disable free busy publishing	
+disable free busy publishing
 disable specific mime types (from being viewed)	90% done already (Unknown MIME types still pose a problem)
-lock image loading preference	
-lock junk mail filtering settings	
+lock image loading preference
+lock junk mail filtering settings
 **  junk mail per account
-lock work week	
-lock first day of work week	
-lock working hours	
-disable forward as icalendar	
-lock color options for tasks	
-lock default contact filing format	
+lock work week
+lock first day of work week
+lock working hours
+disable forward as icalendar
+lock color options for tasks
+lock default contact filing format
 * forbid signatures	Simple -- can be done with just a Gconf key and some UI work to make assoc. widgets unavailable
 * lock user to having 1 specific signature	Simple -- can be done with just a Gconf key and some UI work to make assoc. widgets unavailable
 * forbid adding/removing signatures	Simple -- can be done with just a Gconf key and some UI work to make assoc. widgets unavailable
-* lock each account to a certain signature	Relatively difficult -- involved redesign of the XML blobs which describe accounts 
-* set default folders	
-set trash emptying frequency	
+* lock each account to a certain signature	Relatively difficult -- involved redesign of the XML blobs which describe accounts
+* set default folders
+set trash emptying frequency
 * lock displayed mail headers	Simple -- can be done with just a Gconf key and some UI work to make assoc. widgets unavailable
 * lock authentication type (for incoming mail)	Relatively difficult -- involves redesign of the XML blobs which describe accounts
 * lock authentication type (for outgoing mail)	Relatively difficult -- involves redesign of the XML blobs which describe accounts
@@ -108,7 +108,7 @@ e_account_init (EAccount *account)
 	account->transport = g_new0 (EAccountService, 1);
 
 	account->parent_uid = NULL;
-	
+
 	account->source->auto_check = FALSE;
 	account->source->auto_check_time = 10;
 }
@@ -209,10 +209,10 @@ static gboolean
 xml_set_bool (xmlNodePtr node, const char *name, gboolean *val)
 {
 	gboolean bool;
-	char *buf;
+	xmlChar *buf;
 
-	if ((buf = xmlGetProp (node, name))) {
-		bool = (!strcmp (buf, "true") || !strcmp (buf, "yes"));
+	if ((buf = xmlGetProp (node, (xmlChar*)name))) {
+		bool = (!strcmp ((char*)buf, "true") || !strcmp ((char*)buf, "yes"));
 		xmlFree (buf);
 
 		if (bool != *val) {
@@ -228,10 +228,10 @@ static gboolean
 xml_set_int (xmlNodePtr node, const char *name, int *val)
 {
 	int number;
-	char *buf;
+	xmlChar *buf;
 
-	if ((buf = xmlGetProp (node, name))) {
-		number = strtol (buf, NULL, 10);
+	if ((buf = xmlGetProp (node, (xmlChar*)name))) {
+		number = strtol ((char*)buf, NULL, 10);
 		xmlFree (buf);
 
 		if (number != *val) {
@@ -246,10 +246,10 @@ xml_set_int (xmlNodePtr node, const char *name, int *val)
 static gboolean
 xml_set_prop (xmlNodePtr node, const char *name, char **val)
 {
-	char *buf;
+	xmlChar *buf;
 	int res;
 
-	buf = xmlGetProp (node, name);
+	buf = xmlGetProp (node, (xmlChar*)name);
 	if (buf == NULL) {
 		res = (*val != NULL);
 		if (res) {
@@ -257,10 +257,10 @@ xml_set_prop (xmlNodePtr node, const char *name, char **val)
 			*val = NULL;
 		}
 	} else {
-		res = *val == NULL || strcmp(*val, buf) != 0;
+		res = *val == NULL || strcmp(*val, (char*)buf) != 0;
 		if (res) {
 			g_free(*val);
-			*val = g_strdup(buf);
+			*val = g_strdup((char*)buf);
 		}
 		xmlFree(buf);
 	}
@@ -269,21 +269,21 @@ xml_set_prop (xmlNodePtr node, const char *name, char **val)
 }
 
 static EAccountReceiptPolicy
-str_to_receipt_policy (const char *str)
+str_to_receipt_policy (const xmlChar *str)
 {
-	if (!strcmp (str, "ask"))
+	if (!strcmp ((char*)str, "ask"))
 		return E_ACCOUNT_RECEIPT_ASK;
-	if (!strcmp (str, "always"))
+	if (!strcmp ((char*)str, "always"))
 		return E_ACCOUNT_RECEIPT_ALWAYS;
 
 	return E_ACCOUNT_RECEIPT_NEVER;
 }
 
-static char*
+static xmlChar*
 receipt_policy_to_str (EAccountReceiptPolicy val)
 {
-	char *ret = 0;
-	
+	char *ret = NULL;
+
 	switch (val) {
 	case E_ACCOUNT_RECEIPT_NEVER:
 		ret = "never";
@@ -296,16 +296,16 @@ receipt_policy_to_str (EAccountReceiptPolicy val)
 		break;
 	}
 
-	return ret;
+	return (xmlChar*)ret;
 }
 
 static gboolean
 xml_set_receipt_policy (xmlNodePtr node, const char *name, EAccountReceiptPolicy *val)
 {
 	EAccountReceiptPolicy new_val;
-	char *buf;
+	xmlChar *buf;
 
-	if ((buf = xmlGetProp (node, name))) {
+	if ((buf = xmlGetProp (node, (xmlChar*)name))) {
 		new_val = str_to_receipt_policy (buf);
 		xmlFree (buf);
 
@@ -321,7 +321,7 @@ xml_set_receipt_policy (xmlNodePtr node, const char *name, EAccountReceiptPolicy
 static gboolean
 xml_set_content (xmlNodePtr node, char **val)
 {
-	char *buf;
+	xmlChar *buf;
 	int res;
 
 	buf = xmlNodeGetContent(node);
@@ -332,10 +332,10 @@ xml_set_content (xmlNodePtr node, char **val)
 			*val = NULL;
 		}
 	} else {
-		res = *val == NULL || strcmp(*val, buf) != 0;
+		res = *val == NULL || strcmp(*val, (char*)buf) != 0;
 		if (res) {
 			g_free(*val);
-			*val = g_strdup(buf);
+			*val = g_strdup((char*)buf);
 		}
 		xmlFree(buf);
 	}
@@ -349,15 +349,15 @@ xml_set_identity (xmlNodePtr node, EAccountIdentity *id)
 	gboolean changed = FALSE;
 
 	for (node = node->children; node; node = node->next) {
-		if (!strcmp (node->name, "name"))
+		if (!strcmp ((char*)node->name, "name"))
 			changed |= xml_set_content (node, &id->name);
-		else if (!strcmp (node->name, "addr-spec"))
+		else if (!strcmp ((char*)node->name, "addr-spec"))
 			changed |= xml_set_content (node, &id->address);
-		else if (!strcmp (node->name, "reply-to"))
+		else if (!strcmp ((char*)node->name, "reply-to"))
 			changed |= xml_set_content (node, &id->reply_to);
-		else if (!strcmp (node->name, "organization"))
+		else if (!strcmp ((char*)node->name, "organization"))
 			changed |= xml_set_content (node, &id->organization);
-		else if (!strcmp (node->name, "signature")) {
+		else if (!strcmp ((char*)node->name, "signature")) {
 			changed |= xml_set_prop (node, "uid", &id->sig_uid);
 			if (!id->sig_uid) {
 
@@ -366,10 +366,10 @@ xml_set_identity (xmlNodePtr node, EAccountIdentity *id)
 				/* set a fake sig uid so the migrate code can handle this */
 				gboolean autogen = FALSE;
 				int sig_id = 0;
-				
+
 				xml_set_bool (node, "auto", &autogen);
 				xml_set_int (node, "default", &sig_id);
-				
+
 				if (autogen) {
 					id->sig_uid = g_strdup ("::0");
 					changed = TRUE;
@@ -400,7 +400,7 @@ xml_set_service (xmlNodePtr node, EAccountService *service)
 	}
 
 	for (node = node->children; node; node = node->next) {
-		if (!strcmp (node->name, "url")) {
+		if (!strcmp ((char*)node->name, "url")) {
 			changed |= xml_set_content (node, &service->url);
 			break;
 		}
@@ -426,11 +426,11 @@ e_account_set_from_xml (EAccount *account, const char *xml)
 	xmlDocPtr doc;
 	gboolean changed = FALSE;
 
-	if (!(doc = xmlParseDoc ((char *)xml)))
+	if (!(doc = xmlParseDoc ((xmlChar*)xml)))
 		return FALSE;
 
 	node = doc->children;
-	if (strcmp (node->name, "account") != 0) {
+	if (strcmp ((char*)node->name, "account") != 0) {
 		xmlFreeDoc (doc);
 		return FALSE;
 	}
@@ -442,25 +442,25 @@ e_account_set_from_xml (EAccount *account, const char *xml)
 	changed |= xml_set_bool (node, "enabled", &account->enabled);
 
 	for (node = node->children; node; node = node->next) {
-		if (!strcmp (node->name, "identity")) {
+		if (!strcmp ((char*)node->name, "identity")) {
 			changed |= xml_set_identity (node, account->id);
-		} else if (!strcmp (node->name, "source")) {
+		} else if (!strcmp ((char*)node->name, "source")) {
 			changed |= xml_set_service (node, account->source);
-		} else if (!strcmp (node->name, "transport")) {
+		} else if (!strcmp ((char*)node->name, "transport")) {
 			changed |= xml_set_service (node, account->transport);
-		} else if (!strcmp (node->name, "drafts-folder")) {
+		} else if (!strcmp ((char*)node->name, "drafts-folder")) {
 			changed |= xml_set_content (node, &account->drafts_folder_uri);
-		} else if (!strcmp (node->name, "sent-folder")) {
+		} else if (!strcmp ((char*)node->name, "sent-folder")) {
 			changed |= xml_set_content (node, &account->sent_folder_uri);
-		} else if (!strcmp (node->name, "auto-cc")) {
+		} else if (!strcmp ((char*)node->name, "auto-cc")) {
 			changed |= xml_set_bool (node, "always", &account->always_cc);
 			changed |= xml_set_content (node, &account->cc_addrs);
-		} else if (!strcmp (node->name, "auto-bcc")) {
+		} else if (!strcmp ((char*)node->name, "auto-bcc")) {
 			changed |= xml_set_bool (node, "always", &account->always_bcc);
 			changed |= xml_set_content (node, &account->bcc_addrs);
-		} else if (!strcmp (node->name, "receipt-policy")) {
+		} else if (!strcmp ((char*)node->name, "receipt-policy")) {
 			changed |= xml_set_receipt_policy (node, "policy", &account->receipt_policy);
-		} else if (!strcmp (node->name, "pgp")) {
+		} else if (!strcmp ((char*)node->name, "pgp")) {
 			changed |= xml_set_bool (node, "encrypt-to-self", &account->pgp_encrypt_to_self);
 			changed |= xml_set_bool (node, "always-trust", &account->pgp_always_trust);
 			changed |= xml_set_bool (node, "always-sign", &account->pgp_always_sign);
@@ -468,31 +468,31 @@ e_account_set_from_xml (EAccount *account, const char *xml)
 
 			if (node->children) {
 				for (cur = node->children; cur; cur = cur->next) {
-					if (!strcmp (cur->name, "key-id")) {
+					if (!strcmp ((char*)cur->name, "key-id")) {
 						changed |= xml_set_content (cur, &account->pgp_key);
 						break;
 					}
 				}
 			}
-		} else if (!strcmp (node->name, "smime")) {
+		} else if (!strcmp ((char*)node->name, "smime")) {
 			changed |= xml_set_bool (node, "sign-default", &account->smime_sign_default);
 			changed |= xml_set_bool (node, "encrypt-to-self", &account->smime_encrypt_to_self);
 			changed |= xml_set_bool (node, "encrypt-default", &account->smime_encrypt_default);
 
 			if (node->children) {
 				for (cur = node->children; cur; cur = cur->next) {
-					if (!strcmp (cur->name, "sign-key-id")) {
+					if (!strcmp ((char*)cur->name, "sign-key-id")) {
 						changed |= xml_set_content (cur, &account->smime_sign_key);
-					} else if (!strcmp (cur->name, "encrypt-key-id")) {
+					} else if (!strcmp ((char*)cur->name, "encrypt-key-id")) {
 						changed |= xml_set_content (cur, &account->smime_encrypt_key);
 						break;
 					}
 				}
 			}
-		} else if (!strcmp (node->name, "proxy")) {
+		} else if (!strcmp ((char*)node->name, "proxy")) {
 			if (node->children) {
 				for (cur = node->children; cur; cur = cur->next) {
-					if (!strcmp (cur->name, "parent-uid")) {
+					if (!strcmp ((char*)cur->name, "parent-uid")) {
 						changed |= xml_set_content (cur, &account->parent_uid);
 						break;
 					}
@@ -521,9 +521,9 @@ e_account_import (EAccount *dest, EAccount *src)
 {
 	g_free (dest->name);
 	dest->name = g_strdup (src->name);
-	
+
 	dest->enabled = src->enabled;
-	
+
 	g_free (dest->id->name);
 	dest->id->name = g_strdup (src->id->name);
 	g_free (dest->id->address);
@@ -533,41 +533,41 @@ e_account_import (EAccount *dest, EAccount *src)
 	g_free (dest->id->organization);
 	dest->id->organization = g_strdup (src->id->organization);
 	dest->id->sig_uid = g_strdup (src->id->sig_uid);
-	
+
 	g_free (dest->source->url);
 	dest->source->url = g_strdup (src->source->url);
 	dest->source->keep_on_server = src->source->keep_on_server;
 	dest->source->auto_check = src->source->auto_check;
 	dest->source->auto_check_time = src->source->auto_check_time;
 	dest->source->save_passwd = src->source->save_passwd;
-	
+
 	g_free (dest->transport->url);
 	dest->transport->url = g_strdup (src->transport->url);
 	dest->transport->save_passwd = src->transport->save_passwd;
-	
+
 	g_free (dest->drafts_folder_uri);
 	dest->drafts_folder_uri = g_strdup (src->drafts_folder_uri);
-	
+
 	g_free (dest->sent_folder_uri);
 	dest->sent_folder_uri = g_strdup (src->sent_folder_uri);
-	
+
 	dest->always_cc = src->always_cc;
 	g_free (dest->cc_addrs);
 	dest->cc_addrs = g_strdup (src->cc_addrs);
-	
+
 	dest->always_bcc = src->always_bcc;
 	g_free (dest->bcc_addrs);
 	dest->bcc_addrs = g_strdup (src->bcc_addrs);
-	
+
 	dest->receipt_policy = src->receipt_policy;
-	
+
 	g_free (dest->pgp_key);
 	dest->pgp_key = g_strdup (src->pgp_key);
 	dest->pgp_encrypt_to_self = src->pgp_encrypt_to_self;
 	dest->pgp_always_sign = src->pgp_always_sign;
 	dest->pgp_no_imip_sign = src->pgp_no_imip_sign;
 	dest->pgp_always_trust = src->pgp_always_trust;
-	
+
 	dest->smime_sign_default = src->smime_sign_default;
 	g_free (dest->smime_sign_key);
 	dest->smime_sign_key = g_strdup (src->smime_sign_key);
@@ -576,7 +576,7 @@ e_account_import (EAccount *dest, EAccount *src)
 	dest->smime_encrypt_to_self = src->smime_encrypt_to_self;
 	g_free (dest->smime_encrypt_key);
 	dest->smime_encrypt_key = g_strdup (src->smime_encrypt_key);
-	
+
 	g_signal_emit(dest, signals[CHANGED], 0, -1);
 }
 
@@ -597,79 +597,79 @@ e_account_to_xml (EAccount *account)
 	xmlDocPtr doc;
 	int n;
 
-	doc = xmlNewDoc ("1.0");
+	doc = xmlNewDoc ((xmlChar*)"1.0");
 
-	root = xmlNewDocNode (doc, NULL, "account", NULL);
+	root = xmlNewDocNode (doc, NULL, (xmlChar*)"account", NULL);
 	xmlDocSetRootElement (doc, root);
 
-	xmlSetProp (root, "name", account->name);
-	xmlSetProp (root, "uid", account->uid);
-	xmlSetProp (root, "enabled", account->enabled ? "true" : "false");
+	xmlSetProp (root, (xmlChar*)"name", (xmlChar*)account->name);
+	xmlSetProp (root, (xmlChar*)"uid", (xmlChar*)account->uid);
+	xmlSetProp (root, (xmlChar*)"enabled", (xmlChar*)(account->enabled ? "true" : "false"));
 
-	id = xmlNewChild (root, NULL, "identity", NULL);
+	id = xmlNewChild (root, NULL, (xmlChar*)"identity", NULL);
 	if (account->id->name)
-		xmlNewTextChild (id, NULL, "name", account->id->name);
+		xmlNewTextChild (id, NULL, (xmlChar*)"name", (xmlChar*)account->id->name);
 	if (account->id->address)
-		xmlNewTextChild (id, NULL, "addr-spec", account->id->address);
+		xmlNewTextChild (id, NULL, (xmlChar*)"addr-spec", (xmlChar*)account->id->address);
 	if (account->id->reply_to)
-		xmlNewTextChild (id, NULL, "reply-to", account->id->reply_to);
+		xmlNewTextChild (id, NULL, (xmlChar*)"reply-to", (xmlChar*)account->id->reply_to);
 	if (account->id->organization)
-		xmlNewTextChild (id, NULL, "organization", account->id->organization);
+		xmlNewTextChild (id, NULL, (xmlChar*)"organization", (xmlChar*)account->id->organization);
 
-	node = xmlNewChild (id, NULL, "signature",NULL);
-	xmlSetProp (node, "uid", account->id->sig_uid);
+	node = xmlNewChild (id, NULL, (xmlChar*)"signature",NULL);
+	xmlSetProp (node, (xmlChar*)"uid", (xmlChar*)account->id->sig_uid);
 
-	src = xmlNewChild (root, NULL, "source", NULL);
-	xmlSetProp (src, "save-passwd", account->source->save_passwd ? "true" : "false");
-	xmlSetProp (src, "keep-on-server", account->source->keep_on_server ? "true" : "false");
-	xmlSetProp (src, "auto-check", account->source->auto_check ? "true" : "false");
+	src = xmlNewChild (root, NULL, (xmlChar*)"source", NULL);
+	xmlSetProp (src, (xmlChar*)"save-passwd", (xmlChar*)(account->source->save_passwd ? "true" : "false"));
+	xmlSetProp (src, (xmlChar*)"keep-on-server", (xmlChar*)(account->source->keep_on_server ? "true" : "false"));
+	xmlSetProp (src, (xmlChar*)"auto-check", (xmlChar*)(account->source->auto_check ? "true" : "false"));
 	sprintf (buf, "%d", account->source->auto_check_time);
-	xmlSetProp (src, "auto-check-timeout", buf);
+	xmlSetProp (src, (xmlChar*)"auto-check-timeout", (xmlChar*)buf);
 	if (account->source->url)
-		xmlNewTextChild (src, NULL, "url", account->source->url);
+		xmlNewTextChild (src, NULL, (xmlChar*)"url", (xmlChar*)account->source->url);
 
-	xport = xmlNewChild (root, NULL, "transport", NULL);
-	xmlSetProp (xport, "save-passwd", account->transport->save_passwd ? "true" : "false");
+	xport = xmlNewChild (root, NULL, (xmlChar*)"transport", NULL);
+	xmlSetProp (xport, (xmlChar*)"save-passwd", (xmlChar*)(account->transport->save_passwd ? "true" : "false"));
 	if (account->transport->url)
-		xmlNewTextChild (xport, NULL, "url", account->transport->url);
+		xmlNewTextChild (xport, NULL, (xmlChar*)"url", (xmlChar*)account->transport->url);
 
-	xmlNewTextChild (root, NULL, "drafts-folder", account->drafts_folder_uri);
-	xmlNewTextChild (root, NULL, "sent-folder", account->sent_folder_uri);
+	xmlNewTextChild (root, NULL, (xmlChar*)"drafts-folder", (xmlChar*)account->drafts_folder_uri);
+	xmlNewTextChild (root, NULL, (xmlChar*)"sent-folder", (xmlChar*)account->sent_folder_uri);
 
-	node = xmlNewChild (root, NULL, "auto-cc", NULL);
-	xmlSetProp (node, "always", account->always_cc ? "true" : "false");
+	node = xmlNewChild (root, NULL, (xmlChar*)"auto-cc", NULL);
+	xmlSetProp (node, (xmlChar*)"always", (xmlChar*)(account->always_cc ? "true" : "false"));
 	if (account->cc_addrs)
-		xmlNewTextChild (node, NULL, "recipients", account->cc_addrs);
+		xmlNewTextChild (node, NULL, (xmlChar*)"recipients", (xmlChar*)account->cc_addrs);
 
-	node = xmlNewChild (root, NULL, "auto-bcc", NULL);
-	xmlSetProp (node, "always", account->always_bcc ? "true" : "false");
+	node = xmlNewChild (root, NULL, (xmlChar*)"auto-bcc", NULL);
+	xmlSetProp (node, (xmlChar*)"always", (xmlChar*)(account->always_bcc ? "true" : "false"));
 	if (account->bcc_addrs)
-		xmlNewTextChild (node, NULL, "recipients", account->bcc_addrs);
+		xmlNewTextChild (node, NULL, (xmlChar*)"recipients", (xmlChar*)account->bcc_addrs);
 
-	node = xmlNewChild (root, NULL, "receipt-policy", NULL);
-	xmlSetProp (node, "policy", receipt_policy_to_str (account->receipt_policy));
-	
-	node = xmlNewChild (root, NULL, "pgp", NULL);
-	xmlSetProp (node, "encrypt-to-self", account->pgp_encrypt_to_self ? "true" : "false");
-	xmlSetProp (node, "always-trust", account->pgp_always_trust ? "true" : "false");
-	xmlSetProp (node, "always-sign", account->pgp_always_sign ? "true" : "false");
-	xmlSetProp (node, "no-imip-sign", account->pgp_no_imip_sign ? "true" : "false");
+	node = xmlNewChild (root, NULL, (xmlChar*)"receipt-policy", NULL);
+	xmlSetProp (node, (xmlChar*)"policy", receipt_policy_to_str (account->receipt_policy));
+
+	node = xmlNewChild (root, NULL, (xmlChar*)"pgp", NULL);
+	xmlSetProp (node, (xmlChar*)"encrypt-to-self", (xmlChar*)(account->pgp_encrypt_to_self ? "true" : "false"));
+	xmlSetProp (node, (xmlChar*)"always-trust", (xmlChar*)(account->pgp_always_trust ? "true" : "false"));
+	xmlSetProp (node, (xmlChar*)"always-sign", (xmlChar*)(account->pgp_always_sign ? "true" : "false"));
+	xmlSetProp (node, (xmlChar*)"no-imip-sign", (xmlChar*)(account->pgp_no_imip_sign ? "true" : "false"));
 	if (account->pgp_key)
-		xmlNewTextChild (node, NULL, "key-id", account->pgp_key);
+		xmlNewTextChild (node, NULL, (xmlChar*)"key-id", (xmlChar*)account->pgp_key);
 
-	node = xmlNewChild (root, NULL, "smime", NULL);
-	xmlSetProp (node, "sign-default", account->smime_sign_default ? "true" : "false");
-	xmlSetProp (node, "encrypt-default", account->smime_encrypt_default ? "true" : "false");
-	xmlSetProp (node, "encrypt-to-self", account->smime_encrypt_to_self ? "true" : "false");
+	node = xmlNewChild (root, NULL, (xmlChar*)"smime", NULL);
+	xmlSetProp (node, (xmlChar*)"sign-default", (xmlChar*)(account->smime_sign_default ? "true" : "false"));
+	xmlSetProp (node, (xmlChar*)"encrypt-default", (xmlChar*)(account->smime_encrypt_default ? "true" : "false"));
+	xmlSetProp (node, (xmlChar*)"encrypt-to-self", (xmlChar*)(account->smime_encrypt_to_self ? "true" : "false"));
 	if (account->smime_sign_key)
-		xmlNewTextChild (node, NULL, "sign-key-id", account->smime_sign_key);
+		xmlNewTextChild (node, NULL, (xmlChar*)"sign-key-id", (xmlChar*)account->smime_sign_key);
 	if (account->smime_encrypt_key)
-		xmlNewTextChild (node, NULL, "encrypt-key-id", account->smime_encrypt_key);
+		xmlNewTextChild (node, NULL, (xmlChar*)"encrypt-key-id", (xmlChar*)account->smime_encrypt_key);
 
 	if (account->parent_uid) {
-		node = xmlNewChild (root, NULL, "proxy", NULL);
-		xmlNewTextChild (node, NULL, "parent-uid", account->parent_uid);
-	}	
+		node = xmlNewChild (root, NULL, (xmlChar*)"proxy", NULL);
+		xmlNewTextChild (node, NULL, (xmlChar*)"parent-uid", (xmlChar*)account->parent_uid);
+	}
 
 	xmlDocDumpMemory (doc, &xmlbuf, &n);
 	xmlFreeDoc (doc);
@@ -699,11 +699,11 @@ e_account_uid_from_xml (const char *xml)
 	xmlDocPtr doc;
 	char *uid = NULL;
 
-	if (!(doc = xmlParseDoc ((char *)xml)))
+	if (!(doc = xmlParseDoc ((xmlChar *)xml)))
 		return NULL;
 
 	node = doc->children;
-	if (strcmp (node->name, "account") != 0) {
+	if (strcmp ((char*)node->name, "account") != 0) {
 		xmlFreeDoc (doc);
 		return NULL;
 	}
@@ -786,7 +786,7 @@ static struct _account_info {
 	{ /* E_ACCOUNT_BCC_ADDRS */ 0, TYPE_STRING, G_STRUCT_OFFSET(EAccount, bcc_addrs) },
 
 	{ /* E_ACCOUNT_RECEIPT_POLICY */ 0, TYPE_INT, G_STRUCT_OFFSET(EAccount, receipt_policy) },
-	
+
 	{ /* E_ACCOUNT_PGP_KEY */ 0, TYPE_STRING, G_STRUCT_OFFSET(EAccount, pgp_key) },
 	{ /* E_ACCOUNT_PGP_ENCRYPT_TO_SELF */ 0, TYPE_BOOL, G_STRUCT_OFFSET(EAccount, pgp_encrypt_to_self) },
 	{ /* E_ACCOUNT_PGP_ALWAYS_SIGN */ 0, TYPE_BOOL, G_STRUCT_OFFSET(EAccount, pgp_always_sign) },
@@ -829,10 +829,10 @@ ea_setting_notify(GConfClient *gconf, guint cnxn_id, GConfEntry *entry, void *cr
 	struct _system_info *info;
 
 	g_return_if_fail (gconf_entry_get_key (entry) != NULL);
-	
+
 	if (!(value = gconf_entry_get_value (entry)))
 		return;
-	
+
 	tkey = strrchr(entry->key, '/');
 	g_return_if_fail (tkey != NULL);
 
@@ -887,7 +887,7 @@ ea_setting_setup(void)
 	((account_info[type].type & TYPE_STRUCT)? \
 	(((char **)(((char *)ea)+account_info[type].offset))[0] + account_info[type].struct_offset): \
 	(((char *)ea)+account_info[type].offset))
-	
+
 const char *e_account_get_string(EAccount *ea, e_account_item_t type)
 {
 	return *((const char **)addr(ea, type));

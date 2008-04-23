@@ -1,0 +1,37 @@
+Index: n-eds.trunk/addressbook/backends/file/Makefile.am
+===================================================================
+--- n-eds.trunk.orig/addressbook/backends/file/Makefile.am	2008-04-23 16:56:22.000000000 +0100
++++ n-eds.trunk/addressbook/backends/file/Makefile.am	2008-04-23 16:58:20.000000000 +0100
+@@ -12,7 +12,9 @@
+ libebookbackendfile_la_SOURCES =			\
+ 	e-book-backend-file.c				\
+ 	e-book-backend-file.h				\
+-	e-book-backend-file-factory.c
++	e-book-backend-file-factory.c			\
++	$(top_srcdir)/libedataserver/e-db3-utils.c	\
++	$(top_srcdir)/libedataserver/e-dbhash.c
+ 
+ libebookbackendfile_la_LIBADD =						\
+ 	$(top_builddir)/addressbook/libebook/libebook-$(API_VERSION).la		\
+Index: n-eds.trunk/libedataserver/Makefile.am
+===================================================================
+--- n-eds.trunk.orig/libedataserver/Makefile.am	2008-04-23 16:55:46.000000000 +0100
++++ n-eds.trunk/libedataserver/Makefile.am	2008-04-23 16:55:59.000000000 +0100
+@@ -22,8 +22,6 @@
+ 	e-account.c			\
+ 	e-categories.c			\
+ 	e-data-server-module.c		\
+-	e-dbhash.c			\
+-	e-db3-utils.c			\
+ 	e-file-cache.c			\
+ 	e-flag.c			\
+ 	e-iconv.c			\
+@@ -63,8 +61,6 @@
+ 	e-categories.h			\
+ 	e-component-listener.h		\
+ 	e-data-server-module.h		\
+-	e-db3-utils.h			\
+-	e-dbhash.h			\
+ 	e-file-cache.h			\
+ 	e-flag.h			\
+ 	e-iconv.h			\

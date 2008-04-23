@@ -43,7 +43,7 @@ struct _EDataBookViewPrivate {
   EDataBook *book;
   EBookBackend *backend;
 
-  char* card_query; /* TODO: unused */
+  char* card_query;
   EBookBackendSExp *card_sexp;
   int max_results;
 

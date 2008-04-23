@@ -5,121 +5,107 @@ should help congestion.
 === modified file 'addressbook/libebook-dbus/e-book.c'
 Index: addressbook/libebook-dbus/e-book.c
 ===================================================================
---- addressbook/libebook-dbus/e-book.c.orig	2008-02-19 11:07:02.000000000 +0000
-+++ addressbook/libebook-dbus/e-book.c	2008-02-19 11:07:16.000000000 +0000
-@@ -1680,9 +1680,10 @@
+--- addressbook/libebook-dbus/e-book.c.orig	2008-04-23 14:58:50.000000000 +0100
++++ addressbook/libebook-dbus/e-book.c	2008-04-23 15:37:53.000000000 +0100
+@@ -1712,8 +1712,9 @@
  e_book_get_book_view (EBook *book, EBookQuery *query, GList *requested_fields, int max_results, EBookView **book_view, GError **error)
  {
    GError *err = NULL;
 +  DBusGConnection *view_conn;
    DBusGProxy *view_proxy;
-   char **fields;
 -  char *sexp, *view_path;
 +  char *sexp, *address;
+   gboolean ret = TRUE;
  
    e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
-   e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
-@@ -1691,41 +1692,81 @@
+@@ -1721,14 +1722,20 @@
  
    sexp = e_book_query_to_string (query);
    
--  if (!org_gnome_evolution_dataserver_addressbook_Book_get_book_view (book->priv->proxy, sexp, (const char **) fields, max_results, &view_path, &err)) {
-+  if (!org_gnome_evolution_dataserver_addressbook_Book_get_book_view (book->priv->proxy, sexp, (const char **) fields, max_results, &address, &err)) {
+-  if (!org_gnome_evolution_dataserver_addressbook_Book_get_book_view (book->priv->proxy, sexp, max_results, &view_path, &err)) {
++  if (!org_gnome_evolution_dataserver_addressbook_Book_get_book_view (book->priv->proxy, sexp, max_results, &address, &err)) {
      *book_view = NULL;
-+    g_free (fields);
      g_free (sexp);
      return unwrap_gerror (err, error);
    }
 -  view_proxy = dbus_g_proxy_new_for_name_owner (connection,
 -                                                E_DATA_BOOK_FACTORY_SERVICE_NAME, view_path,
 -                                                "org.gnome.evolution.dataserver.addressbook.BookView", error);
--  /* TODO: handle failures properly here too */
-+  g_free (fields);
-+  g_free (sexp);
 +
 +  view_conn = dbus_g_connection_open (address, &err);
 +  g_free (address);
 +  if (!view_conn) {
-+    return unwrap_gerror (err, error);
++   return unwrap_gerror (err, error);
 +  }
 +
 +  view_proxy = dbus_g_proxy_new_for_peer (view_conn, "/", "org.gnome.evolution.dataserver.addressbook.BookView");
 +  dbus_g_connection_unref (view_conn);
-   if (!view_proxy) {
-     *book_view = NULL;
-+    g_set_error (error, E_BOOK_ERROR,
-+                 E_BOOK_ERROR_CORBA_EXCEPTION,
-+                 "Cannot open connection to book view");
-+    return FALSE;
-   } else {
+ 
+   if (view_proxy) {
      *book_view = e_book_view_new (book, view_proxy);
-+    return TRUE;
+@@ -1738,34 +1745,47 @@
+                  "Cannot get connection to view");
+     ret = FALSE;
    }
+-  
 -  g_free (view_path);
--  g_free (sexp);
--  g_free (fields);
--  return TRUE;
++
+   g_free (sexp);
+ 
+   return ret;
  }
  
  static void
 -get_book_view_reply (DBusGProxy *proxy, char *view_path, GError *error, gpointer user_data)
 +get_book_view_reply (DBusGProxy *proxy, char *address, GError *error, gpointer user_data)
  {
-   struct async_data *data = user_data;
-+  GError *err = NULL;
-   EBookView *view;
+   AsyncData *data = user_data;
+   GError *err = NULL;
+   EBookView *view = NULL;
    EBookBookViewCallback cb = data->callback;
 +  DBusGConnection *view_conn;
    DBusGProxy *view_proxy;
+   EBookStatus status;
  
--  view_proxy = dbus_g_proxy_new_for_name_owner (connection, E_DATA_BOOK_FACTORY_SERVICE_NAME, view_path,
--                                           "org.gnome.evolution.dataserver.addressbook.BookView", NULL);
--  /* TODO: handle errors */
--  view = e_book_view_new (data->book, view_proxy);
-+  if (error) {
-+    if (cb)
-+      cb (data->book, get_status_from_error (error), NULL, data->closure);
-+    g_error_free (error);
-+    g_free (data);
-+    return;
-+  }
-+  
-+  
-+  view_conn = dbus_g_connection_open (address, &err);
-+  g_free (address);
-+  if (!view_conn) {
-+    g_warning (G_STRLOC ": cannot get connection: %s", err->message);
-+    g_error_free (err);
-+    if (cb)
-+      cb (data->book, E_BOOK_ERROR_CORBA_EXCEPTION, NULL, data->closure);
-+    goto done;
-+  }
- 
-+  view_proxy = dbus_g_proxy_new_for_peer (view_conn, "/", "org.gnome.evolution.dataserver.addressbook.BookView");
-+  if (!view_proxy) {
-+    g_warning (G_STRLOC ": cannot create proxy");
-+    if (cb)
-+      cb (data->book, E_BOOK_ERROR_CORBA_EXCEPTION, NULL, data->closure);
-+    goto done;
-+  }
+-  if (view_path) {
+-    view_proxy = dbus_g_proxy_new_for_name_owner (connection, E_DATA_BOOK_FACTORY_SERVICE_NAME, view_path,
+-                                                  "org.gnome.evolution.dataserver.addressbook.BookView", &err);
+-    if (view_proxy) {
+-      view = e_book_view_new (data->book, view_proxy);
+-      status = E_BOOK_ERROR_OK;
+-    } else {
+-      g_warning (G_STRLOC ": cannot get connection to view: %s", err->message);
++  if (address) {
++    view_conn = dbus_g_connection_open (address, &err);
++    g_free (address);
 +
-+  view = e_book_view_new (data->book, view_proxy);
-+  
-   if (cb)
--    cb (data->book, get_status_from_error (error), view, data->closure);
-+    cb (data->book, E_BOOK_ERROR_OK, view, data->closure);
-+  
-+ done:
-+  /* We don't care about the connection any more, the proxy will keep it open */
-+  if (view_conn)
-+    dbus_g_connection_unref (view_conn);
-   g_free (data);
- }
- 
++    if (!view_conn)
++    {
++      g_warning (G_STRLOC ": cannot get connection: %s", err->message);
+       g_error_free (err);
+       status = E_BOOK_ERROR_CORBA_EXCEPTION;
++    } else {
++
++      view_proxy = dbus_g_proxy_new_for_peer (view_conn, "/", "org.gnome.evolution.dataserver.addressbook.BookView");
++      dbus_g_connection_unref (view_conn);
++
++      if (view_proxy) {
++        view = e_book_view_new (data->book, view_proxy);
++        status = E_BOOK_ERROR_OK;
++      } else {
++        g_warning (G_STRLOC ": cannot get connection to view: %s", err->message);
++        g_error_free (err);
++        status = E_BOOK_ERROR_CORBA_EXCEPTION;
++      }
+     }
++
+   } else {
+     status = get_status_from_error (error);
+   }
 Index: addressbook/libedata-book-dbus/e-data-book-view.c
 ===================================================================
---- addressbook/libedata-book-dbus/e-data-book-view.c.orig	2008-02-19 11:04:20.000000000 +0000
-+++ addressbook/libedata-book-dbus/e-data-book-view.c	2008-02-19 11:07:16.000000000 +0000
+--- addressbook/libedata-book-dbus/e-data-book-view.c.orig	2008-04-22 16:13:17.000000000 +0100
++++ addressbook/libedata-book-dbus/e-data-book-view.c	2008-04-23 15:25:16.000000000 +0100
 @@ -21,11 +21,10 @@
  #include <config.h>
  #include <string.h>
@@ -139,7 +125,7 @@ Index: addressbook/libedata-book-dbus/e-data-book-view.c
    EBookBackend *backend;
 +  DBusConnection *conn;
  
-   char* card_query; /* TODO: unused */
+   char* card_query;
    EBookBackendSExp *card_sexp;
 @@ -152,10 +152,32 @@
    g_object_unref (view);
@@ -221,32 +207,24 @@ Index: addressbook/libedata-book-dbus/e-data-book-view.c
  
 Index: addressbook/libedata-book-dbus/e-data-book.c
 ===================================================================
---- addressbook/libedata-book-dbus/e-data-book.c.orig	2008-02-19 11:04:20.000000000 +0000
-+++ addressbook/libedata-book-dbus/e-data-book.c	2008-02-19 11:07:16.000000000 +0000
-@@ -435,8 +435,14 @@
- static char*
- construct_bookview_path (void)
+--- addressbook/libedata-book-dbus/e-data-book.c.orig	2008-04-22 16:16:29.000000000 +0100
++++ addressbook/libedata-book-dbus/e-data-book.c	2008-04-23 15:43:25.000000000 +0100
+@@ -577,7 +577,7 @@
  {
--  static guint counter = 1; /* TODO: add mutex for possible future threading */
--  return g_strdup_printf ("/org/gnome/evolution/dataserver/addressbook/BookView/%d/%d", getpid(), counter++);
-+#ifdef __linux__
-+  /* TODO: take randomisation code from gvfs? */
-+  static guint counter = 1;
-+  return g_strdup_printf ("unix:abstract=/e-addressbook-view-%d-%d", getpid(), counter++);
-+#else
-+# error construct_bookview_path unimplemented on non-Linux systems
-+  /* TODO: check for abstract sockets at configure time */
-+#endif
- }
+   static volatile guint counter = 1;
  
- static gboolean
+-  return g_strdup_printf ("/org/gnome/evolution/dataserver/addressbook/BookView/%d/%d",
++  return g_strdup_printf ("unix:abstract=/e-addressbook-view-%d-%d",
+                           getpid (),
+                           g_atomic_int_exchange_and_add ((int*)&counter, 1));
+ }
 Index: addressbook/libedata-book-dbus/e-data-book.xml
 ===================================================================
---- addressbook/libedata-book-dbus/e-data-book.xml.orig	2008-02-19 11:04:20.000000000 +0000
-+++ addressbook/libedata-book-dbus/e-data-book.xml	2008-02-19 11:07:16.000000000 +0000
-@@ -101,7 +101,7 @@
+--- addressbook/libedata-book-dbus/e-data-book.xml.orig	2008-04-22 15:43:42.000000000 +0100
++++ addressbook/libedata-book-dbus/e-data-book.xml	2008-04-23 15:25:16.000000000 +0100
+@@ -105,7 +105,7 @@
        <arg name="query" type="s" direction="in"/>
-       <arg name="fields" type="as" direction="in"/>
+       <!-- <arg name="fields" type="as" direction="in"/> -->
        <arg name="max_results" type="u" direction="in"/>
 -      <arg name="view" type="o" direction="out"/>
 +      <arg name="address" type="s" direction="out"/>

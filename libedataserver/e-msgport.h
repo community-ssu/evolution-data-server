@@ -17,7 +17,7 @@ typedef struct _EDList {
 	struct _EDListNode *tailpred;
 } EDList;
 
-#define E_DLIST_INITIALISER(l) { (EDListNode *)&l.tail, 0, (EDListNode *)&l.head }
+#define E_DLIST_INITIALISER(l) { (EDListNode *)&l.tail, NULL, (EDListNode *)&l.head }
 
 void e_dlist_init(EDList *v);
 EDListNode *e_dlist_addhead(EDList *l, EDListNode *n);
@@ -95,6 +95,7 @@ void e_thread_put(EThread *e, EMsg *msg);
 int e_thread_busy(EThread *e);
 #endif
 
+#ifndef EDS_DISABLE_DEPRECATED
 /* sigh, another mutex interface, this one allows different mutex types, portably */
 typedef struct _EMutex EMutex;
 
@@ -110,5 +111,6 @@ int e_mutex_unlock(EMutex *m);
 void e_mutex_assert_locked(EMutex *m);
 /* this uses pthread cond's */
 int e_mutex_cond_wait(void *cond, EMutex *m);
+#endif
 
 #endif

@@ -15,8 +15,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  *
  */
 
@@ -72,10 +72,10 @@ e_pipe (int *fds)
 #ifndef G_OS_WIN32
 	if (pipe (fds) != -1)
 		return 0;
-	
+
 	fds[0] = -1;
 	fds[1] = -1;
-	
+
 	return -1;
 #else
 	SOCKET temp, socket1 = -1, socket2 = -1;
@@ -86,11 +86,11 @@ e_pipe (int *fds)
 	struct timeval tv;
 
 	temp = socket (AF_INET, SOCK_STREAM, 0);
-	
+
 	if (temp == INVALID_SOCKET) {
 		goto out0;
 	}
-  	
+
 	arg = 1;
 	if (ioctlsocket (temp, FIONBIO, &arg) == SOCKET_ERROR) {
 		goto out0;
@@ -115,13 +115,13 @@ e_pipe (int *fds)
 	}
 
 	socket1 = socket (AF_INET, SOCK_STREAM, 0);
-	
+
 	if (socket1 == INVALID_SOCKET) {
 		goto out0;
 	}
 
 	arg = 1;
-	if (ioctlsocket (socket1, FIONBIO, &arg) == SOCKET_ERROR) { 
+	if (ioctlsocket (socket1, FIONBIO, &arg) == SOCKET_ERROR) {
 		goto out1;
 	}
 
@@ -187,10 +187,10 @@ out1:
 out0:
 	closesocket (temp);
 	errno = EMFILE;		/* FIXME: use the real syscall errno? */
-	
+
 	fds[0] = -1;
 	fds[1] = -1;
-	
+
 	return -1;
 
 #endif
@@ -199,7 +199,7 @@ out0:
 void e_dlist_init(EDList *v)
 {
         v->head = (EDListNode *)&v->tail;
-        v->tail = 0;
+        v->tail = NULL;
         v->tailpred = (EDListNode *)&v->head;
 }
 
@@ -289,14 +289,14 @@ struct _EMCache {
 
 /**
  * em_cache_new:
- * @timeout: 
- * @nodesize: 
- * @nodefree: 
- * 
+ * @timeout:
+ * @nodesize:
+ * @nodefree:
+ *
  * Setup a new timeout cache.  @nodesize is the size of nodes in the
  * cache, and @nodefree will be called to free YOUR content.
- * 
- * Return value: 
+ *
+ * Return value:
  **/
 EMCache *
 em_cache_new(time_t timeout, size_t nodesize, GFreeFunc nodefree)
@@ -316,8 +316,8 @@ em_cache_new(time_t timeout, size_t nodesize, GFreeFunc nodefree)
 
 /**
  * em_cache_destroy:
- * @emc: 
- * 
+ * @emc:
+ *
  * destroy the cache, duh.
  **/
 void
@@ -330,13 +330,13 @@ em_cache_destroy(EMCache *emc)
 
 /**
  * em_cache_lookup:
- * @emc: 
- * @key: 
- * 
+ * @emc:
+ * @key:
+ *
  * Lookup a cache node.  once you're finished with it, you need to
  * unref it.
- * 
- * Return value: 
+ *
+ * Return value:
  **/
 EMCacheNode *
 em_cache_lookup(EMCache *emc, const char *key)
@@ -348,7 +348,7 @@ em_cache_lookup(EMCache *emc, const char *key)
 	if (n) {
 		e_dlist_remove((EDListNode *)n);
 		e_dlist_addhead(&emc->lru_list, (EDListNode *)n);
-		n->stamp = time(0);
+		n->stamp = time(NULL);
 		n->ref_count++;
 	}
 	g_mutex_unlock(emc->lock);
@@ -360,13 +360,13 @@ em_cache_lookup(EMCache *emc, const char *key)
 
 /**
  * em_cache_node_new:
- * @emc: 
- * @key: 
- * 
+ * @emc:
+ * @key:
+ *
  * Create a new key'd cache node.  The node will not be added to the
  * cache until you insert it.
- * 
- * Return value: 
+ *
+ * Return value:
  **/
 EMCacheNode *
 em_cache_node_new(EMCache *emc, const char *key)
@@ -382,9 +382,9 @@ em_cache_node_new(EMCache *emc, const char *key)
 
 /**
  * em_cache_node_unref:
- * @emc: 
- * @n: 
- * 
+ * @emc:
+ * @n:
+ *
  * unref a cache node, you can only unref nodes which have been looked
  * up.
  **/
@@ -399,9 +399,9 @@ em_cache_node_unref(EMCache *emc, EMCacheNode *n)
 
 /**
  * em_cache_add:
- * @emc: 
- * @n: 
- * 
+ * @emc:
+ * @n:
+ *
  * Add a cache node to the cache, once added the memory is owned by
  * the cache.  If there are conflicts and the old node is still in
  * use, then the new node is not added, otherwise it is added and any
@@ -429,7 +429,7 @@ em_cache_add(EMCache *emc, EMCacheNode *n)
 	} else {
 		time_t now;
 	insert:
-		now = time(0);
+		now = time(NULL);
 		g_hash_table_insert(emc->key_table, n->key, n);
 		e_dlist_addhead(&emc->lru_list, (EDListNode *)n);
 		n->stamp = now;
@@ -462,8 +462,8 @@ em_cache_add(EMCache *emc, EMCacheNode *n)
 
 /**
  * em_cache_clear:
- * @emc: 
- * 
+ * @emc:
+ *
  * clear the cache.  just for api completeness.
  **/
 void
@@ -487,7 +487,6 @@ em_cache_clear(EMCache *emc)
 
 struct _EMsgPort {
 	GAsyncQueue *queue;
-	EMsg *cache;
 	gint pipe[2];  /* on Win32, actually a pair of SOCKETs */
 #ifdef HAVE_NSS
 	PRFileDesc *prpipe[2];
@@ -511,10 +510,10 @@ e_prpipe (PRFileDesc **fds)
 	if (PR_CreatePipe (&fds[0], &fds[1]) != PR_FAILURE)
 		return 0;
 #endif
-	
+
 	fds[0] = NULL;
 	fds[1] = NULL;
-	
+
 	return -1;
 }
 #endif
@@ -562,7 +561,6 @@ e_msgport_new (void)
 
 	msgport = g_slice_new (EMsgPort);
 	msgport->queue = g_async_queue_new ();
-	msgport->cache = NULL;
 	msgport->pipe[0] = -1;
 	msgport->pipe[1] = -1;
 #ifdef HAVE_NSS
@@ -683,21 +681,9 @@ e_msgport_wait (EMsgPort *msgport)
 
 	g_async_queue_lock (msgport->queue);
 
-	/* check the cache first */
-	if (msgport->cache != NULL) {
-		msg = msgport->cache;
-		/* don't clear the cache */
-		g_async_queue_unlock (msgport->queue);
-		return msg;
-	}
-
 	msg = g_async_queue_pop_unlocked (msgport->queue);
 
 	g_assert (msg != NULL);
-
-	/* The message is not actually "removed" from the EMsgPort until
- 	 * e_msgport_get() is called.  So we cache the popped message. */
-	msgport->cache = msg;
 
 	if (msg->flags & MSG_FLAG_SYNC_WITH_PIPE)
 		msgport_sync_with_pipe (msgport->pipe[0]);
@@ -719,14 +705,6 @@ e_msgport_get (EMsgPort *msgport)
 	g_return_val_if_fail (msgport != NULL, NULL);
 
 	g_async_queue_lock (msgport->queue);
-
-	/* check the cache first */
-	if (msgport->cache != NULL) {
-		msg = msgport->cache;
-		msgport->cache = NULL;
-		g_async_queue_unlock (msgport->queue);
-		return msg;
-	}
 
 	msg = g_async_queue_try_pop_unlocked (msgport->queue);
 
@@ -831,7 +809,7 @@ EThread *e_thread_new(e_thread_t type)
 	EThread *e;
 
 	e = g_malloc0(sizeof(*e));
-	pthread_mutex_init(&e->mutex, 0);
+	pthread_mutex_init(&e->mutex, NULL);
 	e->type = type;
 	e->server_port = e_msgport_new();
 	e->have_thread = FALSE;
@@ -875,7 +853,7 @@ void e_thread_destroy(EThread *e)
 
 			pthread_mutex_unlock(&e->mutex);
 			t(printf("Joining thread '%" G_GUINT64_FORMAT "'\n", e_util_pthread_id(id)));
-			pthread_join(id, 0);
+			pthread_join(id, NULL);
 			t(printf("Joined thread '%" G_GUINT64_FORMAT "'!\n", e_util_pthread_id(id)));
 			pthread_mutex_lock(&e->mutex);
 		}
@@ -890,7 +868,7 @@ void e_thread_destroy(EThread *e)
 			msg = g_malloc0(sizeof(*msg));
 			msg->reply_port = E_THREAD_QUIT_REPLYPORT;
 			e_msgport_put(e->server_port, msg);
-			l = l->next;			
+			l = l->next;
 		}
 
 		/* then, wait for everyone to quit */
@@ -899,7 +877,7 @@ void e_thread_destroy(EThread *e)
 			e->id_list = g_list_remove(e->id_list, info);
 			pthread_mutex_unlock(&e->mutex);
 			t(printf("Joining thread '%" G_GUINT64_FORMAT "'\n", e_util_pthread_id(info->id)));
-			pthread_join(info->id, 0);
+			pthread_join(info->id, NULL);
 			t(printf("Joined thread '%" G_GUINT64_FORMAT "'!\n", e_util_pthread_id(info->id)));
 			pthread_mutex_lock(&e->mutex);
 			g_free(info);
@@ -1006,7 +984,7 @@ thread_destroy_msg(EThread *e, EMsg *m)
 	func = e->destroy;
 	func_data = e->destroy_data;
 	pthread_mutex_unlock(&e->mutex);
-	
+
 	if (func)
 		func(e, m, func_data);
 }
@@ -1022,7 +1000,7 @@ thread_received_msg(EThread *e, EMsg *m)
 	func = e->received;
 	func_data = e->received_data;
 	pthread_mutex_unlock(&e->mutex);
-	
+
 	if (func)
 		func(e, m, func_data);
 	else
@@ -1040,7 +1018,7 @@ thread_lost_msg(EThread *e, EMsg *m)
 	func = e->lost;
 	func_data = e->lost_data;
 	pthread_mutex_unlock(&e->mutex);
-	
+
 	if (func)
 		func(e, m, func_data);
 }
@@ -1062,31 +1040,17 @@ thread_dispatch(void *din)
 		if (m == NULL) {
 			/* nothing to do?  If we are a 'new' type thread, just quit.
 			   Otherwise, go into waiting (can be cancelled here) */
-			info = NULL;
-			switch (e->type) {
-			case E_THREAD_NEW:
-			case E_THREAD_QUEUE:
-			case E_THREAD_DROP:
-				info = thread_find(e, self);
-				if (info)
-					info->busy = FALSE;
-				e->waiting++;
-				pthread_mutex_unlock(&e->mutex);
-				e_msgport_wait(e->server_port);
-				pthread_mutex_lock(&e->mutex);
-				e->waiting--;
-				pthread_mutex_unlock(&e->mutex);
-				break;
-#if 0
-			case E_THREAD_NEW:
-				e->id_list = g_list_remove(e->id_list, (void *)pthread_self());
-				pthread_mutex_unlock(&e->mutex);
-				return 0;
-#endif
-			}
+			info = thread_find(e, self);
+			if (info)
+				info->busy = FALSE;
+			e->waiting++;
+			pthread_mutex_unlock(&e->mutex);
+			m = e_msgport_wait(e->server_port);
+			pthread_mutex_lock(&e->mutex);
+			e->waiting--;
+		}
 
-			continue;
-		} else if (m->reply_port == E_THREAD_QUIT_REPLYPORT) {
+		if (m->reply_port == E_THREAD_QUIT_REPLYPORT) {
 			t(printf("Thread %" G_GUINT64_FORMAT " got quit message\n", e_util_pthread_id(self)));
 			/* Handle a quit message, say we're quitting, free the message, and break out of the loop */
 			info = thread_find(e, self);
@@ -1221,11 +1185,11 @@ EMutex *e_mutex_new(e_mutex_t type)
 
 	switch (type) {
 	case E_MUTEX_SIMPLE:
-		pthread_mutex_init(&m->mutex, 0);
+		pthread_mutex_init(&m->mutex, NULL);
 		break;
 	case E_MUTEX_REC:
-		pthread_mutex_init(&m->mutex, 0);
-		pthread_cond_init(&m->cond, 0);
+		pthread_mutex_init(&m->mutex, NULL);
+		pthread_cond_init(&m->cond, NULL);
 		break;
 		/* read / write ?  flags for same? */
 	}
@@ -1385,7 +1349,6 @@ void *server(void *data)
 	while (1) {
 		printf("server %d: waiting\n", id);
 		msg = e_msgport_wait(server_port);
-		msg = e_msgport_get(server_port);
 		if (msg) {
 			printf("server %d: got message\n", id);
 			g_usleep(1000000);
@@ -1413,7 +1376,6 @@ void *client(void *data)
 		e_msgport_put(server_port, msg);
 		printf("client: waiting for reply\n");
 		e_msgport_wait(replyport);
-		e_msgport_get(replyport);
 		printf("client: got reply\n");
 	}
 
@@ -1429,8 +1391,7 @@ void *client(void *data)
 
 	printf("client: receiving multiple\n");
 	for (i=0;i<10;i++) {
-		e_msgport_wait(replyport);
-		msg = e_msgport_get(replyport);
+		msg = e_msgport_wait(replyport);
 		g_free(msg);
 	}
 

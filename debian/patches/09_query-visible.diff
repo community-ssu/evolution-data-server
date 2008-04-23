@@ -2,8 +2,8 @@ Add a (visible) query which means "all contacts which are not deleted".
 
 Index: addressbook/libebook-dbus/e-book-query.c
 ===================================================================
---- addressbook/libebook-dbus/e-book-query.c.orig	2008-02-21 16:02:10.000000000 +0000
-+++ addressbook/libebook-dbus/e-book-query.c	2008-02-21 16:06:18.000000000 +0000
+--- addressbook/libebook-dbus/e-book-query.c.orig	2008-04-23 14:58:48.000000000 +0100
++++ addressbook/libebook-dbus/e-book-query.c	2008-04-23 15:43:46.000000000 +0100
 @@ -14,7 +14,8 @@
  	E_BOOK_QUERY_TYPE_NOT,
  	E_BOOK_QUERY_TYPE_FIELD_EXISTS,
@@ -84,8 +84,8 @@ Index: addressbook/libebook-dbus/e-book-query.c
  
 Index: addressbook/libebook-dbus/e-book-query.h
 ===================================================================
---- addressbook/libebook-dbus/e-book-query.h.orig	2008-02-21 16:00:19.000000000 +0000
-+++ addressbook/libebook-dbus/e-book-query.h	2008-02-21 16:05:53.000000000 +0000
+--- addressbook/libebook-dbus/e-book-query.h.orig	2008-04-22 15:10:04.000000000 +0100
++++ addressbook/libebook-dbus/e-book-query.h	2008-04-23 15:43:46.000000000 +0100
 @@ -52,6 +52,8 @@
  /* a special any field contains query */
  EBookQuery* e_book_query_any_field_contains (const char  *value);
@@ -97,9 +97,9 @@ Index: addressbook/libebook-dbus/e-book-query.h
  
 Index: addressbook/libedata-book-dbus/e-book-backend-sexp.c
 ===================================================================
---- addressbook/libedata-book-dbus/e-book-backend-sexp.c.orig	2008-02-21 16:03:23.000000000 +0000
-+++ addressbook/libedata-book-dbus/e-book-backend-sexp.c	2008-02-21 16:05:53.000000000 +0000
-@@ -522,6 +522,41 @@
+--- addressbook/libedata-book-dbus/e-book-backend-sexp.c.orig	2008-04-23 15:19:50.000000000 +0100
++++ addressbook/libedata-book-dbus/e-book-backend-sexp.c	2008-04-23 15:43:46.000000000 +0100
+@@ -529,6 +529,41 @@
  	return r;
  }
  
@@ -141,7 +141,7 @@ Index: addressbook/libedata-book-dbus/e-book-backend-sexp.c
  /* 'builtin' functions */
  static struct {
  	char *name;
-@@ -536,6 +571,7 @@
+@@ -543,6 +578,7 @@
  	{ "endswith", func_endswith, 0 },
  	{ "exists", func_exists, 0 },
  	{ "exists_vcard", func_exists_vcard, 0 },

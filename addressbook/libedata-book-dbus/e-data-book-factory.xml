@@ -13,8 +13,7 @@ Copyright (C) 2005 Opened Hand Ltd
 
     <method name="getBook">
     <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_BookFactory_getBook"/>
-      <!-- TODO: replace with async method call and get_sender -->
-      <arg name="client" type="s" direction="in"/>
+      <annotation name="org.freedesktop.DBus.GLib.Async" value=""/>
       <arg name="source" type="s" direction="in"/>
       <arg name="path" type="o" direction="out"/>
     </method>

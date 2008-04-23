@@ -70,12 +70,12 @@ struct _EBookPrivate {
 static DBusGConnection *connection = NULL;
 static DBusGProxy *factory_proxy = NULL;
 
-struct async_data {
+typedef struct {
   EBook *book;
   void *callback; /* TODO union */
   gpointer closure;
   gpointer data;
-};
+} AsyncData;
 
 GQuark
 e_book_error_quark (void)
@@ -316,7 +316,6 @@ e_book_new (ESource *source, GError **error)
 {
   GError *err = NULL;
   EBook *book;
-  const char *address;
   char *path;
   
   e_return_error_if_fail (E_IS_SOURCE (source), E_BOOK_ERROR_INVALID_ARG);
@@ -332,9 +331,7 @@ e_book_new (ESource *source, GError **error)
   book->priv->source = g_object_ref (source);
   book->priv->uri = e_source_get_uri (source);
   
-  address = dbus_bus_get_unique_name (dbus_g_connection_get_connection (connection));
-
-  if (!org_gnome_evolution_dataserver_addressbook_BookFactory_get_book (factory_proxy, address, book->priv->uri, &path, &err)) {
+  if (!org_gnome_evolution_dataserver_addressbook_BookFactory_get_book (factory_proxy, book->priv->uri, &path, &err)) {
     g_warning (G_STRLOC ": cannot get book from factory: %s", err ? err->message : "[no error]");
     g_propagate_error (error, err);
     g_object_unref (book);
@@ -559,7 +556,7 @@ e_book_open (EBook *book, gboolean only_if_exists, GError **error)
 static void
 open_reply(DBusGProxy *proxy, GError *error, gpointer user_data)
 {
-  struct async_data *data = user_data;
+  AsyncData *data = user_data;
   EBookCallback cb = data->callback;
   EDataBookStatus status;
 
@@ -569,7 +566,7 @@ open_reply(DBusGProxy *proxy, GError *error, gpointer user_data)
 
   if (cb)
     cb (data->book, status, data->closure);
-  g_free (data);
+  g_slice_free (AsyncData, data);
 }
 
 /**
@@ -587,12 +584,12 @@ open_reply(DBusGProxy *proxy, GError *error, gpointer user_data)
 guint
 e_book_async_open (EBook *book, gboolean only_if_exists, EBookCallback cb, gpointer closure)
 {
-  struct async_data *data;
+  AsyncData *data;
 
   e_return_async_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
-  data = g_new (struct async_data, 1);
+  data = g_slice_new0 (AsyncData);
   data->book = book;
   data->callback = cb;
   data->closure = closure;
@@ -626,11 +623,11 @@ e_book_remove (EBook *book, GError **error)
 static void
 remove_reply(DBusGProxy *proxy, GError *error, gpointer user_data)
 {
-  struct async_data *data = user_data;
+  AsyncData *data = user_data;
   EBookCallback cb = data->callback;
   if (cb)
     cb (data->book, get_status_from_error (error), data->closure);
-  g_free (data);
+  g_slice_free (AsyncData, data);
 }
 
 /**
@@ -647,12 +644,12 @@ remove_reply(DBusGProxy *proxy, GError *error, gpointer user_data)
 guint
 e_book_async_remove (EBook *book, EBookCallback cb, gpointer closure)
 {
-  struct async_data *data;
+  AsyncData *data;
 
   e_return_async_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
-  data = g_new (struct async_data, 1);
+  data = g_slice_new0 (AsyncData);
   data->book = book;
   data->callback = cb;
   data->closure = closure;
@@ -695,7 +692,7 @@ e_book_get_required_fields (EBook *book, GList **fields, GError **error)
 static void
 get_required_fields_reply(DBusGProxy *proxy, char **fields, GError *error, gpointer user_data)
 {
-  struct async_data *data = user_data;
+  AsyncData *data = user_data;
   EBookEListCallback cb = data->callback;
   char **i = fields;
   EList *efields = e_list_new (NULL, 
@@ -711,6 +708,8 @@ get_required_fields_reply(DBusGProxy *proxy, char **fields, GError *error, gpoin
 
   g_object_unref (efields);
   g_free (fields);
+
+  g_slice_free (AsyncData, data);
 }
 
 /**
@@ -727,12 +726,12 @@ get_required_fields_reply(DBusGProxy *proxy, char **fields, GError *error, gpoin
 guint
 e_book_async_get_required_fields (EBook *book, EBookEListCallback cb, gpointer closure)
 {
-  struct async_data *data;
+  AsyncData *data;
 
   e_return_async_error_val_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
-  data = g_new (struct async_data, 1);
+  data = g_slice_new0 (AsyncData);
   data->book = book;
   data->callback = cb;
   data->closure = closure;
@@ -775,7 +774,7 @@ e_book_get_supported_fields (EBook *book, GList **fields, GError **error)
 static void
 get_supported_fields_reply(DBusGProxy *proxy, char **fields, GError *error, gpointer user_data)
 {
-  struct async_data *data = user_data;
+  AsyncData *data = user_data;
   EBookEListCallback cb = data->callback;
   char **i = fields;
   EList *efields = e_list_new (NULL,  (EListFreeFunc) g_free, NULL);
@@ -789,6 +788,8 @@ get_supported_fields_reply(DBusGProxy *proxy, char **fields, GError *error, gpoi
 
   g_object_unref (efields);
   g_free (fields);
+
+  g_slice_free (AsyncData, data);
 }
 
 /**
@@ -806,12 +807,12 @@ get_supported_fields_reply(DBusGProxy *proxy, char **fields, GError *error, gpoi
 guint
 e_book_async_get_supported_fields (EBook *book, EBookEListCallback cb, gpointer closure)
 {
-  struct async_data *data;
+  AsyncData *data;
 
   e_return_async_error_val_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
-  data = g_new (struct async_data, 1);
+  data = g_slice_new0 (AsyncData);
   data->book = book;
   data->callback = cb;
   data->closure = closure;
@@ -853,7 +854,7 @@ e_book_get_supported_auth_methods (EBook *book, GList **auth_methods, GError **e
 static void
 get_supported_auth_methods_reply(DBusGProxy *proxy, char **methods, GError *error, gpointer user_data)
 {
-  struct async_data *data = user_data;
+  AsyncData *data = user_data;
   EBookEListCallback cb = data->callback;
   char **i = methods;
   EList *emethods = e_list_new (NULL, 
@@ -869,6 +870,8 @@ get_supported_auth_methods_reply(DBusGProxy *proxy, char **methods, GError *erro
 
   g_object_unref (emethods);
   g_free (methods);
+
+  g_slice_free (AsyncData, data);
 }
 
 /**
@@ -884,12 +887,12 @@ get_supported_auth_methods_reply(DBusGProxy *proxy, char **methods, GError *erro
  **/guint
 e_book_async_get_supported_auth_methods (EBook *book, EBookEListCallback cb, gpointer closure)
 {
-  struct async_data *data;
+  AsyncData *data;
 
   e_return_async_error_val_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
-  data = g_new (struct async_data, 1);
+  data = g_slice_new0 (AsyncData);
   data->book = book;
   data->callback = cb;
   data->closure = closure;
@@ -927,11 +930,13 @@ e_book_authenticate_user (EBook *book, const char *user, const char *passwd, con
 static void
 authenticate_user_reply(DBusGProxy *proxy, GError *error, gpointer user_data)
 {
-  struct async_data *data = user_data;
+  AsyncData *data = user_data;
   EBookCallback cb = data->callback;
+
   if (cb)
     cb (data->book, get_status_from_error (error), data->closure);
-  g_free (data);
+
+  g_slice_free (AsyncData, data);
 }
 
 /**
@@ -953,7 +958,7 @@ authenticate_user_reply(DBusGProxy *proxy, GError *error, gpointer user_data)
 guint
 e_book_async_authenticate_user (EBook *book, const char *user, const char *passwd, const char *auth_method, EBookCallback cb, gpointer closure)
 {
-  struct async_data *data;
+  AsyncData *data;
 
   e_return_async_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
@@ -961,7 +966,7 @@ e_book_async_authenticate_user (EBook *book, const char *user, const char *passw
   e_return_async_error_if_fail (passwd, E_BOOK_ERROR_INVALID_ARG);
   e_return_async_error_if_fail (auth_method, E_BOOK_ERROR_INVALID_ARG);
 
-  data = g_new (struct async_data, 1);
+  data = g_slice_new0 (AsyncData);
   data->book = book;
   data->callback = cb;
   data->closure = closure;
@@ -1002,7 +1007,7 @@ e_book_get_contact (EBook *book, const char  *id, EContact **contact, GError **e
 static void
 get_contact_reply(DBusGProxy *proxy, char *vcard, GError *error, gpointer user_data)
 {
-  struct async_data *data = user_data;
+  AsyncData *data = user_data;
   EBookContactCallback cb = data->callback;
   EBookStatus status = get_status_from_error (error);
 
@@ -1023,7 +1028,8 @@ get_contact_reply(DBusGProxy *proxy, char *vcard, GError *error, gpointer user_d
   if (error)
 	  g_error_free (error);
   g_free (vcard);
-  g_free (data);
+
+  g_slice_free (AsyncData, data);
 }
 
 /**
@@ -1040,13 +1046,13 @@ get_contact_reply(DBusGProxy *proxy, char *vcard, GError *error, gpointer user_d
 guint
 e_book_async_get_contact (EBook *book, const char *id, EBookContactCallback cb, gpointer closure)
 {
-  struct async_data *data;
+  AsyncData *data;
 
   e_return_async_error_val_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_val_if_fail (id, E_BOOK_ERROR_INVALID_ARG);
 
-  data = g_new (struct async_data, 1);
+  data = g_slice_new0 (AsyncData);
   data->book = book;
   data->callback = cb;
   data->closure = closure;
@@ -1097,7 +1103,7 @@ e_book_get_contacts (EBook *book, EBookQuery *query, GList **contacts, GError **
 static void
 get_contacts_reply(DBusGProxy *proxy, char **vcards, GError *error, gpointer user_data)
 {
-  struct async_data *data = user_data;
+  AsyncData *data = user_data;
   GList *list = NULL;
   EBookListCallback cb = data->callback;
   if (vcards) {
@@ -1107,10 +1113,12 @@ get_contacts_reply(DBusGProxy *proxy, char **vcards, GError *error, gpointer use
     }
   }
   list = g_list_reverse (list);
+
   if (cb)
     cb (data->book, get_status_from_error (error), list, data->closure);
   g_strfreev (vcards);
-  g_free (data);
+
+  g_slice_free (AsyncData, data);
 }
 
 /**
@@ -1127,7 +1135,7 @@ get_contacts_reply(DBusGProxy *proxy, char **vcards, GError *error, gpointer use
 guint
 e_book_async_get_contacts (EBook *book, EBookQuery *query, EBookListCallback cb, gpointer closure)
 {
-  struct async_data *data;
+  AsyncData *data;
   char *sexp;
 
   e_return_async_error_val_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
@@ -1136,7 +1144,7 @@ e_book_async_get_contacts (EBook *book, EBookQuery *query, EBookListCallback cb,
 
   sexp = e_book_query_to_string (query);
 
-  data = g_new (struct async_data, 1);
+  data = g_slice_new0 (AsyncData);
   data->book = book;
   data->callback = cb;
   data->closure = closure;
@@ -1147,20 +1155,31 @@ e_book_async_get_contacts (EBook *book, EBookQuery *query, EBookListCallback cb,
 }
 
 static GList *
-parse_changes_array (char **arr)
+parse_changes_array (GPtrArray *array)
 {
   GList *l = NULL;
-  char **i;
-  char *vcard;
-  for (i = arr; *i != NULL; i++) {
-    EBookChange *change = g_new (EBookChange, 1);
-    /* TODO this is a bit of a hack */
-    change->change_type = atoi (*i);
-    vcard = strchr (*i, '\n') + 1;
-    change->contact = e_contact_new_from_vcard (vcard);
+  int i;
+  
+  if (array == NULL)
+    return NULL;
+
+  for (i = 0; i < array->len; i++) {
+    EBookChange *change;
+    GValueArray *vals;
+
+    vals = g_ptr_array_index (array, i);
+
+    change = g_slice_new (EBookChange);
+    change->change_type = g_value_get_uint (g_value_array_get_nth (vals, 0));
+    change->contact = e_contact_new_from_vcard
+      (g_value_get_string (g_value_array_get_nth (vals, 1)));
+
     l = g_list_prepend (l, change);
   }
-  g_strfreev (arr);
+  
+  g_ptr_array_foreach (array, (GFunc)g_value_array_free, NULL);
+  g_ptr_array_free (array, TRUE);
+
   return g_list_reverse (l);
 }
 
@@ -1180,14 +1199,14 @@ gboolean
 e_book_get_changes (EBook *book, char *changeid, GList **changes, GError **error)
 {
   GError *err = NULL;
-  char **list = NULL;
+  GPtrArray *array = NULL;
 
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
-  org_gnome_evolution_dataserver_addressbook_Book_get_changes (book->priv->proxy, changeid, &list, &err);
+  org_gnome_evolution_dataserver_addressbook_Book_get_changes (book->priv->proxy, changeid, &array, &err);
   if (!err) {
-    *changes = parse_changes_array (list);
+    *changes = parse_changes_array (array);
     return TRUE;
   } else {
     return unwrap_gerror (err, error);
@@ -1195,16 +1214,19 @@ e_book_get_changes (EBook *book, char *changeid, GList **changes, GError **error
 }
 
 static void
-get_changes_reply(DBusGProxy *proxy, char **changes, GError *error, gpointer user_data)
+get_changes_reply (DBusGProxy *proxy, GPtrArray *changes, GError *error, gpointer user_data)
 {
-  struct async_data *data = user_data;
+  AsyncData *data = user_data;
   EBookListCallback cb = data->callback;
-  GList *list;
-  if (cb) {
+  GList *list = NULL;
+  
+  if (changes)
     list = parse_changes_array (changes);
+
+  if (cb)
     cb (data->book, get_status_from_error (error), list, data->closure);
-  }
-  g_free (data);
+  
+  g_slice_free (AsyncData, data);
 }
 
 /**
@@ -1222,12 +1244,12 @@ get_changes_reply(DBusGProxy *proxy, char **changes, GError *error, gpointer use
 guint
 e_book_async_get_changes (EBook *book, char *changeid, EBookListCallback cb, gpointer closure)
 {
-  struct async_data *data;
+  AsyncData *data;
 
   e_return_async_error_val_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
-  data = g_new (struct async_data, 1);
+  data = g_slice_new0 (AsyncData);
   data->book = book;
   data->callback = cb;
   data->closure = closure;
@@ -1250,7 +1272,7 @@ e_book_free_change_list (GList *change_list)
 		EBookChange *change = l->data;
 
 		g_object_unref (change->contact);
-		g_free (change);
+		g_slice_free (EBookChange, change);
 	}
 
 	g_list_free (change_list);
@@ -1289,7 +1311,7 @@ e_book_add_contact (EBook *book, EContact *contact, GError **error)
 static void
 add_contact_reply (DBusGProxy *proxy, char *uid, GError *error, gpointer user_data)
 {
-  struct async_data *data = user_data;
+  AsyncData *data = user_data;
   EBookIdCallback cb = data->callback;
 
   /* If there is an error returned the GLib bindings currently return garbage
@@ -1303,7 +1325,7 @@ add_contact_reply (DBusGProxy *proxy, char *uid, GError *error, gpointer user_da
   if (uid)
     g_free (uid);
 
-  g_free (data);
+  g_slice_free (AsyncData, data);
 }
 
 /**
@@ -1321,7 +1343,7 @@ gboolean
 e_book_async_add_contact (EBook *book, EContact *contact, EBookIdCallback cb, gpointer closure)
 {
   char *vcard;
-  struct async_data *data;
+  AsyncData *data;
 
   e_return_async_error_val_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
@@ -1329,7 +1351,7 @@ e_book_async_add_contact (EBook *book, EContact *contact, EBookIdCallback cb, gp
 
   vcard = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
 
-  data = g_new (struct async_data, 1);
+  data = g_slice_new0 (AsyncData);
   data->book = book;
   data->callback = cb;
   data->closure = closure;
@@ -1369,11 +1391,13 @@ e_book_commit_contact (EBook *book, EContact *contact, GError **error)
 static void
 modify_contact_reply (DBusGProxy *proxy, GError *error, gpointer user_data)
 {
-  struct async_data *data = user_data;
+  AsyncData *data = user_data;
   EBookCallback cb = data->callback;
+
   if (cb)
     cb (data->book, get_status_from_error (error), data->closure);
-  g_free (data);
+
+  g_slice_free (AsyncData, data);
 }
 
 /**
@@ -1392,7 +1416,7 @@ guint
 e_book_async_commit_contact (EBook *book, EContact *contact, EBookCallback cb, gpointer closure)
 {
   char *vcard;
-  struct async_data *data;
+  AsyncData *data;
 
   e_return_async_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
@@ -1400,7 +1424,7 @@ e_book_async_commit_contact (EBook *book, EContact *contact, EBookCallback cb, g
 
   vcard = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
 
-  data = g_new (struct async_data, 1);
+  data = g_slice_new0 (AsyncData);
   data->book = book;
   data->callback = cb;
   data->closure = closure;
@@ -1435,18 +1459,20 @@ e_book_commit_contacts (EBook *book, GList *contacts, GError **error)
 static void
 modify_contacts_reply (DBusGProxy *proxy, GError *error, gpointer user_data)
 {
-  struct async_data *data = user_data;
+  AsyncData *data = user_data;
   EBookCallback cb = data->callback;
+
   if (cb)
     cb (data->book, get_status_from_error (error), data->closure);
-  g_free (data);
+
+  g_slice_free (AsyncData, data);
 }
 
 guint
 e_book_async_commit_contacts (EBook *book, GList *contacts, EBookCallback cb, gpointer closure)
 {
   char **vcards, **i;
-  struct async_data *data;
+  AsyncData *data;
 
   e_return_async_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
@@ -1457,7 +1483,7 @@ e_book_async_commit_contacts (EBook *book, GList *contacts, EBookCallback cb, gp
     *i = e_vcard_to_string (E_VCARD (contacts->data), EVC_FORMAT_VCARD_30);
   }
 
-  data = g_new (struct async_data, 1);
+  data = g_slice_new0 (AsyncData);
   data->book = book;
   data->callback = cb;
   data->closure = closure;
@@ -1497,11 +1523,13 @@ e_book_remove_contact (EBook *book, const char *id, GError **error)
 static void
 remove_contact_reply (DBusGProxy *proxy, GError *error, gpointer user_data)
 {
-  struct async_data *data = user_data;
+  AsyncData *data = user_data;
   EBookCallback cb = data->callback;
+
   if (cb)
     cb (data->book, get_status_from_error (error), data->closure);
-  g_free (data);
+
+  g_slice_free (AsyncData, data);
 }
 
 /**
@@ -1517,7 +1545,7 @@ remove_contact_reply (DBusGProxy *proxy, GError *error, gpointer user_data)
  **/guint
 e_book_async_remove_contact (EBook *book, EContact *contact, EBookCallback cb, gpointer closure)
 {
-  struct async_data *data;
+  AsyncData *data;
   const char *l[2];
 
   e_return_async_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
@@ -1527,7 +1555,7 @@ e_book_async_remove_contact (EBook *book, EContact *contact, EBookCallback cb, g
   l[0] = e_contact_get_const (contact, E_CONTACT_UID);
   l[1] = NULL;
 
-  data = g_new (struct async_data, 1);
+  data = g_slice_new0 (AsyncData);
   data->book = book;
   data->callback = cb;
   data->closure = closure;
@@ -1539,11 +1567,13 @@ e_book_async_remove_contact (EBook *book, EContact *contact, EBookCallback cb, g
 static void
 remove_contact_by_id_reply (DBusGProxy *proxy, GError *error, gpointer user_data)
 {
-  struct async_data *data = user_data;
+  AsyncData *data = user_data;
   EBookCallback cb = data->callback;
+
   if (cb)
     cb (data->book, get_status_from_error (error), data->closure);
-  g_free (data);
+
+  g_slice_free (AsyncData, data);
 }
 
 /**
@@ -1560,7 +1590,7 @@ remove_contact_by_id_reply (DBusGProxy *proxy, GError *error, gpointer user_data
 guint
 e_book_async_remove_contact_by_id (EBook *book, const char *id, EBookCallback cb, gpointer closure)
 {
-  struct async_data *data;
+  AsyncData *data;
   const char *l[2];
 
   e_return_async_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
@@ -1570,7 +1600,7 @@ e_book_async_remove_contact_by_id (EBook *book, const char *id, EBookCallback cb
   l[0] = id;
   l[1] = NULL;
 
-  data = g_new (struct async_data, 1);
+  data = g_slice_new0 (AsyncData);
   data->book = book;
   data->callback = cb;
   data->closure = closure;
@@ -1612,11 +1642,13 @@ e_book_remove_contacts (EBook *book, GList *ids, GError **error)
 static void
 remove_contacts_reply (DBusGProxy *proxy, GError *error, gpointer user_data)
 {
-  struct async_data *data = user_data;
+  AsyncData *data = user_data;
   EBookCallback cb = data->callback;
+
   if (cb)
     cb (data->book, get_status_from_error (error), data->closure);
-  g_free (data);
+
+  g_slice_free (AsyncData, data);
 }
 
 /**
@@ -1636,7 +1668,7 @@ remove_contacts_reply (DBusGProxy *proxy, GError *error, gpointer user_data)
 guint
 e_book_async_remove_contacts (EBook *book, GList *id_list, EBookCallback cb, gpointer closure)
 {
-  struct async_data *data;
+  AsyncData *data;
   char **l;
 
   e_return_async_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
@@ -1650,7 +1682,7 @@ e_book_async_remove_contacts (EBook *book, GList *id_list, EBookCallback cb, gpo
 
   l = flatten_stringlist (id_list);
 
-  data = g_new (struct async_data, 1);
+  data = g_slice_new0 (AsyncData);
   data->book = book;
   data->callback = cb;
   data->closure = closure;
@@ -1680,17 +1712,15 @@ e_book_get_book_view (EBook *book, EBookQuery *query, GList *requested_fields, i
 {
   GError *err = NULL;
   DBusGProxy *view_proxy;
-  char **fields;
   char *sexp, *view_path;
+  gboolean ret = TRUE;
 
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
-  fields = flatten_stringlist (requested_fields);
-
   sexp = e_book_query_to_string (query);
   
-  if (!org_gnome_evolution_dataserver_addressbook_Book_get_book_view (book->priv->proxy, sexp, (const char **) fields, max_results, &view_path, &err)) {
+  if (!org_gnome_evolution_dataserver_addressbook_Book_get_book_view (book->priv->proxy, sexp, max_results, &view_path, &err)) {
     *book_view = NULL;
     g_free (sexp);
     return unwrap_gerror (err, error);
@@ -1698,34 +1728,51 @@ e_book_get_book_view (EBook *book, EBookQuery *query, GList *requested_fields, i
   view_proxy = dbus_g_proxy_new_for_name_owner (connection,
                                                 E_DATA_BOOK_FACTORY_SERVICE_NAME, view_path,
                                                 "org.gnome.evolution.dataserver.addressbook.BookView", error);
-  /* TODO: handle failures properly here too */
-  if (!view_proxy) {
-    *book_view = NULL;
-  } else {
+
+  if (view_proxy) {
     *book_view = e_book_view_new (book, view_proxy);
+  } else {
+    *book_view = NULL;
+    g_set_error (error, E_BOOK_ERROR, E_BOOK_ERROR_CORBA_EXCEPTION,
+                 "Cannot get connection to view");
+    ret = FALSE;
   }
+  
   g_free (view_path);
   g_free (sexp);
-  g_free (fields);
-  return TRUE;
+
+  return ret;
 }
 
 static void
 get_book_view_reply (DBusGProxy *proxy, char *view_path, GError *error, gpointer user_data)
 {
-  struct async_data *data = user_data;
-  EBookView *view;
+  AsyncData *data = user_data;
+  GError *err = NULL;
+  EBookView *view = NULL;
   EBookBookViewCallback cb = data->callback;
   DBusGProxy *view_proxy;
+  EBookStatus status;
 
-  view_proxy = dbus_g_proxy_new_for_name_owner (connection, E_DATA_BOOK_FACTORY_SERVICE_NAME, view_path,
-                                           "org.gnome.evolution.dataserver.addressbook.BookView", NULL);
-  /* TODO: handle errors */
-  view = e_book_view_new (data->book, view_proxy);
-
+  if (view_path) {
+    view_proxy = dbus_g_proxy_new_for_name_owner (connection, E_DATA_BOOK_FACTORY_SERVICE_NAME, view_path,
+                                                  "org.gnome.evolution.dataserver.addressbook.BookView", &err);
+    if (view_proxy) {
+      view = e_book_view_new (data->book, view_proxy);
+      status = E_BOOK_ERROR_OK;
+    } else {
+      g_warning (G_STRLOC ": cannot get connection to view: %s", err->message);
+      g_error_free (err);
+      status = E_BOOK_ERROR_CORBA_EXCEPTION;
+    }
+  } else {
+    status = get_status_from_error (error);
+  }
+  
   if (cb)
-    cb (data->book, get_status_from_error (error), view, data->closure);
-  g_free (data);
+    cb (data->book, status, view, data->closure);
+
+  g_slice_free (AsyncData, data);
 }
 
 /**
@@ -1745,26 +1792,23 @@ get_book_view_reply (DBusGProxy *proxy, char *view_path, GError *error, gpointer
 guint
 e_book_async_get_book_view (EBook *book, EBookQuery *query, GList *requested_fields, int max_results, EBookBookViewCallback cb, gpointer closure)
 {
-  struct async_data *data;
+  AsyncData *data;
   char *sexp;
-  char **fields;
 
   e_return_async_error_val_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_async_error_val_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_async_error_val_if_fail (query, E_BOOK_ERROR_INVALID_ARG);
 
-  data = g_new (struct async_data, 1);
+  data = g_slice_new0 (AsyncData);
   data->book = book;
   data->callback = cb;
   data->closure = closure;
 
-  fields = flatten_stringlist (requested_fields);
   sexp = e_book_query_to_string (query);
 
-  org_gnome_evolution_dataserver_addressbook_Book_get_book_view_async (book->priv->proxy, sexp, (const char **) fields, max_results, get_book_view_reply, data);
+  org_gnome_evolution_dataserver_addressbook_Book_get_book_view_async (book->priv->proxy, sexp, max_results, get_book_view_reply, data);
 
   g_free (sexp);
-  g_free (fields);
   return 0;
 }
 
@@ -2149,6 +2193,8 @@ get_status_from_error (GError *error)
       return E_BOOK_ERROR_PERMISSION_DENIED;
     } else if (strcmp (name, "org.gnome.evolution.dataserver.addressbook.Book.nospace") == 0) {
       return E_BOOK_ERROR_NO_SPACE;
+    } else if (strcmp (name, "org.gnome.evolution.dataserver.addressbook.Book.repositoryoffline") == 0) {
+      return E_BOOK_ERROR_REPOSITORY_OFFLINE;
     } else if (strcmp (name, "org.gnome.evolution.dataserver.addressbook.Book.othererror") == 0) {
       return E_BOOK_ERROR_OTHER_ERROR;
     } else {

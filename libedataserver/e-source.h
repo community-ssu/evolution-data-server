@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  *
  * Author: Ettore Perazzoli <ettore@ximian.com>
  */
@@ -82,20 +82,27 @@ void  e_source_set_relative_uri  (ESource      *source,
 				  const char   *relative_uri);
 void  e_source_set_absolute_uri  (ESource      *source,
 				  const char   *absolute_uri);
+void  e_source_set_color_spec    (ESource      *source,
+				  const gchar  *color_spec);
 void  e_source_set_readonly      (ESource      *source,
 				  gboolean      readonly);
+#ifndef EDS_DISABLE_DEPRECATED
 void  e_source_set_color         (ESource      *source,
 				  guint32       color);
 void  e_source_unset_color       (ESource      *source);
+#endif
 
 ESourceGroup *e_source_peek_group         (ESource *source);
 const char   *e_source_peek_uid           (ESource *source);
 const char   *e_source_peek_name          (ESource *source);
 const char   *e_source_peek_relative_uri  (ESource *source);
 const char   *e_source_peek_absolute_uri  (ESource *source);
+const char   *e_source_peek_color_spec    (ESource *source);
 gboolean      e_source_get_readonly       (ESource *source);
+#ifndef EDS_DISABLE_DEPRECATED
 gboolean      e_source_get_color          (ESource *source,
 					   guint32 *color_return);
+#endif
 
 char *e_source_get_uri  (ESource *source);
 
@@ -112,6 +119,7 @@ void         e_source_foreach_property (ESource *source,
 					GHFunc func,
 					gpointer data);
 
+char *e_source_get_duped_property (ESource *source, const char *property);
 char *e_source_build_absolute_uri (ESource *source);
 
 G_END_DECLS

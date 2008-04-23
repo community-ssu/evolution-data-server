@@ -1,0 +1,38 @@
+Index: n-eds.trunk/addressbook/libebook-dbus/e-book-query.c
+===================================================================
+--- n-eds.trunk.orig/addressbook/libebook-dbus/e-book-query.c	2008-04-23 14:43:34.000000000 +0100
++++ n-eds.trunk/addressbook/libebook-dbus/e-book-query.c	2008-04-23 14:44:28.000000000 +0100
+@@ -589,6 +589,25 @@
+ 	return r;
+ }
+ 
++static ESExpResult *
++func_exists_vcard(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
++{
++	GList **list = data;
++	ESExpResult *r;
++
++	if (argc == 1
++	    && argv[0]->type == ESEXP_RES_STRING) {
++		char *field = argv[0]->value.string;
++
++		*list = g_list_prepend (*list, e_book_query_vcard_field_exists (field));
++	}
++
++	r = e_sexp_result_new(f, ESEXP_RES_BOOL);
++	r->value.bool = FALSE;
++
++	return r;
++}
++
+ /* 'builtin' functions */
+ static const struct {
+ 	char *name;
+@@ -605,6 +624,7 @@
+ 	{ "beginswith", func_beginswith, 0 },
+ 	{ "endswith", func_endswith, 0 },
+ 	{ "exists", func_exists, 0 },
++	{ "exists_vcard", func_exists_vcard, 0 },
+ };
+ 
+ /**

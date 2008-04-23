@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
-/* 
+/*
  *  A class to cache address book conents on local file system
- * 
+ *
  * Copyright (C) 2004 Novell, Inc.
  *
  * Authors: Sivaiah Nallagatla <snallagatla@ximian.com>
@@ -17,13 +17,13 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
 #ifndef E_BOOK_BACKEND_CACHE_H
 #define E_BOOK_BACKEND_CACHE_H
 
-#include <libedataserver/e-file-cache.h>
+#include "libedataserver/e-file-cache.h"
 #include <libebook/e-contact.h>
 
 G_BEGIN_DECLS

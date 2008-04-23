@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20080423) unstable; urgency=low
+
+  * Rebase to the latest OH eds-dbus (r672.)
+
+ -- Rob Bradford <rob@o-hand.com>  Wed, 23 Apr 2008 17:12:27 +0100
+
 evolution-data-server (1.4.2.1-20080418) unstable; urgency=low
 
   * Check if there ever even was a DBusConnection, before closing it; Fixes:

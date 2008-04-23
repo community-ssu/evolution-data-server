@@ -15,8 +15,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  *
  * Authors: Nat Friedman <nat@novell.com>
  *          Chris Toshok <toshok@ximian.com>
@@ -40,9 +40,10 @@
 #include <glib/gstdio.h>
 #include <glib/gi18n-lib.h>
 
-#include "e-dbhash.h"
-#include "e-db3-utils.h"
+#include "libedataserver/e-dbhash.h"
+#include "libedataserver/e-db3-utils.h"
 #include "libedataserver/e-data-server-util.h"
+#include "libedataserver/e-flag.h"
 
 #include "libebook/e-contact.h"
 
@@ -63,7 +64,7 @@
 #define PAS_ID_PREFIX "pas-id-"
 #define SUMMARY_FLUSH_TIMEOUT 5000
 
-static EBookBackendSyncClass *e_book_backend_file_parent_class;
+G_DEFINE_TYPE (EBookBackendFile, e_book_backend_file, E_TYPE_BOOK_BACKEND_SYNC);
 
 struct _EBookBackendFilePrivate {
 	char     *dirname;
@@ -72,14 +73,9 @@ struct _EBookBackendFilePrivate {
 	DB       *file_db;
 	DB_ENV   *env;
 	EBookBackendSummary *summary;
-	/* for future use */
-	void *reserved1;
-	void *reserved2;
-	void *reserved3;
-	void *reserved4;
 };
 
-static GStaticMutex global_env_lock = G_STATIC_MUTEX_INIT;
+G_LOCK_DEFINE_STATIC (global_env);
 static struct {
 	int ref_count;
 	DB_ENV *env;
@@ -558,18 +554,15 @@ e_book_backend_file_get_contact_list (EBookBackendSync *backend,
 
 typedef struct {
 	EBookBackendFile *bf;
-	GMutex *mutex;
-	GCond *cond;
 	GThread *thread;
-	gboolean stopped;
+	EFlag *running;
 } FileBackendSearchClosure;
 
 static void
 closure_destroy (FileBackendSearchClosure *closure)
 {
 	d(printf ("destroying search closure\n"));
-	g_mutex_free (closure->mutex);
-	g_cond_free (closure->cond);
+	e_flag_free (closure->running);
 	g_free (closure);
 }
 
@@ -579,10 +572,8 @@ init_closure (EDataBookView *book_view, EBookBackendFile *bf)
 	FileBackendSearchClosure *closure = g_new (FileBackendSearchClosure, 1);
 
 	closure->bf = bf;
-	closure->mutex = g_mutex_new ();
-	closure->cond = g_cond_new ();
 	closure->thread = NULL;
-	closure->stopped = FALSE;
+	closure->running = e_flag_new ();
 
 	g_object_set_data_full (G_OBJECT (book_view), "EBookBackendFile.BookView::closure",
 				closure, (GDestroyNotify)closure_destroy);
@@ -606,24 +597,26 @@ book_view_thread (gpointer data)
 	DB  *db;
 	DBT id_dbt, vcard_dbt;
 	int db_error;
-	gboolean stopped = FALSE, allcontacts;
+	gboolean allcontacts;
 
 	g_return_val_if_fail (E_IS_DATA_BOOK_VIEW (data), NULL);
 
 	book_view = data;
+
+	/* ref the book view because it'll be removed and unrefed
+	   when/if it's stopped */
+	g_object_ref (book_view);
+	
 	closure = get_closure (book_view);
 	if (!closure) {
 		g_warning (G_STRLOC ": NULL closure in book view thread");
+		g_object_unref (book_view);
 		return NULL;
 	}
 	bf = closure->bf;
 
 	d(printf ("starting initial population of book view\n"));
 
-	/* ref the book view because it'll be removed and unrefed
-	   when/if it's stopped */
-	g_object_ref (book_view);
-	
 	db = bf->priv->file_db;
 	query = e_data_book_view_get_card_query (book_view);
 
@@ -636,9 +629,7 @@ book_view_thread (gpointer data)
 	}
 
 	d(printf ("signalling parent thread\n"));
-	g_mutex_lock (closure->mutex);
-	g_cond_signal (closure->cond);
-	g_mutex_unlock (closure->mutex);
+	e_flag_set (closure->running);
 
 	if (e_book_backend_summary_is_summary_query (bf->priv->summary, query)) {
 		/* do a summary query */
@@ -647,11 +638,8 @@ book_view_thread (gpointer data)
 
 		for (i = 0; i < ids->len; i ++) {
 			char *id = g_ptr_array_index (ids, i);
-			g_mutex_lock (closure->mutex);
-			stopped = closure->stopped;
-			g_mutex_unlock (closure->mutex);
 
-			if (stopped)
+			if (!e_flag_is_set (closure->running))
 				break;
 
 			string_to_dbt (id, &id_dbt);
@@ -684,11 +672,7 @@ book_view_thread (gpointer data)
 			db_error = dbc->c_get(dbc, &id_dbt, &vcard_dbt, DB_FIRST);
 			while (db_error == 0) {
 
-				g_mutex_lock (closure->mutex);
-				stopped = closure->stopped;
-				g_mutex_unlock (closure->mutex);
-
-				if (stopped)
+				if (!e_flag_is_set (closure->running))
 					break;
 
 				/* don't include the version in the list of cards */
@@ -718,7 +702,7 @@ book_view_thread (gpointer data)
 
 	}
 
-	if (!stopped)
+	if (e_flag_is_set (closure->running))
 		e_data_book_view_notify_complete (book_view, GNOME_Evolution_Addressbook_Success);
 
 	/* unref the */
@@ -733,22 +717,14 @@ static void
 e_book_backend_file_start_book_view (EBookBackend  *backend,
 				     EDataBookView *book_view)
 {
-	FileBackendSearchClosure *closure;
-
-	g_return_if_fail (E_IS_BOOK_BACKEND_FILE (backend));
-	g_return_if_fail (E_IS_DATA_BOOK_VIEW (book_view));
-
-	closure = init_closure (book_view, E_BOOK_BACKEND_FILE (backend));
-
-	g_mutex_lock (closure->mutex);
+	FileBackendSearchClosure *closure = init_closure (book_view, E_BOOK_BACKEND_FILE (backend));
 
 	d(printf ("starting book view thread\n"));
 	closure->thread = g_thread_create (book_view_thread, book_view, FALSE, NULL);
 
-	g_cond_wait (closure->cond, closure->mutex);
+	e_flag_wait (closure->running);
 
 	/* at this point we know the book view thread is actually running */
-	g_mutex_unlock (closure->mutex);
 	d(printf ("returning from start_book_view\n"));
 }
 
@@ -764,9 +740,7 @@ e_book_backend_file_stop_book_view (EBookBackend  *backend,
 		g_warning ("NULL closure when stopping query");
 		return;
 	}
-	g_mutex_lock (closure->mutex);
-	closure->stopped = TRUE;
-	g_mutex_unlock (closure->mutex);
+	e_flag_clear (closure->running);
 }
 
 typedef struct {
@@ -1029,7 +1003,7 @@ e_book_backend_file_upgrade_db (EBookBackendFile *bf, char *old_version)
 
 	if (!strcmp (old_version, "0.1")) {
 		/* we just loop through all the cards in the db,
-		   giving them valid ids if they don't have them */
+                   giving them valid ids if they don't have them */
 		DBT  id_dbt, vcard_dbt;
 		DBC *dbc;
 		int  card_failed = 0;
@@ -1172,7 +1146,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 		return db_error_to_status (db_error);
 	}
 
-	g_static_mutex_lock(&global_env_lock);
+	G_LOCK (global_env);
 	if (global_env.ref_count > 0) {
 		env = global_env.env;
 		global_env.ref_count++;
@@ -1180,7 +1154,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 		db_error = db_env_create (&env, 0);
 		if (db_error != 0) {
 			g_warning ("db_env_create failed with %s", db_strerror (db_error));
-			g_static_mutex_unlock(&global_env_lock);
+			G_UNLOCK (global_env);
 			g_free (dirname);
 			g_free (filename);
 			return db_error_to_status (db_error);
@@ -1193,11 +1167,11 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 				(void *(*)(void *, size_t))g_try_realloc,
 				g_free);
 
-		db_error = env->open (env, NULL, DB_CREATE | DB_INIT_MPOOL | DB_PRIVATE | DB_THREAD, 0);
+		db_error = (*env->open) (env, NULL, DB_CREATE | DB_INIT_MPOOL | DB_PRIVATE | DB_THREAD, 0);
 		if (db_error != 0) {
 			env->close(env, 0);
 			g_warning ("db_env_open failed with %s", db_strerror (db_error));
-			g_static_mutex_unlock(&global_env_lock);
+			G_UNLOCK (global_env);
 			g_free (dirname);
 			g_free (filename);
 			return db_error_to_status (db_error);
@@ -1206,7 +1180,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 		global_env.env = env;
 		global_env.ref_count = 1;
 	}
-	g_static_mutex_unlock(&global_env_lock);
+	G_UNLOCK (global_env);
 
 	bf->priv->env = env;
 
@@ -1218,7 +1192,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 		return db_error_to_status (db_error);
 	}
 
-	db_error = db->open (db, NULL, filename, NULL, DB_HASH, DB_THREAD, 0666);
+	db_error = (*db->open) (db, NULL, filename, NULL, DB_HASH, DB_THREAD, 0666);
 
 	if (db_error == DB_OLD_VERSION) {
 		db_error = e_db3_utils_upgrade_format (filename);
@@ -1230,7 +1204,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 			return db_error_to_status (db_error);
 		}
 
-		db_error = db->open (db, NULL, filename, NULL, DB_HASH, DB_THREAD, 0666);
+		db_error = (*db->open) (db, NULL, filename, NULL, DB_HASH, DB_THREAD, 0666);
 	}
 
 	bf->priv->file_db = db;
@@ -1240,14 +1214,14 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 	} else {
 		db->close (db, 0);
 		
-		db_error = db_create (&db, env, 0);
-		if (db_error != 0) {
-			g_warning ("db_create failed with %s", db_strerror (db_error));
-			g_free (dirname);
-			g_free (filename);
-			return GNOME_Evolution_Addressbook_OtherError;
-		}
-		db_error = db->open (db, NULL, filename, NULL, DB_HASH, DB_RDONLY | DB_THREAD, 0666);
+        	db_error = db_create (&db, env, 0);
+        	if (db_error != 0) {
+                	g_warning ("db_create failed with %s", db_strerror (db_error));
+                	g_free (dirname);
+                	g_free (filename);
+                	return GNOME_Evolution_Addressbook_OtherError;
+        	}
+		db_error = (*db->open) (db, NULL, filename, NULL, DB_HASH, DB_RDONLY | DB_THREAD, 0666);
 
 		if (db_error != 0 && !only_if_exists) {
 			int rv;
@@ -1276,7 +1250,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 				return GNOME_Evolution_Addressbook_OtherError;
 			}
 
-			db_error = db->open (db, NULL, filename, NULL, DB_HASH, DB_CREATE | DB_THREAD, 0666);
+			db_error = (*db->open) (db, NULL, filename, NULL, DB_HASH, DB_CREATE | DB_THREAD, 0666);
 			if (db_error != 0) {
 				db->close (db, 0);
 				g_warning ("db->open (... DB_CREATE ...) failed with %s", db_strerror (db_error));
@@ -1284,9 +1258,11 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 			else {
 #ifdef CREATE_DEFAULT_VCARD
 				EContact *contact = NULL;
-
-				do_create(bf, XIMIAN_VCARD, &contact);
-				/* XXX check errors here */
+				EBookBackendSyncStatus status;
+				
+				status = do_create (bf, XIMIAN_VCARD, &contact);
+				if (status != GNOME_Evolution_Addressbook_Success)
+					g_warning ("Cannot create default contact: %d", status);
 				if (contact)
 					g_object_unref (contact);
 #endif
@@ -1484,13 +1460,13 @@ e_book_backend_file_dispose (GObject *object)
 		bf->priv->file_db = NULL;
 	}
 	
-	g_static_mutex_lock(&global_env_lock);
+	G_LOCK (global_env);
 	global_env.ref_count--;
 	if (global_env.ref_count == 0) {
 		global_env.env->close (global_env.env, 0);
 		global_env.env = NULL;
 	}
-	g_static_mutex_unlock (&global_env_lock);
+	G_UNLOCK (global_env);
 	
 	if (bf->priv->summary) {
 		g_object_unref (bf->priv->summary);
@@ -1567,8 +1543,6 @@ e_book_backend_file_class_init (EBookBackendFileClass *klass)
 	EBookBackendSyncClass *sync_class;
 	EBookBackendClass *backend_class;
 
-	e_book_backend_file_parent_class = g_type_class_peek_parent (klass);
-
 	sync_class = E_BOOK_BACKEND_SYNC_CLASS (klass);
 	backend_class = E_BOOK_BACKEND_CLASS (klass);
 
@@ -1616,31 +1590,4 @@ e_book_backend_file_init (EBookBackendFile *backend)
 	priv             = g_new0 (EBookBackendFilePrivate, 1);
 
 	backend->priv = priv;
-}
-
-/**
- * e_book_backend_file_get_type:
- */
-GType
-e_book_backend_file_get_type (void)
-{
-	static GType type = 0;
-
-	if (! type) {
-		GTypeInfo info = {
-			sizeof (EBookBackendFileClass),
-			NULL, /* base_class_init */
-			NULL, /* base_class_finalize */
-			(GClassInitFunc)  e_book_backend_file_class_init,
-			NULL, /* class_finalize */
-			NULL, /* class_data */
-			sizeof (EBookBackendFile),
-			0,    /* n_preallocs */
-			(GInstanceInitFunc) e_book_backend_file_init
-		};
-
-		type = g_type_register_static (E_TYPE_BOOK_BACKEND_SYNC, "EBookBackendFile", &info, 0);
-	}
-
-	return type;
 }

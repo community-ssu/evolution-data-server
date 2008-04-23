@@ -13,15 +13,15 @@
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  * USA.
  */
 
@@ -46,7 +46,7 @@ e_url_shroud (const char *url)
 	const char *last_at = NULL;
 	const char *p;
 	char *shrouded;
-	
+
 	if (url == NULL)
 		return NULL;
 
@@ -237,20 +237,20 @@ e_uri_new (const char *uri_string)
 	semi = memchr (uri_string, ';', end - uri_string);
 	if (semi) {
 		if (semi[1]) {
-			const char *cur, *p, *eq;
+			const char *cur, *ptr, *eq;
 			char *name, *value;
 
-			for (cur = semi + 1; cur < end; cur = p + 1) {
-				p = memchr (cur, ';', end - cur);
-				if (!p)
-					p = end;
-				eq = memchr (cur, '=', p - cur);
+			for (cur = semi + 1; cur < end; cur = ptr + 1) {
+				ptr = memchr (cur, ';', end - cur);
+				if (!ptr)
+					ptr = end;
+				eq = memchr (cur, '=', ptr - cur);
 				if (eq) {
 					name = g_strndup (cur, eq - cur);
-					value = g_strndup (eq + 1, p - (eq + 1));
+					value = g_strndup (eq + 1, ptr - (eq + 1));
 					uri_decode (value);
 				} else {
-					name = g_strndup (cur, p - cur);
+					name = g_strndup (cur, ptr - cur);
 					value = g_strdup ("");
 				}
 				uri_decode (name);

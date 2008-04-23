@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  *
  * Author: Ettore Perazzoli <ettore@ximian.com>
  */
@@ -101,6 +101,15 @@ gboolean  e_source_group_remove_source         (ESourceGroup *group,
 						ESource      *source);
 gboolean  e_source_group_remove_source_by_uid  (ESourceGroup *group,
 						const char   *uid);
+
+gchar *e_source_group_get_property     (ESourceGroup *source,
+					      const gchar *property);
+void         e_source_group_set_property     (ESourceGroup *source,
+					      const gchar *property,
+					      const gchar *value);
+void         e_source_group_foreach_property (ESourceGroup *source,
+					      GHFunc func,
+					      gpointer data);
 
 char *e_source_group_to_xml (ESourceGroup *group);
 

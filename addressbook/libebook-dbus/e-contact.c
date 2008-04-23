@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  *
  * Author: Chris Toshok (toshok@ximian.com)
  */
@@ -34,7 +34,7 @@
 #include "e-name-western.h"
 
 #ifdef G_OS_WIN32
-#include <libedataserver/e-data-server-util.h>
+#include "libedataserver/e-data-server-util.h"
 #undef EVOLUTION_LOCALEDIR
 #define EVOLUTION_LOCALEDIR e_util_get_localedir ()
 #endif
@@ -80,6 +80,8 @@ typedef struct {
 
 static void* photo_getter (EContact *contact, EVCardAttribute *attr);
 static void photo_setter (EContact *contact, EVCardAttribute *attr, void *data);
+static void* geo_getter (EContact *contact, EVCardAttribute *attr);
+static void geo_setter (EContact *contact, EVCardAttribute *attr, void *data);
 static void* fn_getter (EContact *contact, EVCardAttribute *attr);
 static void fn_setter (EContact *contact, EVCardAttribute *attr, void *data);
 static void* n_getter (EContact *contact, EVCardAttribute *attr);
@@ -272,6 +274,9 @@ static const EContactFieldInfo field_info[] = {
  	STRING_FIELD (E_CONTACT_PHONE_TELEPHONE,        EVC_TEL,       "tel",         N_("Telephone"),  FALSE),
 
 	MULTI_LIST_FIELD (E_CONTACT_SIP, 	  EVC_X_SIP,    "sip",    N_("SIP address"),          FALSE),
+
+	/* Geo information */
+	STRUCT_FIELD	(E_CONTACT_GEO,  EVC_GEO, "geo",  N_("Geographic Information"),  FALSE, geo_getter, geo_setter, e_contact_geo_get_type)
 };
 
 #undef LIST_ELEM_STR_FIELD
@@ -406,6 +411,35 @@ e_contact_get_first_attr (EContact *contact, const char *attr_name)
 }
 
 
+
+static void*
+geo_getter (EContact *contact, EVCardAttribute *attr)
+{
+	if (attr) {
+		GList *p = e_vcard_attribute_get_values (attr);
+		EContactGeo *geo = g_new0 (EContactGeo, 1);
+
+		geo->latitude  = (p && p->data ? g_ascii_strtod (p->data, NULL) : 0); if (p) p = p->next;
+		geo->longitude = (p && p->data ? g_ascii_strtod (p->data, NULL) : 0);
+
+		return geo;
+	}
+	else
+		return NULL;
+}
+
+static void
+geo_setter (EContact *contact, EVCardAttribute *attr, void *data)
+{
+	EContactGeo *geo = data;	
+	char buf[G_ASCII_DTOSTR_BUF_SIZE];
+
+	e_vcard_attribute_add_value
+		(attr, g_ascii_dtostr (buf, sizeof (buf), geo->latitude));
+
+	e_vcard_attribute_add_value
+		(attr, g_ascii_dtostr (buf, sizeof (buf), geo->longitude));
+}
 
 static void*
 photo_getter (EContact *contact, EVCardAttribute *attr)
@@ -1598,7 +1632,7 @@ e_contact_get_const (EContact *contact, EContactField field_id)
  * Sets the value of @contact's field specified by @field_id to @value.
  **/
 void
-e_contact_set (EContact *contact, EContactField field_id, gpointer value)
+e_contact_set (EContact *contact, EContactField field_id, const gpointer value)
 {
 	d(printf ("e_contact_set (%p, %d, %p)\n", contact, field_id, value));
 
@@ -2011,6 +2045,41 @@ e_contact_photo_get_type (void)
 							(GBoxedFreeFunc) e_contact_photo_free);
 	return type_id;
 }
+
+/**
+ * e_contact_geo_free:
+ * @geo: an #EContactGeo
+ *
+ * Frees the @geo struct and its contents.
+ **/
+void
+e_contact_geo_free (EContactGeo *geo)
+{
+	g_free (geo);
+}
+
+static EContactGeo *
+e_contact_geo_copy (EContactGeo *geo)
+{
+	EContactGeo *geo2 = g_new0 (EContactGeo, 1);
+	geo2->latitude  = geo->latitude;
+	geo2->longitude = geo->longitude;
+
+	return geo2;
+}
+
+GType
+e_contact_geo_get_type (void)
+{
+	static GType type_id = 0;
+
+	if (!type_id)
+		type_id = g_boxed_type_register_static ("EContactGeo",
+							(GBoxedCopyFunc) e_contact_geo_copy,
+							(GBoxedFreeFunc) e_contact_geo_free);
+	return type_id;
+}
+
 
 /**
  * e_contact_address_free:

@@ -1,5 +1,5 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
-/* 
+/*
  * Copyright (C) 2003 Ximian, Inc.
  *
  * This library is free software; you can redistribute it and/or
@@ -13,8 +13,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #ifndef __E_ACCOUNT__
@@ -58,7 +58,7 @@ typedef enum _e_account_item_t {
 	E_ACCOUNT_BCC_ADDRS,
 
 	E_ACCOUNT_RECEIPT_POLICY,
-	
+
 	E_ACCOUNT_PGP_KEY,
 	E_ACCOUNT_PGP_ENCRYPT_TO_SELF,
 	E_ACCOUNT_PGP_ALWAYS_SIGN,
@@ -85,7 +85,7 @@ typedef struct _EAccountIdentity {
 	char *address;
 	char *reply_to;
 	char *organization;
-	
+
 	char *sig_uid;
 } EAccountIdentity;
 
@@ -101,6 +101,7 @@ typedef struct _EAccountService {
 	gboolean auto_check;
 	int auto_check_time;
 	gboolean save_passwd;
+	gboolean get_password_canceled;
 } EAccountService;
 
 typedef struct _EAccount {

@@ -75,8 +75,8 @@ dist-hook:
 	cd $(distdir); rm -f $(BUILT_SOURCES)
 
 
-check_PROGRAMS = test-econtact
-test_econtact_SOURCES = test-econtact.c
-test_econtact_LDADD = ./libebook-1.2.la -lcheck
+check_PROGRAMS = test-suite
+test_suite_SOURCES = test-main.c test-econtact.c test-commit.c
+test_suite_LDADD = ./libebook-1.2.la -lcheck
 
-TESTS = test-econtact
+TESTS = test-suite

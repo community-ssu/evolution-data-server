@@ -2,9 +2,9 @@ Add defines and accessors for the Maemo contact-state and last-used fields.
 
 Index: addressbook/libebook-dbus/e-vcard.h
 ===================================================================
---- addressbook/libebook-dbus/e-vcard.h.orig	2008-02-19 11:04:22.000000000 +0000
-+++ addressbook/libebook-dbus/e-vcard.h	2008-02-19 11:07:11.000000000 +0000
-@@ -90,6 +90,13 @@
+--- addressbook/libebook-dbus/e-vcard.h.orig	2008-04-22 15:56:55.000000000 +0100
++++ addressbook/libebook-dbus/e-vcard.h	2008-04-23 15:14:13.000000000 +0100
+@@ -91,6 +91,13 @@
  #define EVC_X_GROUPWISE     	"X-GROUPWISE"
  #define EVC_X_BOOK_URI     	"X-EVOLUTION-BOOK-URI"
  
@@ -20,12 +20,14 @@ Index: addressbook/libebook-dbus/e-vcard.h
  	EVC_FORMAT_VCARD_30
 Index: addressbook/libebook-dbus/e-contact.c
 ===================================================================
---- addressbook/libebook-dbus/e-contact.c.orig	2008-02-19 11:04:22.000000000 +0000
-+++ addressbook/libebook-dbus/e-contact.c	2008-02-19 11:07:11.000000000 +0000
-@@ -272,6 +272,9 @@
-  	STRING_FIELD (E_CONTACT_PHONE_TELEPHONE,        EVC_TEL,       "tel",         N_("Telephone"),  FALSE),
- 
+--- addressbook/libebook-dbus/e-contact.c.orig	2008-04-22 15:55:48.000000000 +0100
++++ addressbook/libebook-dbus/e-contact.c	2008-04-23 15:16:15.000000000 +0100
+@@ -276,7 +276,10 @@
  	MULTI_LIST_FIELD (E_CONTACT_SIP, 	  EVC_X_SIP,    "sip",    N_("SIP address"),          FALSE),
+ 
+ 	/* Geo information */
+-	STRUCT_FIELD	(E_CONTACT_GEO,  EVC_GEO, "geo",  N_("Geographic Information"),  FALSE, geo_getter, geo_setter, e_contact_geo_get_type)
++	STRUCT_FIELD	(E_CONTACT_GEO,  EVC_GEO, "geo",  N_("Geographic Information"),  FALSE, geo_getter, geo_setter, e_contact_geo_get_type),
 +
 +	STRING_FIELD (E_CONTACT_OSSO_CONTACT_STATE,       EVC_X_OSSO_CONTACT_STATE,       "osso-contact-state",       N_("Contact State"),    FALSE),
 +	STRING_FIELD (E_CONTACT_OSSO_LAST_USED,       EVC_X_OSSO_LAST_USED,       "osso-last-used",       N_("Last Used"),    FALSE),
@@ -34,11 +36,11 @@ Index: addressbook/libebook-dbus/e-contact.c
  #undef LIST_ELEM_STR_FIELD
 Index: addressbook/libebook-dbus/e-contact.h
 ===================================================================
---- addressbook/libebook-dbus/e-contact.h.orig	2008-02-19 11:04:22.000000000 +0000
-+++ addressbook/libebook-dbus/e-contact.h	2008-02-19 11:07:11.000000000 +0000
-@@ -199,6 +199,9 @@
+--- addressbook/libebook-dbus/e-contact.h.orig	2008-04-22 15:56:22.000000000 +0100
++++ addressbook/libebook-dbus/e-contact.h	2008-04-23 15:14:13.000000000 +0100
+@@ -201,6 +201,9 @@
  
- 	E_CONTACT_SIP,
+ 	E_CONTACT_GEO,	/* structured field (EContactGeo) */	
  
 +	E_CONTACT_OSSO_CONTACT_STATE, /* string */
 +	E_CONTACT_OSSO_LAST_USED, /* string */

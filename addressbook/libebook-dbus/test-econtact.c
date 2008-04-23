@@ -2,7 +2,7 @@
 #include <string.h>
 #include <libebook/e-contact.h>
 
-#define MAEMO 1
+#include "test-prototypes.h"
 
 START_TEST (test_get_names_full)
 {
@@ -106,7 +106,7 @@ START_TEST (test_fn_magic)
 }
 END_TEST
 
-static Suite *
+Suite *
 contact_suite (void)
 {
   Suite *s = suite_create ("EContact");
@@ -121,22 +121,4 @@ contact_suite (void)
   suite_add_tcase (s, tc_get);
   
   return s;
-}
-
-int
-main (void)
-{
-  int number_failed;
-  Suite *s;
-  SRunner *sr;
-  g_type_init ();
-
-  s = contact_suite ();
-
-  sr = srunner_create (s);
-  srunner_run_all (sr, CK_NORMAL);
-  number_failed = srunner_ntests_failed (sr);
-  srunner_free (sr);
-
-  return (number_failed == 0) ? 0 : 1;
 }

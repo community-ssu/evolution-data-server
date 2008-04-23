@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
  * Authors: Rodrigo Moya <rodrigo@ximian.com>
  */
@@ -57,7 +57,7 @@ e_file_cache_set_property (GObject *object, guint property_id, const GValue *val
 	priv = cache->priv;
 
 	/* FIXME: the property is being set twice. Need to investigate
-	 * why and fix. Until then, we just return when called the 
+	 * why and fix. Until then, we just return when called the
 	 * second time*/
 	if (priv->filename)
 		return;
@@ -67,7 +67,7 @@ e_file_cache_set_property (GObject *object, guint property_id, const GValue *val
 		/* make sure the directory for the cache exists */
 		priv->filename = g_strdup ( g_value_get_string (value));
 		dirname = g_path_get_dirname (priv->filename);
-		result = e_util_mkdir_hier (dirname, 0700);
+		result = g_mkdir_with_parents (dirname, 0700);
 		g_free (dirname);
 		if (result != 0)
 			break;
@@ -243,11 +243,11 @@ e_file_cache_remove (EFileCache *cache)
 }
 
 static void
-add_key_to_list (const char *key, const char *value, gpointer user_data)
+add_key_to_slist (const char *key, const char *value, gpointer user_data)
 {
-	GList **keys = user_data;
+	GSList **keys = user_data;
 
-	*keys = g_list_append (*keys, (char *) key);
+	*keys = g_slist_append (*keys, (char *) key);
 }
 
 /**
@@ -262,16 +262,16 @@ gboolean
 e_file_cache_clean (EFileCache *cache)
 {
 	EFileCachePrivate *priv;
-	GList *keys = NULL;
+	GSList *keys = NULL;
 
 	g_return_val_if_fail (E_IS_FILE_CACHE (cache), FALSE);
 
 	priv = cache->priv;
 
-	e_xmlhash_foreach_key (priv->xml_hash, (EXmlHashFunc) add_key_to_list, &keys);
+	e_xmlhash_foreach_key (priv->xml_hash, (EXmlHashFunc) add_key_to_slist, &keys);
 	while (keys != NULL) {
 		e_file_cache_remove_object (cache, (const char *) keys->data);
-		keys = g_list_remove (keys, keys->data);
+		keys = g_slist_remove (keys, keys->data);
 	}
 
 	return TRUE;
@@ -321,7 +321,7 @@ e_file_cache_get_object (EFileCache *cache, const char *key)
 }
 
 static void
-add_object_to_list (const char *key, const char *value, gpointer user_data)
+add_object_to_slist (const char *key, const char *value, gpointer user_data)
 {
 	GSList **list = user_data;
 
@@ -341,7 +341,7 @@ e_file_cache_get_objects (EFileCache *cache)
 
 	priv = cache->priv;
 
-	e_xmlhash_foreach_key (priv->xml_hash, (EXmlHashFunc) add_object_to_list, &list);
+	e_xmlhash_foreach_key (priv->xml_hash, (EXmlHashFunc) add_object_to_slist, &list);
 
 	return list;
 }
@@ -359,7 +359,7 @@ e_file_cache_get_keys (EFileCache *cache)
 
 	priv = cache->priv;
 
-	e_xmlhash_foreach_key (priv->xml_hash, (EXmlHashFunc) add_key_to_list, &list);
+	e_xmlhash_foreach_key (priv->xml_hash, (EXmlHashFunc) add_key_to_slist, &list);
 
 	return list;
 }

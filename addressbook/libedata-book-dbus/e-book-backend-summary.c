@@ -1,5 +1,5 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
-/* 
+/*
  * pas-backend-summary.c
  * Copyright 2000, 2001, Ximian, Inc.
  *
@@ -17,8 +17,8 @@
  *
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
- * 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -137,8 +137,10 @@ clear_items (EBookBackendSummary *summary)
 	int num = summary->priv->items->len;
 	for (i = 0; i < num; i++) {
 		EBookBackendSummaryItem *item = g_ptr_array_remove_index_fast (summary->priv->items, 0);
-		g_hash_table_remove (summary->priv->id_to_item, item->id);
-		free_summary_item (item);
+		if (item) {
+			g_hash_table_remove (summary->priv->id_to_item, item->id);
+			free_summary_item (item);
+		}
 	}
 }
 
@@ -528,7 +530,9 @@ e_book_backend_summary_load (EBookBackendSummary *summary)
 {
 	EBookBackendSummaryItem *new_item;
 	int i;
-	
+
+	clear_items (summary);
+
 	if (!e_book_backend_summary_open (summary))
 		return FALSE;
 
@@ -759,7 +763,7 @@ e_book_backend_summary_add_contact (EBookBackendSummary *summary, EContact *cont
 
 	/* ID normally should not be NULL for a contact. */
 	/* Added this check as groupwise server sometimes returns
-	 * contacts with NULL id 
+	 * contacts with NULL id
 	 */
 	id = e_contact_get (contact, E_CONTACT_UID);
 	if (!id) {
@@ -923,7 +927,7 @@ func_check(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
 
 	r = e_sexp_result_new(f, ESEXP_RES_BOOL);
 	r->value.bool = truth;
-	
+
 	return r;
 }
 
@@ -945,11 +949,11 @@ static const struct {
 } check_symbols[] = {
 	{ "contains", func_check, 0 },
 	{ "is", func_check, 0 },
-	{ "is_vcard", func_fail, 0 },
 	{ "beginswith", func_check, 0 },
 	{ "endswith", func_check, 0 },
 	{ "exists", func_check, 0 },
 	{ "exists_vcard", func_fail, 0 },
+	{ "is_vcard", func_fail, 0 },
 };
 
 /**

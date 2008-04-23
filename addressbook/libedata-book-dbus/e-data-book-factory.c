@@ -25,6 +25,7 @@
 #include <glib/gi18n.h>
 #include <dbus/dbus-protocol.h>
 #include <dbus/dbus-glib.h>
+#include <dbus/dbus-glib-lowlevel.h>
 #include <dbus/dbus-glib-bindings.h>
 #include <libedataserver/e-data-server-module.h>
 #include "e-book-backend-factory.h"
@@ -33,11 +34,12 @@
 #include "e-book-backend.h"
 #include "e-book-backend-factory.h"
 
-static gboolean impl_BookFactory_getBook(EDataBookFactory *object, const char *IN_client, const char *IN_source, char **OUT_book, GError **error);
+static void impl_BookFactory_getBook(EDataBookFactory *factory, const char *IN_uri, DBusGMethodInvocation *context);
 #include "e-data-book-factory-glue.h"
 
+static gchar *nm_dbus_escape_object_path (const gchar *utf8_string);
+
 static GMainLoop *loop;
-/* TODO: don't have this static */
 static EDataBookFactory *factory;
 static DBusGProxy *bus_proxy, *backup_proxy;
 
@@ -51,10 +53,6 @@ DBusGConnection *connection;
    return (returnval); \
  } \
 }G_STMT_END
-
-#if WITH_BUGBUDDY
-static void setup_segv_handler (void);
-#endif
 
 /* Generate the GObject boilerplate */
 G_DEFINE_TYPE(EDataBookFactory, e_data_book_factory, G_TYPE_OBJECT);
@@ -179,13 +177,11 @@ e_data_book_factory_lookup_backend_factory (EDataBookFactory *factory,
   return backend_factory;
 }
 
-static gchar *nm_dbus_escape_object_path (const gchar *utf8_string);
-
 static char* make_path_name(const char* uri)
 {
   char *s, *path;
   s = nm_dbus_escape_object_path (uri);
-  path = g_strdup_printf("/org/gnome/evolution/dataserver/addressbook/%s", s);
+  path = g_strdup_printf ("/org/gnome/evolution/dataserver/addressbook/%s", s);
   g_free (s);
   return path;
 }
@@ -214,16 +210,19 @@ book_closed_cb (EDataBook *book, const char *client)
   g_hash_table_insert (factory->priv->connections, g_strdup (client), list);
 }
 
-static gboolean
-impl_BookFactory_getBook(EDataBookFactory *factory, const char *IN_client, const char *IN_uri, char **OUT_book, GError **error)
+static void
+impl_BookFactory_getBook(EDataBookFactory *factory, const char *IN_uri, DBusGMethodInvocation *context)
 {
   EDataBook *book;
   EDataBookFactoryPrivate *priv = factory->priv;
   ESource *source;
-  char *path;
-
-  g_set_error_val_if_fail (IN_uri != NULL, FALSE, error, E_DATA_BOOK_FACTORY_ERROR, E_DATA_BOOK_FACTORY_ERROR_GENERIC);
-  g_set_error_val_if_fail (OUT_book != NULL, FALSE, error, E_DATA_BOOK_FACTORY_ERROR, E_DATA_BOOK_FACTORY_ERROR_GENERIC);
+  char *path, *sender;
+  GList *list;
+  
+  if (IN_uri == NULL || IN_uri[0] == '\0') {
+    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, NoSuchBook, _("Empty URI")));
+    return;
+  }
 
   /* Remove a pending exit */
   if (priv->exit_timeout) {
@@ -250,21 +249,17 @@ impl_BookFactory_getBook(EDataBookFactory *factory, const char *IN_client, const
   }
   g_object_unref (source);
 
-  *OUT_book = path;
-
-  {
-    GList *list;
-    char *key;
-    g_mutex_lock (priv->connections_lock);
-    key = g_strdup (IN_client);
-    list = g_hash_table_lookup (priv->connections, key);
-    list = g_list_prepend (list, book);
-    g_hash_table_insert (priv->connections, key, list);
-    g_mutex_unlock (priv->connections_lock);
-  }
+  /* Update the hash of open connections */
+  g_mutex_lock (priv->connections_lock);
+  sender = dbus_g_method_get_sender (context);
+  list = g_hash_table_lookup (priv->connections, sender);
+  list = g_list_prepend (list, book);
+  g_hash_table_insert (priv->connections, sender, list);
+  g_mutex_unlock (priv->connections_lock);
 
   g_mutex_unlock (priv->books_lock);
-  return TRUE;
+
+  dbus_g_method_return (context, path);
 }
 
 static void
@@ -319,10 +314,6 @@ main (int argc, char **argv)
 {
   GError *error = NULL;
   guint32 request_name_ret;
-
-#if WITH_BUGBUDDY
-  setup_segv_handler ();
-#endif
 
   g_type_init ();
   if (!g_thread_supported ()) g_thread_init (NULL);
@@ -406,61 +397,3 @@ static gchar *nm_dbus_escape_object_path (const gchar *utf8_string)
 
 	return g_string_free (string, FALSE);
 }
-
-#if WITH_BUGBUDDY
-#include <pthread.h>
-#include <signal.h>
-#include <unistd.h>
-
-static pthread_mutex_t segv_mutex = PTHREAD_MUTEX_INITIALIZER;
-static pthread_t main_thread;
-
-static void
-gnome_segv_handler (int signo)
-{
-  const char *gnome_segv_path;
-  static int in_segv = 0;
-  char *exec;
-  
-  if (pthread_self() != main_thread) {
-    /* deadlock intentionally in the sub-threads */
-    pthread_kill(main_thread, signo);
-    pthread_mutex_lock(&segv_mutex);
-  }
-  
-  in_segv++;
-  if (in_segv > 2) {
-    /* The fprintf() was segfaulting, we are just totally hosed */
-    _exit (1);
-  } else if (in_segv > 1) {
-    /* dialog display isn't working out */
-    g_printerr (_("Multiple segmentation faults occurred; can't display error dialog\n"));
-    _exit (1);
-  }
-  
-  gnome_segv_path = GNOMEUI_SERVERDIR "/gnome_segv2";
-
-  exec = g_strdup_printf ("%s \"" LIBEXECDIR "/e-addressbook-factory\" %d \"" VERSION "\"",
-                          gnome_segv_path, signo);
-  system (exec);
-  g_free (exec);
-  
-  _exit(1);
-}
-
-static void
-setup_segv_handler (void)
-{
-  struct sigaction sa;
-  
-  sa.sa_flags = 0;
-  sigemptyset (&sa.sa_mask);
-  sa.sa_handler = gnome_segv_handler;
-  sigaction (SIGSEGV, &sa, NULL);
-  sigaction (SIGBUS, &sa, NULL);
-  sigaction (SIGFPE, &sa, NULL);
-  
-  main_thread = pthread_self();
-  pthread_mutex_lock(&segv_mutex);
-}
-#endif /* WITH_BUGBUDDY */

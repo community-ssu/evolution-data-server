@@ -19,7 +19,7 @@ START_TEST(test_photo_read_uri)
 
   photo = e_contact_get (contact, E_CONTACT_PHOTO);
   fail_unless (photo->type == E_CONTACT_PHOTO_TYPE_URI, "Photo type is not URI");
-  fail_unless (strcmp (photo->uri, "http://www.burtonini.com/photo.jpg") == 0, "Photo URI incorrect");
+  fail_unless (strcmp (photo->data.uri, "http://www.burtonini.com/photo.jpg") == 0, "Photo URI incorrect");
   e_contact_photo_free (photo);
   g_object_unref (contact);
 } END_TEST;
@@ -41,8 +41,8 @@ START_TEST(test_photo_read_inlined)
 
   photo = e_contact_get (contact, E_CONTACT_PHOTO);
   fail_unless (photo->type == E_CONTACT_PHOTO_TYPE_INLINED, "Photo type is not inline");
-  fail_unless (photo->inlined.length == 9847, "Photo data size incorrect");
-  fail_unless (craphash (photo->inlined.data, photo->inlined.length) == 3225337096U, "Photo data hash incorrect");
+  fail_unless (photo->data.inlined.length == 9847, "Photo data size incorrect");
+  fail_unless (craphash (photo->data.inlined.data, photo->data.inlined.length) == 3225337096U, "Photo data hash incorrect");
   e_contact_photo_free (photo);
   g_object_unref (contact);
 } END_TEST;
@@ -58,7 +58,7 @@ START_TEST(test_photo_write_uri)
   e_contact_set (contact, E_CONTACT_FULL_NAME, "Fred Smith");
   photo = g_new0 (EContactPhoto, 1);
   photo->type = E_CONTACT_PHOTO_TYPE_URI;
-  photo->uri = g_strdup ("http://www.example.com/photo.jpg");
+  photo->data.uri = g_strdup ("http://www.example.com/photo.jpg");
   e_contact_set (contact, E_CONTACT_PHOTO, photo);
   e_contact_photo_free (photo);
 
@@ -71,7 +71,7 @@ START_TEST(test_photo_write_uri)
   fail_unless (strcmp (e_contact_get_const (contact, E_CONTACT_FULL_NAME), "Fred Smith") == 0, "Name is wrong");
   photo = e_contact_get (contact, E_CONTACT_PHOTO);
   fail_unless (photo->type == E_CONTACT_PHOTO_TYPE_URI, "Photo type is not URI");
-  fail_unless (strcmp (photo->uri, "http://www.example.com/photo.jpg") == 0, "Photo URI incorrect");
+  fail_unless (strcmp (photo->data.uri, "http://www.example.com/photo.jpg") == 0, "Photo URI incorrect");
   e_contact_photo_free (photo);
   g_object_unref (contact);
 } END_TEST;

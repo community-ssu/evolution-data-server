@@ -1,5 +1,5 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
-/* 
+/*
  * pas-backend-card-sexp.c
  * Copyright 1999, 2000, 2001, Ximian, Inc.
  *
@@ -14,13 +14,13 @@
  *
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
- * 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA.
  */
 
 #include <string.h>
-#include <libedataserver/e-sexp.h>
-#include <libedataserver/e-data-server-util.h>
+#include "libedataserver/e-sexp.h"
+#include "libedataserver/e-data-server-util.h"
 #include "e-book-backend-sexp.h"
 
 static GObjectClass *parent_class;
@@ -54,7 +54,7 @@ compare_im (EContact *contact, const char *str,
 			break;
 		}
 	}
-	
+
 	g_list_foreach (aims, (GFunc)g_free, NULL);
 	g_list_free (aims);
 
@@ -160,7 +160,7 @@ compare_name (EContact *contact, const char *str,
 	name = e_contact_get_const (contact, E_CONTACT_FAMILY_NAME);
 	if (name && compare (name, str))
 		return TRUE;
-	
+
 	name = e_contact_get_const (contact, E_CONTACT_GIVEN_NAME);
 	if (name && compare (name, str))
 		return TRUE;
@@ -176,7 +176,7 @@ static gboolean
 compare_address (EContact *contact, const char *str,
 		 char *(*compare)(const char*, const char*))
 {
-	
+
 	int i;
 	gboolean rv = FALSE;
 
@@ -187,19 +187,19 @@ compare_address (EContact *contact, const char *str,
 				(address->street && compare(address->street, str)) ||
 				(address->ext && compare(address->ext, str)) ||
 				(address->locality && compare(address->locality, str)) ||
-				(address->region && compare(address->region, str)) || 
+				(address->region && compare(address->region, str)) ||
 				(address->code && compare(address->code, str)) ||
 				(address->country && compare(address->country, str));
-			
+
 			e_contact_address_free (address);
-		
+
 			if (rv)
 				break;
 		}
 	}
 
 	return rv;
-	
+
 }
 
 static gboolean
@@ -275,7 +275,6 @@ static struct prop_info {
 	LIST_PROP ( "address",   compare_address ),
 	LIST_PROP ( "category-list",  compare_category ),
 };
-static int num_prop_infos = sizeof(prop_info_table) / sizeof(prop_info_table[0]);
 
 static ESExpResult *
 entry_compare(SearchContext *ctx, struct _ESExp *f,
@@ -296,14 +295,14 @@ entry_compare(SearchContext *ctx, struct _ESExp *f,
 		propname = argv[0]->value.string;
 
 		any_field = !strcmp(propname, "x-evolution-any-field");
-		for (i = 0; i < num_prop_infos; i ++) {
+		for (i = 0; i < G_N_ELEMENTS (prop_info_table); i ++) {
 			if (any_field
 			    || !strcmp (prop_info_table[i].query_prop, propname)) {
 				info = &prop_info_table[i];
-		
+
 				if (any_field && info->field_id == E_CONTACT_UID) {
 					/* We need to skip UID from any field contains search
-					 * any-field search should be supported for the 
+					 * any-field search should be supported for the
 					 * visible fields only.
 					 */
 					truth = FALSE;
@@ -311,7 +310,7 @@ entry_compare(SearchContext *ctx, struct _ESExp *f,
 				else if (info->prop_type == PROP_TYPE_NORMAL) {
 					const char *prop = NULL;
 					/* straight string property matches */
-					
+
 					prop = e_contact_get_const (ctx->contact, info->field_id);
 
 					if (prop && compare(prop, argv[1]->value.string)) {
@@ -334,7 +333,7 @@ entry_compare(SearchContext *ctx, struct _ESExp *f,
 					break;
 			}
 		}
-		
+
 	}
 	r = e_sexp_result_new(f, ESEXP_RES_BOOL);
 	r->value.bool = truth;
@@ -358,13 +357,13 @@ vcard_compare(SearchContext *ctx, struct _ESExp *f,
 
 		field = argv[0]->value.string;
 		needle = argv[1]->value.string;
-		
+
 		for (attrs = e_vcard_get_attributes (E_VCARD (ctx->contact)); attrs; attrs = attrs->next) {
 			EVCardAttribute *attr = attrs->data;
 			GList *values;
 			if (g_ascii_strcasecmp (e_vcard_attribute_get_name (attr), field) != 0)
 				continue;
-			
+
 			values = e_vcard_attribute_get_values (attr);
 			for (; values; values = values->next) {
 				const char *value = values->data;
@@ -374,7 +373,7 @@ vcard_compare(SearchContext *ctx, struct _ESExp *f,
 				}
 			}
 		}
-		
+
 	}
 	r = e_sexp_result_new(f, ESEXP_RES_BOOL);
 	r->value.bool = truth;
@@ -468,15 +467,15 @@ func_exists(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
 
 		propname = argv[0]->value.string;
 
-		for (i = 0; i < num_prop_infos; i ++) {
+		for (i = 0; i < G_N_ELEMENTS (prop_info_table); i ++) {
 			if (!strcmp (prop_info_table[i].query_prop, propname)) {
 				info = &prop_info_table[i];
-				
+
 				if (info->prop_type == PROP_TYPE_NORMAL) {
 					const char *prop = NULL;
 					/* searches where the query's property
 					   maps directly to an ecard property */
-					
+
 					prop = e_contact_get_const (ctx->contact, info->field_id);
 
 					if (prop && *prop)
@@ -490,7 +489,7 @@ func_exists(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
 				break;
 			}
 		}
-		
+
 	}
 	r = e_sexp_result_new(f, ESEXP_RES_BOOL);
 	r->value.bool = truth;
@@ -523,7 +522,7 @@ func_exists_vcard(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *
 			}
 		}
 	}
-	
+
 	r = e_sexp_result_new(f, ESEXP_RES_BOOL);
 	r->value.bool = truth;
 

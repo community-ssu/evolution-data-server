@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  *
  * Author: Dan Winship <danw@ximian.com>
  */
@@ -30,9 +30,9 @@
 
 /**
  * e_uid_new:
- * 
+ *
  * Generate a new unique string for use e.g. in account lists.
- * 
+ *
  * Return value: The newly generated UID.  The caller should free the string
  * when it's done with it.
  **/
@@ -43,18 +43,7 @@ e_uid_new (void)
 	static char *hostname;
 
 	if (!hostname) {
-#if GLIB_CHECK_VERSION (2, 8, 0)
 		hostname = (char *) g_get_host_name ();
-#else
-		static char buffer [512];
-
-		if ((gethostname (buffer, sizeof (buffer) - 1) == 0) &&
-		    (buffer [0] != 0))
-			hostname = buffer;
-		else
-			hostname = "localhost";
-
-#endif
 	}
 
 	return g_strdup_printf ("%lu.%lu.%d@%s",

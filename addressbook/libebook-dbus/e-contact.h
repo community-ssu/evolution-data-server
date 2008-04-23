@@ -199,6 +199,8 @@ typedef enum {
 
 	E_CONTACT_SIP,
 
+	E_CONTACT_GEO,	/* structured field (EContactGeo) */	
+
 	E_CONTACT_FIELD_LAST,
 	E_CONTACT_FIELD_FIRST        = E_CONTACT_UID,
 
@@ -223,6 +225,11 @@ typedef struct {
 	char *suffixes;
 } EContactName;
 
+typedef struct {
+	double latitude;
+	double longitude;
+} EContactGeo;
+
 typedef enum {
 	E_CONTACT_PHOTO_TYPE_INLINED,
 	E_CONTACT_PHOTO_TYPE_URI
@@ -233,7 +240,7 @@ typedef struct {
 	union {
 		struct {
 			char *mime_type;
-			int length;
+			gsize length;
 			guchar *data;
 		} inlined;
 		char *uri;
@@ -254,13 +261,13 @@ typedef struct {
 } EContactAddress;
 
 typedef struct {
-	int year;
-	int month;
-	int day;
+	unsigned int year;
+	unsigned int month;
+	unsigned int day;
 } EContactDate;
 
 typedef struct {
-	int length;
+	gsize length;
 	char *data;
 } EContactCert;
 
@@ -316,6 +323,9 @@ void                    e_contact_name_free        (EContactName *name);
 
 GType                   e_contact_photo_get_type   (void);
 void                    e_contact_photo_free       (EContactPhoto *photo);
+
+GType			e_contact_geo_get_type	   (void);
+void			e_contact_geo_free	   (EContactGeo *geo);
 
 GType                   e_contact_cert_get_type    (void);
 void                    e_contact_cert_free        (EContactCert *cert);

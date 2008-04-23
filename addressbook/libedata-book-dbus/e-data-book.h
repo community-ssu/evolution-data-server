@@ -34,6 +34,7 @@ struct _EDataBook
   GObject parent;
   EBookBackend *backend;
   ESource *source;
+  /* TODO: move to private data */
   EDataBookClosedCallback closed_cb;
 };
 

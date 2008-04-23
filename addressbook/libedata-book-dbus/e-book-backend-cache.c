@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -126,7 +126,7 @@ e_book_backend_cache_finalize (GObject *object)
 			g_free (priv->uri);
 			priv->uri = NULL;
 		}
-	
+
 
 		g_free (priv);
 		cache->priv = NULL;
@@ -143,16 +143,12 @@ e_book_backend_cache_constructor (GType type,
 	GObject *obj;
 	const char *uri;
 	char *cache_file;
-	EBookBackendCacheClass *klass;
-	GObjectClass *parent_class;
 
 	/* Invoke parent constructor. */
-	klass = E_BOOK_BACKEND_CACHE_CLASS (g_type_class_peek (E_TYPE_BOOK_BACKEND_CACHE));
-	parent_class = G_OBJECT_CLASS (g_type_class_peek_parent (klass));
 	obj = parent_class->constructor (type,
 					 n_construct_properties,
 					 construct_properties);
-  
+
 	/* extract uid */
 	if (!g_ascii_strcasecmp ( g_param_spec_get_name (construct_properties->pspec), "uri")) {
 		uri = g_value_get_string (construct_properties->value);
@@ -231,7 +227,7 @@ EBookBackendCache *
 e_book_backend_cache_new (const char *uri)
 {
 	EBookBackendCache *cache;
-        
+
        	cache = g_object_new (E_TYPE_BOOK_BACKEND_CACHE, "uri", uri, NULL);
 
         return cache;
@@ -260,7 +256,7 @@ e_book_backend_cache_get_contact (EBookBackendCache *cache, const char *uid)
 	vcard_str = e_file_cache_get_object (E_FILE_CACHE (cache), uid);
 	if (vcard_str) {
 		contact = e_contact_new_from_vcard (vcard_str);
-		
+
 	}
 
 
@@ -315,7 +311,7 @@ e_book_backend_cache_add_contact (EBookBackendCache *cache,
 gboolean
 e_book_backend_cache_remove_contact (EBookBackendCache *cache,
 				    const char *uid)
-				      
+
 {
 	gboolean retval;
 	EBookBackendCachePrivate *priv;
@@ -345,7 +341,7 @@ e_book_backend_cache_remove_contact (EBookBackendCache *cache,
  *
  * Return value: %TRUE if the cache contains the contact, %FALSE otherwise.
  **/
-gboolean 
+gboolean
 e_book_backend_cache_check_contact (EBookBackendCache *cache, const char *uid)
 {
 
@@ -358,7 +354,7 @@ e_book_backend_cache_check_contact (EBookBackendCache *cache, const char *uid)
 	priv = cache->priv;
 
 	retval = FALSE;
-	if (e_file_cache_get_object (E_FILE_CACHE (cache), uid)) 
+	if (e_file_cache_get_object (E_FILE_CACHE (cache), uid))
 		retval = TRUE;
 	return retval;
 }
@@ -390,7 +386,7 @@ e_book_backend_cache_get_contacts (EBookBackendCache *cache, const char *query)
 		if (!sexp)
 			return NULL;
 	}
-       
+
 
         lcache = l = e_file_cache_get_objects (E_FILE_CACHE (cache));
 
@@ -404,7 +400,7 @@ e_book_backend_cache_get_contacts (EBookBackendCache *cache, const char *query)
 			else
 				g_object_unref (contact);
                 }
-                
+
         }
 	if (lcache)
 		g_slist_free (lcache);
@@ -430,17 +426,17 @@ e_book_backend_cache_search (EBookBackendCache *cache, const char *query)
 {
 	GList *matching_contacts, *temp;
 	GPtrArray *ptr_array;
-	
+
 	matching_contacts = e_book_backend_cache_get_contacts (cache, query);
 	ptr_array = g_ptr_array_new ();
-	
+
 	temp = matching_contacts;
 	for (; matching_contacts != NULL; matching_contacts = g_list_next (matching_contacts)) {
 		g_ptr_array_add (ptr_array, e_contact_get (matching_contacts->data, E_CONTACT_UID));
 		g_object_unref (matching_contacts->data);
 	}
 	g_list_free (temp);
-	
+
 	return ptr_array;
 }
 
@@ -452,18 +448,18 @@ e_book_backend_cache_search (EBookBackendCache *cache, const char *query)
  *
  * Return value: %TRUE if cache exists, %FALSE if not.
  **/
-gboolean 
+gboolean
 e_book_backend_cache_exists (const char *uri)
 {
 	char *file_name;
 	gboolean exists = FALSE;
 	file_name = get_filename_from_uri (uri);
-	
+
 	if (file_name && g_file_test (file_name, G_FILE_TEST_EXISTS)) {
 		exists = TRUE;
 		g_free (file_name);
 	}
-	
+
 	return exists;
 }
 
@@ -471,7 +467,7 @@ e_book_backend_cache_exists (const char *uri)
  * e_book_backend_cache_set_populated:
  * @cache: an #EBookBackendCache
  *
- * Flags @cache as being populated - that is, it is up-to-date on the 
+ * Flags @cache as being populated - that is, it is up-to-date on the
  * contents of the book it's caching.
  **/
 void
@@ -479,7 +475,7 @@ e_book_backend_cache_set_populated (EBookBackendCache *cache)
 {
   	g_return_if_fail (E_IS_BOOK_BACKEND_CACHE (cache));
 	e_file_cache_add_object (E_FILE_CACHE (cache), "populated", "TRUE");
-	
+
 }
 
 /**
@@ -496,7 +492,7 @@ e_book_backend_cache_is_populated (EBookBackendCache *cache)
   	g_return_val_if_fail (E_IS_BOOK_BACKEND_CACHE (cache), FALSE);
 	if (e_file_cache_get_object (E_FILE_CACHE (cache), "populated"))
 		return TRUE;
-	return FALSE;	
+	return FALSE;
 }
 
 void
@@ -509,8 +505,7 @@ e_book_backend_cache_set_time (EBookBackendCache *cache, const char *t)
 char *
 e_book_backend_cache_get_time (EBookBackendCache *cache)
 {
-	g_return_val_if_fail (E_IS_BOOK_BACKEND_CACHE (cache), 0);
-	const char *t = e_file_cache_get_object (E_FILE_CACHE (cache), "last_update_time");
-	return t;
+	g_return_val_if_fail (E_IS_BOOK_BACKEND_CACHE (cache), NULL);
+	return g_strdup (e_file_cache_get_object (E_FILE_CACHE (cache), "last_update_time"));
 }
 

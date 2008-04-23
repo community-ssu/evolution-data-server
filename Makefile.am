@@ -30,6 +30,7 @@ EXTRA_DIST = 						\
 	intltool-update.in				\
 	intltool-extract.in				\
 	$(pkgconfig_DATA:-$(API_VERSION).pc=.pc.in) 	\
+	autogen.sh					\
 	$(LIBDB_FILES)
 
 DISTCLEANFILES = intltool-extract intltool-merge intltool-update iconv-detect.h $(pkgconfig_DATA)

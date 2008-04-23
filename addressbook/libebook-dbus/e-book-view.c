@@ -266,7 +266,13 @@ e_book_view_start (EBookView *book_view)
   if (book_view->priv->view_proxy) {
     org_gnome_evolution_dataserver_addressbook_BookView_start (book_view->priv->view_proxy, &error);
     if (error) {
-      g_printerr("Cannot start book view: %s\n", error->message);
+      g_warning ("Cannot start book view: %s\n", error->message);
+
+      /* Fake a sequence-complete so that the application knows this failed */
+      /* TODO: use get_status_from_error */
+      g_signal_emit (book_view, signals[SEQUENCE_COMPLETE], 0,
+		     E_BOOK_ERROR_CORBA_EXCEPTION);
+
       g_error_free (error);
     }
   }
@@ -290,7 +296,7 @@ e_book_view_stop (EBookView *book_view)
   if (book_view->priv->view_proxy) {
     org_gnome_evolution_dataserver_addressbook_BookView_stop (book_view->priv->view_proxy, &error);
     if (error) {
-      g_printerr("Cannot stop book view: %s\n", error->message);
+      g_warning ("Cannot stop book view: %s\n", error->message);
       g_error_free (error);
     }
   }

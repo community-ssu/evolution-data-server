@@ -51,8 +51,8 @@
 #define E_DATA_SERVER_INTERFACE_CHECK_OAF_ID "OAFIID:GNOME_Evolution_DataServer_InterfaceCheck"
 #define E_DATA_SERVER_LOGGING_OAF_ID "OAFIID:GNOME_Evolution_DataServer_Logging"
 
-#define E_DATA_CAL_FACTORY_OAF_ID "OAFIID:GNOME_Evolution_DataServer_CalFactory:" BASE_VERSION
-#define E_DATA_BOOK_FACTORY_OAF_ID "OAFIID:GNOME_Evolution_DataServer_BookFactory:" BASE_VERSION
+#define E_DATA_CAL_FACTORY_OAF_ID "OAFIID:GNOME_Evolution_DataServer_CalFactory:" API_VERSION
+#define E_DATA_BOOK_FACTORY_OAF_ID "OAFIID:GNOME_Evolution_DataServer_BookFactory:" API_VERSION
 
 /* The and addressbook calendar factories */
 
@@ -73,7 +73,6 @@ static guint termination_handler_id;
 
 static GStaticMutex termination_lock = G_STATIC_MUTEX_INIT;
 
-#if WITH_BUGBUDDY
 #include <pthread.h>
 
 static pthread_mutex_t segv_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -127,7 +126,6 @@ setup_segv_handler (void)
 	main_thread = pthread_self();
 	pthread_mutex_lock(&segv_mutex);
 }
-#endif /* WITH_BUGBUDDY */
 
 
 /* Termination */
@@ -304,9 +302,7 @@ main (int argc, char **argv)
 			  CORBA_OBJECT_NIL,
 			  CORBA_OBJECT_NIL);
 	
-#if WITH_BUGBUDDY
 	setup_segv_handler ();
-#endif /* WITH_BUGBUDDY */
 
 	e_data_server_module_init ();
 

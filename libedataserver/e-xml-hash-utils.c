@@ -1,5 +1,5 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
-/* 
+/*
  * Copyright (C) 2001-2003 Ximian, Inc.
  *
  * This program is free software; you can redistribute it and/or
@@ -13,8 +13,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #include "config.h"
@@ -35,7 +35,7 @@
 
 /**
  * e_xml_to_hash:
- * @doc: The #xmlDoc to store in a hash table. 
+ * @doc: The #xmlDoc to store in a hash table.
  * @type: The value type to use as a key in the hash table.
  *
  * Creates a #GHashTable representation of the #xmlDoc @doc.
@@ -50,9 +50,8 @@ GHashTable *
 e_xml_to_hash (xmlDoc *doc, EXmlHashType type)
 {
 	xmlNode *root, *node;
-	xmlChar *value;
+	xmlChar *key, *value;
 	GHashTable *hash;
-	char *key;
 
 	hash = g_hash_table_new (g_str_hash, g_str_equal);
 
@@ -62,8 +61,8 @@ e_xml_to_hash (xmlDoc *doc, EXmlHashType type)
 			continue;
 
 		if (type == E_XML_HASH_TYPE_OBJECT_UID &&
-		    !strcmp (node->name, "object"))
-			key = xmlGetProp (node, "uid");
+		    !strcmp ((char*)node->name, "object"))
+			key = xmlGetProp (node, (xmlChar*)"uid");
 		else
 			key = xmlStrdup (node->name);
 
@@ -79,7 +78,7 @@ e_xml_to_hash (xmlDoc *doc, EXmlHashType type)
 			continue;
 		}
 
-		g_hash_table_insert (hash, g_strdup (key), g_strdup (value));
+		g_hash_table_insert (hash, g_strdup ((char*)key), g_strdup ((char*)value));
 		xmlFree (key);
 		xmlFree (value);
 	}
@@ -102,10 +101,10 @@ foreach_save_func (gpointer key, gpointer value, gpointer user_data)
 	xmlChar *enc;
 
 	if (sd->type == E_XML_HASH_TYPE_OBJECT_UID) {
-		new_node = xmlNewNode (NULL, "object");
-		xmlNewProp (new_node, "uid", (const char *) key);
+		new_node = xmlNewNode (NULL, (xmlChar*)"object");
+		xmlNewProp (new_node, (xmlChar*)"uid", (const xmlChar *) key);
 	} else
-		new_node = xmlNewNode (NULL, (const char *) key);
+		new_node = xmlNewNode (NULL, (const xmlChar *) key);
 
 	enc = xmlEncodeEntitiesReentrant (sd->doc, value);
 	xmlNodeSetContent (new_node, enc);
@@ -132,11 +131,11 @@ e_xml_from_hash (GHashTable *hash, EXmlHashType type, const char *root_name)
 	xmlDoc *doc;
 	struct save_data sd;
 
-	doc = xmlNewDoc ("1.0");
-	doc->encoding = g_strdup ("UTF-8");
+	doc = xmlNewDoc ((xmlChar*)"1.0");
+	doc->encoding = xmlStrdup ((xmlChar*)"UTF-8");
 	sd.type = type;
 	sd.doc = doc;
-	sd.root = xmlNewDocNode (doc, NULL, root_name, NULL);
+	sd.root = xmlNewDocNode (doc, NULL, (xmlChar*)root_name, NULL);
 	xmlDocSetRootElement (doc, sd.root);
 
 	g_hash_table_foreach (hash, foreach_save_func, &sd);
@@ -199,7 +198,7 @@ e_xmlhash_new (const char *filename)
 		doc = e_xml_parse_file (filename);
 		if (!doc) {
 			e_xmlhash_destroy (hash);
-			
+
 			return NULL;
 		}
 		hash->objects = e_xml_to_hash (doc, E_XML_HASH_TYPE_OBJECT_UID);
@@ -207,7 +206,7 @@ e_xmlhash_new (const char *filename)
 	} else {
 		hash->objects = g_hash_table_new (g_str_hash, g_str_equal);
 	}
-	
+
 	return hash;
 }
 
@@ -264,7 +263,7 @@ e_xmlhash_remove (EXmlHash *hash, const char *key)
  *
  * Returns: E_XMLHASH_STATUS_SAME if the value and @compare_data are
  *          equal,E_XMLHASH_STATUS_DIFFERENT if they are different, or
- *          E_XMLHASH_STATUS_NOT_FOUND if there is no entry in @hash with 
+ *          E_XMLHASH_STATUS_NOT_FOUND if there is no entry in @hash with
  *          its key equal to @key.
  **/
 EXmlHashStatus

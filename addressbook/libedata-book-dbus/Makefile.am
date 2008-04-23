@@ -31,6 +31,7 @@ libedata_book_1_2_la_SOURCES =				\
 	e-data-book.c					\
 	ximian-vcard.h					\
 	e-book-backend-sync.c \
+	opid.c opid.h \
 	$(ENUM_GENERATED)
 
 libedata_book_1_2_la_LIBADD =					\

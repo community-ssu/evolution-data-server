@@ -2,9 +2,9 @@ Change the system addressbook path.
 
 Index: addressbook/libebook-dbus/e-book.c
 ===================================================================
---- addressbook/libebook-dbus/e-book.c.orig	2008-02-19 11:04:22.000000000 +0000
-+++ addressbook/libebook-dbus/e-book.c	2008-02-19 11:07:02.000000000 +0000
-@@ -440,7 +440,8 @@
+--- addressbook/libebook-dbus/e-book.c.orig	2008-04-23 14:36:51.000000000 +0100
++++ addressbook/libebook-dbus/e-book.c	2008-04-23 14:37:01.000000000 +0100
+@@ -437,7 +437,8 @@
  		char *uri;
  
  		filename = g_build_filename (g_get_home_dir(),

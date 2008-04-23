@@ -43,9 +43,6 @@ int main (void)
   nf = srunner_ntests_failed(sr);
 
   srunner_free(sr);
-  suite_free(hash_suite);
-  suite_free(parse_suite);
-  suite_free(photo_suite);
 
   return nf;
 }

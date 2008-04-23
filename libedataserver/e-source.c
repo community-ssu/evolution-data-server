@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  *
  * Author: Ettore Perazzoli <ettore@ximian.com>
  */
@@ -31,10 +31,6 @@
 #define ES_CLASS(obj)  E_SOURCE_CLASS (G_OBJECT_GET_CLASS (obj))
 
 
-/* String used to put the color in the XML.  */
-#define COLOR_FORMAT_STRING "%06x"
-
-
 /* Private members.  */
 
 struct _ESourcePrivate {
@@ -46,9 +42,8 @@ struct _ESourcePrivate {
 	char *absolute_uri;
 
 	gboolean readonly;
-	
-	gboolean has_color;
-	guint32 color;
+
+	gchar *color_spec;
 
 	GHashTable *properties;
 };
@@ -88,6 +83,7 @@ impl_finalize (GObject *object)
 	g_free (priv->name);
 	g_free (priv->relative_uri);
 	g_free (priv->absolute_uri);
+	g_free (priv->color_spec);
 
 	g_hash_table_destroy (priv->properties);
 
@@ -120,7 +116,7 @@ e_source_class_init (ESourceClass *class)
 	object_class->dispose  = impl_dispose;
 	object_class->finalize = impl_finalize;
 
-	signals[CHANGED] = 
+	signals[CHANGED] =
 		g_signal_new ("changed",
 			      G_OBJECT_CLASS_TYPE (object_class),
 			      G_SIGNAL_RUN_LAST,
@@ -140,6 +136,28 @@ e_source_init (ESource *source)
 
 	priv->properties = g_hash_table_new_full (g_str_hash, g_str_equal,
 						  g_free, g_free);
+}
+
+/* Private methods. */
+
+static gboolean
+set_color_spec (ESource *source,
+                const gchar *color_spec)
+{
+	ESourcePrivate *priv = source->priv;
+	gboolean do_cmp;
+
+	if (color_spec == priv->color_spec)
+		return FALSE;
+
+	do_cmp = (color_spec != NULL && priv->color_spec != NULL);
+	if (do_cmp && g_ascii_strcasecmp (color_spec, priv->color_spec) == 0)
+		return FALSE;
+
+	g_free (priv->color_spec);
+	priv->color_spec = g_strdup (color_spec);
+
+	return TRUE;
 }
 
 /* Public methods.  */
@@ -184,13 +202,13 @@ e_source_new_from_xml_node (xmlNodePtr node)
 	ESource *source;
 	xmlChar *uid;
 
-	uid = xmlGetProp (node, "uid");
+	uid = xmlGetProp (node, (xmlChar*)"uid");
 	if (uid == NULL)
 		return NULL;
 
 	source = g_object_new (e_source_get_type (), NULL);
 
-	source->priv->uid = g_strdup (uid);
+	source->priv->uid = g_strdup ((char*)uid);
 	xmlFree (uid);
 
 	if (e_source_update_from_xml_node (source, node, NULL))
@@ -237,14 +255,14 @@ import_properties (ESource *source,
 	for (prop_node = prop_root->children; prop_node; prop_node = prop_node->next) {
 		xmlChar *name, *value;
 
-		if (!prop_node->name || strcmp (prop_node->name, "property"))
+		if (!prop_node->name || strcmp ((char*)prop_node->name, "property"))
 			continue;
 
-		name = xmlGetProp (prop_node, "name");
-		value = xmlGetProp (prop_node, "value");
+		name = xmlGetProp (prop_node, (xmlChar*)"name");
+		value = xmlGetProp (prop_node, (xmlChar*)"value");
 
 		if (name && value)
-			g_hash_table_insert (priv->properties, g_strdup (name), g_strdup (value));
+			g_hash_table_insert (priv->properties, g_strdup ((char*)name), g_strdup ((char*)value));
 
 		if (name)
 			xmlFree (name);
@@ -285,9 +303,9 @@ compare_str_hashes (GHashTable *table1, GHashTable *table2)
  * e_source_update_from_xml_node:
  * @source: An ESource.
  * @node: A pointer to the node to parse.
- * 
+ *
  * Update the ESource properties from @node.
- * 
+ *
  * Return value: %TRUE if the data in @node was recognized and parsed into
  * acceptable values for @source, %FALSE otherwise.
  **/
@@ -299,67 +317,64 @@ e_source_update_from_xml_node (ESource *source,
 	xmlChar *name;
 	xmlChar *relative_uri;
 	xmlChar *absolute_uri;
-	xmlChar *color_string;
-	gboolean retval;
+	xmlChar *color_spec;
+	xmlChar *color;
+	gboolean retval = FALSE;
 	gboolean changed = FALSE;
 
-	name = xmlGetProp (node, "name");
-	relative_uri = xmlGetProp (node, "relative_uri");
-	absolute_uri = xmlGetProp (node, "uri");
-	color_string = xmlGetProp (node, "color");
+	name = xmlGetProp (node, (xmlChar*)"name");
+	relative_uri = xmlGetProp (node, (xmlChar*)"relative_uri");
+	absolute_uri = xmlGetProp (node, (xmlChar*)"uri");
+	color_spec = xmlGetProp (node, (xmlChar*)"color_spec");
+	color = xmlGetProp (node, (xmlChar*)"color");  /* obsolete */
 
-	if (name == NULL || (relative_uri == NULL && absolute_uri == NULL)) {
-		retval = FALSE;
+	if (name == NULL || (relative_uri == NULL && absolute_uri == NULL))
 		goto done;
-	}
+
+	if (color_spec != NULL && color != NULL)
+		goto done;
 
 	if (source->priv->name == NULL
-	    || strcmp (name, source->priv->name) != 0
+	    || strcmp ((char*)name, source->priv->name) != 0
 	    || source->priv->relative_uri == NULL
 	    || relative_uri != NULL
-	    || strcmp (relative_uri, source->priv->relative_uri) != 0) {
+	    || strcmp ((char*)relative_uri, source->priv->relative_uri) != 0) {
 		g_free (source->priv->name);
-		source->priv->name = g_strdup (name);
+		source->priv->name = g_strdup ((char*)name);
 
 		g_free (source->priv->relative_uri);
-		source->priv->relative_uri = g_strdup (relative_uri);
+		source->priv->relative_uri = g_strdup ((char*)relative_uri);
 
 		changed = TRUE;
 	}
 
 	if (absolute_uri != NULL) {
 		g_free (source->priv->absolute_uri);
-		source->priv->absolute_uri = g_strdup (absolute_uri);
+		source->priv->absolute_uri = g_strdup ((char*)absolute_uri);
 		changed = TRUE;
 	}
 
-	if (color_string == NULL) {
-		if (source->priv->has_color) {
-			source->priv->has_color = FALSE;
-			changed = TRUE;
-		}
+	if (color == NULL) {
+		/* It is okay for color_spec to be NULL. */
+		changed |= set_color_spec (source, (char*)color_spec);
 	} else {
-		guint32 color = 0;
-
-		sscanf (color_string, COLOR_FORMAT_STRING, &color);
-		if (! source->priv->has_color || source->priv->color != color) {
-			source->priv->has_color = TRUE;
-			source->priv->color = color;
-			changed = TRUE;
-		}
+		gchar buffer[8];
+		g_snprintf (buffer, sizeof (buffer), "#%s", color);
+		changed |= set_color_spec (source, buffer);
 	}
+
 	if (g_hash_table_size (source->priv->properties) && !node->children) {
 		g_hash_table_destroy (source->priv->properties);
 		source->priv->properties = g_hash_table_new_full (g_str_hash, g_str_equal,
 								  g_free, g_free);
 		changed = TRUE;
 	}
-	
+
 	for (node = node->children; node; node = node->next) {
 		if (!node->name)
 			continue;
 
-		if (!strcmp (node->name, "properties")) {
+		if (!strcmp ((char*)node->name, "properties")) {
 			GHashTable *temp = source->priv->properties;
 			source->priv->properties = g_hash_table_new_full (g_str_hash, g_str_equal,
 									  g_free, g_free);
@@ -386,8 +401,10 @@ e_source_update_from_xml_node (ESource *source,
 		xmlFree (relative_uri);
 	if (absolute_uri != NULL)
 		xmlFree (absolute_uri);
-	if (color_string != NULL)
-		xmlFree (color_string);
+	if (color_spec != NULL)
+		xmlFree (color_spec);
+	if (color != NULL)
+		xmlFree (color);
 
 	return retval;
 }
@@ -395,23 +412,23 @@ e_source_update_from_xml_node (ESource *source,
 /**
  * e_source_name_from_xml_node:
  * @node: A pointer to an XML node.
- * 
+ *
  * Assuming that @node is a valid ESource specification, retrieve the name of
  * the source from it.
- * 
+ *
  * Return value: Name of the source in the specified @node.  The caller must
  * free the string.
  **/
 char *
 e_source_uid_from_xml_node (xmlNodePtr node)
 {
-	xmlChar *uid = xmlGetProp (node, "uid");
+	xmlChar *uid = xmlGetProp (node, (xmlChar*)"uid");
 	char *retval;
 
 	if (uid == NULL)
 		return NULL;
 
-	retval = g_strdup (uid);
+	retval = g_strdup ((char*)uid);
 	xmlFree (uid);
 	return retval;
 }
@@ -423,7 +440,7 @@ e_source_build_absolute_uri (ESource *source)
 	gchar *uri_str;
 
 	g_return_val_if_fail (source->priv->group != NULL, NULL);
-	
+
 	base_uri_str = e_source_group_peek_base_uri (source->priv->group);
 
 	/* If last character in base URI is a slash, just concat the
@@ -454,7 +471,7 @@ e_source_set_group (ESource *source,
 
 	if (source->priv->readonly)
 		return;
-	
+
 	if (source->priv->group == group)
 		return;
 
@@ -478,7 +495,7 @@ e_source_set_name (ESource *source,
 
 	if (source->priv->readonly)
 		return;
-	
+
 	if (source->priv->name != NULL &&
 	    strcmp (source->priv->name, name) == 0)
 		return;
@@ -499,7 +516,7 @@ e_source_set_relative_uri (ESource *source,
 
 	if (source->priv->readonly)
 		return;
-	
+
 	if (source->priv->relative_uri == relative_uri)
 		return;
 
@@ -507,7 +524,7 @@ e_source_set_relative_uri (ESource *source,
 	source->priv->relative_uri = g_strdup (relative_uri);
 
 	/* reset the absolute uri */
-	if (source->priv->absolute_uri && 
+	if (source->priv->absolute_uri &&
 	    (absolute_uri = e_source_build_absolute_uri (source))) {
 		g_free (source->priv->absolute_uri);
 		source->priv->absolute_uri = absolute_uri;
@@ -544,25 +561,19 @@ e_source_set_readonly (ESource  *source,
 	source->priv->readonly = readonly;
 
 	g_signal_emit (source, signals[CHANGED], 0);
-	
+
 }
 
 void
 e_source_set_color (ESource *source,
 		    guint32 color)
 {
+	gchar color_spec[8];
+
 	g_return_if_fail (E_IS_SOURCE (source));
 
-	if (source->priv->readonly)
-		return;
-	
-	if (source->priv->has_color && source->priv->color == color)
-		return;
-
-	source->priv->has_color = TRUE;
-	source->priv->color = color;
-
-	g_signal_emit (source, signals[CHANGED], 0);
+	g_snprintf (color_spec, sizeof (color_spec), "#%06x", color);
+	e_source_set_color_spec (source, color_spec);
 }
 
 void
@@ -570,13 +581,29 @@ e_source_unset_color (ESource *source)
 {
 	g_return_if_fail (E_IS_SOURCE (source));
 
-	if (! source->priv->has_color)
-		return;
-
-	source->priv->has_color = FALSE;
-	g_signal_emit (source, signals[CHANGED], 0);
+	e_source_set_color_spec (source, NULL);
 }
 
+/**
+ * e_source_set_color_spec:
+ * @source: an ESource
+ * @color_spec: a string specifying the color
+ *
+ * Store a textual representation of a color in @source.  The @color_spec
+ * string should be parsable by #gdk_color_parse(), or %NULL to unset the
+ * color in @source.
+ *
+ * Since: 1.10
+ **/
+void
+e_source_set_color_spec (ESource *source,
+		         const gchar *color_spec)
+{
+	g_return_if_fail (E_IS_SOURCE (source));
+
+	if (!source->priv->readonly && set_color_spec (source, color_spec))
+		g_signal_emit (source, signals[CHANGED], 0);
+}
 
 ESourceGroup *
 e_source_peek_group (ESource *source)
@@ -618,6 +645,25 @@ e_source_peek_absolute_uri (ESource *source)
 	return source->priv->absolute_uri;
 }
 
+/**
+ * e_source_peek_color_spec:
+ * @source: an ESource
+ *
+ * Return the textual representation of the color for @source, or %NULL if it
+ * has none.  The returned string should be parsable by #gdk_color_parse().
+ *
+ * Return value: a string specifying the color
+ *
+ * Since: 1.10
+ **/
+const char *
+e_source_peek_color_spec (ESource *source)
+{
+	g_return_val_if_fail (E_IS_SOURCE (source), NULL);
+
+	return source->priv->color_spec;
+}
+
 gboolean
 e_source_get_readonly (ESource *source)
 {
@@ -632,9 +678,9 @@ e_source_get_readonly (ESource *source)
  * @source: An ESource
  * @color_return: Pointer to a variable where the returned color will be
  * stored.
- * 
+ *
  * If @source has an associated color, return it in *@color_return.
- * 
+ *
  * Return value: %TRUE if the @source has a defined color (and hence
  * *@color_return was set), %FALSE otherwise.
  **/
@@ -642,13 +688,21 @@ gboolean
 e_source_get_color (ESource *source,
 		    guint32 *color_return)
 {
+	const gchar *color_spec;
+	guint32 color;
+
 	g_return_val_if_fail (E_IS_SOURCE (source), FALSE);
 
-	if (! source->priv->has_color)
+	color_spec = e_source_peek_color_spec (source);
+
+	if (color_spec == NULL)
+		return FALSE;
+
+	if (sscanf (color_spec, "#%06x", &color) != 1)
 		return FALSE;
 
 	if (color_return != NULL)
-		*color_return = source->priv->color;
+		*color_return = color;
 
 	return TRUE;
 }
@@ -673,13 +727,13 @@ e_source_get_uri (ESource *source)
 
 
 static void
-property_dump_cb (const gchar *key, const gchar *value, xmlNodePtr root)
+property_dump_cb (const xmlChar *key, const xmlChar *value, xmlNodePtr root)
 {
 	xmlNodePtr node;
 
-	node = xmlNewChild (root, NULL, "property", NULL);
-	xmlSetProp (node, "name", key);
-	xmlSetProp (node, "value", value);
+	node = xmlNewChild (root, NULL, (xmlChar*)"property", NULL);
+	xmlSetProp (node, (xmlChar*)"name", key);
+	xmlSetProp (node, (xmlChar*)"value", value);
 }
 
 
@@ -688,38 +742,32 @@ dump_common_to_xml_node (ESource *source,
 			 xmlNodePtr parent_node)
 {
 	ESourcePrivate *priv;
-	gboolean has_color;
-	guint32 color;
 	xmlNodePtr node;
 	const char *abs_uri = NULL, *relative_uri = NULL;
 
 	priv = source->priv;
 
 	if (parent_node)
-		node = xmlNewChild (parent_node, NULL, "source", NULL);
+		node = xmlNewChild (parent_node, NULL, (xmlChar*)"source", NULL);
 	else
-		node = xmlNewNode (NULL, "source");
+		node = xmlNewNode (NULL, (xmlChar*)"source");
 
-	xmlSetProp (node, "uid", e_source_peek_uid (source));
-	xmlSetProp (node, "name", e_source_peek_name (source));
+	xmlSetProp (node, (xmlChar*)"uid", (xmlChar*)e_source_peek_uid (source));
+	xmlSetProp (node, (xmlChar*)"name", (xmlChar*)e_source_peek_name (source));
 	abs_uri = e_source_peek_absolute_uri (source);
 	relative_uri = e_source_peek_relative_uri (source);
 	if (abs_uri)
-		xmlSetProp (node, "uri", abs_uri);
+		xmlSetProp (node, (xmlChar*)"uri", (xmlChar*)abs_uri);
 	if (relative_uri)
-		xmlSetProp (node, "relative_uri", relative_uri);
-	
-	has_color = e_source_get_color (source, &color);
-	if (has_color) {
-		char *color_string = g_strdup_printf (COLOR_FORMAT_STRING, color);
-		xmlSetProp (node, "color", color_string);
-		g_free (color_string);
-	}
+		xmlSetProp (node, (xmlChar*)"relative_uri", (xmlChar*)relative_uri);
+
+	if (priv->color_spec != NULL)
+		xmlSetProp (node, (xmlChar*)"color_spec", (xmlChar*)priv->color_spec);
 
 	if (g_hash_table_size (priv->properties) != 0) {
 		xmlNodePtr properties_node;
 
-		properties_node = xmlNewChild (node, NULL, "properties", NULL);
+		properties_node = xmlNewChild (node, NULL, (xmlChar*)"properties", NULL);
 		g_hash_table_foreach (priv->properties, (GHFunc) property_dump_cb, properties_node);
 	}
 
@@ -749,13 +797,13 @@ e_source_to_standalone_xml (ESource *source)
 
 	g_return_val_if_fail (E_IS_SOURCE (source), NULL);
 
-	doc = xmlNewDoc ("1.0");
+	doc = xmlNewDoc ((xmlChar*)"1.0");
 	node = dump_common_to_xml_node (source, NULL);
 
 	xmlDocSetRootElement (doc, node);
 
 	uri = e_source_get_uri (source);
-	xmlSetProp (node, "uri", uri);
+	xmlSetProp (node, (xmlChar*)"uri", (xmlChar*)uri);
 	g_free (uri);
 
 	xmlDocDumpMemory (doc, &xml_buffer, &xml_buffer_size);
@@ -777,12 +825,12 @@ e_source_new_from_standalone_xml (const char *xml)
 	xmlNodePtr root;
 	ESource *source;
 
-	doc = xmlParseDoc ((char *) xml);
+	doc = xmlParseDoc ((xmlChar*)xml);
 	if (doc == NULL)
 		return NULL;
 
 	root = doc->children;
-	if (strcmp (root->name, "source") != 0)
+	if (strcmp ((char*)root->name, "source") != 0)
 		return NULL;
 
 	source = e_source_new_from_xml_node (root);
@@ -804,6 +852,16 @@ e_source_get_property (ESource *source,
 	return g_hash_table_lookup (priv->properties, property);
 }
 
+char *
+e_source_get_duped_property (ESource *source, const char *property)
+{
+	ESourcePrivate *priv;
+
+	g_return_val_if_fail (E_IS_SOURCE (source), NULL);
+	priv = source->priv;
+
+ 	return g_strdup (g_hash_table_lookup (priv->properties, property));
+}
 
 void
 e_source_set_property (ESource *source,
@@ -847,7 +905,6 @@ ESource *
 e_source_copy (ESource *source)
 {
 	ESource *new_source;
-	guint32  color;
 
 	g_return_val_if_fail (E_IS_SOURCE (source), NULL);
 
@@ -856,8 +913,7 @@ e_source_copy (ESource *source)
 
 	e_source_set_name (new_source, e_source_peek_name (source));
 
-	if (e_source_get_color (source, &color))
-		e_source_set_color (new_source, color);
+	new_source->priv->color_spec = g_strdup (source->priv->color_spec);
 
 	new_source->priv->absolute_uri = g_strdup (e_source_peek_absolute_uri (source));
 

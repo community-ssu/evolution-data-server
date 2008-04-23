@@ -10,9 +10,13 @@ Copyright (C) 2005 Opened Hand Ltd
   <interface name="org.gnome.evolution.dataserver.addressbook.Book">
     <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="EDataBook"/>
 
-    <signal name="writable"/>
-    <signal name="connection"/>
-    <signal name="auth-required"/>
+    <signal name="writable">
+    	<arg name="value" type="b"/>
+    </signal>
+    <signal name="connection">
+    	<arg name="connected" type="b"/>
+    </signal>
+    <signal name="auth_required"/>
 
     <method name="open">
       <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_AddressBook_Book_open"/>
@@ -99,7 +103,7 @@ Copyright (C) 2005 Opened Hand Ltd
       <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_AddressBook_Book_getBookView"/>
       <annotation name="org.freedesktop.DBus.GLib.Async" value=""/>
       <arg name="query" type="s" direction="in"/>
-      <arg name="fields" type="as" direction="in"/>
+      <!-- <arg name="fields" type="as" direction="in"/> -->
       <arg name="max_results" type="u" direction="in"/>
       <arg name="view" type="o" direction="out"/>
     </method>
@@ -108,7 +112,7 @@ Copyright (C) 2005 Opened Hand Ltd
       <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_AddressBook_Book_getChanges"/>
       <annotation name="org.freedesktop.DBus.GLib.Async" value=""/>
       <arg name="change_id" type="s" direction="in"/>
-      <arg name="changes" type="as" direction="out"/>
+      <arg name="changes" type="a(us)" direction="out"/>
     </method>
 
     <method name="cancelOperation">

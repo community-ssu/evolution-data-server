@@ -3,9 +3,9 @@ handler was actually fired.
 
 Index: addressbook/backends/file/e-book-backend-file.c
 ===================================================================
---- addressbook/backends/file/e-book-backend-file.c.orig	2008-02-19 11:04:22.000000000 +0000
-+++ addressbook/backends/file/e-book-backend-file.c	2008-02-19 11:07:09.000000000 +0000
-@@ -83,6 +83,7 @@
+--- addressbook/backends/file/e-book-backend-file.c.orig	2008-04-23 14:53:52.000000000 +0100
++++ addressbook/backends/file/e-book-backend-file.c	2008-04-23 14:58:51.000000000 +0100
+@@ -79,6 +79,7 @@
  static struct {
  	int ref_count;
  	DB_ENV *env;
@@ -13,7 +13,7 @@ Index: addressbook/backends/file/e-book-backend-file.c
  } global_env;
  
  static EBookBackendSyncStatus
-@@ -213,12 +214,16 @@
+@@ -209,12 +210,16 @@
  
  	string_to_dbt (vcard, &vcard_dbt);
  
@@ -30,7 +30,7 @@ Index: addressbook/backends/file/e-book-backend-file.c
  		if (db_error != 0) {
  			g_warning ("db->sync failed with %s", db_strerror (db_error));
  		}
-@@ -337,7 +342,9 @@
+@@ -333,7 +338,9 @@
  	string_to_dbt (dbt_id, &id_dbt);
  	string_to_dbt (vcard_with_rev, &vcard_dbt);
  
@@ -40,7 +40,7 @@ Index: addressbook/backends/file/e-book-backend-file.c
  
  	g_free (vcard_with_rev);
  	
-@@ -365,7 +372,9 @@
+@@ -361,7 +368,9 @@
  	status = modify_contact (bf, vcard, contact);
  	
  	if (status == GNOME_Evolution_Addressbook_Success) {
@@ -50,7 +50,7 @@ Index: addressbook/backends/file/e-book-backend-file.c
  		if (db_error == 0) {
  			e_book_backend_summary_remove_contact (bf->priv->summary,
  							       e_contact_get_const (*contact, E_CONTACT_UID));
-@@ -417,7 +426,9 @@
+@@ -413,7 +422,9 @@
  	}
  
  	/* Sync the database */
@@ -60,7 +60,7 @@ Index: addressbook/backends/file/e-book-backend-file.c
  	if (db_error != 0) {
  		return db_error_to_status (db_error);
  	}
-@@ -1140,6 +1151,7 @@
+@@ -1114,6 +1125,7 @@
  #endif
  {
  	g_warning ("libdb error: %s", buf2);
@@ -68,11 +68,11 @@ Index: addressbook/backends/file/e-book-backend-file.c
  }
  
  
-@@ -1204,6 +1216,7 @@
+@@ -1178,6 +1190,7 @@
  		}
  
  		global_env.env = env;
 +		global_env.had_error = FALSE;
  		global_env.ref_count = 1;
  	}
- 	g_static_mutex_unlock(&global_env_lock);
+ 	G_UNLOCK (global_env);
