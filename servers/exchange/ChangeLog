@@ -1,0 +1,332 @@
+2006-01-27  Sushma Rai  <rsushma@novell.com>
+
+	* storage/exchange-constants.h: using API_VERSION for Exchange
+	Connector book and calendar factories. See #323115.
+
+2006-01-05  Sushma Rai  <rsushma@novell.com>
+
+	* lib/e2k-autoconfig.c (validate): Free E2kAutoconfig structure.
+	Fixes #324483.
+
+2005-12-15  Sushma Rai  <rsushma@novell.com>
+
+	* lib/e2k-autoconfig.c (e2k_validate_user): Fixes the problem
+	of validating and authenticating user only on pressing "Authenticate"
+	button twice, even if the user gives the proper password.
+	
+2005-12-12  Irene Huang <Irene.Huang@sun.com>
+
+        * lib/e2k-autoconfig.c: (e2k_validate_user): If password
+        exists, used the remembered password to do the
+        authentification. If validation failed, forget password.
+
+2005-11-25  Sushma Rai  <rsushma@novell.com>
+
+	* storage/exchange-account.c (exchange_account_remove_folder)
+	(get_password)(exchange_account_connect): Fix for compiler warnings.
+	(exchange_account_connect): Initialize the return value, info_result
+	before cheking the validity of ExchangeAccount. Fixes a crash.
+
+2005-10-21  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	* storage/exchange-account.c (exchange_account_remove_folder) : Proceed
+	with deletion of folder only if the folder being removed is *not* a 
+	standard folder. This fixes #312848.
+
+2005-09-30  Arunprakash  <arunp@novell.com>
+
+	* storage/exchange-account.c (setup_account_hierarchies) : Skips the
+	hierarchies creation if it is done.
+	** Fixes #312229.
+
+2005-08-26  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+        * lib/e2k-autoconfig.c (e2k_validate_user) : Fix the password key to
+        be consistent with the camel key.
+        * storage/e-folder-exchange.c (sanitize_path) : Strips the ';' in the
+        path.
+        * storage/exchange-account.c (get_hierarchy_for)
+        (setup_account_hierarchies) : Fix the physical uri to delimit the
+        folder path from the uri with a ';'
+        (exchange_account_new) : Fix the uri authority to be same as the camel
+        uri which would be later used in all components for creating the
+        password key.
+
+2005-09-05  Praveen Kumar  <kpraveen@novell.com>
+
+        ** Fixes bug 314588.
+
+        * lib/e2k-context.c (e2k_context_new) : Modified the constructor
+        to return NULL if there is no host name in the SOUP URI.
+
+2005-09-14  Irene Huang  <Irene.Huang@sun.com>
+
+	Fix for #316274
+
+	* storage/exchange-account.h: only declare exchange_account_set_
+	password function when the macro HAVE_KRB5 is defined.
+
+2005-08-25  Arunprakash  <arunp@novell.com>
+
+	* storage/exchange-account.c (init) : set the default linestatus
+	to offline.
+	(exchange_account_rescan_tree) : Use the proper linestatus value.
+	(exchange_account_set_offline) : Added lock before modifying
+	the account linestatus to complete the connection in progress.
+	(exchange_account_set_online) : Similar.
+	(exchange_account_is_offline) : Return the proper linestatus.
+
+2005-08-25  Arunprakash  <arunp@novell.com>
+
+	* storage/exchange-account.c (hierarchy_new_folder) : Removes
+	redundant computation.
+	
+2005-08-22  Not Zed  <NotZed@Ximian.com>
+
+	* storage/exchange-esource.c (is_offline): provide a proper c
+	prototype for this, () is pre-iso-c.
+
+2005-08-22  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	* storage/exchange-account.c (get_password) : Store the password
+	(exchange_account_connect) : Handle NULL password, and also move
+	the mutex to the end of connect.
+	* storage/exchange-esource.c (add_folder_esource) : Add the auth
+	properties to the esources.
+
+2005-08-17  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	* storage/exchange-account.c (exchange_account_get_folder): Lookup on
+	NULL data is wrong. Handle it earlier.
+	* storage/exchange-hierarchy-webdav.c (rescan) : Use 
+	E2K_PR_EXCHANGE_FOLDER_SIZE for getting the folder size.
+	(scan_subtree): Similar. Also, dont scan the deleted items subtree.
+
+2005-08-12  Praveen Kumar  <kpraveen@novell.com>
+
+	* storage/exchange-esource.c
+	(is_offline): Added new
+	(add_folder_esource): Modified to add the calendar and tasks to 
+	the selected list only if the account is online. This is a part
+	of the fix to the bug 237272.
+	
+2005-08-02  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	* storage/exchange-hierarchy-favorites.c (remove_folder) : Remove
+	the esources only after we have removed the folder from the server.
+	* storage/exchange-account.c (exchange_account_rescan_tree) : Add the
+	toplevel folder of the hierarchy in the fresh folder list manually
+	* storage/exchange-hierarchy-somedav.c (scan_subtree) : Temporary fix.
+	Allow a rescan for now.
+	* storage/exchange-esource.c (remove_folder_esource) : Handle the 
+	addressbook esource removal properly. We no longer use the absolute 
+	uri for addressbooks, except for GAL.
+
+2005-07-28  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	* storage/exchange-account.c (is_password_expired) : This should be
+	included only if kerberos is enabled in the configure options.
+
+2005-07-22  Praveen Kumar <kpraveen@novell.com>
+
+	* storage/exchange-esource.c (add_folder_esource) : Modified the way
+	of Exchange addressbook ESource URI handling to be the same way as
+	calendar ESource URI handling except for "gal://" protocol
+
+2005-07-21  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	* storage/Makefile.am : Add the separated esource handling code files.
+	* storage/exchange-esource.[ch] : Added new
+	* storage/e-folder-exchange.c : Reinclude the esource creation code.
+	* storage/exchange-account.c : Add a new fresh_folder list. This has
+	the latest list of folders available for the account, excluding the
+	folders that were deleted in the current session.
+	(exchange_account_rescan_tree) : Add a scan for fetching any new
+	folders apart from scanning the existing folder properties.
+	(exchange_account_get_folders): First check for the fresh_folder list
+	if available and get the list from that.
+	* storage/exchange-hierarchy-favorites.c : Reinclude the esource
+	removal code.
+	* storage/exchange-hierarchy-foreign.c : Similar
+	* storage/exchange-hierarchy-gal.c : Similar
+	* storage/exchange-hierarchy-webdav.c : Similar
+
+2005-07-15  Arunprakash <arunp@novell.com>
+
+	* storage/exchange-account.c (exchange_account_connect) :  Update the 
+	error value before looping. This fixes #310483.
+
+2005-07-14  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	* storage/Makefile.am : Use the version-info
+	* storage/exchange-account.c : Fix a warning
+
+2005-07-14  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	* storage/exchange-hierarchy-foreign.c (remove_folder) : The esource
+	removal should be moved to the eplugins code.
+
+2005-07-11  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	Initial patch submitted by Arun Prakash <arunp@novell.com>.
+	* storage/exchange-account.c : The private ExchangeAccount structure
+	now also stores the quota_limit which can be used by the plugins to
+	display.
+	(get_password) : Now returns the error status
+	(exchange_account_set_password) : Similar
+	(exchange_account_connect) : This now accepts a password for connecting
+	and also returns the appropriate error code so that the plugins can
+	print appropriate messages.
+	(exchange_account_get_quota_limit) : Newly added.
+	(exchange_account_check_password_expiry) : Newly added
+	* storage/exchange-account.h : Added a new ExchangeAccountResult enum
+	for returning the connection status. Also modified the appropriate
+	function declarations.
+
+2005-07-11  Shakti Sen <shprasad@novell.com>
+
+	* storage/Makefile.am: Included files exchange-hierarchy-foreign.c
+	and exchange-hierarchy-foreign.h
+	* storage/exchange-account.c: Added foreign hierarchy support.
+	* storage/exchange-hierarchy-foreign.[ch]: Added newly for foreign 
+	hierarchy support.
+
+2005-07-08  Praveen Kumar <kpraveen@novell.com>
+
+	* lib/Makefile.am : Added entry for ek-sid.h in the headers files to 
+	be installed
+	
+2005-07-08  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	* storage/Makefile.am : We should be using the CURRENT, REVISION and
+	AGE variables for the version-info of the exchange library.
+
+2005-07-07  Sarfraaz Ahmed <asarfraaz@novell.com>
+	
+	* storage/e-folder-exchange.c : Remove dead code
+	* storage/exchange-account.c : Make ExchangeFolderSize a member of
+	ExchangeAccount. Also removed some dead codE
+	(exchange_account_folder_size_add) (exchange_account_folder_size_remove)
+	(exchange_account_folder_size_rename)
+	(exchange_account_folder_size_get_model) : Added new
+	* storage/exchange-account.h : Similar
+	* storage/exchange-folder-size.c : Replaced E2K_MAKE_TYPE with 
+	G_DEFINE_TYPE and made necessary changes to init and class_init members
+	(format_size_func)(parent_destroyed)(exchange_folder_size_display) :
+	All moved to plugins.
+	* storage/exchange-folder-size.h : Similar
+	* storage/exchange-hierarchy-somedav.c : Fixed a warning
+	* storage/exchange-hierarchy-webdav.c : Removed ExchangeFolderSize as 
+	its member and updated the methods used to access it. We should now
+	query the ExchangeAccount object for FolderSize information updation
+	* storage/exchange-hierarchy-webdav.h : Removed dead code
+
+2005-07-01  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	* lib/e2k-autoconfig.c (validate) : This should only return the
+	exception type and not print anything. The plugin will now print the
+	proper error message.
+	(e2k_validate_user) : Similar
+	* lib/e2k-autoconfig.h : Move E2kAutoconfigResult to e2k-validate.h
+	so that the plugins can use it.
+	* lib/e2k-validate.h : Moved E2kAutoconfigResult here.
+	* storage/e-folder-exchange.c (e_mkdir_hier) : Make use of 
+	g_build_filename instead of the deprecated g_concat_dir_and_file
+	* storage/e-folder-type-registry.c : Remove unwanted code.
+	* storage/e-folder.c : Similar
+	* storage/e-storage.c : Similar
+	* storage/exchange-folder-size.c : Similar
+
+2005-06-28  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	* storage/exchange-account.c (exchange_account_is_favorite_folder) :
+	Added new to check for favorites folder.
+	* storage/exchange-account.h : Similar
+	* storage/exchange-hierarchy-favorites.c 
+	(exchange_hierarchy_favorites_is_added) : The main implementation.
+	Newly added.
+	* storage/exchange-hierarchy-favorites.h : Similar
+
+2005-06-22  Sarfraaz Ahmed <asarfraaz@novell.com>
+	
+	* storage/Makefile.am : e-shell-marshall.list should be disted.
+	* lib/Makefile.am : mapi-properties should also be disted.
+
+2005-06-15  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	* storage/Makefile.am : Install exchange-hierarchy-webdav.h and
+	exchange-hierarchy-somedav.h
+
+2005-06-14  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	* storage/libexchange-storage.pc.in : Dont hardcode the libsoup
+	version.
+
+2005-06-12  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	* lib/Makefile.am : Use ENABLE_KRB5 instead of HAVE_KRB5
+
+2005-06-12  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	* lib/Makefile.am : Include e2k-global-catalog-ldap.h. Install
+	e2k-global-catalog-ldap.h and e2k-validate.h
+	* lib/e2k-global-catalog.c : Use e2k-global-catalog-ldap.h
+	* lib/e2k-global-catalog.h : Remove the use of ldap.h from here.
+	* storage/Makefile.am : Use KRB5_LDFLAGS instead of KRB5_LIBS
+	* lib/e2k-global-catalog-ldap.h : Added new
+	* lib/e2k-validate.h : Added new
+
+2005-06-12  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	* lib/Makefile.am : Remove commented code and fix spacings
+	* storage/Makefile.am : Similar. Also added exchange-oof.[ch]
+	* lib/e2k-context.c : Use the proper VERSION definition name.
+
+2005-06-10  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	First movement of exchange server communication code into e-d-s HEAD.
+
+2005-06-07  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	* storage/Makefile.am : Removed references to config-listener and 
+	foreign-hierarchy 
+	* storage/e-folder-exchange.c : Removed references to e_source here.
+	* storage/e-storage.c : Removed from e-d-s and moved back to exchange.
+	* storage/exchange-account.c : Removed references to foreign hierarchy.
+	* storage/exchange-account.h : Added constants.h
+	* storage/exchange-constants.h : Avoided re-inclusion
+	* storage/exchange-hierarchy-favorites.c : Removed esource references.
+	* storage/exchange-hierarchy-gal.c : Removed esource references
+	* storage/exchange-hierarchy-webdav.c : Removed references to foreign 
+	hierarchy.
+	* storage/exchange-types.h : Similar
+
+2005-06-03  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	* storage/e-shell-marshal.list : New file
+
+2005-06-02  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	* libexchange-storage.pc.in : Moved it from exchange to 
+	exchange/storage
+	* lib/Makefile.am : Added a few more header files that had to be 
+	installed.
+	* storage/Makefile.am : Similar
+	* storage/e-folder-exchange.c : Merged the changes from HEAD.
+	* storage/e-folder.c : Added marshalling code.
+	* storage/e-storage.c : Similar
+	* storage/exchange-account.c (exchange_account_get_username): Added new
+	* storage/exchange-account.h : Similar
+	* storage/exchange-component.[ch] : Removed from Makefile.am. Should be
+	removing these files from the repository.
+	* storage/exchange-config-listener.[ch] : Merged the changed from HEAD.
+	* storage/exchange-hierarchy-favorites.c : Similar
+	* storage/exchange-hierarchy-foreign.c : Similar
+	* storage/exchange-hierarchy-gal.c : Similar
+	* storage/exchange-hierarchy-webdav.c : Similar
+	* storage/exchange-constants.h : Added a new file.
+
+2005-05-21  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	* lib/Makefile.am : Install e2k-global-catalog.h and e2k-utils.h
+	Also added this new ChangeLog file

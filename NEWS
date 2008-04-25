@@ -1,3 +1,78 @@
+Evolution-Data-Server 1.4.2.1, 2005-11-30
+-----------------------------------------
+Added fix for an ugly crasher in the calendar component.
+Use EDS 1.4.2.1 instead of 1.4.2
+
+Evolution-Data-Server 1.4.2, 2005-11-29
+----------------------------------------
+
+Bugzilla bugs fixed (see http://bugzilla.gnome.org/show_bug.cgi):
+
+
+#218177- Disable IMAP Account causes crash (Parthasarathi)
+#318508- Repeated crash when downloading new mail (Vivek Jain)
+#228929- After upgrading snapshot cannot see IMAP inbox contents (Shreyas)
+#317956- Crash when starting evolution without or with expired kerberos 5
+         (Bjorn Torkelsson)
+#320736- crash connecting to groupwise7 (Parthasarathi)
+#319045- gw-Evolution crashes after marking few mails as not junk (Vivek)
+#312848- Delete option should be disabled for default Tasks list
+         (Sarfraaz)
+#318104- evolution crashed when changing calendar timezone and keeps
+         crashing (Harish)
+#317322- crash when delete a imported recurrent event (Chenthill)
+#318777- recurrence editing ... (Chenthill)
+#318130- e-cal-backend-http.c does not include e-cal-time-util.h, fails
+         (Matthew Daniel)
+#319612- Stop warnings from e-destination about xmlChar* (Ross Burton)
+#318227- Change LDAP search filter (Carsten Guenther)
+#316955- Recreates summary file on every other load (Ross Burton)
+#319848- Cannot select multiple adresses for 'To', 'Cc' etc fields
+         (Sushma)
+
+Updated Translations:
+
+	- fa (Meelad Zakaria)
+	- bg (Alexander Shopov)
+
+Evolution-Data-Server 1.4.1, 2005-10-03
+----------------------------------------
+
+Bugzilla bugs fixed (see http://bugzilla.gnome.org/show_bug.cgi):
+
+#116162 (bnc)- Crash when accepting a groupwise appointment (Chen)
+#257321 - Sent folder should have a unique icon (Sankar)
+#272176 - Slight deviations in vCal-format causes crash (Dinesh)
+#309679 - 'Tentativly accept' is updated as accept (Dinesh)
+#309993 - Newly created mail items appear as READ in GW proxy (Sankar).
+#311447 - GW: ModifyProxyAccessRights doesnt work (Sankar)
+#312229 - Crash while switching to online (Arunprakash)
+#312462 - EDS crashes frequently (Chakravarthi)
+#314243 - cannot create  recurring GW events with interval more than 1 (Chakravarthi)
+#314574 - camel-lock-client looking for a non-existant camel-lock-helper (Parthasarathi)
+#314746 - Syncing passwords across components fails for Exchange (Sarfraaz)
+#314925 - In 'Attendees' tab particpants id displayed as junk after delegating meeting (Chenthill)
+#314942 - gw: Marking mail as Junk - Evolution crashes (Vivek)
+#314997 - Editing addresses in the composer is buggy (Devashish)
+#315173 - Crash when dragging embedded message/rfc822 into a folder (Vivek)
+#316195 - Can't Publish Free/Busy for Web-Calendars (Dinesh)
+#316274 - Exchange Plugin cant be enabled on a machine w/o KRB5 (Irene)
+#317226 - bug about recurrent all day events (Wang) 
+
+Updated Translations:
+
+	- cs (Dan Damian)
+	- es (Francisco Javier F. Serrador)
+	- et (Ivar Smolin)
+	- eu (Inaki Larranaga)
+	- fr (Christophe Merlet)
+	- fr (Stéphane Raimbault)
+	- gl (Ignacio Casal Quinteiro)
+	- ro (Dan Damian)
+	- sv (Christian Rose)
+	- tr (Baris Cicek)
+	- vi (Clytie Siddall)
+
 Evolution-Data-Server 1.4.0, 2005-09-05
 ---------------------------------------
 

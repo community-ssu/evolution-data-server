@@ -1,0 +1,5122 @@
+# Evolution-data-server Bulgarian translation.
+# Copyright (C) 1999, 2000, 2001, 2002, 2004, 2005 Free Software Foundation, Inc.
+# Nikolay Hristov <geroy@stemo.bg>
+# Alexander Shopov <al_shopov@web.bg>
+# Yanko Kaneti <yaneti@declera.com>
+# Vladimir Petkov <vpetkov@i-space.org>, 2004.
+# Vladimir Petkov <vpetkov@i-space.org>, 2005.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2005-12-05 08:59+0200\n"
+"PO-Revision-Date: 2005-12-05 08:58+0200\n"
+"Last-Translator: Vladimir \"Kaladan\" Petkov <vpetkov@i-space.org>\n"
+"Language-Team: Bulgarian <dict@fsa-bg.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#: ../addressbook/backends/file/e-book-backend-file.c:533
+#: ../addressbook/backends/groupwise/e-book-backend-groupwise.c:2210
+#: ../addressbook/backends/vcf/e-book-backend-vcf.c:478
+msgid "Loading..."
+msgstr "Зареждане..."
+
+#: ../addressbook/backends/file/e-book-backend-file.c:535
+#: ../addressbook/backends/groupwise/e-book-backend-groupwise.c:2169
+#: ../addressbook/backends/groupwise/e-book-backend-groupwise.c:2189
+#: ../addressbook/backends/groupwise/e-book-backend-groupwise.c:2208
+#: ../addressbook/backends/ldap/e-book-backend-ldap.c:3587
+#: ../addressbook/backends/vcf/e-book-backend-vcf.c:480
+msgid "Searching..."
+msgstr "Търсене..."
+
+#: ../addressbook/backends/groupwise/e-book-backend-groupwise.c:2493
+#: ../addressbook/backends/ldap/e-book-backend-ldap.c:3735
+#, c-format
+msgid "Downloading contacts (%d)... "
+msgstr "Изтегляне на контакти (%d)... "
+
+#: ../addressbook/backends/groupwise/e-book-backend-groupwise.c:2642
+#: ../addressbook/backends/groupwise/e-book-backend-groupwise.c:2809
+#: ../addressbook/backends/groupwise/e-book-backend-groupwise.c:2845
+#, c-format
+msgid "Updating contacts cache (%d)... "
+msgstr "Опресняване на временната памет за контактите (%d)... "
+
+#: ../addressbook/backends/ldap/e-book-backend-ldap.c:684
+msgid "Using Distinguished Name (DN)"
+msgstr "Използва се известно име (DN)"
+
+#: ../addressbook/backends/ldap/e-book-backend-ldap.c:687
+msgid "Using Email Address"
+msgstr "Използвайки е-поща"
+
+#: ../addressbook/backends/ldap/e-book-backend-ldap.c:873
+msgid "Reconnecting to LDAP server..."
+msgstr "Повторно свързване с LDAP сървъра..."
+
+#: ../addressbook/backends/ldap/e-book-backend-ldap.c:1441
+msgid "Adding contact to LDAP server..."
+msgstr "Добавяне на контакт в LDAP сървъра..."
+
+#: ../addressbook/backends/ldap/e-book-backend-ldap.c:1575
+msgid "Removing contact from LDAP server..."
+msgstr "Премахване на контакт от LDAP сървъра..."
+
+#: ../addressbook/backends/ldap/e-book-backend-ldap.c:1857
+msgid "Modifying contact from LDAP server..."
+msgstr "Промяна на контакт в LDAP сървъра..."
+
+#: ../addressbook/backends/ldap/e-book-backend-ldap.c:3463
+msgid "Receiving LDAP search results..."
+msgstr "Получаване на резултатите от ръсенето от LDAP сървъра..."
+
+#: ../addressbook/backends/ldap/e-book-backend-ldap.c:3609
+msgid "Error performing search"
+msgstr "Грешка при изпълнението на търсенето"
+
+#. translators: the placeholders will be filled by
+#. * function names, e.g.
+#. * "e_book_add_contact" on book before
+#. * "e_book_open
+#: ../addressbook/libebook/e-book.c:257 ../addressbook/libebook/e-book.c:261
+#: ../addressbook/libebook/e-book.c:473 ../addressbook/libebook/e-book.c:477
+#: ../addressbook/libebook/e-book.c:618 ../addressbook/libebook/e-book.c:622
+#: ../addressbook/libebook/e-book.c:711 ../addressbook/libebook/e-book.c:715
+#: ../addressbook/libebook/e-book.c:1029 ../addressbook/libebook/e-book.c:1034
+#: ../addressbook/libebook/e-book.c:1221 ../addressbook/libebook/e-book.c:1225
+#: ../addressbook/libebook/e-book.c:1382 ../addressbook/libebook/e-book.c:1386
+#: ../addressbook/libebook/e-book.c:1595 ../addressbook/libebook/e-book.c:1599
+#: ../addressbook/libebook/e-book.c:1836 ../addressbook/libebook/e-book.c:1840
+#: ../addressbook/libebook/e-book.c:2076 ../addressbook/libebook/e-book.c:2080
+#: ../addressbook/libebook/e-book.c:2292 ../addressbook/libebook/e-book.c:2296
+#: ../addressbook/libebook/e-book.c:3392
+#, c-format
+msgid "\"%s\" on book before \"%s\""
+msgstr "„%s“ е в книгата преди „%s“"
+
+#: ../addressbook/libebook/e-book.c:270 ../addressbook/libebook/e-book.c:486
+#: ../addressbook/libebook/e-book.c:631 ../addressbook/libebook/e-book.c:724
+#: ../addressbook/libebook/e-book.c:1044 ../addressbook/libebook/e-book.c:1235
+#: ../addressbook/libebook/e-book.c:1396 ../addressbook/libebook/e-book.c:1608
+#: ../addressbook/libebook/e-book.c:1849 ../addressbook/libebook/e-book.c:2090
+#: ../addressbook/libebook/e-book.c:2305 ../addressbook/libebook/e-book.c:2641
+#: ../addressbook/libebook/e-book.c:2847
+msgid "book busy"
+msgstr "книгата е заета"
+
+#: ../addressbook/libebook/e-book.c:303 ../addressbook/libebook/e-book.c:307
+#: ../addressbook/libebook/e-book.c:519 ../addressbook/libebook/e-book.c:523
+#: ../addressbook/libebook/e-book.c:660 ../addressbook/libebook/e-book.c:664
+#: ../addressbook/libebook/e-book.c:753 ../addressbook/libebook/e-book.c:757
+#: ../addressbook/libebook/e-book.c:1073 ../addressbook/libebook/e-book.c:1076
+#: ../addressbook/libebook/e-book.c:1267 ../addressbook/libebook/e-book.c:1270
+#: ../addressbook/libebook/e-book.c:1425 ../addressbook/libebook/e-book.c:1429
+#: ../addressbook/libebook/e-book.c:1644 ../addressbook/libebook/e-book.c:1648
+#: ../addressbook/libebook/e-book.c:1896 ../addressbook/libebook/e-book.c:1900
+#: ../addressbook/libebook/e-book.c:2122 ../addressbook/libebook/e-book.c:2126
+#: ../addressbook/libebook/e-book.c:2333 ../addressbook/libebook/e-book.c:2337
+#: ../addressbook/libebook/e-book.c:2582 ../addressbook/libebook/e-book.c:2669
+#: ../addressbook/libebook/e-book.c:2673 ../addressbook/libebook/e-book.c:2875
+#: ../addressbook/libebook/e-book.c:2879 ../addressbook/libebook/e-book.c:3401
+#, c-format
+msgid "CORBA exception making \"%s\" call"
+msgstr "Изключение на CORBA при извикването „%s“"
+
+#: ../addressbook/libebook/e-book.c:2563
+#, c-format
+msgid "%s: there is no current operation"
+msgstr "%s: няма текуща операция"
+
+#: ../addressbook/libebook/e-book.c:2598
+#, c-format
+msgid "%s: couldn't cancel"
+msgstr "%s: неуспех при отмяната"
+
+#: ../addressbook/libebook/e-book.c:2627 ../addressbook/libebook/e-book.c:2631
+#, c-format
+msgid "\"%s\" on book after \"%s\""
+msgstr "„%s“ е в книгата след „%s“"
+
+#: ../addressbook/libebook/e-book.c:2697
+#, c-format
+msgid "%s: cancelled"
+msgstr "%s: отказан"
+
+#: ../addressbook/libebook/e-book.c:3258
+#, c-format
+msgid "%s: Invalid source."
+msgstr "%s: Невалиден източник."
+
+#: ../addressbook/libebook/e-book.c:3266 ../addressbook/libebook/e-book.c:3330
+#, c-format
+msgid "%s: no factories available for uri `%s'"
+msgstr "%s: няма фабрики за uri „%s“"
+
+#: ../addressbook/libebook/e-book.c:3278
+#, c-format
+msgid "%s: Could not create EBookListener"
+msgstr "%s: Неуспех при създаването на EBookListener"
+
+#: ../addressbook/libebook/e-book.c:3541
+#, c-format
+msgid "%s: there was no self contact uid stored in gconf"
+msgstr ""
+"%s: не съществува идентификатор на потребител за собствен контакт в gconf"
+
+#: ../addressbook/libebook/e-book.c:3671
+#, c-format
+msgid "%s: there was no source for uid `%s' stored in gconf."
+msgstr ""
+"%s: не съществува източник за потребителски идентификатор „%s“ в gconf."
+
+#: ../addressbook/libebook/e-contact.c:102
+msgid "Unique ID"
+msgstr "Уникален ID"
+
+#: ../addressbook/libebook/e-contact.c:103
+msgid "File Under"
+msgstr "Записване под"
+
+#. Name fields
+#. FN isn't really a structured field - we use a getter/setter
+#. so we can set the N property (since evo 1.4 works fine with
+#. vcards that don't even have a N attribute.  *sigh*)
+#: ../addressbook/libebook/e-contact.c:109
+msgid "Full Name"
+msgstr "Пълно име"
+
+#: ../addressbook/libebook/e-contact.c:110
+msgid "Name"
+msgstr "Име"
+
+#: ../addressbook/libebook/e-contact.c:111
+msgid "Given Name"
+msgstr "Фамилия"
+
+#: ../addressbook/libebook/e-contact.c:112
+msgid "Family Name"
+msgstr "Фамилия"
+
+#: ../addressbook/libebook/e-contact.c:113
+msgid "Nickname"
+msgstr "Прякор"
+
+#: ../addressbook/libebook/e-contact.c:114
+msgid "Name or Org"
+msgstr "Име или орг."
+
+#. Address fields
+#: ../addressbook/libebook/e-contact.c:117
+msgid "Address List"
+msgstr "Списък с адреси"
+
+#: ../addressbook/libebook/e-contact.c:118
+msgid "Home Address"
+msgstr "Домашен адрес"
+
+#: ../addressbook/libebook/e-contact.c:119
+msgid "Work Address"
+msgstr "Работен адрес"
+
+#: ../addressbook/libebook/e-contact.c:120
+msgid "Other Address"
+msgstr "Друг адрес"
+
+#: ../addressbook/libebook/e-contact.c:122
+msgid "Home Address Label"
+msgstr "Етикет на домашния адрес"
+
+#: ../addressbook/libebook/e-contact.c:123
+msgid "Work Address Label"
+msgstr "Етикет на работния адрес"
+
+#: ../addressbook/libebook/e-contact.c:124
+msgid "Other Address Label"
+msgstr "Други работни етикети"
+
+#: ../addressbook/libebook/e-contact.c:126
+msgid "Assistant Phone"
+msgstr "Телефон на асистент"
+
+#: ../addressbook/libebook/e-contact.c:127
+msgid "Business Phone"
+msgstr "Работен телефон"
+
+#: ../addressbook/libebook/e-contact.c:128
+msgid "Business Phone 2"
+msgstr "Работен телефон 2"
+
+#: ../addressbook/libebook/e-contact.c:129
+msgid "Business Fax"
+msgstr "Раб. Факс"
+
+#: ../addressbook/libebook/e-contact.c:130
+msgid "Callback Phone"
+msgstr "Телефон за обратна връзка"
+
+#: ../addressbook/libebook/e-contact.c:131
+msgid "Car Phone"
+msgstr "Телефон в автомобил"
+
+#: ../addressbook/libebook/e-contact.c:132
+msgid "Company Phone"
+msgstr "Фирмен телефон"
+
+#: ../addressbook/libebook/e-contact.c:133
+msgid "Home Phone"
+msgstr "Домашен телефон"
+
+#: ../addressbook/libebook/e-contact.c:134
+msgid "Home Phone 2"
+msgstr "Домашен телефон 2"
+
+#: ../addressbook/libebook/e-contact.c:135
+msgid "Home Fax"
+msgstr "Домашен факс"
+
+#: ../addressbook/libebook/e-contact.c:136
+msgid "ISDN"
+msgstr "ISDN"
+
+#: ../addressbook/libebook/e-contact.c:137
+msgid "Mobile Phone"
+msgstr "Мобилен телефон"
+
+#: ../addressbook/libebook/e-contact.c:138
+msgid "Other Phone"
+msgstr "Друг телефон"
+
+#: ../addressbook/libebook/e-contact.c:139
+msgid "Other Fax"
+msgstr "Друг факс"
+
+#: ../addressbook/libebook/e-contact.c:140
+msgid "Pager"
+msgstr "Пейджър"
+
+#: ../addressbook/libebook/e-contact.c:141
+msgid "Primary Phone"
+msgstr "Основен телефон"
+
+#: ../addressbook/libebook/e-contact.c:142
+msgid "Radio"
+msgstr "Радио"
+
+#: ../addressbook/libebook/e-contact.c:143
+msgid "Telex"
+msgstr "Телекс"
+
+#: ../addressbook/libebook/e-contact.c:144
+msgid "TTY"
+msgstr "TTY"
+
+#. Email fields
+#: ../addressbook/libebook/e-contact.c:147
+msgid "Email List"
+msgstr "Списък с е-пощи"
+
+#: ../addressbook/libebook/e-contact.c:148
+msgid "Email 1"
+msgstr "Е-поща 1"
+
+#: ../addressbook/libebook/e-contact.c:149
+msgid "Email 2"
+msgstr "Е-поща 2"
+
+#: ../addressbook/libebook/e-contact.c:150
+msgid "Email 3"
+msgstr "Е-поща 3"
+
+#: ../addressbook/libebook/e-contact.c:151
+msgid "Email 4"
+msgstr "Е-поща 4"
+
+#: ../addressbook/libebook/e-contact.c:152
+msgid "Mailer"
+msgstr "Пощенска програма"
+
+#: ../addressbook/libebook/e-contact.c:153
+msgid "Wants HTML Mail"
+msgstr "Желае HTML поща"
+
+#. Instant messaging fields
+#: ../addressbook/libebook/e-contact.c:156
+msgid "AIM Screen Name List"
+msgstr "Списък на абонаментите към AIM"
+
+#: ../addressbook/libebook/e-contact.c:157
+msgid "GroupWise Id List"
+msgstr "Списък на абонаментите към Groupwise"
+
+#: ../addressbook/libebook/e-contact.c:158
+msgid "Jabber Id List"
+msgstr "Идентификационен списък на Jabber"
+
+#: ../addressbook/libebook/e-contact.c:159
+msgid "Yahoo! Screen Name List"
+msgstr "Списък на абонаментите към Yahoo!"
+
+#: ../addressbook/libebook/e-contact.c:160
+msgid "MSN Screen Name List"
+msgstr "Списък на абонаментите към MSN"
+
+#: ../addressbook/libebook/e-contact.c:161
+msgid "ICQ Id List"
+msgstr "Идентификационен списък на ICQ"
+
+#: ../addressbook/libebook/e-contact.c:163
+msgid "AIM Home Screen Name 1"
+msgstr "Домашен абонамент към AIM 1"
+
+#: ../addressbook/libebook/e-contact.c:164
+msgid "AIM Home Screen Name 2"
+msgstr "Домашен абонамент към AIM 2"
+
+#: ../addressbook/libebook/e-contact.c:165
+msgid "AIM Home Screen Name 3"
+msgstr "Домашен абонамент към AIM 3"
+
+#: ../addressbook/libebook/e-contact.c:166
+msgid "AIM Work Screen Name 1"
+msgstr "Работен абонамент към AIM 1"
+
+#: ../addressbook/libebook/e-contact.c:167
+msgid "AIM Work Screen Name 2"
+msgstr "Работен абонамент към AIM 2"
+
+#: ../addressbook/libebook/e-contact.c:168
+msgid "AIM Work Screen Name 3"
+msgstr "Работен абонамент към AIM 3"
+
+#: ../addressbook/libebook/e-contact.c:169
+msgid "GroupWise Home Screen Name 1"
+msgstr "Домашен абонамент към Groupwise 1"
+
+#: ../addressbook/libebook/e-contact.c:170
+msgid "GroupWise Home Screen Name 2"
+msgstr "Домашен абонамент към Groupwise 2"
+
+#: ../addressbook/libebook/e-contact.c:171
+msgid "GroupWise Home Screen Name 3"
+msgstr "Домашен абонамент към Groupwise 3"
+
+#: ../addressbook/libebook/e-contact.c:172
+msgid "GroupWise Work Screen Name 1"
+msgstr "Работен абонамент към Groupwise 1"
+
+#: ../addressbook/libebook/e-contact.c:173
+msgid "GroupWise Work Screen Name 2"
+msgstr "Работен абонамент към Groupwise 2"
+
+#: ../addressbook/libebook/e-contact.c:174
+msgid "GroupWise Work Screen Name 3"
+msgstr "Работен абонамент към Groupwise 3"
+
+#: ../addressbook/libebook/e-contact.c:175
+msgid "Jabber Home Id 1"
+msgstr "Първи домашен абонамент към Jabber"
+
+#: ../addressbook/libebook/e-contact.c:176
+msgid "Jabber Home Id 2"
+msgstr "Втори домашен абонамент към Jabber"
+
+#: ../addressbook/libebook/e-contact.c:177
+msgid "Jabber Home Id 3"
+msgstr "Трети домашен абонамент към Jabber"
+
+#: ../addressbook/libebook/e-contact.c:178
+msgid "Jabber Work Id 1"
+msgstr "Първи работен абонамент към Jabber"
+
+#: ../addressbook/libebook/e-contact.c:179
+msgid "Jabber Work Id 2"
+msgstr "Втори работен абонамент към Jabber"
+
+#: ../addressbook/libebook/e-contact.c:180
+msgid "Jabber Work Id 3"
+msgstr "Трети работен абонамент към Jabber"
+
+#: ../addressbook/libebook/e-contact.c:181
+msgid "Yahoo! Home Screen Name 1"
+msgstr "Първи домашен абонамент към Yahoo!"
+
+#: ../addressbook/libebook/e-contact.c:182
+msgid "Yahoo! Home Screen Name 2"
+msgstr "Втори домашен абонамент към Yahoo!"
+
+#: ../addressbook/libebook/e-contact.c:183
+msgid "Yahoo! Home Screen Name 3"
+msgstr "Трети домашен абонамент към Yahoo!"
+
+#: ../addressbook/libebook/e-contact.c:184
+msgid "Yahoo! Work Screen Name 1"
+msgstr "Първи работен абонамент към Yahoo!"
+
+#: ../addressbook/libebook/e-contact.c:185
+msgid "Yahoo! Work Screen Name 2"
+msgstr "Втори работен абонамент към Yahoo!"
+
+#: ../addressbook/libebook/e-contact.c:186
+msgid "Yahoo! Work Screen Name 3"
+msgstr "Трети работен абонамент към Yahoo!"
+
+#: ../addressbook/libebook/e-contact.c:187
+msgid "MSN Home Screen Name 1"
+msgstr "Първи домашен абонамент към MSN"
+
+#: ../addressbook/libebook/e-contact.c:188
+msgid "MSN Home Screen Name 2"
+msgstr "Втори домашен абонамент към MSN"
+
+#: ../addressbook/libebook/e-contact.c:189
+msgid "MSN Home Screen Name 3"
+msgstr "Трети домашен абонамент към MSN"
+
+#: ../addressbook/libebook/e-contact.c:190
+msgid "MSN Work Screen Name 1"
+msgstr "Първи работен абонамент към MSN"
+
+#: ../addressbook/libebook/e-contact.c:191
+msgid "MSN Work Screen Name 2"
+msgstr "Втори работен абонамент към MSN"
+
+#: ../addressbook/libebook/e-contact.c:192
+msgid "MSN Work Screen Name 3"
+msgstr "Трети работен абонамент към MSN"
+
+#: ../addressbook/libebook/e-contact.c:193
+msgid "ICQ Home Id 1"
+msgstr "Първи домашен абонамент към ICQ"
+
+#: ../addressbook/libebook/e-contact.c:194
+msgid "ICQ Home Id 2"
+msgstr "Втори домашен абонамент към ICQ"
+
+#: ../addressbook/libebook/e-contact.c:195
+msgid "ICQ Home Id 3"
+msgstr "Трети домашен абонамент към ICQ"
+
+#: ../addressbook/libebook/e-contact.c:196
+msgid "ICQ Work Id 1"
+msgstr "Първи работен абонамент към ICQ"
+
+#: ../addressbook/libebook/e-contact.c:197
+msgid "ICQ Work Id 2"
+msgstr "Втори работен абонамент към ICQ"
+
+#: ../addressbook/libebook/e-contact.c:198
+msgid "ICQ Work Id 3"
+msgstr "Трети работен абонамент към ICQ"
+
+#. Organizational fields
+#: ../addressbook/libebook/e-contact.c:201
+msgid "Organization"
+msgstr "Организация"
+
+#: ../addressbook/libebook/e-contact.c:202
+msgid "Organizational Unit"
+msgstr "Организационна единица"
+
+#: ../addressbook/libebook/e-contact.c:203
+msgid "Office"
+msgstr "Офис"
+
+#: ../addressbook/libebook/e-contact.c:205
+msgid "Title"
+msgstr "Титла"
+
+#: ../addressbook/libebook/e-contact.c:206
+msgid "Role"
+msgstr "Роля"
+
+#: ../addressbook/libebook/e-contact.c:207
+msgid "Manager"
+msgstr "Ръководител"
+
+#: ../addressbook/libebook/e-contact.c:208
+msgid "Assistant"
+msgstr "Асистент"
+
+#. Web fields
+#: ../addressbook/libebook/e-contact.c:211
+msgid "Homepage URL"
+msgstr "Адрес на домашната страница"
+
+#: ../addressbook/libebook/e-contact.c:212
+msgid "Weblog URL"
+msgstr "Адрес на интернет дневник"
+
+#: ../addressbook/libebook/e-contact.c:213
+msgid "Video Conferencing URL"
+msgstr "Адрес за видеоконферентна връзка"
+
+#. Photo/Logo
+#: ../addressbook/libebook/e-contact.c:216
+msgid "Photo"
+msgstr "Фотография"
+
+#: ../addressbook/libebook/e-contact.c:217
+msgid "Logo"
+msgstr "Лого"
+
+#. Security fields
+#: ../addressbook/libebook/e-contact.c:220
+msgid "X.509 Certificate"
+msgstr "Сертификат X.509"
+
+#. Contact categories
+#: ../addressbook/libebook/e-contact.c:223
+msgid "Category List"
+msgstr "Категория"
+
+#: ../addressbook/libebook/e-contact.c:224
+#: ../libedataserverui/e-categories-dialog.c:397
+msgid "Categories"
+msgstr "Категории"
+
+#. Collaboration fields
+#: ../addressbook/libebook/e-contact.c:227
+msgid "Calendar URI"
+msgstr "URI за календар"
+
+#: ../addressbook/libebook/e-contact.c:228
+msgid "Free/Busy URL"
+msgstr "Свободен/зает URL"
+
+#: ../addressbook/libebook/e-contact.c:229
+msgid "ICS Calendar"
+msgstr "Календар ICS"
+
+#. Misc fields
+#: ../addressbook/libebook/e-contact.c:232
+msgid "Spouse's Name"
+msgstr "Име на съпруг(а)"
+
+#: ../addressbook/libebook/e-contact.c:233
+msgid "Note"
+msgstr "Бележка"
+
+#: ../addressbook/libebook/e-contact.c:235
+msgid "Birth Date"
+msgstr "Дата на раждане"
+
+#. Add default categories only if gconf doesn't contain any category list
+#. Make sure we have all categories
+#: ../addressbook/libebook/e-contact.c:236
+#: ../calendar/backends/contacts/e-cal-backend-contacts.c:453
+#: ../libedataserver/e-categories.c:237
+msgid "Anniversary"
+msgstr "Годишнина"
+
+#: ../addressbook/libebook/e-contact.c:238
+msgid "List"
+msgstr "Списък"
+
+#: ../addressbook/libebook/e-contact.c:239
+msgid "List Show Addresses"
+msgstr "Показване на адресите като списък"
+
+#. Last modified time
+#: ../addressbook/libebook/e-contact.c:242
+msgid "Last Revision"
+msgstr "Последна редакция"
+
+#. URI of the book to which the contact belongs to
+#: ../addressbook/libebook/e-contact.c:244
+msgid "Book URI"
+msgstr "URI на книгата"
+
+#: ../addressbook/libebook/e-contact.c:1232
+#: ../addressbook/libebook/e-destination.c:751
+msgid "Unnamed List"
+msgstr "Списък без име"
+
+#: ../calendar/backends/contacts/e-cal-backend-contacts.c:455
+#: ../libedataserver/e-categories.c:238
+msgid "Birthday"
+msgstr "Дата на раждане"
+
+#: ../calendar/backends/contacts/e-cal-backend-contacts.c:481
+#, c-format
+msgid "Birthday: %s"
+msgstr "Дата на раждане:%s"
+
+#: ../calendar/backends/contacts/e-cal-backend-contacts.c:505
+#, c-format
+msgid "Anniversary: %s"
+msgstr "Годишнина: %s"
+
+#: ../calendar/backends/file/e-cal-backend-file.c:193
+msgid "Can't save calendar data: Malformed URI."
+msgstr "Данните за календара не могат да бъдат запазени. Адресът е развален."
+
+#: ../calendar/backends/groupwise/e-cal-backend-groupwise-utils.c:889
+#: ../camel/providers/groupwise/camel-groupwise-folder.c:1425
+msgid "Reply Requested: by "
+msgstr "Изисква се отговор: от "
+
+#: ../calendar/backends/groupwise/e-cal-backend-groupwise-utils.c:894
+#: ../camel/providers/groupwise/camel-groupwise-folder.c:1430
+msgid "Reply Requested: When convenient"
+msgstr "Изисква се отговор: Когато е удобно"
+
+#: ../calendar/backends/groupwise/e-cal-backend-groupwise.c:184
+#, c-format
+msgid "Loading %s items"
+msgstr "Зареждане на %s обекти"
+
+#: ../calendar/backends/groupwise/e-cal-backend-groupwise.c:708
+#: ../servers/exchange/storage/exchange-hierarchy-foreign.c:254
+msgid "Calendar"
+msgstr "Календар"
+
+#: ../calendar/backends/groupwise/e-cal-backend-groupwise.c:764
+msgid "Invalid server URI"
+msgstr "Адресът на сървъра е невалиден"
+
+#: ../calendar/backends/groupwise/e-cal-backend-groupwise.c:780
+#: ../calendar/backends/groupwise/e-cal-backend-groupwise.c:789
+#: ../calendar/backends/groupwise/e-cal-backend-groupwise.c:871
+#: ../calendar/libecal/e-cal.c:5095
+#: ../camel/providers/groupwise/camel-groupwise-folder.c:890
+#: ../camel/providers/groupwise/camel-groupwise-folder.c:910
+#: ../camel/providers/groupwise/camel-groupwise-folder.c:938
+#: ../camel/providers/groupwise/camel-groupwise-store.c:518
+#: ../camel/providers/groupwise/camel-groupwise-store.c:533
+#: ../camel/providers/groupwise/camel-groupwise-store.c:575
+#: ../camel/providers/groupwise/camel-groupwise-store.c:1077
+#: ../camel/providers/groupwise/camel-groupwise-transport.c:178
+msgid "Authentication failed"
+msgstr "Идентификацията е неуспешна"
+
+#: ../calendar/backends/groupwise/e-cal-backend-groupwise.c:830
+msgid "Could not create thread for getting deltas"
+msgstr "Неуспех при създаване на нишка за получаване на разликите"
+
+#: ../calendar/backends/groupwise/e-cal-backend-groupwise.c:855
+#: ../calendar/backends/groupwise/e-cal-backend-groupwise.c:1098
+#: ../calendar/backends/http/e-cal-backend-http.c:496
+#: ../calendar/backends/weather/e-cal-backend-weather.c:444
+msgid "Could not create cache file"
+msgstr "Кеш файлът не може да бъде създаден"
+
+#: ../calendar/backends/groupwise/e-cal-backend-groupwise.c:865
+msgid "Could not create thread for populating cache"
+msgstr "Неуспех при създаване на нишка за първоначално запълване на кеша"
+
+#: ../calendar/backends/http/e-cal-backend-http.c:241
+msgid "Redirected to Invalid URI"
+msgstr "Пренасочено към невалиден адрес"
+
+#: ../calendar/backends/http/e-cal-backend-http.c:265
+msgid "Bad file format."
+msgstr "Лош файлов формат."
+
+#: ../calendar/backends/http/e-cal-backend-http.c:271
+msgid "Not a calendar."
+msgstr "Не е календар."
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:140
+msgid "Could not retrieve weather data"
+msgstr "Данните за времето не могат да бъдат получени"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:194
+msgid "Fair"
+msgstr "Хубаво"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:195
+msgid "Snow showers"
+msgstr "Валежи от сняг"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:196
+msgid "Snow"
+msgstr "Сняг"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:197
+msgid "Partly cloudy"
+msgstr "Частична облачност"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:198
+msgid "Smoke"
+msgstr "Дим"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:199
+msgid "Thunderstorms"
+msgstr "Гръмотевични бури"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:200
+msgid "Cloudy"
+msgstr "Облачно"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:201
+msgid "Drizzle"
+msgstr "Лек дъжд"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:202
+msgid "Sunny"
+msgstr "Слънчево"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:203
+msgid "Dust"
+msgstr "Прашно"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:204
+msgid "Clear"
+msgstr "Ясно"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:205
+msgid "Mostly cloudy"
+msgstr "Предимно облачно"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:206
+msgid "Windy"
+msgstr "Ветровито"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:207
+msgid "Rain showers"
+msgstr "Валежи от дъжд"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:208
+msgid "Foggy"
+msgstr "Мъгливо"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:209
+msgid "Rain/snow mixed"
+msgstr "Смесица от дъжд и сняг"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:210
+msgid "Sleet"
+msgstr "Киша"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:211
+msgid "Very hot/humid"
+msgstr "Много горещо/влажно"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:212
+msgid "Blizzard"
+msgstr "Виелица"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:213
+msgid "Freezing rain"
+msgstr "Леден дъжд"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:214
+msgid "Haze"
+msgstr "Мараня"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:215
+msgid "Blowing snow"
+msgstr "Зимна буря"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:216
+msgid "Freezing drizzle"
+msgstr "Леден дъжд"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:217
+msgid "Very cold/wind chill"
+msgstr "Много студено и ветровито"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:218
+msgid "Rain"
+msgstr "Дъжд"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:228
+#: ../calendar/backends/weather/e-cal-backend-weather.c:236
+#: ../calendar/backends/weather/e-cal-backend-weather.c:238
+#: ../calendar/backends/weather/e-cal-backend-weather.c:245
+msgid "Weather: Sunny"
+msgstr "Времето: Слънчево"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:229
+#: ../calendar/backends/weather/e-cal-backend-weather.c:230
+#: ../calendar/backends/weather/e-cal-backend-weather.c:246
+#: ../calendar/backends/weather/e-cal-backend-weather.c:249
+msgid "Weather: Snow"
+msgstr "Времето: Сняг"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:231
+msgid "Weather: Partly Cloudy"
+msgstr "Времето: Частична облачност"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:232
+#: ../calendar/backends/weather/e-cal-backend-weather.c:237
+#: ../calendar/backends/weather/e-cal-backend-weather.c:242
+#: ../calendar/backends/weather/e-cal-backend-weather.c:248
+msgid "Weather: Fog"
+msgstr "Времето: Мъгла"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:233
+msgid "Weather: Thunderstorms"
+msgstr "Времето: Гръмотевични бури"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:234
+#: ../calendar/backends/weather/e-cal-backend-weather.c:239
+msgid "Weather: Cloudy"
+msgstr "Времето: Облачно"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:235
+#: ../calendar/backends/weather/e-cal-backend-weather.c:241
+#: ../calendar/backends/weather/e-cal-backend-weather.c:243
+#: ../calendar/backends/weather/e-cal-backend-weather.c:244
+#: ../calendar/backends/weather/e-cal-backend-weather.c:247
+#: ../calendar/backends/weather/e-cal-backend-weather.c:250
+#: ../calendar/backends/weather/e-cal-backend-weather.c:252
+msgid "Weather: Rain"
+msgstr "Времето: Дъжд"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:327
+#, c-format
+msgid "%.1f°C - %s"
+msgstr "%.1f°C - %s"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:329
+#, c-format
+msgid "%.1f°F - %s"
+msgstr "%.1f°F - %s"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:332
+#, c-format
+msgid "%.1f/%.1f°C - %s"
+msgstr "%.1f/%.1f°C - %s"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:334
+#, c-format
+msgid "%.1f/%.1f°F - %s"
+msgstr "%.1f/%.1f°F - %s"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:340
+#, c-format
+msgid "%d%% chance of precipitation\n"
+msgstr "%d%% шанс от валежи\n"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:347
+#, c-format
+msgid "%.1fcm snow\n"
+msgstr "%.1fcm сняг\n"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:349
+#, c-format
+msgid "%.1fin snow\n"
+msgstr "%.1fin сняг\n"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:352
+#, c-format
+msgid "%.1f-%.1fcm snow\n"
+msgstr "%.1f-%.1fcm сняг\n"
+
+#: ../calendar/backends/weather/e-cal-backend-weather.c:354
+#, c-format
+msgid "%.1f-%.1fin snow\n"
+msgstr "%.1f-%.1fin сняг\n"
+
+#: ../calendar/libecal/e-cal-component.c:1322
+msgid "Untitled appointment"
+msgstr "Неназовани срещи"
+
+#: ../calendar/libecal/e-cal-recur.c:4026
+msgid "1st"
+msgstr "1ви"
+
+#: ../calendar/libecal/e-cal-recur.c:4027
+msgid "2nd"
+msgstr "2ри"
+
+#: ../calendar/libecal/e-cal-recur.c:4028
+msgid "3rd"
+msgstr "3ти"
+
+#: ../calendar/libecal/e-cal-recur.c:4029
+msgid "4th"
+msgstr "4ти"
+
+#: ../calendar/libecal/e-cal-recur.c:4030
+msgid "5th"
+msgstr "5ти"
+
+#: ../calendar/libecal/e-cal-recur.c:4031
+msgid "6th"
+msgstr "6ти"
+
+#: ../calendar/libecal/e-cal-recur.c:4032
+msgid "7th"
+msgstr "7ми"
+
+#: ../calendar/libecal/e-cal-recur.c:4033
+msgid "8th"
+msgstr "8ми"
+
+#: ../calendar/libecal/e-cal-recur.c:4034
+msgid "9th"
+msgstr "9ти"
+
+#: ../calendar/libecal/e-cal-recur.c:4035
+msgid "10th"
+msgstr "10ти"
+
+#: ../calendar/libecal/e-cal-recur.c:4036
+msgid "11th"
+msgstr "11ти"
+
+#: ../calendar/libecal/e-cal-recur.c:4037
+msgid "12th"
+msgstr "12ти"
+
+#: ../calendar/libecal/e-cal-recur.c:4038
+msgid "13th"
+msgstr "13ти"
+
+#: ../calendar/libecal/e-cal-recur.c:4039
+msgid "14th"
+msgstr "14ти"
+
+#: ../calendar/libecal/e-cal-recur.c:4040
+msgid "15th"
+msgstr "15ти"
+
+#: ../calendar/libecal/e-cal-recur.c:4041
+msgid "16th"
+msgstr "16ти"
+
+#: ../calendar/libecal/e-cal-recur.c:4042
+msgid "17th"
+msgstr "17ти"
+
+#: ../calendar/libecal/e-cal-recur.c:4043
+msgid "18th"
+msgstr "18ти"
+
+#: ../calendar/libecal/e-cal-recur.c:4044
+msgid "19th"
+msgstr "19ти"
+
+#: ../calendar/libecal/e-cal-recur.c:4045
+msgid "20th"
+msgstr "20ти"
+
+#: ../calendar/libecal/e-cal-recur.c:4046
+msgid "21st"
+msgstr "21ви"
+
+#: ../calendar/libecal/e-cal-recur.c:4047
+msgid "22nd"
+msgstr "22ри"
+
+#: ../calendar/libecal/e-cal-recur.c:4048
+msgid "23rd"
+msgstr "23ти"
+
+#: ../calendar/libecal/e-cal-recur.c:4049
+msgid "24th"
+msgstr "24ти"
+
+#: ../calendar/libecal/e-cal-recur.c:4050
+msgid "25th"
+msgstr "25ти"
+
+#: ../calendar/libecal/e-cal-recur.c:4051
+msgid "26th"
+msgstr "26ти"
+
+#: ../calendar/libecal/e-cal-recur.c:4052
+msgid "27th"
+msgstr "27ми"
+
+#: ../calendar/libecal/e-cal-recur.c:4053
+msgid "28th"
+msgstr "28ми"
+
+#: ../calendar/libecal/e-cal-recur.c:4054
+msgid "29th"
+msgstr "29ти"
+
+#: ../calendar/libecal/e-cal-recur.c:4055
+msgid "30th"
+msgstr "30ти"
+
+#: ../calendar/libecal/e-cal-recur.c:4056
+msgid "31st"
+msgstr "31ви"
+
+#: ../calendar/libecal/e-cal-util.c:680 ../calendar/libecal/e-cal-util.c:708
+msgid "High"
+msgstr "Високо"
+
+#: ../calendar/libecal/e-cal-util.c:682 ../calendar/libecal/e-cal-util.c:710
+msgid "Normal"
+msgstr "Нормално"
+
+#: ../calendar/libecal/e-cal-util.c:684 ../calendar/libecal/e-cal-util.c:712
+msgid "Low"
+msgstr "Ниско"
+
+#. An empty string is the same as 'None'.
+#: ../calendar/libecal/e-cal-util.c:706
+msgid "Undefined"
+msgstr "Неопределено"
+
+#. FIXME: Try to get the parent uri so that we dont have to ask the password again
+#: ../calendar/libecal/e-cal.c:1662
+#, c-format
+msgid "Enter password for %s to enable proxy for user %s"
+msgstr ""
+"Въведете парола за %s, за да включите сървъра посредник за потребителя %s"
+
+#: ../calendar/libecal/e-cal.c:1665 ../libedataserverui/e-book-auth-util.c:192
+#, c-format
+msgid "Enter password for %s (user %s)"
+msgstr "Моля, въведете парола за %s (потребител %s)"
+
+#: ../calendar/libecal/e-cal.c:5067
+msgid "Invalid argument"
+msgstr "Грешен аргумент"
+
+#: ../calendar/libecal/e-cal.c:5069
+msgid "Backend is busy"
+msgstr "Бек ендът е зает"
+
+#: ../calendar/libecal/e-cal.c:5071
+msgid "Repository is offline"
+msgstr "Хранилището не е активно"
+
+#: ../calendar/libecal/e-cal.c:5073
+msgid "No such calendar"
+msgstr "Няма такъв календар"
+
+#: ../calendar/libecal/e-cal.c:5075 ../servers/groupwise/e-gw-connection.c:167
+msgid "Object not found"
+msgstr "Обектът не може да бъде намерен"
+
+#: ../calendar/libecal/e-cal.c:5077 ../servers/groupwise/e-gw-connection.c:161
+msgid "Invalid object"
+msgstr "Невалиден обект"
+
+#: ../calendar/libecal/e-cal.c:5079
+msgid "URI not loaded"
+msgstr "Адресът не е зареден"
+
+#: ../calendar/libecal/e-cal.c:5081
+msgid "URI already loaded"
+msgstr "Адресът вече е зареден"
+
+#: ../calendar/libecal/e-cal.c:5083
+#: ../servers/exchange/storage/e-storage.c:572
+msgid "Permission denied"
+msgstr "Достъпът е отказан"
+
+#: ../calendar/libecal/e-cal.c:5085 ../servers/groupwise/e-gw-connection.c:169
+msgid "Unknown User"
+msgstr "Неизвестен потребител"
+
+#: ../calendar/libecal/e-cal.c:5087
+msgid "Object ID already exists"
+msgstr "Карта ID вече съществува"
+
+#: ../calendar/libecal/e-cal.c:5089
+msgid "Protocol not supported"
+msgstr "Протоколът на се подържа"
+
+#: ../calendar/libecal/e-cal.c:5091
+msgid "Operation has been cancelled"
+msgstr "Действието беше прекратено"
+
+#: ../calendar/libecal/e-cal.c:5093
+msgid "Could not cancel operation"
+msgstr "Действието не може да бъде прекъснато"
+
+#: ../calendar/libecal/e-cal.c:5097
+#: ../camel/providers/smtp/camel-smtp-transport.c:212
+msgid "Authentication required"
+msgstr "Изисква се идентификация"
+
+#: ../calendar/libecal/e-cal.c:5099
+msgid "A CORBA exception has occurred"
+msgstr "Случи се изключение на CORBA"
+
+#: ../calendar/libecal/e-cal.c:5101
+#: ../camel/providers/groupwise/camel-groupwise-transport.c:212
+#: ../camel/providers/imap/camel-imap-command.c:310
+#: ../camel/providers/imap/camel-imap-command.c:410
+#: ../camel/providers/imap4/camel-imap4-store.c:376
+#: ../camel/providers/pop3/camel-pop3-store.c:533
+#: ../camel/providers/pop3/camel-pop3-store.c:540
+#: ../camel/providers/pop3/camel-pop3-store.c:546
+#: ../servers/exchange/storage/e-storage.c:586
+#: ../servers/groupwise/e-gw-connection.c:175
+msgid "Unknown error"
+msgstr "Неизвестна грешка"
+
+#: ../calendar/libecal/e-cal.c:5103
+#: ../servers/exchange/storage/e-storage.c:554
+msgid "No error"
+msgstr "Няма грешка"
+
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:65
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:576
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:769
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:796
+#, c-format
+msgid "\"%s\" expects no arguments"
+msgstr "„%s“ не очаква аргументи"
+
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:98
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:208
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:250
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:286
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:834
+#, c-format
+msgid "\"%s\" expects one argument"
+msgstr "„%s“ очаква един аргумент"
+
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:104
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:111
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:292
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:520
+#, c-format
+msgid "\"%s\" expects the first argument to be a string"
+msgstr "„%s“ очаква първият аргумент да бъде низ"
+
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:119
+#, c-format
+msgid "\"%s\" expects the first argument to be an ISO 8601 date/time string"
+msgstr "„%s“ очаква първият аргумент да бъде ISO 8601 date/time низ"
+
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:158
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:359
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:514
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:608
+#, c-format
+msgid "\"%s\" expects two arguments"
+msgstr "„%s“ очаква два аргумента"
+
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:164
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:214
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:256
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:365
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:614
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:840
+#, c-format
+msgid "\"%s\" expects the first argument to be a time_t"
+msgstr "„%s“ очаква първия аргумент да бъде time_t"
+
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:172
+#, c-format
+msgid "\"%s\" expects the second argument to be an integer"
+msgstr "„%s“ очаква вторият аргумент да бъде integer"
+
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:373
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:622
+#, c-format
+msgid "\"%s\" expects the second argument to be a time_t"
+msgstr "„%s“ очаква вторият аргумент да бъде time_t"
+
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:528
+#, c-format
+msgid "\"%s\" expects the second argument to be a string"
+msgstr "„%s“ очаква вторият аргумент да бъде низ"
+
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:548
+#, c-format
+msgid ""
+"\"%s\" expects the first argument to be either \"any\", \"summary\", or "
+"\"description\", or \"location\""
+msgstr ""
+"„%s“ очаква първият аргумент да бъде „всякакъв“, „обобщение“, „описание“ или "
+"„местоположение“"
+
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:671
+#, c-format
+msgid "\"%s\" expects at least one argument"
+msgstr "„%s“ очаква поне един аргумент"
+
+#: ../calendar/libedata-cal/e-cal-backend-sexp.c:685
+#, c-format
+msgid ""
+"\"%s\" expects all arguments to be strings or one and only one argument to "
+"be a boolean false (#f)"
+msgstr ""
+"„%s“ очаква всички аргументи да са низове или точно един аргумент да бъде "
+"булевата стойност лъжа (#f)"
+
+#: ../camel/camel-cipher-context.c:102
+msgid "Signing is not supported by this cipher"
+msgstr "Подписа не се поддържа от този шифър"
+
+#: ../camel/camel-cipher-context.c:128
+msgid "Signing message"
+msgstr "Подписване на писмото"
+
+#: ../camel/camel-cipher-context.c:145
+msgid "Verifying is not supported by this cipher"
+msgstr "Верификацията не се поддържа от този шифър"
+
+#: ../camel/camel-cipher-context.c:171
+msgid "Verifying message"
+msgstr "Потвърждаване на писмото"
+
+#: ../camel/camel-cipher-context.c:189
+msgid "Encryption is not supported by this cipher"
+msgstr "Криптирането не се поддържа от този шифър"
+
+#: ../camel/camel-cipher-context.c:215
+msgid "Encrypting message"
+msgstr "Криптиране на писмо"
+
+#: ../camel/camel-cipher-context.c:232
+msgid "Decryption is not supported by this cipher"
+msgstr "Декриптирането не се поддържа от този шифър"
+
+#: ../camel/camel-cipher-context.c:254
+msgid "Decrypting message"
+msgstr "Дешифриране на писмото"
+
+#: ../camel/camel-cipher-context.c:271
+msgid "You may not import keys with this cipher"
+msgstr "Не можете да внасяте ключове с този шифър"
+
+#: ../camel/camel-cipher-context.c:301
+msgid "You may not export keys with this cipher"
+msgstr "Не можете да изнасяте ключове с този шифър"
+
+#: ../camel/camel-data-cache.c:134
+msgid "Unable to create cache path"
+msgstr "Неуспех при създаването на пътека за кеша"
+
+#: ../camel/camel-data-cache.c:376
+#, c-format
+msgid "Could not remove cache entry: %s: %s"
+msgstr "Записа в кеша %s не може да бъде изтрит: %s"
+
+#: ../camel/camel-disco-diary.c:195
+#, c-format
+msgid ""
+"Could not write log entry: %s\n"
+"Further operations on this server will not be replayed when you\n"
+"reconnect to the network."
+msgstr ""
+"Не може да се запишат действията: %s\n"
+"По-нататъшните операция на този сървър няма да бъдат възобновени, когато\n"
+"се включите наново в мрежата."
+
+#: ../camel/camel-disco-diary.c:258
+#, c-format
+msgid ""
+"Could not open `%s':\n"
+"%s\n"
+"Changes made to this folder will not be resynchronized."
+msgstr ""
+"Не може да се отвори „%s“:\n"
+"%s\n"
+"Направените промени в тази папка няма да бъдат синхронизирани."
+
+#: ../camel/camel-disco-diary.c:294
+msgid "Resynchronizing with server"
+msgstr "Ресинхронизиране със сървър"
+
+#: ../camel/camel-disco-folder.c:42 ../camel/camel-offline-folder.c:51
+msgid "Copy folder content locally for offline operation"
+msgstr ""
+"Копиране съдържанието на папката локално с цел работа в режим „Изключен“"
+
+#: ../camel/camel-disco-folder.c:104 ../camel/camel-offline-folder.c:110
+msgid "Downloading new messages for offline mode"
+msgstr "Изтегляне на нови съобщения за режим „Изключен“"
+
+#: ../camel/camel-disco-folder.c:467
+#, c-format
+msgid "Preparing folder '%s' for offline"
+msgstr "Подготвяне на папката „%s“ за режим „Изключен“"
+
+#: ../camel/camel-disco-store.c:395
+#: ../camel/providers/groupwise/camel-groupwise-store.c:1275
+#: ../camel/providers/imap/camel-imap-store.c:2944
+msgid "You must be working online to complete this operation"
+msgstr "Трябва да сте в режим „online“, за да завършите тази операция"
+
+#: ../camel/camel-exception.c:308
+msgid "No description available"
+msgstr "Липсва описание"
+
+#: ../camel/camel-filter-driver.c:701 ../camel/camel-filter-search.c:523
+#, c-format
+msgid "Failed to create pipe to '%s': %s"
+msgstr "Неуспех при създаването на програмен канал „%s“: %s"
+
+#: ../camel/camel-filter-driver.c:745
+#, c-format
+msgid "Failed to create child process '%s': %s"
+msgstr "Неуспех при създаване на дъщерен процес „%s“: %s"
+
+#: ../camel/camel-filter-driver.c:788
+#, c-format
+msgid "Invalid message stream received from %s: %s"
+msgstr "Невалиден поток със съобщения от %s: %s"
+
+#: ../camel/camel-filter-driver.c:977 ../camel/camel-filter-driver.c:986
+msgid "Syncing folders"
+msgstr "Синхронизиране на папки"
+
+#: ../camel/camel-filter-driver.c:1075 ../camel/camel-filter-driver.c:1453
+#, c-format
+msgid "Error parsing filter: %s: %s"
+msgstr "Грешка при работа с филтър: %s: %s"
+
+#: ../camel/camel-filter-driver.c:1084 ../camel/camel-filter-driver.c:1462
+#, c-format
+msgid "Error executing filter: %s: %s"
+msgstr "Грешка при изпълнение на филтър: %s: %s"
+
+#: ../camel/camel-filter-driver.c:1151
+msgid "Unable to open spool folder"
+msgstr "Не може да се отвори spool папка"
+
+#: ../camel/camel-filter-driver.c:1160
+msgid "Unable to process spool folder"
+msgstr "Не може да се обработи spool папка"
+
+#: ../camel/camel-filter-driver.c:1175
+#, c-format
+msgid "Getting message %d (%d%%)"
+msgstr "Получаване на съобщение номер %d (%d%%)"
+
+#: ../camel/camel-filter-driver.c:1179
+msgid "Cannot open message"
+msgstr "Не може да се отвори съобщение"
+
+#: ../camel/camel-filter-driver.c:1180 ../camel/camel-filter-driver.c:1192
+#, c-format
+msgid "Failed on message %d"
+msgstr "Грешка при съобщение %d"
+
+#: ../camel/camel-filter-driver.c:1206 ../camel/camel-filter-driver.c:1297
+msgid "Syncing folder"
+msgstr "Синхронизиране на папка"
+
+#: ../camel/camel-filter-driver.c:1210 ../camel/camel-filter-driver.c:1302
+msgid "Complete"
+msgstr "Завършено"
+
+#: ../camel/camel-filter-driver.c:1267
+#, c-format
+msgid "Getting message %d of %d"
+msgstr "Получаване на съобщение номер %d от %d"
+
+#: ../camel/camel-filter-driver.c:1282
+#, c-format
+msgid "Failed at message %d of %d"
+msgstr "Грешка на съобщение - %d от %d"
+
+#: ../camel/camel-filter-search.c:136
+msgid "Failed to retrieve message"
+msgstr "Получаването на съобщението е неуспешно"
+
+#: ../camel/camel-filter-search.c:396
+msgid "Invalid arguments to (system-flag)"
+msgstr "Неправилни аргументи към (system-flag)"
+
+#: ../camel/camel-filter-search.c:411
+msgid "Invalid arguments to (user-tag)"
+msgstr "Неправилни аргументи към (user-tag)"
+
+#: ../camel/camel-filter-search.c:559
+#, c-format
+msgid "Failed to create create child process '%s': %s"
+msgstr "Неуспех при създаването на под-процес „%s“: %s"
+
+#. A filter search is a search through your filters, ie. your filters is the corpus being searched thru.
+#: ../camel/camel-filter-search.c:682 ../camel/camel-filter-search.c:690
+#, c-format
+msgid "Error executing filter search: %s: %s"
+msgstr "Грешка при търсене на филтър: %s: %s"
+
+#: ../camel/camel-folder-search.c:357 ../camel/camel-folder-search.c:478
+#, c-format
+msgid ""
+"Cannot parse search expression: %s:\n"
+"%s"
+msgstr ""
+"не може да се анализира търсеният израз: %s:\n"
+"%s"
+
+#: ../camel/camel-folder-search.c:367 ../camel/camel-folder-search.c:488
+#, c-format
+msgid ""
+"Error executing search expression: %s:\n"
+"%s"
+msgstr ""
+"Грешка при изпълнение търсене на израз: %s:\n"
+"%s"
+
+#: ../camel/camel-folder-search.c:674 ../camel/camel-folder-search.c:707
+msgid "(match-all) requires a single bool result"
+msgstr "(съвпадение на всички) изисква единичен булев резулат"
+
+#: ../camel/camel-folder-search.c:757
+msgid "(match-threads) not allowed inside match-all"
+msgstr "(съвпадение по нишки) не е позволено вътре в „съвпадение на всички“"
+
+#: ../camel/camel-folder-search.c:760 ../camel/camel-folder-search.c:764
+msgid "(match-threads) requires a match type string"
+msgstr "(съвпадение по нишки) изисква низ за напасване"
+
+#: ../camel/camel-folder-search.c:786
+msgid "(match-threads) expects an array result"
+msgstr "(съвпадение по нишки) очаква резултат-масив"
+
+#: ../camel/camel-folder-search.c:792
+msgid "(match-threads) requires the folder set"
+msgstr "(съвпадение по нишки) изисква сбор от папки"
+
+#: ../camel/camel-folder-search.c:881
+#, c-format
+msgid "Performing query on unknown header: %s"
+msgstr "Изпълнение на заявка върху непозната заглавна част: %s"
+
+#: ../camel/camel-folder.c:616
+#, c-format
+msgid "Unsupported operation: append message: for %s"
+msgstr "Неподържана операция: добавяне на съобщение за %s"
+
+#: ../camel/camel-folder.c:1238
+#, c-format
+msgid "Unsupported operation: search by expression: for %s"
+msgstr "Неподържана операция: търсене по израз: за %s"
+
+#: ../camel/camel-folder.c:1279
+#, c-format
+msgid "Unsupported operation: search by uids: for %s"
+msgstr "Неподдържана операция: търсене по uids: за %s"
+
+#: ../camel/camel-folder.c:1395
+msgid "Moving messages"
+msgstr "Преместване на писма"
+
+#: ../camel/camel-folder.c:1395
+msgid "Copying messages"
+msgstr "Копиране на писма"
+
+#: ../camel/camel-folder.c:1649
+msgid "Learning junk"
+msgstr "Изучаване на писмата тип спам"
+
+#: ../camel/camel-folder.c:1666
+msgid "Learning non-junk"
+msgstr "Изучава се кое е спам"
+
+#: ../camel/camel-folder.c:1685
+msgid "Filtering new message(s)"
+msgstr "Филтриране на ново(и) съобщение(я)"
+
+#: ../camel/camel-gpg-context.c:734
+#, c-format
+msgid ""
+"Unexpected GnuPG status message encountered:\n"
+"\n"
+"%s"
+msgstr ""
+"Неочаквано съобщение от GnuPG:\n"
+"\n"
+"%s"
+
+#: ../camel/camel-gpg-context.c:748
+msgid "Failed to parse gpg userid hint."
+msgstr ""
+"Неуспех при анализа на подсказката за потребителски идентификатор на gpg."
+
+#: ../camel/camel-gpg-context.c:772
+msgid "Failed to parse gpg passphrase request."
+msgstr "Неуспех при анализа на заявката за тайна фраза на gpg."
+
+#: ../camel/camel-gpg-context.c:786
+#, c-format
+msgid ""
+"You need a passphrase to unlock the key for\n"
+"user: \"%s\""
+msgstr ""
+"Нуждаете се от тайна фраза, за да отключите ключа за\n"
+"потребителя: „%s“"
+
+#: ../camel/camel-gpg-context.c:803 ../camel/camel-gpg-context.c:1000
+#: ../camel/providers/nntp/camel-nntp-store.c:1273
+msgid "Cancelled."
+msgstr "Прекратено."
+
+#: ../camel/camel-gpg-context.c:821
+msgid "Failed to unlock secret key: 3 bad passphrases given."
+msgstr "Неуспех при отключване на таен ключ: 3 грешни фрази подадени."
+
+#: ../camel/camel-gpg-context.c:827
+#, c-format
+msgid "Unexpected response from GnuPG: %s"
+msgstr "Неочакван отговор от GnuPG: %s"
+
+#: ../camel/camel-gpg-context.c:879
+msgid "Failed to encrypt: No valid recipients specified."
+msgstr "Не може да се криптира: Няма зададени валидни получатели."
+
+#. always called on an i/o error
+#: ../camel/camel-gpg-context.c:1138 ../camel/camel-gpg-context.c:1262
+#: ../camel/camel-gpg-context.c:1744 ../camel/camel-gpg-context.c:1789
+#, c-format
+msgid "Failed to execute gpg: %s"
+msgstr "Неуспех при изпълнението на gpg: %s"
+
+#: ../camel/camel-gpg-context.c:1230 ../camel/camel-smime-context.c:389
+#, c-format
+msgid "Could not generate signing data: %s"
+msgstr "Не може да се генерират данни за подпис: %s"
+
+#: ../camel/camel-gpg-context.c:1277 ../camel/camel-gpg-context.c:1464
+#: ../camel/camel-gpg-context.c:1547 ../camel/camel-gpg-context.c:1562
+#: ../camel/camel-gpg-context.c:1666 ../camel/camel-gpg-context.c:1681
+#: ../camel/camel-gpg-context.c:1760 ../camel/camel-gpg-context.c:1805
+msgid "Failed to execute gpg."
+msgstr "Неуспех при изпълнението на gpg."
+
+#: ../camel/camel-gpg-context.c:1296
+msgid "This is a digitally signed message part"
+msgstr "Това е цифрово подписана част от писмото"
+
+#: ../camel/camel-gpg-context.c:1382 ../camel/camel-gpg-context.c:1388
+#: ../camel/camel-gpg-context.c:1394 ../camel/camel-gpg-context.c:1411
+#: ../camel/camel-smime-context.c:692 ../camel/camel-smime-context.c:703
+#: ../camel/camel-smime-context.c:710
+msgid "Cannot verify message signature: Incorrect message format"
+msgstr ""
+"Не може да се потвърди подписа на съобщението: Невалиден формат на "
+"съобщението"
+
+#: ../camel/camel-gpg-context.c:1449
+#, c-format
+msgid "Cannot verify message signature: could not create temp file: %s"
+msgstr ""
+"Не може да се потвърди подписа на съобщението: не може да се създаде "
+"временен файл: %s"
+
+#: ../camel/camel-gpg-context.c:1530
+#, c-format
+msgid "Could not generate encrypting data: %s"
+msgstr "Не може да се генерират данни за криптиране: %s"
+
+#: ../camel/camel-gpg-context.c:1580
+msgid "This is a digitally encrypted message part"
+msgstr "Това е цифрово криптирана част от съобщение"
+
+#: ../camel/camel-gpg-context.c:1637
+msgid "Failed to decrypt MIME part: protocol error"
+msgstr "Неуспех при дешифрирането на MIME частта: протоколна грешка"
+
+#: ../camel/camel-gpg-context.c:1648
+msgid "Cannot decrypt message: Incorrect message format"
+msgstr "Не може да се дешифрира съобщението. Грешен формат на съобщението."
+
+#: ../camel/camel-gpg-context.c:1702 ../camel/camel-smime-context.c:966
+msgid "Encrypted content"
+msgstr "Криптирано съдържание"
+
+#: ../camel/camel-gpg-context.c:1721
+msgid "Unable to parse message content"
+msgstr "Неуспех при прегледа на съдържанието на писмото"
+
+#: ../camel/camel-gpg-context.c:1745 ../camel/camel-gpg-context.c:1790
+#: ../camel/camel-tcp-stream-openssl.c:631
+#: ../camel/providers/imap4/camel-imap4-engine.c:1550
+#: ../camel/providers/imap4/camel-imap4-engine.c:1589
+#: ../camel/providers/imap4/camel-imap4-engine.c:1634
+#: ../camel/providers/imap4/camel-imap4-engine.c:1690
+#: ../camel/providers/imap4/camel-imap4-store.c:1435
+#: ../camel/providers/imap4/camel-imap4-utils.c:575
+#: ../camel/providers/smtp/camel-smtp-transport.c:160
+#: ../camel/providers/smtp/camel-smtp-transport.c:215
+msgid "Unknown"
+msgstr "Неизвестен"
+
+#: ../camel/camel-lock-client.c:100
+#, c-format
+msgid "Cannot build locking helper pipe: %s"
+msgstr "Неуспех при създаването на помощен програмен канал за заключване: %s"
+
+#: ../camel/camel-lock-client.c:113
+#, c-format
+msgid "Cannot fork locking helper: %s"
+msgstr "Неуспех при създаването на процес за заключване: %s"
+
+#: ../camel/camel-lock-client.c:191 ../camel/camel-lock-client.c:214
+#, c-format
+msgid "Could not lock '%s': protocol error with lock-helper"
+msgstr "Грешка при заключване на „%s“: протоколна грешка в lock-helper"
+
+#: ../camel/camel-lock-client.c:204
+#, c-format
+msgid "Could not lock '%s'"
+msgstr "Не може да се заключи „%s“"
+
+#: ../camel/camel-lock.c:92 ../camel/camel-lock.c:113
+#, c-format
+msgid "Could not create lock file for %s: %s"
+msgstr "Не може да се създаде заключващ файл за %s: %s"
+
+#: ../camel/camel-lock.c:154
+#, c-format
+msgid "Timed out trying to get lock file on %s. Try again later."
+msgstr ""
+"Изтече времето за изчакване за получаване на заключващ файл на %s. Опитайте "
+"отново по-късно."
+
+#: ../camel/camel-lock.c:209
+#, c-format
+msgid "Failed to get lock using fcntl(2): %s"
+msgstr "Неуспех при получаване на lock използвайки fcntl(2): %s"
+
+#: ../camel/camel-lock.c:272
+#, c-format
+msgid "Failed to get lock using flock(2): %s"
+msgstr "Неуспех при получаване на lock използвайки flcntl(2): %s"
+
+#: ../camel/camel-movemail.c:104
+#, c-format
+msgid "Could not check mail file %s: %s"
+msgstr "Не може да се провери пощенски файл %s: %s"
+
+#: ../camel/camel-movemail.c:117
+#, c-format
+msgid "Could not open mail file %s: %s"
+msgstr "Не може да се отвори пощенски файл %s: %s"
+
+#: ../camel/camel-movemail.c:125
+#, c-format
+msgid "Could not open temporary mail file %s: %s"
+msgstr "Не може да се отвори временен пощенски файл %s: %s"
+
+#: ../camel/camel-movemail.c:154
+#, c-format
+msgid "Failed to store mail in temp file %s: %s"
+msgstr "Неуспех при запазване на поща във временен файл %s: %s"
+
+#: ../camel/camel-movemail.c:184
+#, c-format
+msgid "Could not create pipe: %s"
+msgstr "Не може да се създаде програмен канал: %s"
+
+#: ../camel/camel-movemail.c:196
+#, c-format
+msgid "Could not fork: %s"
+msgstr "Не може да се направи fork: %s"
+
+#: ../camel/camel-movemail.c:234
+#, c-format
+msgid "Movemail program failed: %s"
+msgstr "Програмата за преместване на поща пропадна: %s"
+
+#: ../camel/camel-movemail.c:235
+msgid "(Unknown error)"
+msgstr "(Неизвестна грешка)"
+
+#: ../camel/camel-movemail.c:258
+#, c-format
+msgid "Error reading mail file: %s"
+msgstr "Грешка при четене на пощенски файл: %s"
+
+#: ../camel/camel-movemail.c:269
+#, c-format
+msgid "Error writing mail temp file: %s"
+msgstr "Грешка при писане на поща във временен файл %s"
+
+#: ../camel/camel-movemail.c:462 ../camel/camel-movemail.c:529
+#, c-format
+msgid "Error copying mail temp file: %s"
+msgstr "Грешка при копиране на поща във временен файл: %s"
+
+#: ../camel/camel-multipart-signed.c:598
+msgid "parse error"
+msgstr "грешка при преглед"
+
+#: ../camel/camel-net-utils.c:446 ../camel/camel-net-utils.c:608
+#: ../camel/camel-net-utils.c:739
+#: ../camel/providers/pop3/camel-pop3-store.c:446
+#: ../camel/providers/pop3/camel-pop3-store.c:527
+msgid "Cancelled"
+msgstr "Прекратено"
+
+#: ../camel/camel-net-utils.c:465
+msgid "cannot create thread"
+msgstr "неуспех при създаването на нишка"
+
+#: ../camel/camel-net-utils.c:612
+#, c-format
+msgid "Resolving: %s"
+msgstr "Анализиране: %s"
+
+#: ../camel/camel-net-utils.c:634
+msgid "Host lookup failed"
+msgstr "Търсенето на хоста е неуспешно"
+
+#: ../camel/camel-net-utils.c:636
+#, c-format
+msgid "Host lookup failed: %s: %s"
+msgstr "Търсенето на хоста пропадна: %s: %s"
+
+#: ../camel/camel-net-utils.c:743
+msgid "Resolving address"
+msgstr "Разглеждане на адрес"
+
+#: ../camel/camel-net-utils.c:763
+msgid "Name lookup failed"
+msgstr "Прегледа на името е неуспешно"
+
+#: ../camel/camel-net-utils.c:766
+#, c-format
+msgid "Name lookup failed: %s"
+msgstr "Прегледа на името е неуспешно: %s"
+
+#: ../camel/camel-offline-folder.c:253
+#, c-format
+msgid "Syncing messages in folder '%s' to disk"
+msgstr "Синхронизация на писмата в папка „%s“ с диска"
+
+#: ../camel/camel-offline-journal.c:162 ../camel/camel-offline-journal.c:185
+#, c-format
+msgid "Cannot write offline journal for folder `%s': %s"
+msgstr "Не може да се запише журнала за работа офлайн за папката „%s“: %s"
+
+#: ../camel/camel-provider.c:59
+msgid "Virtual folder email provider"
+msgstr "Доставчик на виртуални папки за е-поща"
+
+#: ../camel/camel-provider.c:61
+msgid "For reading mail as a query of another set of folders"
+msgstr "За четене на поща, като запитване до друг набор папки"
+
+#: ../camel/camel-provider.c:185
+#, c-format
+msgid "Could not load %s: Module loading not supported on this system."
+msgstr ""
+"Не може да се зареди %s: Зареждаемия модул не се подържа от тази система"
+
+#: ../camel/camel-provider.c:194
+#, c-format
+msgid "Could not load %s: %s"
+msgstr "Не може да се зареди %s: %s"
+
+#: ../camel/camel-provider.c:202
+#, c-format
+msgid "Could not load %s: No initialization code in module."
+msgstr "Не може да се зареди %s: Няма инициализиращ код в модула."
+
+#: ../camel/camel-provider.c:374 ../camel/camel-session.c:163
+#, c-format
+msgid "No provider available for protocol `%s'"
+msgstr "Няма наличен доставчик за протокол „%s“"
+
+#: ../camel/camel-sasl-anonymous.c:35
+msgid "Anonymous"
+msgstr "Анонимно"
+
+#: ../camel/camel-sasl-anonymous.c:37
+msgid "This option will connect to the server using an anonymous login."
+msgstr "Тази опция ще ви свързва със сървър позволяващ анонимно влизане"
+
+#: ../camel/camel-sasl-anonymous.c:122 ../camel/camel-sasl-plain.c:88
+msgid "Authentication failed."
+msgstr "Оторизацията пропадна"
+
+#: ../camel/camel-sasl-anonymous.c:131
+#, c-format
+msgid ""
+"Invalid email address trace information:\n"
+"%s"
+msgstr ""
+"Грешна информация при трасиране на пощенски адрес:\n"
+"%s"
+
+#: ../camel/camel-sasl-anonymous.c:143
+#, c-format
+msgid ""
+"Invalid opaque trace information:\n"
+"%s"
+msgstr ""
+"Грешна информация при трасиране:\n"
+"%s"
+
+#: ../camel/camel-sasl-anonymous.c:155
+#, c-format
+msgid ""
+"Invalid trace information:\n"
+"%s"
+msgstr ""
+"Грешна информация при трасиране:\n"
+"%s"
+
+#: ../camel/camel-sasl-cram-md5.c:36
+msgid "CRAM-MD5"
+msgstr "CRAM-MD5"
+
+#: ../camel/camel-sasl-cram-md5.c:38
+msgid ""
+"This option will connect to the server using a secure CRAM-MD5 password, if "
+"the server supports it."
+msgstr ""
+"Тази опция ще ви свърже със сървър използващ CRAM-MD5 парола, ако той я "
+"поддържа"
+
+#: ../camel/camel-sasl-digest-md5.c:49
+msgid "DIGEST-MD5"
+msgstr "DIGEST-MD5"
+
+#: ../camel/camel-sasl-digest-md5.c:51
+msgid ""
+"This option will connect to the server using a secure DIGEST-MD5 password, "
+"if the server supports it."
+msgstr ""
+"Тази опция ще ви свърже със сървър използващ DIGEST-MD5 парола, ако той я "
+"поддържа"
+
+#: ../camel/camel-sasl-digest-md5.c:819
+msgid "Server challenge too long (>2048 octets)"
+msgstr "Предизвикателството от сървъра е прекалено дълго (>2048 октета)"
+
+#: ../camel/camel-sasl-digest-md5.c:828
+msgid "Server challenge invalid\n"
+msgstr "Предизвикателството от сървъра е прекалено дълго.\n"
+
+#: ../camel/camel-sasl-digest-md5.c:834
+msgid "Server challenge contained invalid \"Quality of Protection\" token"
+msgstr ""
+"Предизвикателството от сървъра съдържа невалидна част - „Качество на защита“"
+
+#: ../camel/camel-sasl-digest-md5.c:864
+msgid "Server response did not contain authorization data"
+msgstr "Отговорът на сървъра не съдържа данни за упълномощаване"
+
+#: ../camel/camel-sasl-digest-md5.c:882
+msgid "Server response contained incomplete authorization data"
+msgstr "Отговорът на сървъра съдържа непълни данни за упълномощаване"
+
+#: ../camel/camel-sasl-digest-md5.c:892
+msgid "Server response does not match"
+msgstr "Отговорът на сървъра не съвпада"
+
+#: ../camel/camel-sasl-gssapi.c:57
+msgid "GSSAPI"
+msgstr "GSSAPI"
+
+#: ../camel/camel-sasl-gssapi.c:59
+msgid "This option will connect to the server using Kerberos 5 authentication."
+msgstr ""
+"Тази опция ще прави връзката към сървъра да е със Kerberos 5 идентификация."
+
+#: ../camel/camel-sasl-gssapi.c:157
+msgid ""
+"The specified mechanism is not supported by the provided credential, or is "
+"unrecognized by the implementation."
+msgstr ""
+"Указаният механизъм не се поддържа от продоставените удостоверения или не се "
+"разпознава от реализацията."
+
+#: ../camel/camel-sasl-gssapi.c:162
+msgid "The provided target_name parameter was ill-formed."
+msgstr "Подаденият параметър target_name е зле формиран."
+
+#: ../camel/camel-sasl-gssapi.c:165
+msgid ""
+"The provided target_name parameter contained an invalid or unsupported type "
+"of name."
+msgstr ""
+"Подаденият параметър target_name съдържа невалиден или неподдържан вид име."
+
+#: ../camel/camel-sasl-gssapi.c:169
+msgid ""
+"The input_token contains different channel bindings to those specified via "
+"the input_chan_bindings parameter."
+msgstr ""
+"input_token съдържа различни връзки с входни канали от зададените в "
+"параметъра input_chan_bindings."
+
+#: ../camel/camel-sasl-gssapi.c:174
+msgid ""
+"The input_token contains an invalid signature, or a signature that could not "
+"be verified."
+msgstr ""
+"input_token съдържа неправилен подпис или подпис, който не може да бъде "
+"проверен."
+
+#: ../camel/camel-sasl-gssapi.c:178
+msgid ""
+"The supplied credentials were not valid for context initiation, or the "
+"credential handle did not reference any credentials."
+msgstr ""
+"Указаните удостоверения не са валидни за контекста на инициализация или "
+"указателят на удостоверения не сочи никакви удостоверения."
+
+#: ../camel/camel-sasl-gssapi.c:183
+msgid "The supplied context handle did not refer to a valid context."
+msgstr "Подаденият указател на контекст не сочи към валиден контекст."
+
+#: ../camel/camel-sasl-gssapi.c:186
+msgid "The consistency checks performed on the input_token failed."
+msgstr "Проверките на input_token за последователност са неуспешни."
+
+#: ../camel/camel-sasl-gssapi.c:189
+msgid "The consistency checks performed on the credential failed."
+msgstr "Проверките за последователност на препоръките с неуспешни."
+
+#: ../camel/camel-sasl-gssapi.c:192
+msgid "The referenced credentials have expired."
+msgstr "Указаните препоръки са изтекли."
+
+#: ../camel/camel-sasl-gssapi.c:198 ../camel/camel-sasl-gssapi.c:246
+#: ../camel/camel-sasl-gssapi.c:282 ../camel/camel-sasl-gssapi.c:297
+#: ../camel/camel-sasl-kerberos4.c:228
+#: ../camel/providers/imap/camel-imap-store.c:1249
+msgid "Bad authentication response from server."
+msgstr "Грешна оторизация при отговора на сървъра."
+
+#: ../camel/camel-sasl-gssapi.c:307
+msgid "Unsupported security layer."
+msgstr "Неподдържан слой на сигурност"
+
+#: ../camel/camel-sasl-kerberos4.c:44
+msgid "Kerberos 4"
+msgstr "Kerberos 4"
+
+#: ../camel/camel-sasl-kerberos4.c:46
+msgid "This option will connect to the server using Kerberos 4 authentication."
+msgstr "Тази опция ще ви свърже със сървър използващ Kerberos 4 за оторизация"
+
+#: ../camel/camel-sasl-kerberos4.c:171
+#, c-format
+msgid ""
+"Could not get Kerberos ticket:\n"
+"%s"
+msgstr ""
+"Не може да се получи Kerberos билет:\n"
+"%s"
+
+#: ../camel/camel-sasl-login.c:33
+msgid "Login"
+msgstr "Идентифициране"
+
+#: ../camel/camel-sasl-login.c:35 ../camel/camel-sasl-plain.c:35
+msgid "This option will connect to the server using a simple password."
+msgstr "Тази опция ще ви свърже със сървър използващ проста парола."
+
+#: ../camel/camel-sasl-login.c:132
+msgid "Unknown authentication state."
+msgstr "Неизвестен тип на идентификация"
+
+#: ../camel/camel-sasl-ntlm.c:32
+msgid "NTLM / SPA"
+msgstr "NTLM / SPA"
+
+#: ../camel/camel-sasl-ntlm.c:34
+msgid ""
+"This option will connect to a Windows-based server using NTLM / Secure "
+"Password Authentication."
+msgstr ""
+"С тази настройка ще се направи връзка с Windows сървър през NTLM / Secure "
+"Password Authentication."
+
+#: ../camel/camel-sasl-plain.c:33
+msgid "PLAIN"
+msgstr "ОБИКНОВЕН"
+
+#: ../camel/camel-sasl-popb4smtp.c:37
+msgid "POP before SMTP"
+msgstr "POP преди SMTP"
+
+#: ../camel/camel-sasl-popb4smtp.c:39
+msgid "This option will authorise a POP connection before attempting SMTP"
+msgstr "Тази опция ще оторизира POP връзка преди SMTP"
+
+#: ../camel/camel-sasl-popb4smtp.c:104
+msgid "POP Source URI"
+msgstr "POP източник URI"
+
+#: ../camel/camel-sasl-popb4smtp.c:107
+msgid "POP Before SMTP auth using an unknown transport"
+msgstr "POP преди SMTP упълномощаване използва неизвестен транспорт"
+
+#: ../camel/camel-sasl-popb4smtp.c:112
+msgid "POP Before SMTP auth using a non-pop source"
+msgstr "POP преди SMTP упълномощаване използва източник, който не е POP"
+
+#: ../camel/camel-search-private.c:151
+#, c-format
+msgid "Regular expression compilation failed: %s: %s"
+msgstr "Компилирането на регулярен израз пропадна  %s: %s"
+
+#: ../camel/camel-service.c:270
+#, c-format
+msgid "URL '%s' needs a username component"
+msgstr "URL „%s“ се нуждае от компонент име на потребител"
+
+#: ../camel/camel-service.c:274
+#, c-format
+msgid "URL '%s' needs a host component"
+msgstr "URL „%s“ се нуждае от компонент хост"
+
+#: ../camel/camel-service.c:278
+#, c-format
+msgid "URL '%s' needs a path component"
+msgstr "URL „%s“ се нуждае от компонент път"
+
+#: ../camel/camel-session.c:285
+#, c-format
+msgid ""
+"Could not create directory %s:\n"
+"%s"
+msgstr ""
+"Не може да се създаде папка %s:\n"
+"%s"
+
+#: ../camel/camel-smime-context.c:231
+#, c-format
+msgid "Cannot find certificate for '%s'"
+msgstr "Не може да се намери сертификат за „%s“"
+
+#: ../camel/camel-smime-context.c:237
+msgid "Cannot create CMS message"
+msgstr "Не може да се създаде CMS съобщение"
+
+#: ../camel/camel-smime-context.c:242
+msgid "Cannot create CMS signed data"
+msgstr "Не може да се създаде подписано съобщение за CMS"
+
+#: ../camel/camel-smime-context.c:248
+msgid "Cannot attach CMS signed data"
+msgstr "Не може да се добавят подписани данни за CMS"
+
+#: ../camel/camel-smime-context.c:255
+msgid "Cannot attach CMS data"
+msgstr "Неуспех при прикрепянето на CMS данните"
+
+#: ../camel/camel-smime-context.c:261
+msgid "Cannot create CMS Signer information"
+msgstr "Не може да се създаде CMS съобщение с подпис"
+
+#: ../camel/camel-smime-context.c:267
+msgid "Cannot find certificate chain"
+msgstr "Веригата за сертификат не може да бъде намерена"
+
+#: ../camel/camel-smime-context.c:273
+msgid "Cannot add CMS Signing time"
+msgstr "Неуспех при добавянето на CMS времето на подписване"
+
+#: ../camel/camel-smime-context.c:295 ../camel/camel-smime-context.c:307
+#, c-format
+msgid "Encryption certificate for '%s' does not exist"
+msgstr "Сертификата за криптиране за „%s“ не съществува"
+
+#: ../camel/camel-smime-context.c:314
+msgid "Cannot add SMIMEEncKeyPrefs attribute"
+msgstr "Грешка при добавяне на атрибута SMIMEEncKeyPrefs"
+
+#: ../camel/camel-smime-context.c:319
+msgid "Cannot add MS SMIMEEncKeyPrefs attribute"
+msgstr "Грешка при добавяне на атрибута MS SMIMEEncKeyPrefs"
+
+#: ../camel/camel-smime-context.c:324
+msgid "Cannot add encryption certificate"
+msgstr "Неуспешно добавяне на сертификат за шифроване"
+
+#: ../camel/camel-smime-context.c:330
+msgid "Cannot add CMS Signer information"
+msgstr "Не може да се добави подпис към CMS съобщение"
+
+#: ../camel/camel-smime-context.c:400 ../camel/camel-smime-context.c:848
+msgid "Cannot create encoder context"
+msgstr "Не може да се създаде контекст за кодиране"
+
+#: ../camel/camel-smime-context.c:406
+msgid "Failed to add data to CMS encoder"
+msgstr "Неуспех при добавянето на данни към кодиращ CMS"
+
+#: ../camel/camel-smime-context.c:411 ../camel/camel-smime-context.c:865
+msgid "Failed to encode data"
+msgstr "Неуспех при кодиране на данни"
+
+#: ../camel/camel-smime-context.c:484
+msgid "Unverified"
+msgstr "Непотвърдено"
+
+#: ../camel/camel-smime-context.c:486
+msgid "Good signature"
+msgstr "Валиден подпис"
+
+#: ../camel/camel-smime-context.c:488
+msgid "Bad signature"
+msgstr "Невалиден подпис"
+
+#: ../camel/camel-smime-context.c:490
+msgid "Content tampered with or altered in transit"
+msgstr "Съдържанието е повредено или променено при пренасянето"
+
+#: ../camel/camel-smime-context.c:492
+msgid "Signing certificate not found"
+msgstr "Сертификат за подпис не е открит"
+
+#: ../camel/camel-smime-context.c:494
+msgid "Signing certificate not trusted"
+msgstr "Сертификатът за подписване не е надежден"
+
+#: ../camel/camel-smime-context.c:496
+msgid "Signature algorithm unknown"
+msgstr "Неизвестен алгоритъм за подписване"
+
+#: ../camel/camel-smime-context.c:498
+msgid "Signature algorithm unsupported"
+msgstr "Алгоритъмът за подписване не се поддържа"
+
+#: ../camel/camel-smime-context.c:500
+msgid "Malformed signature"
+msgstr "Лошо форматиран подпис"
+
+#: ../camel/camel-smime-context.c:502
+msgid "Processing error"
+msgstr "Грешка при обработването"
+
+#: ../camel/camel-smime-context.c:539
+msgid "No signed data in signature"
+msgstr "Няма подписани данни в подписа"
+
+#: ../camel/camel-smime-context.c:546
+msgid "Digests missing from enveloped data"
+msgstr "Липсват извадките от данните в плика"
+
+#: ../camel/camel-smime-context.c:559 ../camel/camel-smime-context.c:569
+msgid "Cannot calculate digests"
+msgstr "Извадките не могат да се изчислят"
+
+#: ../camel/camel-smime-context.c:574
+msgid "Cannot set message digests"
+msgstr "Извадките не могат да бъдат зададени"
+
+#: ../camel/camel-smime-context.c:584 ../camel/camel-smime-context.c:589
+msgid "Certificate import failed"
+msgstr "Внасянето на сертификат пропадна"
+
+#: ../camel/camel-smime-context.c:599
+msgid "Certificate is the only message, cannot verify certificates"
+msgstr ""
+"Сертификатът е единственото съобщение. Не може да се подтвърди сертификата."
+
+#: ../camel/camel-smime-context.c:602
+msgid "Certificate is the only message, certificates imported and verified"
+msgstr ""
+"Сертификатът е единственото съобщение. Сертификатите са внесен и подтвърдени."
+
+#: ../camel/camel-smime-context.c:606
+msgid "Cannot find signature digests"
+msgstr "Извадките на подписите не могат да бъдат намерени"
+
+#: ../camel/camel-smime-context.c:622
+#, c-format
+msgid "Signer: %s <%s>: %s\n"
+msgstr "Подписващ: %s <%s>: %s\n"
+
+#: ../camel/camel-smime-context.c:723
+msgid "Decoder failed"
+msgstr "Неуспех на декодера"
+
+#: ../camel/camel-smime-context.c:775
+#, c-format
+msgid "Cannot find certificate for `%s'"
+msgstr "Не може да се намери сертификат за „%s“"
+
+#: ../camel/camel-smime-context.c:782
+msgid "Cannot find common bulk encryption algorithm"
+msgstr "Не може да се открие подходящ алгоритъм за криптиране на много данни"
+
+#. PORT_GetError(); ??
+#: ../camel/camel-smime-context.c:791
+msgid "Cannot allocate slot for encryption bulk key"
+msgstr "Не може да се задели място за ключ за криптиране на много данни"
+
+#: ../camel/camel-smime-context.c:802
+msgid "Cannot create CMS Message"
+msgstr "Не може да се създаде CMS съобщение"
+
+#: ../camel/camel-smime-context.c:808
+msgid "Cannot create CMS Enveloped data"
+msgstr "Не може да се създаде CMS съобщение в цифров плик"
+
+#: ../camel/camel-smime-context.c:814
+msgid "Cannot attach CMS Enveloped data"
+msgstr "Не могат да се добавят данни обвити в плик по CMS"
+
+#: ../camel/camel-smime-context.c:820
+msgid "Cannot attach CMS data object"
+msgstr "Неуспех при прикрепянето на обект за CMS данни"
+
+#: ../camel/camel-smime-context.c:829
+msgid "Cannot create CMS Recipient information"
+msgstr "Не може да се създаде CMS съобщение за получател"
+
+#: ../camel/camel-smime-context.c:834
+msgid "Cannot add CMS Recipient information"
+msgstr "Не може да се добави получател на CMS"
+
+#: ../camel/camel-smime-context.c:859
+msgid "Failed to add data to encoder"
+msgstr "Неуспех при добавянето на данни към декодера"
+
+#: ../camel/camel-smime-context.c:946
+#, c-format
+msgid "Decoder failed, error %d"
+msgstr "Декодерът не успя, грешка %d"
+
+#: ../camel/camel-smime-context.c:953
+msgid "S/MIME Decrypt: No encrypted content found"
+msgstr "Дешифриране S/MIME: Не е открито шифрирано съдържание"
+
+#: ../camel/camel-smime-context.c:980
+msgid "import keys: unimplemented"
+msgstr "внасяне на ключове: не е още функционално"
+
+#: ../camel/camel-smime-context.c:988
+msgid "export keys: unimplemented"
+msgstr "изнасяне на ключове: липсва такава способност"
+
+#: ../camel/camel-store.c:215
+#: ../camel/providers/groupwise/camel-groupwise-transport.c:168
+msgid "Cannot get folder: Invalid operation on this store"
+msgstr "Не може да се вземе папката. Грешна операция за това хранилище"
+
+#: ../camel/camel-store.c:247
+#, c-format
+msgid "Cannot create folder `%s': folder exists"
+msgstr "Не може да се създаде папка „%s“: вече съществува"
+
+#: ../camel/camel-store.c:311
+msgid "Cannot create folder: Invalid operation on this store"
+msgstr "Не може да се създаде папката: Грешна операция за това хранилище"
+
+#: ../camel/camel-store.c:339
+#, c-format
+msgid "Cannot create folder: %s: folder exists"
+msgstr "Не може да се създаде папка: %s: вече съществува"
+
+#: ../camel/camel-store.c:403 ../camel/camel-vee-store.c:367
+#: ../camel/providers/local/camel-maildir-store.c:217
+#, c-format
+msgid "Cannot delete folder: %s: Invalid operation"
+msgstr "Не може да се изтрие папка %s: грешна операция"
+
+#: ../camel/camel-store.c:453 ../camel/camel-vee-store.c:404
+#: ../camel/providers/local/camel-maildir-store.c:289
+#, c-format
+msgid "Cannot rename folder: %s: Invalid operation"
+msgstr "Не може да се преименува папката %s: грешна операция"
+
+#. the name of the Trash folder, used for deleted messages
+#: ../camel/camel-store.c:794 ../camel/camel-vtrash-folder.c:47
+msgid "Trash"
+msgstr "Кошче"
+
+#. the name of the Junk folder, used for spam messages
+#: ../camel/camel-store.c:797 ../camel/camel-vtrash-folder.c:49
+msgid "Junk"
+msgstr "Спам"
+
+#: ../camel/camel-tcp-stream-openssl.c:568
+msgid "Unable to get issuer's certificate"
+msgstr "Грешка при получаване сертификата на издателя"
+
+#: ../camel/camel-tcp-stream-openssl.c:570
+msgid "Unable to get Certificate Revocation List"
+msgstr "Грешка при получаване списъка за отмяна на сертификат"
+
+#: ../camel/camel-tcp-stream-openssl.c:572
+msgid "Unable to decrypt certificate signature"
+msgstr "Грешка при дешифриране подписа на сертификата"
+
+#: ../camel/camel-tcp-stream-openssl.c:574
+msgid "Unable to decrypt Certificate Revocation List signature"
+msgstr "Грешка при дешифриране подписа списъка за отмяна на сертификата"
+
+#: ../camel/camel-tcp-stream-openssl.c:576
+msgid "Unable to decode issuer's public key"
+msgstr "Грешка при разкодирането на публичния ключ на издателя"
+
+#: ../camel/camel-tcp-stream-openssl.c:578
+msgid "Certificate signature failure"
+msgstr "Грешка в подписа на сертификата"
+
+#: ../camel/camel-tcp-stream-openssl.c:580
+msgid "Certificate Revocation List signature failure"
+msgstr "Грешка в списъка за отмяна на сертификата"
+
+#: ../camel/camel-tcp-stream-openssl.c:582
+msgid "Certificate not yet valid"
+msgstr "Сертификата не е още валиден"
+
+#: ../camel/camel-tcp-stream-openssl.c:584
+msgid "Certificate has expired"
+msgstr "Сертификата е с изтекъл срок"
+
+#: ../camel/camel-tcp-stream-openssl.c:586
+msgid "CRL not yet valid"
+msgstr "CRL не е валиден все още"
+
+#: ../camel/camel-tcp-stream-openssl.c:588
+msgid "CRL has expired"
+msgstr "CRL е с изтекъл срок"
+
+#: ../camel/camel-tcp-stream-openssl.c:593
+msgid "Error in CRL"
+msgstr "Грешка в CRL"
+
+#: ../camel/camel-tcp-stream-openssl.c:595
+msgid "Out of memory"
+msgstr "Няма достатъчно памет"
+
+#: ../camel/camel-tcp-stream-openssl.c:597
+msgid "Zero-depth self-signed certificate"
+msgstr "Само-подписан сертификат с нулева дълбочина"
+
+#: ../camel/camel-tcp-stream-openssl.c:599
+msgid "Self-signed certificate in chain"
+msgstr "Самоподписан сертификат във верига"
+
+#: ../camel/camel-tcp-stream-openssl.c:601
+msgid "Unable to get issuer's certificate locally"
+msgstr "Грешка при локално записване на сертификата на издателя"
+
+#: ../camel/camel-tcp-stream-openssl.c:603
+msgid "Unable to verify leaf signature"
+msgstr "Не може да се провери листов подпис"
+
+#: ../camel/camel-tcp-stream-openssl.c:605
+msgid "Certificate chain too long"
+msgstr "Веригата на сертификата е твърде дълга"
+
+#: ../camel/camel-tcp-stream-openssl.c:607
+msgid "Certificate Revoked"
+msgstr "Сертификатът е отхвърлен"
+
+#: ../camel/camel-tcp-stream-openssl.c:609
+msgid "Invalid Certificate Authority (CA)"
+msgstr "Невалиден издател на сертификат (CA)"
+
+#: ../camel/camel-tcp-stream-openssl.c:611
+msgid "Path length exceeded"
+msgstr "Максималната дължина на пътя е надвишена"
+
+#: ../camel/camel-tcp-stream-openssl.c:613
+msgid "Invalid purpose"
+msgstr "Невалидна цел"
+
+#: ../camel/camel-tcp-stream-openssl.c:615
+msgid "Certificate untrusted"
+msgstr "Непроверен сертификат"
+
+#: ../camel/camel-tcp-stream-openssl.c:617
+msgid "Certificate rejected"
+msgstr "Сертификата е отхвърлен"
+
+#: ../camel/camel-tcp-stream-openssl.c:620
+msgid "Subject/Issuer mismatch"
+msgstr "Разминаване при заглавие/издател"
+
+#: ../camel/camel-tcp-stream-openssl.c:622
+msgid "AKID/SKID mismatch"
+msgstr "AKID/SKID разминаване"
+
+#: ../camel/camel-tcp-stream-openssl.c:624
+msgid "AKID/Issuer serial mismatch"
+msgstr "AKID/Issuer серийно разминаване"
+
+#: ../camel/camel-tcp-stream-openssl.c:626
+msgid "Key usage does not support certificate signing"
+msgstr "Ключът не поддържа подписване на сертификати"
+
+#: ../camel/camel-tcp-stream-openssl.c:629
+msgid "Error in application verification"
+msgstr "Грешка при проверката на програмата"
+
+#: ../camel/camel-tcp-stream-openssl.c:696 ../camel/camel-tcp-stream-ssl.c:838
+#, c-format
+msgid ""
+"Issuer:            %s\n"
+"Subject:           %s\n"
+"Fingerprint:       %s\n"
+"Signature:         %s"
+msgstr ""
+"Издател:               %s\n"
+"Заглавие:               %s\n"
+"Пръстови отпечатъци:      %s\n"
+"Подпис:       %s"
+
+#: ../camel/camel-tcp-stream-openssl.c:702 ../camel/camel-tcp-stream-ssl.c:844
+msgid "GOOD"
+msgstr "ДОБЪР"
+
+#: ../camel/camel-tcp-stream-openssl.c:702 ../camel/camel-tcp-stream-ssl.c:844
+msgid "BAD"
+msgstr "ЛОШ"
+
+#: ../camel/camel-tcp-stream-openssl.c:704
+#, c-format
+msgid ""
+"Bad certificate from %s:\n"
+"\n"
+"%s\n"
+"\n"
+"%s\n"
+"\n"
+"Do you wish to accept anyway?"
+msgstr ""
+"Лош сертификат от %s:\n"
+"\n"
+"%s\n"
+"\n"
+"%s\n"
+"\n"
+"Желаете ли да го приемете въпреки това?"
+
+#. construct our user prompt
+#: ../camel/camel-tcp-stream-ssl.c:848
+#, c-format
+msgid ""
+"SSL Certificate check for %s:\n"
+"\n"
+"%s\n"
+"\n"
+"Do you wish to accept?"
+msgstr ""
+"SSL проверка на сертификата за %s:\n"
+"\n"
+"%s\n"
+"\n"
+"Приемате ли?"
+
+#: ../camel/camel-tcp-stream-ssl.c:892
+#, c-format
+msgid ""
+"Certificate problem: %s\n"
+"Issuer: %s"
+msgstr ""
+"Проблем със сертификат: %s\n"
+"Издател: %s"
+
+#: ../camel/camel-tcp-stream-ssl.c:944
+#, c-format
+msgid ""
+"Bad certificate domain: %s\n"
+"Issuer: %s"
+msgstr ""
+"Неправилен домейн на сертификата:%s\n"
+"Издател: %s"
+
+#: ../camel/camel-tcp-stream-ssl.c:962
+#, c-format
+msgid ""
+"Certificate expired: %s\n"
+"Issuer: %s"
+msgstr ""
+"Изтекъл сертификат: %s\n"
+"Издател: %s"
+
+#: ../camel/camel-tcp-stream-ssl.c:979
+#, c-format
+msgid ""
+"Certificate revocation list expired: %s\n"
+"Issuer: %s"
+msgstr ""
+"Списъкът за отмяна на сертификата е изтекъл: %s\n"
+"Издател: %s"
+
+#: ../camel/camel-url.c:293
+#, c-format
+msgid "Could not parse URL `%s'"
+msgstr "Не може да се анализира URL „%s“"
+
+#: ../camel/camel-vee-folder.c:475
+#, c-format
+msgid "Error storing `%s': %s"
+msgstr "Грешка при запазването на „%s“: %s"
+
+#: ../camel/camel-vee-folder.c:517
+#, c-format
+msgid "No such message %s in %s"
+msgstr "Няма такова съобщение: %s в %s"
+
+#: ../camel/camel-vee-folder.c:642 ../camel/camel-vee-folder.c:648
+msgid "Cannot copy or move messages into a Virtual Folder"
+msgstr "Не може да се преместят или копират съобщенията във Виртуалната папка"
+
+#: ../camel/camel-vee-store.c:100 ../camel/camel-vee-store.c:343
+msgid "Unmatched"
+msgstr "Несъвпадащ"
+
+#: ../camel/camel-vee-store.c:390
+#, c-format
+msgid "Cannot delete folder: %s: No such folder"
+msgstr "Не може да се изтрие папка %s: Няма такава папка"
+
+#: ../camel/camel-vee-store.c:412
+#, c-format
+msgid "Cannot rename folder: %s: No such folder"
+msgstr "Не може да се преименува папката %s Няма такава папка"
+
+#: ../camel/camel-vtrash-folder.c:48
+msgid "Cannot copy messages to the Trash folder"
+msgstr "Не може да се копират съобщенията в кошчето"
+
+#: ../camel/camel-vtrash-folder.c:50
+msgid "Cannot copy messages to the Junk folder"
+msgstr "Не може да се копират съобщенията в папката за спам"
+
+#: ../camel/providers/groupwise/camel-groupwise-folder.c:116
+#: ../camel/providers/imap/camel-imap-folder.c:2057
+#, c-format
+msgid ""
+"Cannot get message: %s\n"
+"  %s"
+msgstr ""
+"Не може да се вземе писмо: %s\n"
+"  %s"
+
+#: ../camel/providers/groupwise/camel-groupwise-folder.c:116
+#: ../camel/providers/imap/camel-imap-folder.c:2057
+#: ../camel/providers/local/camel-maildir-folder.c:245
+#: ../camel/providers/local/camel-mbox-folder.c:340
+#: ../camel/providers/local/camel-mh-folder.c:203
+msgid "No such message"
+msgstr "Няма такова писмо"
+
+#: ../camel/providers/groupwise/camel-groupwise-folder.c:128
+#: ../camel/providers/imap4/camel-imap4-folder.c:787
+#: ../camel/providers/nntp/camel-nntp-folder.c:157
+#: ../camel/providers/nntp/camel-nntp-folder.c:233
+#: ../camel/providers/nntp/camel-nntp-folder.c:372
+#: ../camel/providers/pop3/camel-pop3-folder.c:263
+#: ../camel/providers/pop3/camel-pop3-folder.c:431
+#: ../camel/providers/pop3/camel-pop3-folder.c:492
+#: ../camel/providers/pop3/camel-pop3-folder.c:510
+msgid "User cancelled"
+msgstr "Потребителят е отказан"
+
+#: ../camel/providers/groupwise/camel-groupwise-folder.c:135
+#: ../camel/providers/imap4/camel-imap4-folder.c:792
+#: ../camel/providers/nntp/camel-nntp-folder.c:148
+#: ../camel/providers/nntp/camel-nntp-folder.c:150
+#: ../camel/providers/nntp/camel-nntp-folder.c:159
+#: ../camel/providers/nntp/camel-nntp-folder.c:235
+#: ../camel/providers/pop3/camel-pop3-folder.c:434
+#: ../camel/providers/pop3/camel-pop3-folder.c:495
+#: ../camel/providers/pop3/camel-pop3-folder.c:502
+#: ../camel/providers/pop3/camel-pop3-folder.c:513
+#, c-format
+msgid "Cannot get message %s: %s"
+msgstr "Не може да се вземе писмото %s: %s"
+
+#: ../camel/providers/groupwise/camel-groupwise-folder.c:152
+#: ../camel/providers/groupwise/camel-groupwise-folder.c:160
+#: ../camel/providers/imap4/camel-imap4-folder.c:810
+msgid "This message is not available in offline mode."
+msgstr "Това писмо не е налично в режим „Изключен“."
+
+#: ../camel/providers/groupwise/camel-groupwise-folder.c:171
+#: ../camel/providers/groupwise/camel-groupwise-folder.c:178
+#: ../camel/providers/groupwise/camel-groupwise-folder.c:1389
+msgid "Could not get message"
+msgstr "Писмото не може да бъде получено"
+
+#: ../camel/providers/groupwise/camel-groupwise-folder.c:702
+#: ../camel/providers/imap/camel-imap-folder.c:246
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "Не може да се зареди обобщение за %s"
+
+#: ../camel/providers/groupwise/camel-groupwise-folder.c:1025
+#: ../camel/providers/groupwise/camel-groupwise-store.c:563
+#: ../camel/providers/imap/camel-imap-folder.c:2369
+#: ../camel/providers/imap/camel-imap-folder.c:2439
+msgid "Fetching summary information for new messages"
+msgstr "Извличане на обобщена информация за нови писма"
+
+#: ../camel/providers/groupwise/camel-groupwise-folder.c:1618
+#: ../camel/providers/groupwise/camel-groupwise-folder.c:1664
+#, c-format
+msgid "Cannot append message to folder `%s': %s"
+msgstr "Не може да се добави писмото към папката „%s“: %s"
+
+#: ../camel/providers/groupwise/camel-groupwise-folder.c:1652
+#, c-format
+msgid "Cannot create message: %s"
+msgstr "Неуспех при създаването на писмо: %s"
+
+#: ../camel/providers/groupwise/camel-groupwise-journal.c:283
+#, c-format
+msgid "Cannot get folder container %s"
+msgstr "Неуспех при получаването на контейнера %s"
+
+#: ../camel/providers/groupwise/camel-groupwise-journal.c:347
+#: ../camel/providers/imap4/camel-imap4-journal.c:320
+msgid "Cannot append message in offline mode: cache unavailable"
+msgstr "Не може да се добави писмо в режим „Изключен“: няма наличен кеш"
+
+#: ../camel/providers/groupwise/camel-groupwise-journal.c:363
+#: ../camel/providers/imap4/camel-imap4-journal.c:336
+#, c-format
+msgid "Cannot append message in offline mode: %s"
+msgstr "Писмото не може да се прикрепи писмо в режим „Изключен“: %s"
+
+#: ../camel/providers/groupwise/camel-groupwise-provider.c:51
+#: ../camel/providers/imap4/camel-imap4-provider.c:36
+msgid "Checking for new mail"
+msgstr "Проверка за нова поща"
+
+#: ../camel/providers/groupwise/camel-groupwise-provider.c:53
+msgid "Check for new messages in all folders"
+msgstr "Проверка за нови съобщения във всички папки"
+
+#: ../camel/providers/groupwise/camel-groupwise-provider.c:56
+#: ../camel/providers/imap/camel-imap-provider.c:64
+#: ../camel/providers/imap4/camel-imap4-provider.c:56
+#: ../camel/providers/local/camel-local-provider.c:43
+#: ../camel/providers/local/camel-local-provider.c:79
+#: ../camel/providers/local/camel-local-provider.c:99
+msgid "Options"
+msgstr "Опции"
+
+#: ../camel/providers/groupwise/camel-groupwise-provider.c:58
+msgid "Apply filters to new messages in Inbox on this server"
+msgstr ""
+"Прилагане на филтри спрямо новите писма в пощенската кутия на този сървър"
+
+#: ../camel/providers/groupwise/camel-groupwise-provider.c:60
+msgid "Check new messages for Junk contents"
+msgstr "Проверка на новите съобщения за спам"
+
+#: ../camel/providers/groupwise/camel-groupwise-provider.c:62
+msgid "Only check for Junk messages in the INBOX folder"
+msgstr "Проверка за спам само в папката INBOX"
+
+#: ../camel/providers/groupwise/camel-groupwise-provider.c:64
+msgid "Automatically synchronize account locally"
+msgstr "Автоматично синхронизиране на отдалечената поща локално"
+
+#: ../camel/providers/groupwise/camel-groupwise-provider.c:69
+msgid "SOAP Settings"
+msgstr "Настройки на SOAP"
+
+#: ../camel/providers/groupwise/camel-groupwise-provider.c:72
+msgid "Post Office Agent SOAP Port:"
+msgstr "Порт за пощенския агент със SOAP:"
+
+#: ../camel/providers/groupwise/camel-groupwise-provider.c:85
+msgid "Novell GroupWise"
+msgstr "Novell GroupWise"
+
+#: ../camel/providers/groupwise/camel-groupwise-provider.c:87
+msgid "For accessing Novell GroupWise servers"
+msgstr "За достъп до Novell Groupwise сървъри"
+
+#: ../camel/providers/groupwise/camel-groupwise-provider.c:102
+#: ../camel/providers/imap/camel-imap-provider.c:96
+#: ../camel/providers/imap4/camel-imap4-provider.c:88
+#: ../camel/providers/imapp/camel-imapp-provider.c:66
+#: ../camel/providers/nntp/camel-nntp-provider.c:72
+#: ../camel/providers/pop3/camel-pop3-provider.c:72
+msgid "Password"
+msgstr "Парола"
+
+#: ../camel/providers/groupwise/camel-groupwise-provider.c:104
+msgid ""
+"This option will connect to the GroupWise server using a plaintext password."
+msgstr ""
+"Тази опция ще ви свърже с GroupWise сървър използващ нешифрована парола"
+
+#: ../camel/providers/groupwise/camel-groupwise-store.c:104
+msgid "Host or user not available in url"
+msgstr "Хостът или потребителят не са налични в url"
+
+#: ../camel/providers/groupwise/camel-groupwise-store.c:203
+#, c-format
+msgid "%sPlease enter the GroupWise password for %s@%s"
+msgstr "%sВъведете паролата на GroupWise за %s@%s"
+
+#: ../camel/providers/groupwise/camel-groupwise-store.c:217
+#: ../camel/providers/imap/camel-imap-store.c:1328
+msgid "You didn't enter a password."
+msgstr "Не сте въвели парола."
+
+#: ../camel/providers/groupwise/camel-groupwise-store.c:231
+msgid "Unable to authenticate to GroupWise server."
+msgstr "Неуспех при идентифицирането пред GroupWise сървър."
+
+#: ../camel/providers/groupwise/camel-groupwise-store.c:297
+msgid "Some features may not work correctly with your current server version"
+msgstr ""
+"Възможно е някои функции да не работят правилни с текущата версия на сървъра"
+
+#: ../camel/providers/groupwise/camel-groupwise-store.c:470
+#: ../camel/providers/imap/camel-imap-store.c:1857
+#: ../camel/providers/imap/camel-imap-store.c:2048
+#, c-format
+msgid "No such folder %s"
+msgstr "Няма такава папка %s"
+
+#: ../camel/providers/groupwise/camel-groupwise-store.c:1054
+msgid "Cannot create GroupWise folders in offline mode."
+msgstr "Не може да създавате GroupWise папки докато сте в режим „Изключен“."
+
+#: ../camel/providers/groupwise/camel-groupwise-store.c:1068
+#: ../camel/providers/imap/camel-imap-store.c:1932
+#: ../camel/providers/imap/camel-imap-store.c:2301
+msgid "The parent folder is not allowed to contain subfolders"
+msgstr "На родителската папка не е разрешено да има под-папки"
+
+#: ../camel/providers/groupwise/camel-groupwise-store.c:1145
+#: ../camel/providers/groupwise/camel-groupwise-store.c:1166
+#, c-format
+msgid "Cannot rename Groupwise folder `%s' to `%s'"
+msgstr "Не може да преименувате Groupwise папката „%s“ на „%s“"
+
+#: ../camel/providers/groupwise/camel-groupwise-store.c:1198
+#: ../camel/providers/groupwise/camel-groupwise-transport.c:121
+#, c-format
+msgid "GroupWise server %s"
+msgstr "Сървър GroupWise %s"
+
+#: ../camel/providers/groupwise/camel-groupwise-store.c:1200
+#, c-format
+msgid "GroupWise service for %s on %s"
+msgstr "GroupWise услуга за %s на %s"
+
+#: ../camel/providers/groupwise/camel-groupwise-transport.c:123
+#, c-format
+msgid "GroupWise mail delivery via %s"
+msgstr "Groupwise поща през %s"
+
+#: ../camel/providers/groupwise/camel-groupwise-transport.c:161
+msgid "Sending Message"
+msgstr "Изпращане на писмо"
+
+#: ../camel/providers/groupwise/camel-groupwise-transport.c:212
+#: ../camel/providers/sendmail/camel-sendmail-transport.c:206
+#, c-format
+msgid "Could not send message: %s"
+msgstr "Съобщението не може да бъде изпратено: %s"
+
+#: ../camel/providers/imap/camel-imap-command.c:222
+#: ../camel/providers/imap/camel-imap-command.c:264
+#: ../camel/providers/imap/camel-imap-command.c:471
+#: ../camel/providers/imap/camel-imap-store.c:2984
+msgid "Operation cancelled"
+msgstr "Действието прекратено"
+
+#: ../camel/providers/imap/camel-imap-command.c:309
+#: ../camel/providers/imap/camel-imap-store.c:2987
+#, c-format
+msgid "Server unexpectedly disconnected: %s"
+msgstr "Сървъра неочаквано се откачи: %s"
+
+#. for imap ALERT codes, account user@host
+#. we might get a ']' from a BAD response since we +12, but who cares?
+#: ../camel/providers/imap/camel-imap-command.c:330
+#, c-format
+msgid ""
+"Alert from IMAP server %s@%s:\n"
+"%s"
+msgstr ""
+"Предупреждение от IMAP сървъра %s@%s:\n"
+"%s"
+
+#: ../camel/providers/imap/camel-imap-command.c:399
+#, c-format
+msgid "Unexpected response from IMAP server: %s"
+msgstr "Неочакван отговор от IMAP сървър: %s"
+
+#: ../camel/providers/imap/camel-imap-command.c:409
+#, c-format
+msgid "IMAP command failed: %s"
+msgstr "IMAP команда пропадна: %s"
+
+#: ../camel/providers/imap/camel-imap-command.c:485
+msgid "Server response ended too soon."
+msgstr "Отговора на сървъра завърши твърде бързо"
+
+#: ../camel/providers/imap/camel-imap-command.c:692
+#, c-format
+msgid "IMAP server response did not contain %s information"
+msgstr "IMAP сървъра не съдържа %s информация"
+
+#: ../camel/providers/imap/camel-imap-command.c:728
+#, c-format
+msgid "Unexpected OK response from IMAP server: %s"
+msgstr "Неочакван отговор OK от IMAP сървър: %s"
+
+#: ../camel/providers/imap/camel-imap-folder.c:227
+#, c-format
+msgid "Could not create directory %s: %s"
+msgstr "Не може да се създаде директория %s: %s"
+
+#: ../camel/providers/imap/camel-imap-folder.c:331
+msgid "Folder was destroyed and recreated on server."
+msgstr "Папката е била разрушена и пресъздадена на сървъра."
+
+#. Check UIDs and flags of all messages we already know of.
+#: ../camel/providers/imap/camel-imap-folder.c:628
+#: ../camel/providers/imap4/camel-imap4-summary.c:1472
+msgid "Scanning for changed messages"
+msgstr "Сканиране за променени писма"
+
+#: ../camel/providers/imap/camel-imap-folder.c:2017
+#, c-format
+msgid "Unable to retrieve message: %s"
+msgstr "Писмото %s не може да бъде получено"
+
+#: ../camel/providers/imap/camel-imap-folder.c:2096
+#: ../camel/providers/imap/camel-imap-folder.c:2711
+#: ../camel/providers/nntp/camel-nntp-folder.c:221
+msgid "This message is not currently available"
+msgstr "Това писмо не е налично"
+
+#: ../camel/providers/imap/camel-imap-folder.c:2547
+#, c-format
+msgid "Incomplete server response: no information provided for message %d"
+msgstr "Непълен отговор от сървъра: няма данни за писмото %d"
+
+#: ../camel/providers/imap/camel-imap-folder.c:2555
+#, c-format
+msgid "Incomplete server response: no UID provided for message %d"
+msgstr "Непълен отговор от сървъра: няма UID за писмото %d"
+
+#: ../camel/providers/imap/camel-imap-folder.c:2568
+#, c-format
+msgid ""
+"Unexpected server response: Identical UIDs provided for messages %d and %d"
+msgstr "Неочаквано съобщение от сървъра: еднакви UID за писма %d и %d"
+
+#: ../camel/providers/imap/camel-imap-folder.c:2749
+msgid "Could not find message body in FETCH response."
+msgstr "Не може да се намери тялото на съобщението в FETCH отговора."
+
+#: ../camel/providers/imap/camel-imap-message-cache.c:156
+#, c-format
+msgid "Could not open cache directory: %s"
+msgstr "Не може да се отвори кеш папка: %s"
+
+#: ../camel/providers/imap/camel-imap-message-cache.c:253
+#: ../camel/providers/imap/camel-imap-message-cache.c:310
+#: ../camel/providers/imap/camel-imap-message-cache.c:341
+#: ../camel/providers/imap/camel-imap-message-cache.c:373
+#, c-format
+msgid "Failed to cache message %s: %s"
+msgstr "Неуспех при кеширане на съобщение %s: %s"
+
+#: ../camel/providers/imap/camel-imap-message-cache.c:418
+#, c-format
+msgid "Failed to cache %s: %s"
+msgstr "Неуспех при кеширането на %s: %s"
+
+#: ../camel/providers/imap/camel-imap-provider.c:44
+msgid "Checking for New Mail"
+msgstr "Проверка за нова поща"
+
+#: ../camel/providers/imap/camel-imap-provider.c:46
+#: ../camel/providers/imap4/camel-imap4-provider.c:38
+msgid "C_heck for new messages in all folders"
+msgstr "Проверка за _нови писма във всички папки"
+
+#: ../camel/providers/imap/camel-imap-provider.c:49
+#: ../camel/providers/imap4/camel-imap4-provider.c:41
+msgid "Connection to Server"
+msgstr "Връзка със сървъра"
+
+#: ../camel/providers/imap/camel-imap-provider.c:51
+#: ../camel/providers/imap4/camel-imap4-provider.c:43
+msgid "_Use custom command to connect to server"
+msgstr "_Използване на друга команда за връзка със сървъра"
+
+#: ../camel/providers/imap/camel-imap-provider.c:53
+#: ../camel/providers/imap4/camel-imap4-provider.c:45
+msgid "Command:"
+msgstr "Команда:"
+
+#: ../camel/providers/imap/camel-imap-provider.c:56
+#: ../camel/providers/imap4/camel-imap4-provider.c:48
+#: ../camel/providers/nntp/camel-nntp-provider.c:42
+msgid "Folders"
+msgstr "Папки"
+
+#: ../camel/providers/imap/camel-imap-provider.c:58
+#: ../camel/providers/imap4/camel-imap4-provider.c:50
+msgid "_Show only subscribed folders"
+msgstr "_Показване само на папките с абонат"
+
+#: ../camel/providers/imap/camel-imap-provider.c:60
+#: ../camel/providers/imap4/camel-imap4-provider.c:52
+msgid "O_verride server-supplied folder namespace"
+msgstr "О_тмяна на пространството на имената зададено от сървъра"
+
+#: ../camel/providers/imap/camel-imap-provider.c:62
+#: ../camel/providers/imap4/camel-imap4-provider.c:54
+msgid "Namespace"
+msgstr "Пространство на имената"
+
+#: ../camel/providers/imap/camel-imap-provider.c:66
+#: ../camel/providers/imap4/camel-imap4-provider.c:58
+msgid "_Apply filters to new messages in INBOX on this server"
+msgstr "Използване на _филтри за нови съобщения в INBOX от този сървър"
+
+#: ../camel/providers/imap/camel-imap-provider.c:68
+#: ../camel/providers/imap4/camel-imap4-provider.c:60
+msgid "Check new messages for _Junk contents"
+msgstr "Проверка на новите съобщения за _спам"
+
+#: ../camel/providers/imap/camel-imap-provider.c:70
+#: ../camel/providers/imap4/camel-imap4-provider.c:62
+msgid "Only check for Junk messa_ges in the INBOX folder"
+msgstr "Проверка за спам само на _писма в пощенската кутия"
+
+#: ../camel/providers/imap/camel-imap-provider.c:72
+#: ../camel/providers/imap4/camel-imap4-provider.c:64
+msgid "Automatically synchroni_ze remote mail locally"
+msgstr "Автоматично синхрони_зиране на отдалечената поща локално"
+
+#: ../camel/providers/imap/camel-imap-provider.c:79
+msgid "IMAP"
+msgstr "IMAP"
+
+#: ../camel/providers/imap/camel-imap-provider.c:81
+msgid "For reading and storing mail on IMAP servers."
+msgstr "За четене и запазване на поща от IMAP сървъри"
+
+#: ../camel/providers/imap/camel-imap-provider.c:98
+#: ../camel/providers/imapp/camel-imapp-provider.c:68
+msgid "This option will connect to the IMAP server using a plaintext password."
+msgstr "Тази опция ще ви свърже с IMAP сървър използващ нешифрована парола"
+
+#: ../camel/providers/imap/camel-imap-store.c:420
+#: ../camel/providers/imap4/camel-imap4-store.c:215
+#, c-format
+msgid "IMAP server %s"
+msgstr "IMAP сървър %s"
+
+#: ../camel/providers/imap/camel-imap-store.c:422
+#: ../camel/providers/imap4/camel-imap4-store.c:217
+#, c-format
+msgid "IMAP service for %s on %s"
+msgstr "IMAP услуга за %s на %s"
+
+#: ../camel/providers/imap/camel-imap-store.c:552
+#: ../camel/providers/imap/camel-imap-store.c:567
+#: ../camel/providers/imap4/camel-imap4-store.c:322
+#: ../camel/providers/imap4/camel-imap4-store.c:337
+#: ../camel/providers/nntp/camel-nntp-store.c:186
+#: ../camel/providers/nntp/camel-nntp-store.c:201
+#: ../camel/providers/pop3/camel-pop3-store.c:167
+#: ../camel/providers/pop3/camel-pop3-store.c:182
+#: ../camel/providers/smtp/camel-smtp-transport.c:254
+#: ../camel/providers/smtp/camel-smtp-transport.c:269
+#, c-format
+msgid "Could not connect to %s: %s"
+msgstr "Не може да се осъществи връзка с %s: %s"
+
+#: ../camel/providers/imap/camel-imap-store.c:553
+#: ../camel/providers/imap4/camel-imap4-store.c:323
+#: ../camel/providers/nntp/camel-nntp-store.c:187
+#: ../camel/providers/pop3/camel-pop3-store.c:168
+#: ../camel/providers/smtp/camel-smtp-transport.c:255
+msgid "SSL unavailable"
+msgstr "SSL не е наличен"
+
+#: ../camel/providers/imap/camel-imap-store.c:564
+#: ../camel/providers/imap/camel-imap-store.c:834
+#: ../camel/providers/imap4/camel-imap4-store.c:270
+#: ../camel/providers/imap4/camel-imap4-store.c:334
+#: ../camel/providers/imapp/camel-imapp-store.c:248
+#: ../camel/providers/nntp/camel-nntp-store.c:198
+#: ../camel/providers/nntp/camel-nntp-store.c:217
+#: ../camel/providers/pop3/camel-pop3-store.c:179
+#: ../camel/providers/smtp/camel-smtp-transport.c:266
+msgid "Connection cancelled"
+msgstr "Връзката е прекратена"
+
+#: ../camel/providers/imap/camel-imap-store.c:672
+#: ../camel/providers/imap/camel-imap-store.c:694
+#: ../camel/providers/imap/camel-imap-store.c:700
+#: ../camel/providers/imap4/camel-imap4-store.c:362
+#: ../camel/providers/imap4/camel-imap4-store.c:375
+#: ../camel/providers/imap4/camel-imap4-store.c:391
+#, c-format
+msgid "Failed to connect to IMAP server %s in secure mode: %s"
+msgstr "Неуспех при свързването с IMAP сървъра %s в сигурен режим: %s"
+
+#: ../camel/providers/imap/camel-imap-store.c:673
+#: ../camel/providers/smtp/camel-smtp-transport.c:323
+msgid "STARTTLS not supported"
+msgstr "STARTTLS не се поддържа"
+
+#: ../camel/providers/imap/camel-imap-store.c:695
+#: ../camel/providers/imap4/camel-imap4-store.c:363
+#: ../camel/providers/pop3/camel-pop3-store.c:244
+msgid "SSL negotiations failed"
+msgstr "Неуспешни SSL преговори"
+
+#: ../camel/providers/imap/camel-imap-store.c:701
+#: ../camel/providers/imap4/camel-imap4-store.c:392
+#: ../camel/providers/pop3/camel-pop3-store.c:250
+#: ../camel/providers/smtp/camel-smtp-transport.c:362
+msgid "SSL is not available in this build"
+msgstr "В този билд SSL не е наличен"
+
+#: ../camel/providers/imap/camel-imap-store.c:837
+#: ../camel/providers/imap4/camel-imap4-store.c:273
+#, c-format
+msgid "Could not connect with command \"%s\": %s"
+msgstr "Не може да се свърже с команда „%s“: %s"
+
+#. create a dummy "." parent inbox, use to scan, then put back at the top level
+#: ../camel/providers/imap/camel-imap-store.c:1021
+#: ../camel/providers/imap/camel-imap-store.c:2397
+#: ../camel/providers/imap4/camel-imap4-store-summary.c:368
+#: ../camel/providers/imap4/camel-imap4-store.c:1268
+#: ../camel/providers/local/camel-maildir-folder.c:75
+#: ../camel/providers/local/camel-maildir-store.c:217
+#: ../camel/providers/local/camel-maildir-store.c:289
+#: ../camel/providers/local/camel-maildir-store.c:511
+#: ../camel/providers/local/camel-maildir-store.c:524
+#: ../camel/providers/local/camel-spool-store.c:460
+#: ../servers/exchange/storage/exchange-hierarchy-foreign.c:258
+msgid "Inbox"
+msgstr "Пощенска кутия"
+
+#: ../camel/providers/imap/camel-imap-store.c:1281
+#, c-format
+msgid "IMAP server %s does not support requested authentication type %s"
+msgstr "IMAP сървър %s не подържа заявената оторизация тип %s"
+
+#: ../camel/providers/imap/camel-imap-store.c:1291
+#: ../camel/providers/smtp/camel-smtp-transport.c:498
+#, c-format
+msgid "No support for authentication type %s"
+msgstr "Няма поддръжка за оторизация тип %s"
+
+#: ../camel/providers/imap/camel-imap-store.c:1314
+#: ../camel/providers/imapp/camel-imapp-store.c:364
+#, c-format
+msgid "%sPlease enter the IMAP password for %s@%s"
+msgstr "%sВъведете IMAP паролата за %s@%s"
+
+#: ../camel/providers/imap/camel-imap-store.c:1357
+#, c-format
+msgid ""
+"Unable to authenticate to IMAP server.\n"
+"%s\n"
+"\n"
+msgstr ""
+"Не може да се оторизира пред IMAP сървър.\n"
+"%s\n"
+"\n"
+
+#: ../camel/providers/imap/camel-imap-store.c:1869
+#: ../camel/providers/imap/camel-imap-store.c:2239
+#: ../camel/providers/imap4/camel-imap4-store.c:857
+#, c-format
+msgid ""
+"The folder name \"%s\" is invalid because it contains the character \"%c\""
+msgstr "Името на папката „%s“ е невалидно, защото съдържа символа „%c“"
+
+#: ../camel/providers/imap/camel-imap-store.c:1986
+#: ../camel/providers/local/camel-maildir-store.c:190
+#: ../camel/providers/local/camel-mbox-store.c:199
+#: ../camel/providers/local/camel-mh-store.c:249
+#, c-format
+msgid "Cannot create folder `%s': folder exists."
+msgstr "Не може да се създаде папка „%s“: вече съществува."
+
+#: ../camel/providers/imap/camel-imap-store.c:2250
+#, c-format
+msgid "Unknown parent folder: %s"
+msgstr "Неизвестна родителска папка: %s"
+
+#: ../camel/providers/imap4/camel-imap4-command.c:550
+#: ../camel/providers/imap4/camel-imap4-command.c:557
+#, c-format
+msgid "Failed sending command to IMAP server %s: %s"
+msgstr "Неуспех при изпращането на команда към IMAP сървъра %s: %s"
+
+#: ../camel/providers/imap4/camel-imap4-command.c:660
+#, c-format
+msgid "Unexpected response from IMAP4 server %s: %s"
+msgstr "Неочакван отговор от IMAP4 сървъра %s: %s"
+
+#: ../camel/providers/imap4/camel-imap4-engine.c:222
+#, c-format
+msgid "Unexpected greeting from IMAP server %s."
+msgstr "Неочакван поздрав от IMAP сървъра %s"
+
+#: ../camel/providers/imap4/camel-imap4-engine.c:432
+#, c-format
+msgid "Cannot select folder `%s': Invalid mailbox name"
+msgstr ""
+"Папката „%s“ не може да бъде избрана: некоректно име на пощенската кутия"
+
+#: ../camel/providers/imap4/camel-imap4-engine.c:438
+#, c-format
+msgid "Cannot select folder `%s': Bad command"
+msgstr "Папката „%s“ не може да бъде избрана: лоша команда"
+
+#: ../camel/providers/imap4/camel-imap4-engine.c:1549
+#: ../camel/providers/imap4/camel-imap4-engine.c:1588
+#: ../camel/providers/imap4/camel-imap4-engine.c:1633
+#: ../camel/providers/imap4/camel-imap4-engine.c:1689
+#, c-format
+msgid "IMAP4 server %s unexpectedly disconnected: %s"
+msgstr "Връзката с IMAP4 сървъра %s прекъсна неочаквано: %s"
+
+#: ../camel/providers/imap4/camel-imap4-folder.c:85
+msgid ""
+"Enable Mailing-List detection required for some filter and vFolder rules"
+msgstr ""
+"Включване откриването на пощенските списъци, използвано в някои филтри и "
+"виртуални папки"
+
+#: ../camel/providers/imap4/camel-imap4-folder.c:398
+#, c-format
+msgid "Cannot access folder `%s': %s"
+msgstr "Неуспех при достъп до папката „%s“: %s"
+
+#: ../camel/providers/imap4/camel-imap4-folder.c:457
+#, c-format
+msgid "Cannot sync flags to folder `%s': Unknown"
+msgstr ""
+"Неуспех при синхронизирането на флаговете в папка „%s“: неизвестна причина"
+
+#: ../camel/providers/imap4/camel-imap4-folder.c:463
+#, c-format
+msgid "Cannot sync flags to folder `%s': Bad command"
+msgstr "Неуспех при синхронизирането на флаговете в папка „%s“: лоша команда"
+
+#: ../camel/providers/imap4/camel-imap4-folder.c:603
+#, c-format
+msgid "Cannot expunge folder `%s': Unknown"
+msgstr "Неуспех при изчистване на папката „%s“: неизвестна грешка"
+
+#: ../camel/providers/imap4/camel-imap4-folder.c:608
+#, c-format
+msgid "Cannot expunge folder `%s': Bad command"
+msgstr "Неуспех при изчистване на папката „%s“: неправилна команда"
+
+#: ../camel/providers/imap4/camel-imap4-folder.c:864
+#, c-format
+msgid "Cannot get message %s from folder `%s': No such message"
+msgstr "Неуспех при получаване на писмо %s от папка „%s“: няма такова писмо"
+
+#: ../camel/providers/imap4/camel-imap4-folder.c:869
+#, c-format
+msgid "Cannot get message %s from folder `%s': Bad command"
+msgstr "Неуспех при взимането на писмо %s от папка „%s“: лоша команда"
+
+#: ../camel/providers/imap4/camel-imap4-folder.c:913
+#, c-format
+msgid "Cannot append message to folder `%s': Folder is read-only"
+msgstr ""
+"Неуспех при прикрепянето на писмо към папката „%s“: папката е с права само "
+"за четене"
+
+#: ../camel/providers/imap4/camel-imap4-folder.c:1006
+#, c-format
+msgid "Cannot append message to folder `%s': Unknown error"
+msgstr "Неуспех при прикрепянето на писмо към папката „%s“: неизвестна грешка"
+
+#: ../camel/providers/imap4/camel-imap4-folder.c:1035
+#, c-format
+msgid "Cannot append message to folder `%s': Bad command"
+msgstr ""
+"Неуспех при прикрепянето на писмото към папката „%s“: неправилна команда"
+
+#: ../camel/providers/imap4/camel-imap4-folder.c:1155
+#, c-format
+msgid "Cannot move messages from folder `%s' to folder `%s': Unknown"
+msgstr ""
+"Преместването на писма от папка „%s“ в папка „%s“ е неуспешно: неизвестна "
+"грешка"
+
+#: ../camel/providers/imap4/camel-imap4-folder.c:1159
+#, c-format
+msgid "Cannot copy messages from folder `%s' to folder `%s': Unknown"
+msgstr ""
+"Неуспех при копирането на писма от папка „%s“ в папка „%s“: не е ясно защо"
+
+#: ../camel/providers/imap4/camel-imap4-folder.c:1167
+#, c-format
+msgid "Cannot move messages from folder `%s' to folder `%s': Bad command"
+msgstr ""
+"Неуспех при преместването на писма от папка „%s“ в папка „%s“: Лоша команда"
+
+#: ../camel/providers/imap4/camel-imap4-folder.c:1171
+#, c-format
+msgid "Cannot copy messages from folder `%s' to folder `%s': Bad command"
+msgstr ""
+"Неуспех при копирането на писма от папката „%s“ в папка „%s“: лоша команда"
+
+#: ../camel/providers/imap4/camel-imap4-provider.c:71
+msgid "IMAP4rev1"
+msgstr "IMAP4rev1"
+
+#: ../camel/providers/imap4/camel-imap4-provider.c:73
+msgid "For reading and storing mail on IMAPv4rev1 servers."
+msgstr "За четене и запазване на поща от сървъри IMAPv4rev1"
+
+#: ../camel/providers/imap4/camel-imap4-provider.c:90
+msgid ""
+"This option will connect to the IMAPv4rev1 server using a plaintext password."
+msgstr ""
+"С тази настройка ще бъде направена връзка с IMAPv4rev1 сървър с парола в "
+"чист текст."
+
+#: ../camel/providers/imap4/camel-imap4-store.c:478
+#, c-format
+msgid ""
+"Cannot authenticate to IMAP server %s using the %s authentication mechanism"
+msgstr ""
+"Не може да се идентифицира пред IMAP сървъра %s използвайки %s "
+"идентификационния механизъм."
+
+#: ../camel/providers/imap4/camel-imap4-store.c:523
+#, c-format
+msgid "%sPlease enter the IMAP password for %s on host %s"
+msgstr "%sВъведете IMAP паролата на %s за %s"
+
+#: ../camel/providers/imap4/camel-imap4-store.c:593
+#, c-format
+msgid "Cannot authenticate to IMAP server %s using %s"
+msgstr "Пропадна идентифицирането пред IMAP сървъра %s, използвайки %s"
+
+#: ../camel/providers/imap4/camel-imap4-store.c:755
+#: ../camel/providers/imap4/camel-imap4-store.c:867
+msgid "Cannot create IMAP folders in offline mode."
+msgstr "Не можете да създавате IMAP папки когато сте в режим „Изключен“."
+
+#: ../camel/providers/imap4/camel-imap4-store.c:794
+#, c-format
+msgid "Cannot get folder `%s' on IMAP server %s: Unknown"
+msgstr ""
+"Неуспех при получаването на папка „%s“ от IMAP сървър %s: Не е ясно защо"
+
+#: ../camel/providers/imap4/camel-imap4-store.c:915
+#, c-format
+msgid "Cannot create folder `%s': Invalid mailbox name"
+msgstr "Неуспех при създаването на папка „%s“: Невалидно mailbox име"
+
+#: ../camel/providers/imap4/camel-imap4-store.c:921
+#, c-format
+msgid "Cannot create folder `%s': Bad command"
+msgstr "Папката „%s“ не може да бъде създадена: лоша команда"
+
+#: ../camel/providers/imap4/camel-imap4-store.c:952
+#, c-format
+msgid "Cannot delete folder `%s': Special folder"
+msgstr "Папката „%s“ не може да бъде изтрита: специална папка"
+
+#: ../camel/providers/imap4/camel-imap4-store.c:959
+msgid "Cannot delete IMAP folders in offline mode."
+msgstr "Не може да изтривате IMAP папки когато сте в режим „Изключен“."
+
+#: ../camel/providers/imap4/camel-imap4-store.c:1018
+#, c-format
+msgid "Cannot delete folder `%s': Invalid mailbox name"
+msgstr "Грешка при изтриване на папката „%s“: Неправилно име на пощенска кутия"
+
+#: ../camel/providers/imap4/camel-imap4-store.c:1023
+#, c-format
+msgid "Cannot delete folder `%s': Bad command"
+msgstr "Папката „%s“ не може да бъде изтрита: лоша команда"
+
+#: ../camel/providers/imap4/camel-imap4-store.c:1043
+#, c-format
+msgid "Cannot rename folder `%s' to `%s': Special folder"
+msgstr "Неуспех при преименуването на папка „%s“ на „%s“: Специална папка"
+
+#: ../camel/providers/imap4/camel-imap4-store.c:1050
+msgid "Cannot rename IMAP folders in offline mode."
+msgstr "Не може да преименувате IMAP папки докато сте в режим „Изключен“."
+
+#: ../camel/providers/imap4/camel-imap4-store.c:1081
+#, c-format
+msgid "Cannot rename folder `%s' to `%s': Invalid mailbox name"
+msgstr ""
+"Неуспех при преименуването на папка „%s“ в „%s“: невалидно име на mailbox"
+
+#: ../camel/providers/imap4/camel-imap4-store.c:1086
+#, c-format
+msgid "Cannot rename folder `%s' to `%s': Bad command"
+msgstr "Неуспех при преименуването на папка „%s“ на „%s“: Лоша команда"
+
+#: ../camel/providers/imap4/camel-imap4-store.c:1433
+#, c-format
+msgid "Cannot get %s information for pattern `%s' on IMAP server %s: %s"
+msgstr "Не може да се вземе %s информация за шаблона %s на IMAP сървъра %s: %s"
+
+#: ../camel/providers/imap4/camel-imap4-store.c:1435
+msgid "Bad command"
+msgstr "Невалидна команда"
+
+#: ../camel/providers/imap4/camel-imap4-store.c:1473
+msgid "Cannot subscribe to IMAP folders in offline mode."
+msgstr ""
+"Не можете да се записвате към IMAP папки когато сте в режим „Изключен“."
+
+#: ../camel/providers/imap4/camel-imap4-store.c:1518
+#, c-format
+msgid "Cannot subscribe to folder `%s': Invalid mailbox name"
+msgstr "Грешка при записване за папка „%s“: Неправилно име на пощенска кутия"
+
+#: ../camel/providers/imap4/camel-imap4-store.c:1523
+#, c-format
+msgid "Cannot subscribe to folder `%s': Bad command"
+msgstr "Грешка при записване за папка „%s“: Неправилна команда"
+
+#: ../camel/providers/imap4/camel-imap4-store.c:1545
+msgid "Cannot unsubscribe from IMAP folders in offline mode."
+msgstr "Не може да се отпишете от IMAP папки докато сте в режим „Изключен“."
+
+#: ../camel/providers/imap4/camel-imap4-store.c:1590
+#, c-format
+msgid "Cannot unsubscribe from folder `%s': Invalid mailbox name"
+msgstr ""
+"Не можете да се отпишете от папката „%s“: грешно име на пощенската кутия"
+
+#: ../camel/providers/imap4/camel-imap4-store.c:1595
+#, c-format
+msgid "Cannot unsubscribe from folder `%s': Bad command"
+msgstr "Грешка при отписване от папка „%s“: Неправилна команда"
+
+#: ../camel/providers/imap4/camel-imap4-summary.c:1497
+msgid "Fetching envelopes for new messages"
+msgstr "Проверяване за нови писма"
+
+#: ../camel/providers/imap4/camel-imap4-utils.c:368
+#, c-format
+msgid "Unexpected token in response from IMAP server %s: "
+msgstr "Неочаквани знаци в отговора от IMAP сървъра %s: "
+
+#: ../camel/providers/imap4/camel-imap4-utils.c:391
+msgid "No data"
+msgstr "Няма данни"
+
+#: ../camel/providers/imap4/camel-imap4-utils.c:574
+#, c-format
+msgid "IMAP server %s unexpectedly disconnected: %s"
+msgstr "Връзката с IMAP сървъра %s прекъсна неочаквано: %s"
+
+#: ../camel/providers/imapp/camel-imapp-provider.c:40
+#: ../camel/providers/pop3/camel-pop3-provider.c:39
+msgid "Message storage"
+msgstr "Хранилище на писма"
+
+#: ../camel/providers/imapp/camel-imapp-provider.c:48
+msgid "IMAP+"
+msgstr "IMAP+"
+
+#: ../camel/providers/imapp/camel-imapp-provider.c:50
+msgid ""
+"Experimental IMAP 4(.1) client\n"
+"This is untested and unsupported code, you want to use plain imap instead.\n"
+"\n"
+" !!! DO NOT USE THIS FOR PRODUCTION EMAIL  !!!\n"
+msgstr ""
+"Пробен IMAP 4(.1) клиент\n"
+"Това е недостатъчно изпробвана функционалност, за по-сигурно използвайте "
+"обикновен imap.\n"
+"\n"
+"НЕ ИЗПОЛЗВАЙТЕ ТОВА ЗА ВАЖНА КОРЕСПОНДЕНЦИЯ!\n"
+
+#: ../camel/providers/imapp/camel-imapp-store.c:251
+#, c-format
+msgid "Could not connect to %s (port %s): %s"
+msgstr "Не може да се осъществи връзка с %s (порт %s): %s"
+
+#: ../camel/providers/imapp/camel-imapp-store.c:348
+#, c-format
+msgid "Could not connect to POP server on %s"
+msgstr "Неуспех при свързването с POP сървъра %s"
+
+#: ../camel/providers/local/camel-local-folder.c:173
+msgid "Index message body data"
+msgstr "Индексиране на данните за тялото на съобщенията"
+
+#. $HOME relative path + protocol string
+#: ../camel/providers/local/camel-local-folder.c:381
+#, c-format
+msgid "~%s (%s)"
+msgstr "~%s (%s)"
+
+#. /var/spool/mail relative path + protocol
+#: ../camel/providers/local/camel-local-folder.c:385
+#: ../camel/providers/local/camel-local-folder.c:388
+#, c-format
+msgid "mailbox:%s (%s)"
+msgstr "пощенска кутия:%s (%s)"
+
+#. a full path + protocol
+#: ../camel/providers/local/camel-local-folder.c:392
+#, c-format
+msgid "%s (%s)"
+msgstr "%s (%s)"
+
+#: ../camel/providers/local/camel-local-provider.c:45
+msgid "Use the `.folders' folder summary file (exmh)"
+msgstr "Използване на файла „.folders“ с описания на папките (exmh)"
+
+#: ../camel/providers/local/camel-local-provider.c:52
+msgid "MH-format mail directories"
+msgstr "MH-формат mail директории"
+
+#: ../camel/providers/local/camel-local-provider.c:53
+msgid "For storing local mail in MH-like mail directories."
+msgstr "За съхранение на локална поща в MH-подобни пощенски директории"
+
+#: ../camel/providers/local/camel-local-provider.c:68
+msgid "Local delivery"
+msgstr "Локално разпределяне"
+
+#: ../camel/providers/local/camel-local-provider.c:69
+msgid ""
+"For retrieving (moving) local mail from standard mbox formated spools into "
+"folders managed by Evolution."
+msgstr ""
+"За получаване (преместване) на локалната поща от стандартен спулер във "
+"формат mbox към папки под управлението на Evolution."
+
+#: ../camel/providers/local/camel-local-provider.c:81
+#: ../camel/providers/local/camel-local-provider.c:100
+msgid "Apply filters to new messages in INBOX"
+msgstr "Използване на филтри за нови съобщения в INBOX"
+
+#: ../camel/providers/local/camel-local-provider.c:88
+msgid "Maildir-format mail directories"
+msgstr "Maildir-формат пощенски директории"
+
+#: ../camel/providers/local/camel-local-provider.c:89
+msgid "For storing local mail in maildir directories."
+msgstr "За съхранение на локална поща в maildir директории"
+
+#: ../camel/providers/local/camel-local-provider.c:101
+msgid "Store status headers in Elm/Pine/Mutt format"
+msgstr ""
+"Запазване на заглавните части за състоянието във формат на Elm/Pine/Mutt"
+
+#: ../camel/providers/local/camel-local-provider.c:108
+msgid "Standard Unix mbox spool or directory"
+msgstr "Стандартна за Unix пощенска директория"
+
+#: ../camel/providers/local/camel-local-provider.c:109
+msgid ""
+"For reading and storing local mail in external standard mbox spool files.\n"
+"May also be used to read a tree of Elm, Pine, or Mutt style folders."
+msgstr ""
+"За прочитане и съхраняване на локалната поща в стандарнти, външни файлов във "
+"формат mbox.\n"
+"Също така, може да се използва за прочитането на дърво от папки във формат "
+"Elm, Pine, или Mutt."
+
+#: ../camel/providers/local/camel-local-store.c:150
+#: ../camel/providers/local/camel-local-store.c:261
+#: ../camel/providers/local/camel-mbox-store.c:342
+#: ../camel/providers/local/camel-spool-store.c:125
+#, c-format
+msgid "Store root %s is not an absolute path"
+msgstr "Основната папка за запазване %s не е описана с абсолютен път."
+
+#: ../camel/providers/local/camel-local-store.c:157
+#, c-format
+msgid "Store root %s is not a regular directory"
+msgstr "Основната папка за запазване %s не е обикновена папка."
+
+#: ../camel/providers/local/camel-local-store.c:166
+#: ../camel/providers/local/camel-local-store.c:174
+#: ../camel/providers/local/camel-local-store.c:272
+#, c-format
+msgid "Cannot get folder: %s: %s"
+msgstr "Не може да се получи папка: %s: %s"
+
+#: ../camel/providers/local/camel-local-store.c:186
+msgid "Local stores do not have an inbox"
+msgstr "Локални запазвания няма в inbox"
+
+#: ../camel/providers/local/camel-local-store.c:232
+#, c-format
+msgid "Local mail file %s"
+msgstr "Локален mail файл %s"
+
+#: ../camel/providers/local/camel-local-store.c:341
+#, c-format
+msgid "Could not rename folder %s to %s: %s"
+msgstr "Не може да се преименува папката %s на %s: %s"
+
+#: ../camel/providers/local/camel-local-store.c:406
+#, c-format
+msgid "Could not rename '%s': %s"
+msgstr "Не може да се преименува „%s“: %s"
+
+#: ../camel/providers/local/camel-local-store.c:431
+#: ../camel/providers/local/camel-mbox-store.c:271
+#, c-format
+msgid "Could not delete folder summary file `%s': %s"
+msgstr "Не може да се изтрие файл с обобщение за папка „%s“: %s"
+
+#: ../camel/providers/local/camel-local-store.c:441
+#: ../camel/providers/local/camel-mbox-store.c:283
+#, c-format
+msgid "Could not delete folder index file `%s': %s"
+msgstr "Не може да се изтрие индекс файл за папка „%s“: %s"
+
+#: ../camel/providers/local/camel-local-store.c:464
+#: ../camel/providers/local/camel-mbox-store.c:307
+#, c-format
+msgid "Could not delete folder meta file `%s': %s"
+msgstr "Грешка при изтриване на мета-файла на папката „%s“: %s"
+
+#: ../camel/providers/local/camel-local-summary.c:405
+#, c-format
+msgid "Could not save summary: %s: %s"
+msgstr "Не може да се запази обобщение %s: %s"
+
+#: ../camel/providers/local/camel-local-summary.c:463
+msgid "Unable to add message to summary: unknown reason"
+msgstr "Не може да се добави съобщение към обобщение: неизвестна причина"
+
+#: ../camel/providers/local/camel-maildir-folder.c:215
+msgid "Maildir append message cancelled"
+msgstr "Добавянето на писмо в maildir е отменено."
+
+#: ../camel/providers/local/camel-maildir-folder.c:218
+#, c-format
+msgid "Cannot append message to maildir folder: %s: %s"
+msgstr "Не може да се добави съобщението в maildir папката: %s: %s"
+
+#: ../camel/providers/local/camel-maildir-folder.c:244
+#: ../camel/providers/local/camel-maildir-folder.c:258
+#: ../camel/providers/local/camel-maildir-folder.c:267
+#: ../camel/providers/local/camel-mbox-folder.c:339
+#: ../camel/providers/local/camel-mbox-folder.c:358
+#: ../camel/providers/local/camel-mbox-folder.c:389
+#: ../camel/providers/local/camel-mbox-folder.c:397
+#: ../camel/providers/local/camel-mh-folder.c:202
+#: ../camel/providers/local/camel-mh-folder.c:213
+#: ../camel/providers/local/camel-mh-folder.c:222
+#, c-format
+msgid ""
+"Cannot get message: %s from folder %s\n"
+"  %s"
+msgstr ""
+"Не може да се получи съобщение  %s от папка %s\n"
+"  %s"
+
+#: ../camel/providers/local/camel-maildir-folder.c:268
+msgid "Invalid message contents"
+msgstr "Грешно съдържание на писмо"
+
+#: ../camel/providers/local/camel-maildir-store.c:146
+#: ../camel/providers/local/camel-maildir-store.c:171
+#: ../camel/providers/local/camel-mbox-store.c:171
+#: ../camel/providers/local/camel-mbox-store.c:183
+#, c-format
+msgid "Cannot create folder `%s': %s"
+msgstr "Папката „%s“ не може да бъде създадена: %s"
+
+#: ../camel/providers/local/camel-maildir-store.c:159
+#: ../camel/providers/local/camel-mbox-store.c:141
+#: ../camel/providers/local/camel-mh-store.c:217
+#, c-format
+msgid "Cannot get folder `%s': %s"
+msgstr "Папката „%s“ не може да бъде взета: %s"
+
+#: ../camel/providers/local/camel-maildir-store.c:163
+#: ../camel/providers/local/camel-mbox-store.c:149
+#: ../camel/providers/local/camel-mh-store.c:224
+#, c-format
+msgid "Cannot get folder `%s': folder does not exist."
+msgstr "Неуспех при взимането на папка „%s“: папката не съществува."
+
+#: ../camel/providers/local/camel-maildir-store.c:187
+#, c-format
+msgid "Cannot get folder `%s': not a maildir directory."
+msgstr "Грешка при получаването на папката „%s“: не е maildir папка."
+
+#: ../camel/providers/local/camel-maildir-store.c:232
+#: ../camel/providers/local/camel-maildir-store.c:270
+#: ../camel/providers/local/camel-mh-store.c:273
+#, c-format
+msgid "Could not delete folder `%s': %s"
+msgstr "Не може да се изтрие папката „%s“: %s"
+
+#: ../camel/providers/local/camel-maildir-store.c:234
+msgid "not a maildir directory"
+msgstr "не е maildir директория"
+
+#: ../camel/providers/local/camel-maildir-store.c:436
+#: ../camel/providers/local/camel-spool-store.c:327
+#: ../camel/providers/local/camel-spool-store.c:341
+#, c-format
+msgid "Could not scan folder `%s': %s"
+msgstr ""
+"Не може да се сканира папка „%s“:\n"
+"%s"
+
+#: ../camel/providers/local/camel-maildir-summary.c:425
+#: ../camel/providers/local/camel-maildir-summary.c:556
+#, c-format
+msgid "Cannot open maildir directory path: %s: %s"
+msgstr "Не може да се отвори mailbox: %s: %s"
+
+#: ../camel/providers/local/camel-maildir-summary.c:549
+msgid "Checking folder consistency"
+msgstr "Проверка на цялостта на папките"
+
+#: ../camel/providers/local/camel-maildir-summary.c:652
+msgid "Checking for new messages"
+msgstr "Проверяване за нови писма"
+
+#: ../camel/providers/local/camel-maildir-summary.c:741
+#: ../camel/providers/local/camel-mbox-summary.c:416
+#: ../camel/providers/local/camel-mbox-summary.c:589
+#: ../camel/providers/local/camel-mbox-summary.c:680
+#: ../camel/providers/local/camel-spool-summary.c:139
+msgid "Storing folder"
+msgstr "Запазване на папка"
+
+#: ../camel/providers/local/camel-mbox-folder.c:147
+#: ../camel/providers/local/camel-spool-folder.c:148
+#, c-format
+msgid "Cannot create folder lock on %s: %s"
+msgstr "Не може да се създаде заключване за папката %s: %s"
+
+#: ../camel/providers/local/camel-mbox-folder.c:206
+#, c-format
+msgid "Cannot open mailbox: %s: %s\n"
+msgstr "Не може да се отвори пощенска кутия: %s: %s\n"
+
+#: ../camel/providers/local/camel-mbox-folder.c:266
+msgid "Mail append cancelled"
+msgstr "Действието за добавяне на поща е прекъснато"
+
+#: ../camel/providers/local/camel-mbox-folder.c:269
+#, c-format
+msgid "Cannot append message to mbox file: %s: %s"
+msgstr "Писмото не може да се добави в mbox файла: %s: %s"
+
+#: ../camel/providers/local/camel-mbox-folder.c:390
+msgid "The folder appears to be irrecoverably corrupted."
+msgstr "Папката изглежда е невъзстановимо повредена."
+
+#: ../camel/providers/local/camel-mbox-folder.c:398
+#: ../camel/providers/local/camel-mh-folder.c:223
+msgid "Message construction failed."
+msgstr "Създаването на писмото е неуспешно."
+
+#: ../camel/providers/local/camel-mbox-store.c:163
+#: ../camel/providers/local/camel-mbox-store.c:348
+msgid "Cannot create a folder by this name."
+msgstr "Папка с такова име не може да бъде създадена."
+
+#: ../camel/providers/local/camel-mbox-store.c:193
+#, c-format
+msgid "Cannot get folder `%s': not a regular file."
+msgstr "Не може да се вземе папка „%s“: не е обикновен файл."
+
+#: ../camel/providers/local/camel-mbox-store.c:223
+#: ../camel/providers/local/camel-mbox-store.c:234
+#: ../camel/providers/local/camel-mbox-store.c:257
+#, c-format
+msgid ""
+"Could not delete folder `%s':\n"
+"%s"
+msgstr ""
+"Не може да се изтрие папката „%s“:\n"
+"%s"
+
+#: ../camel/providers/local/camel-mbox-store.c:242
+#, c-format
+msgid "`%s' is not a regular file."
+msgstr "„%s“ не е обикновен файл."
+
+#: ../camel/providers/local/camel-mbox-store.c:249
+#, c-format
+msgid "Folder `%s' is not empty. Not deleted."
+msgstr "Папката „%s“ не е празна. Не е изтрита."
+
+#: ../camel/providers/local/camel-mbox-store.c:361
+#, c-format
+msgid "Cannot create directory `%s': %s."
+msgstr "Не може да се създаде папка „%s“: %s"
+
+#: ../camel/providers/local/camel-mbox-store.c:375
+#, c-format
+msgid "Cannot create folder: %s: %s"
+msgstr "Не може да се създаде папка: %s: %s"
+
+#: ../camel/providers/local/camel-mbox-store.c:377
+msgid "Folder already exists"
+msgstr "Папката вече съществува"
+
+#: ../camel/providers/local/camel-mbox-store.c:459
+msgid "The new folder name is illegal."
+msgstr "Новото име на папката е невалидно."
+
+#: ../camel/providers/local/camel-mbox-store.c:472
+#, c-format
+msgid "Could not rename `%s': `%s': %s"
+msgstr "Не може да се преименува „%s“: „%s“: %s"
+
+#: ../camel/providers/local/camel-mbox-store.c:547
+#, c-format
+msgid "Could not rename '%s' to %s: %s"
+msgstr "Не може да се преименува „%s“ на %s: %s"
+
+#: ../camel/providers/local/camel-mbox-summary.c:422
+#, c-format
+msgid "Could not open folder: %s: %s"
+msgstr "Не може да се отвори папката %s: %s"
+
+#: ../camel/providers/local/camel-mbox-summary.c:470
+#, c-format
+msgid "Fatal mail parser error near position %ld in folder %s"
+msgstr "Фатална грешка в пощата близо до %ld в папка %s"
+
+#: ../camel/providers/local/camel-mbox-summary.c:526
+#, c-format
+msgid "Cannot check folder: %s: %s"
+msgstr "Не може да  се провери папката %s: %s"
+
+#: ../camel/providers/local/camel-mbox-summary.c:594
+#: ../camel/providers/local/camel-mbox-summary.c:685
+#: ../camel/providers/local/camel-spool-summary.c:144
+#, c-format
+msgid "Could not open file: %s: %s"
+msgstr "Не може да се отвори файл %s: %s"
+
+#: ../camel/providers/local/camel-mbox-summary.c:606
+#: ../camel/providers/local/camel-spool-summary.c:164
+#, c-format
+msgid "Cannot open temporary mailbox: %s"
+msgstr "Не може да се отвори временния mailbox: %s"
+
+#: ../camel/providers/local/camel-mbox-summary.c:619
+#: ../camel/providers/local/camel-mbox-summary.c:791
+#, c-format
+msgid "Could not close source folder %s: %s"
+msgstr "Не може да се затвори папката източник %s: %s"
+
+#: ../camel/providers/local/camel-mbox-summary.c:628
+#, c-format
+msgid "Could not close temp folder: %s"
+msgstr "Не може да затвори временната папка: %s"
+
+#: ../camel/providers/local/camel-mbox-summary.c:639
+#, c-format
+msgid "Could not rename folder: %s"
+msgstr "Не може да се преименува папката: %s"
+
+#: ../camel/providers/local/camel-mbox-summary.c:696
+#: ../camel/providers/local/camel-mbox-summary.c:902
+#, c-format
+msgid "Could not store folder: %s"
+msgstr "Папката %s не може да бъде запазена"
+
+#: ../camel/providers/local/camel-mbox-summary.c:733
+#: ../camel/providers/local/camel-mbox-summary.c:741
+#: ../camel/providers/local/camel-mbox-summary.c:933
+#: ../camel/providers/local/camel-mbox-summary.c:941
+msgid "Summary and folder mismatch, even after a sync"
+msgstr "Обобщението и папката са объркани дори след синхронизация"
+
+#: ../camel/providers/local/camel-mbox-summary.c:867
+#: ../camel/providers/local/camel-spool-summary.c:336
+#, c-format
+msgid "Unknown error: %s"
+msgstr "Неизвестна грешка: %s"
+
+#: ../camel/providers/local/camel-mbox-summary.c:996
+#: ../camel/providers/local/camel-mbox-summary.c:1022
+#, c-format
+msgid "Error writing to temp mailbox: %s"
+msgstr "Грешка при писане във временната пощенска кутия: %s"
+
+#: ../camel/providers/local/camel-mbox-summary.c:1013
+#, c-format
+msgid "Writing to tmp mailbox failed: %s: %s"
+msgstr "Писането във временната пощенска кутия неуспешно: %s: %s"
+
+#: ../camel/providers/local/camel-mh-folder.c:175
+msgid "MH append message cancelled"
+msgstr "Прекъснато бе добавяне на MH писмо"
+
+#: ../camel/providers/local/camel-mh-folder.c:178
+#, c-format
+msgid "Cannot append message to mh folder: %s: %s"
+msgstr "Не може да се добави съобщението в mh папката: %s: %s"
+
+#: ../camel/providers/local/camel-mh-store.c:232
+#, c-format
+msgid "Could not create folder `%s': %s"
+msgstr "Не може да се създаде папка „%s“: %s"
+
+#: ../camel/providers/local/camel-mh-store.c:244
+#, c-format
+msgid "Cannot get folder `%s': not a directory."
+msgstr "Не може да се вземе папка „%s“: не е папка."
+
+#: ../camel/providers/local/camel-mh-summary.c:246
+#, c-format
+msgid "Cannot open MH directory path: %s: %s"
+msgstr "Не може да се отвори MH директория: %s: %s"
+
+#: ../camel/providers/local/camel-spool-store.c:131
+#, c-format
+msgid "Spool `%s' cannot be opened: %s"
+msgstr "Спулерът „%s“ не може да бъде отворен: %s"
+
+#: ../camel/providers/local/camel-spool-store.c:143
+#, c-format
+msgid "Spool `%s' is not a regular file or directory"
+msgstr "Спулерът „%s“ не е обикновен файл или папка"
+
+#: ../camel/providers/local/camel-spool-store.c:162
+#, c-format
+msgid "Folder `%s/%s' does not exist."
+msgstr "Папката „%s/%s“ не съществува."
+
+#: ../camel/providers/local/camel-spool-store.c:172
+#, c-format
+msgid ""
+"Could not open folder `%s':\n"
+"%s"
+msgstr ""
+"Не може да се отвори папката „%s“:\n"
+"%s"
+
+#: ../camel/providers/local/camel-spool-store.c:176
+#, c-format
+msgid "Folder `%s' does not exist."
+msgstr "Папката „%s“ не съществува."
+
+#: ../camel/providers/local/camel-spool-store.c:181
+#, c-format
+msgid ""
+"Could not create folder `%s':\n"
+"%s"
+msgstr ""
+"Не може да се създаде папка „%s“:\n"
+"%s"
+
+#: ../camel/providers/local/camel-spool-store.c:189
+#, c-format
+msgid "`%s' is not a mailbox file."
+msgstr "„%s“ е невалиден mailbox файл."
+
+#: ../camel/providers/local/camel-spool-store.c:206
+msgid "Store does not support an INBOX"
+msgstr "Кутията не поддържа папка за входящи писма"
+
+#: ../camel/providers/local/camel-spool-store.c:218
+#, c-format
+msgid "Spool mail file %s"
+msgstr "Spool mail файл %s"
+
+#: ../camel/providers/local/camel-spool-store.c:218
+#, c-format
+msgid "Spool folder tree %s"
+msgstr "Дърво от папки за спулиране %s"
+
+#: ../camel/providers/local/camel-spool-store.c:226
+msgid "Spool folders cannot be renamed"
+msgstr "Spool папките не могат да бъдат преименувани"
+
+#: ../camel/providers/local/camel-spool-store.c:234
+msgid "Spool folders cannot be deleted"
+msgstr "Spool папката не може да бъде изтрита"
+
+#: ../camel/providers/local/camel-spool-summary.c:177
+#: ../camel/providers/local/camel-spool-summary.c:187
+#: ../camel/providers/local/camel-spool-summary.c:197
+#, c-format
+msgid "Could not sync temporary folder %s: %s"
+msgstr "Не може да се синхронизира временната папка: %s: %s"
+
+#: ../camel/providers/local/camel-spool-summary.c:213
+#, c-format
+msgid "Could not sync spool folder %s: %s"
+msgstr "Не може да се синхронизира spool папката „%s“: %s"
+
+#: ../camel/providers/local/camel-spool-summary.c:244
+#: ../camel/providers/local/camel-spool-summary.c:263
+#: ../camel/providers/local/camel-spool-summary.c:276
+#, c-format
+msgid ""
+"Could not sync spool folder %s: %s\n"
+"Folder may be corrupt, copy saved in `%s'"
+msgstr ""
+"Не може да се синхронизира spool папката „%s“: %s\n"
+"Папката може би е повредена, копието е запазено в „%s“"
+
+#: ../camel/providers/nntp/camel-nntp-folder.c:177
+#: ../camel/providers/nntp/camel-nntp-folder.c:209
+#, c-format
+msgid "Internal error: uid in invalid format: %s"
+msgstr "Вътрешна грешка: uid е в невалиден формат: %s"
+
+#: ../camel/providers/nntp/camel-nntp-folder.c:329
+#: ../camel/providers/nntp/camel-nntp-folder.c:332
+#: ../camel/providers/nntp/camel-nntp-folder.c:374
+#: ../camel/providers/nntp/camel-nntp-folder.c:376
+#, c-format
+msgid "Posting failed: %s"
+msgstr "Изпращането пропадна: %s"
+
+#: ../camel/providers/nntp/camel-nntp-folder.c:394
+msgid "You cannot post NNTP messages while working offline!"
+msgstr "Не може да изпращате NNTP писма докато сте в режим „Изключен“!"
+
+#: ../camel/providers/nntp/camel-nntp-folder.c:405
+msgid "You cannot copy messages from a NNTP folder!"
+msgstr "Не можете да копирате писма от папка тип NNTP!"
+
+#: ../camel/providers/nntp/camel-nntp-provider.c:44
+msgid ""
+"Show folders in short notation (e.g. c.o.linux rather than comp.os.linux)"
+msgstr ""
+"Показване на папките с кратки съкращение (напр. c.o.linux вместо comp.os."
+"linux)"
+
+#: ../camel/providers/nntp/camel-nntp-provider.c:46
+msgid "In the subscription dialog, show relative folder names"
+msgstr "В прозореца за абонамент, показване на относителни име на папки"
+
+#: ../camel/providers/nntp/camel-nntp-provider.c:53
+msgid "USENET news"
+msgstr "Новини в USENET"
+
+#: ../camel/providers/nntp/camel-nntp-provider.c:55
+msgid "This is a provider for reading from and posting to USENET newsgroups."
+msgstr "Това е доставчик за четене и пубикуване в групи за новини в USENET."
+
+#: ../camel/providers/nntp/camel-nntp-provider.c:74
+msgid ""
+"This option will authenticate with the NNTP server using a plaintext "
+"password."
+msgstr "С тази настройка паролата за NNTP сървъра ще бъде в чист текст."
+
+#: ../camel/providers/nntp/camel-nntp-store.c:220
+#, c-format
+msgid "Could not read greeting from %s: %s"
+msgstr "Неуспех при четенето на поздрава от %s: %s"
+
+#: ../camel/providers/nntp/camel-nntp-store.c:232
+#, c-format
+msgid "NNTP server %s returned error code %d: %s"
+msgstr "NNTP сървъра %s върна код за грешка %d: %s"
+
+#: ../camel/providers/nntp/camel-nntp-store.c:409
+#, c-format
+msgid "USENET News via %s"
+msgstr "Новини в USENET през %s"
+
+#: ../camel/providers/nntp/camel-nntp-store.c:799
+#, c-format
+msgid ""
+"Error retrieving newsgroups:\n"
+"\n"
+"%s"
+msgstr ""
+"Грешка при получаването на новинарските групи:\n"
+"\n"
+"%s"
+
+#: ../camel/providers/nntp/camel-nntp-store.c:893
+msgid ""
+"You cannot subscribe to this newsgroup:\n"
+"\n"
+"No such newsgroup. The selected item is a probably a parent folder."
+msgstr ""
+"Неуспех при отписването от тази новинарска група:\n"
+"\n"
+"Няма такава група. Най-вероятно избрания обект е родителска папка."
+
+#: ../camel/providers/nntp/camel-nntp-store.c:925
+msgid ""
+"You cannot unsubscribe to this newsgroup:\n"
+"\n"
+"newsgroup does not exist!"
+msgstr ""
+"Не можете да се отпишете от новинарската група:\n"
+"\n"
+"такава група не съществува!"
+
+#: ../camel/providers/nntp/camel-nntp-store.c:950
+msgid "You cannot create a folder in a News store: subscribe instead."
+msgstr ""
+"Не можете да създавате папки в новинарска група. Вместо това се запишете."
+
+#: ../camel/providers/nntp/camel-nntp-store.c:958
+msgid "You cannot rename a folder in a News store."
+msgstr "Не можете да преименувате папка в News store."
+
+#: ../camel/providers/nntp/camel-nntp-store.c:966
+msgid "You cannot remove a folder in a News store: unsubscribe instead."
+msgstr ""
+"Не можете да премахвате папки в новинарска група. Вместо това се отпишете."
+
+#: ../camel/providers/nntp/camel-nntp-store.c:1147
+msgid "Authentication requested but no username provided"
+msgstr "Изискване на удостоверение"
+
+#: ../camel/providers/nntp/camel-nntp-store.c:1155
+#, c-format
+msgid "Please enter the NNTP password for %s@%s"
+msgstr "Моля въведете NNTP парола за %s@%s"
+
+#: ../camel/providers/nntp/camel-nntp-store.c:1159
+#, c-format
+msgid "Cannot authenticate to server: %s"
+msgstr "Неуспех при идентификацията пред сървър: %s"
+
+#: ../camel/providers/nntp/camel-nntp-store.c:1275
+#, c-format
+msgid "NNTP Command failed: %s"
+msgstr "NNTP командата %s е неуспешна"
+
+#: ../camel/providers/nntp/camel-nntp-store.c:1331
+msgid "Not connected."
+msgstr "Не е свързан."
+
+#: ../camel/providers/nntp/camel-nntp-store.c:1384
+#, c-format
+msgid "No such folder: %s"
+msgstr "Папката %s не съществува"
+
+#: ../camel/providers/nntp/camel-nntp-summary.c:220
+#: ../camel/providers/nntp/camel-nntp-summary.c:316
+#, c-format
+msgid "%s: Scanning new messages"
+msgstr "%s: сканиране за нови писма"
+
+#: ../camel/providers/nntp/camel-nntp-summary.c:227
+#, c-format
+msgid "Unexpected server response from xover: %s"
+msgstr "Неочакван сървърен отговор от xover: %s"
+
+#: ../camel/providers/nntp/camel-nntp-summary.c:330
+#, c-format
+msgid "Unexpected server response from head: %s"
+msgstr "Неочакван сървърен отговор от head: %s"
+
+#: ../camel/providers/nntp/camel-nntp-summary.c:370
+msgid "Use cancel"
+msgstr "Използване на отказ"
+
+#: ../camel/providers/nntp/camel-nntp-summary.c:372
+#, c-format
+msgid "Operation failed: %s"
+msgstr "Операцията %s е неуспешна"
+
+#: ../camel/providers/pop3/camel-pop3-folder.c:247
+msgid "Retrieving POP summary"
+msgstr "Получаване на POP обобщение"
+
+#: ../camel/providers/pop3/camel-pop3-folder.c:266
+#, c-format
+msgid "Cannot get POP summary: %s"
+msgstr "Неуспех при взимането на обобщението за POP: %s"
+
+#: ../camel/providers/pop3/camel-pop3-folder.c:309
+msgid "Expunging deleted messages"
+msgstr "Отстраняване на изтритите писма"
+
+#: ../camel/providers/pop3/camel-pop3-folder.c:405
+#, c-format
+msgid "No message with uid %s"
+msgstr "Няма съобщение с uid %s"
+
+#. Sigh, most of the crap in this function is so that the cancel button
+#. returns the proper exception code.  Sigh.
+#: ../camel/providers/pop3/camel-pop3-folder.c:412
+#, c-format
+msgid "Retrieving POP message %d"
+msgstr "Получаване на POP писмо %d"
+
+#: ../camel/providers/pop3/camel-pop3-folder.c:502
+msgid "Unknown reason"
+msgstr "Причината е неизвестна"
+
+#: ../camel/providers/pop3/camel-pop3-provider.c:41
+msgid "Leave messages on server"
+msgstr "Оставяне на пощата на сървъра"
+
+#: ../camel/providers/pop3/camel-pop3-provider.c:44
+#, c-format
+msgid "Delete after %s day(s)"
+msgstr "Изтриване след %s дни"
+
+#: ../camel/providers/pop3/camel-pop3-provider.c:47
+msgid "Disable support for all POP3 extensions"
+msgstr "Спиране на поддръжката за всички POP3 разширения"
+
+#: ../camel/providers/pop3/camel-pop3-provider.c:55
+msgid "POP"
+msgstr "POP"
+
+#: ../camel/providers/pop3/camel-pop3-provider.c:57
+msgid "For connecting to and downloading mail from POP servers."
+msgstr "За връзка и изтегляне на поща от POP сървъри."
+
+#: ../camel/providers/pop3/camel-pop3-provider.c:74
+msgid ""
+"This option will connect to the POP server using a plaintext password. This "
+"is the only option supported by many POP servers."
+msgstr ""
+"Тази опция ще ви свърже с POP сървър използващ обикновена парола. Това е "
+"опцията подържана от много POP сървъри."
+
+#: ../camel/providers/pop3/camel-pop3-provider.c:84
+msgid ""
+"This option will connect to the POP server using an encrypted password via "
+"the APOP protocol. This may not work for all users even on servers that "
+"claim to support it."
+msgstr ""
+"Тази опция ще ви свърже с POP сървър използващ шифрована парола през APOP "
+"протокол. Това може да не работи за всички потребители на POP сървъра."
+
+#: ../camel/providers/pop3/camel-pop3-store.c:202
+#, c-format
+msgid "Failed to read a valid greeting from POP server %s"
+msgstr "Не е получен правилен поздрав от POP сървъра %s"
+
+#: ../camel/providers/pop3/camel-pop3-store.c:216
+#: ../camel/providers/pop3/camel-pop3-store.c:233
+#: ../camel/providers/pop3/camel-pop3-store.c:243
+#: ../camel/providers/pop3/camel-pop3-store.c:249
+#, c-format
+msgid "Failed to connect to POP server %s in secure mode: %s"
+msgstr "Грешка при свързване с POP сървъра %s в засекретен режим: %s"
+
+#: ../camel/providers/pop3/camel-pop3-store.c:217
+msgid "STLS not supported"
+msgstr "STLS не се поддържа"
+
+#: ../camel/providers/pop3/camel-pop3-store.c:361
+#, c-format
+msgid "Could not connect to POP server %s"
+msgstr "Неуспех при свързването с POP сървъра %s"
+
+#: ../camel/providers/pop3/camel-pop3-store.c:402
+#: ../camel/providers/pop3/camel-pop3-store.c:516
+#, c-format
+msgid ""
+"Unable to connect to POP server %s: No support for requested authentication "
+"mechanism."
+msgstr ""
+"Неуспех при свързването към POP сървъра %s: Няма поддръжка за нужния "
+"механизъм за идентификация"
+
+#: ../camel/providers/pop3/camel-pop3-store.c:418
+#, c-format
+msgid "SASL `%s' Login failed for POP server %s: %s"
+msgstr "SASL „%s“ Грешка при влизането в POP сървъра %s: %s"
+
+#: ../camel/providers/pop3/camel-pop3-store.c:430
+#, c-format
+msgid "Cannot login to POP server %s: SASL Protocol error"
+msgstr "Неуспех при влизането в POP сървъра %s: SASL Protocol error"
+
+#: ../camel/providers/pop3/camel-pop3-store.c:449
+#, c-format
+msgid "Failed to authenticate on POP server %s: %s"
+msgstr "Неуспех при идентифицирането пред POP сървъра %s: %s"
+
+#: ../camel/providers/pop3/camel-pop3-store.c:475
+#, c-format
+msgid "%sPlease enter the POP password for %s on host %s"
+msgstr "%sВъведете POP паролата за %s към %s"
+
+#: ../camel/providers/pop3/camel-pop3-store.c:530
+#: ../camel/providers/pop3/camel-pop3-store.c:543
+#, c-format
+msgid ""
+"Unable to connect to POP server %s.\n"
+"Error sending password: %s"
+msgstr ""
+"Неуспех при свързването към POP сървъра %s.\n"
+"Грешка при изпращането на парола: %s"
+
+#: ../camel/providers/pop3/camel-pop3-store.c:537
+#, c-format
+msgid ""
+"Unable to connect to POP server %s.\n"
+"Error sending username: %s"
+msgstr ""
+"Неуспех при свързването към POP сървъра %s.\n"
+"Грешка при изпращането на потребителско име: %s"
+
+#: ../camel/providers/pop3/camel-pop3-store.c:643
+#, c-format
+msgid "No such folder `%s'."
+msgstr "Няма такава папка „%s“."
+
+#: ../camel/providers/sendmail/camel-sendmail-provider.c:37
+msgid "Sendmail"
+msgstr "Sendmail"
+
+#: ../camel/providers/sendmail/camel-sendmail-provider.c:39
+msgid ""
+"For delivering mail by passing it to the \"sendmail\" program on the local "
+"system."
+msgstr ""
+"За изпращане на поща чрез подаването й на програмата „sendmail“ на локалната "
+"система."
+
+#: ../camel/providers/sendmail/camel-sendmail-transport.c:114
+msgid "Could not parse recipient list"
+msgstr "Списъкът на получателите не може да бъде прегледан"
+
+#: ../camel/providers/sendmail/camel-sendmail-transport.c:145
+#, c-format
+msgid "Could not create pipe to sendmail: %s: mail not sent"
+msgstr "Не може да се създаде програмен канал за sendmail: %s: не е изпратен"
+
+#: ../camel/providers/sendmail/camel-sendmail-transport.c:166
+#, c-format
+msgid "Could not fork sendmail: %s: mail not sent"
+msgstr "Не може да се направи fork sendmail: %s: пощата не е изпратена"
+
+#: ../camel/providers/sendmail/camel-sendmail-transport.c:234
+#, c-format
+msgid "sendmail exited with signal %s: mail not sent."
+msgstr "sendmail завърши със сигнал %s: пощата не е изпратена"
+
+#: ../camel/providers/sendmail/camel-sendmail-transport.c:241
+#, c-format
+msgid "Could not execute %s: mail not sent."
+msgstr "Не може да се изпълни %s: пощата не е изпратена"
+
+#: ../camel/providers/sendmail/camel-sendmail-transport.c:246
+#, c-format
+msgid "sendmail exited with status %d: mail not sent."
+msgstr "sendmail завърши със статус %d: пощата не е изпратена."
+
+#: ../camel/providers/sendmail/camel-sendmail-transport.c:260
+msgid "sendmail"
+msgstr "sendmail"
+
+#: ../camel/providers/sendmail/camel-sendmail-transport.c:262
+msgid "Mail delivery via the sendmail program"
+msgstr "Изпращане на поща през програмата sendmail"
+
+#: ../camel/providers/smtp/camel-smtp-provider.c:38
+msgid "SMTP"
+msgstr "SMTP"
+
+#: ../camel/providers/smtp/camel-smtp-provider.c:40
+msgid "For delivering mail by connecting to a remote mailhub using SMTP."
+msgstr ""
+"За доставка на поща чрез свързване към отделечен разпределител на поща през "
+"SMTP."
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:162
+msgid "Syntax error, command unrecognized"
+msgstr "Синтактична грешка, непозната команда"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:164
+msgid "Syntax error in parameters or arguments"
+msgstr "Синтактична грешка в параметрите или аргументите"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:166
+msgid "Command not implemented"
+msgstr "Командата не се използва"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:168
+msgid "Command parameter not implemented"
+msgstr "Параметрите на командата не се използват"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:170
+msgid "System status, or system help reply"
+msgstr "Отговор на системен статус или системна помощ"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:172
+msgid "Help message"
+msgstr "Помощно съобщение"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:174
+msgid "Service ready"
+msgstr "Обслужването е готово"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:176
+msgid "Service closing transmission channel"
+msgstr "Обслужването затвори прехвърлящият канал"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:178
+msgid "Service not available, closing transmission channel"
+msgstr "Обслужването не е налично, затварям прехвърлящият канал"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:180
+msgid "Requested mail action okay, completed"
+msgstr "Заявеното пощенско действие е наред, завърши"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:182
+msgid "User not local; will forward to <forward-path>"
+msgstr "Потребителя не е локален: ще го препратя на <forward-path>"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:184
+msgid "Requested mail action not taken: mailbox unavailable"
+msgstr "Заявеното пощенско действие не е получено: mailbox не е наличен"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:186
+msgid "Requested action not taken: mailbox unavailable"
+msgstr "Заявеното действие не е получено: mailbox не е наличен"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:188
+msgid "Requested action aborted: error in processing"
+msgstr "Заявеното действие прекъсна: грешка в обработката"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:190
+msgid "User not local; please try <forward-path>"
+msgstr "Потребителя не е локален; моля опитайте <forward-path>"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:192
+msgid "Requested action not taken: insufficient system storage"
+msgstr "Заявеното действие не е взето: липса на достатъчно място за запазване"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:194
+msgid "Requested mail action aborted: exceeded storage allocation"
+msgstr ""
+"Заявеното пощенско действие е прекъснато: надвишава свободното място за "
+"запазване"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:196
+msgid "Requested action not taken: mailbox name not allowed"
+msgstr ""
+"Заявеното пощенско действие не е взето: името на mailbox не е разрешено"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:198
+msgid "Start mail input; end with <CRLF>.<CRLF>"
+msgstr "Въведете данните на писмото и завършете с <CRLF>.<CRLF>"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:200
+msgid "Transaction failed"
+msgstr "Неуспешна транзакция"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:204
+msgid "A password transition is needed"
+msgstr "Необходима е промяна на паролата"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:206
+msgid "Authentication mechanism is too weak"
+msgstr "Механизмът да идентификация е твърде слаб"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:208
+msgid "Encryption required for requested authentication mechanism"
+msgstr "Изисква се шифроване за изискания механизъм за идентификация"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:210
+msgid "Temporary authentication failure"
+msgstr "Временна грешка при идентификация"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:291
+msgid "Welcome response error"
+msgstr "Грешка при отговора на поздрава"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:322
+#: ../camel/providers/smtp/camel-smtp-transport.c:355
+#: ../camel/providers/smtp/camel-smtp-transport.c:361
+#, c-format
+msgid "Failed to connect to SMTP server %s in secure mode: %s"
+msgstr "Неуспех при свързването със SMTP сървъра %s в сигурен режим: %s"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:331
+#, c-format
+msgid "STARTTLS command failed: %s"
+msgstr "Командата STARTTLS е неуспешна: %s"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:346
+msgid "STARTTLS command failed"
+msgstr "Командата STARTTLS е неуспешна"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:488
+#, c-format
+msgid "SMTP server %s does not support requested authentication type %s."
+msgstr "SMTP сървъра %s не поддържа необходимия вид идентифициране %s."
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:526
+#, c-format
+msgid "%sPlease enter the SMTP password for %s on host %s"
+msgstr "%sВъведете SMTP паролата за %s към %s"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:545
+#, c-format
+msgid ""
+"Unable to authenticate to SMTP server.\n"
+"%s\n"
+"\n"
+msgstr ""
+"Неуспех при удостоверение пред SMTP сървъра.\n"
+"%s\n"
+"\n"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:669
+#, c-format
+msgid "SMTP server %s"
+msgstr "SMTP сървър %s"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:671
+#, c-format
+msgid "SMTP mail delivery via %s"
+msgstr "SMTP поща през %s"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:689
+msgid "Cannot send message: service not connected."
+msgstr "Съобщението на може да бъде изпратено: услугата не е свързана."
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:695
+msgid "Cannot send message: sender address not valid."
+msgstr "Не може да се изпрати съобщение: невалиден адрес на изпращача."
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:699
+msgid "Sending message"
+msgstr "Изпращане на съобщението"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:714
+msgid "Cannot send message: no recipients defined."
+msgstr "Не може да се изпрати съобщение: няма зададен получател"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:725
+msgid "Cannot send message: one or more invalid recipients"
+msgstr ""
+"Съобщението не може да бъде изпратено: един или повече невалидни получатели"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:894
+msgid "SMTP Greeting"
+msgstr "SMTP поздравления"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:920
+#, c-format
+msgid "HELO command failed: %s"
+msgstr "Командата HELO е неуспешна: %s"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:937
+msgid "HELO command failed"
+msgstr "Командата HELO е неуспешна"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:1003
+msgid "SMTP Authentication"
+msgstr "SMTP удостоверение"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:1009
+msgid "Error creating SASL authentication object."
+msgstr "Грешка при създаване на SASL оторизация"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:1026
+#: ../camel/providers/smtp/camel-smtp-transport.c:1037
+#, c-format
+msgid "AUTH command failed: %s"
+msgstr "Командата AUTH е неуспешна: %s"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:1043
+msgid "AUTH command failed"
+msgstr "Командата AUTH е неуспешна"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:1105
+msgid "Bad authentication response from server.\n"
+msgstr "Лош отговор за оторизация от сървъра.\n"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:1130
+#, c-format
+msgid "MAIL FROM command failed: %s: mail not sent"
+msgstr "Командата MAIL FROM е неуспешна: %s: писмото не е изпратено"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:1147
+msgid "MAIL FROM command failed"
+msgstr "Командата MAIL FROM е неуспешна"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:1171
+#, c-format
+msgid "RCPT TO command failed: %s: mail not sent"
+msgstr "Командата RCPT TO е неуспешна: %s: писмото не е изпратено"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:1190
+#, c-format
+msgid "RCPT TO <%s> failed"
+msgstr "RCPT TO <%s> е неуспешна"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:1229
+#: ../camel/providers/smtp/camel-smtp-transport.c:1287
+#: ../camel/providers/smtp/camel-smtp-transport.c:1306
+#, c-format
+msgid "DATA command failed: %s: mail not sent"
+msgstr "Командата DATA е неуспешна: %s: писмото не е изпратено"
+
+#. we should have gotten instructions on how to use the DATA command:
+#. * 354 Enter mail, end with "." on a line by itself
+#.
+#: ../camel/providers/smtp/camel-smtp-transport.c:1246
+#: ../camel/providers/smtp/camel-smtp-transport.c:1322
+msgid "DATA command failed"
+msgstr "Командата DATA е неуспешна"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:1345
+#, c-format
+msgid "RSET command failed: %s"
+msgstr "Командата RSET е неуспешна: %s"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:1361
+msgid "RSET command failed"
+msgstr "Командата RSET е неуспешна"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:1384
+#, c-format
+msgid "QUIT command failed: %s"
+msgstr "Командата QUIT е неуспешна: %s"
+
+#: ../camel/providers/smtp/camel-smtp-transport.c:1398
+msgid "QUIT command failed"
+msgstr "Командата QUIT е неуспешна"
+
+#: ../libedataserver/e-categories.c:239
+msgid "Business"
+msgstr "Бизнес"
+
+#: ../libedataserver/e-categories.c:240
+msgid "Competition"
+msgstr "Конкуренция"
+
+#: ../libedataserver/e-categories.c:241
+msgid "Favorites"
+msgstr "Любими"
+
+#: ../libedataserver/e-categories.c:242
+msgid "Gifts"
+msgstr "Подаръци"
+
+#: ../libedataserver/e-categories.c:243
+msgid "Goals/Objectives"
+msgstr "Цели/Задачи"
+
+#: ../libedataserver/e-categories.c:244
+msgid "Holiday"
+msgstr "Празник"
+
+#: ../libedataserver/e-categories.c:245
+msgid "Holiday Cards"
+msgstr "Поздравителни картички"
+
+#: ../libedataserver/e-categories.c:246
+msgid "Hot Contacts"
+msgstr "Горещи контакти"
+
+#: ../libedataserver/e-categories.c:247
+msgid "Ideas"
+msgstr "Идеи"
+
+#: ../libedataserver/e-categories.c:248
+msgid "International"
+msgstr "Международен"
+
+#: ../libedataserver/e-categories.c:249
+msgid "Key Customer"
+msgstr "Важен клиент"
+
+#: ../libedataserver/e-categories.c:250
+msgid "Miscellaneous"
+msgstr "Други"
+
+#: ../libedataserver/e-categories.c:251
+msgid "Personal"
+msgstr "Личен"
+
+#: ../libedataserver/e-categories.c:252
+msgid "Phone Calls"
+msgstr "Телефонни обаждания"
+
+#: ../libedataserver/e-categories.c:253
+msgid "Status"
+msgstr "Състояние"
+
+#: ../libedataserver/e-categories.c:254
+msgid "Strategies"
+msgstr "Стратегии"
+
+#: ../libedataserver/e-categories.c:255
+msgid "Suppliers"
+msgstr "Доставчици"
+
+#: ../libedataserver/e-categories.c:256
+msgid "Time & Expenses"
+msgstr "Време и разходи"
+
+#: ../libedataserver/e-categories.c:257
+msgid "VIP"
+msgstr "ВИП"
+
+#: ../libedataserver/e-categories.c:258
+msgid "Waiting"
+msgstr "Изчакване"
+
+#. strptime format of a weekday, a date and a time,
+#. in 12-hour format.
+#. strftime format of a weekday, a date and a
+#. time, in 12-hour format.
+#: ../libedataserver/e-time-utils.c:179 ../libedataserver/e-time-utils.c:422
+msgid "%a %m/%d/%Y %I:%M:%S %p"
+msgstr "%a %m/%d/%Y %I:%M:%S %p"
+
+#. strptime format of a weekday, a date and a time,
+#. in 24-hour format.
+#. strftime format of a weekday, a date and a
+#. time, in 24-hour format.
+#: ../libedataserver/e-time-utils.c:184 ../libedataserver/e-time-utils.c:413
+msgid "%a %m/%d/%Y %H:%M:%S"
+msgstr "%a %m/%d/%Y %H:%M:%S"
+
+#. strptime format of a weekday, a date and a time,
+#. in 12-hour format, without seconds.
+#. strftime format of a weekday, a date and a
+#. time, in 12-hour format, without seconds.
+#: ../libedataserver/e-time-utils.c:189 ../libedataserver/e-time-utils.c:418
+msgid "%a %m/%d/%Y %I:%M %p"
+msgstr "%a %m/%d/%Y %I:%M %p"
+
+#. strptime format of a weekday, a date and a time,
+#. in 24-hour format, without seconds.
+#. strftime format of a weekday, a date and a
+#. time, in 24-hour format, without seconds.
+#: ../libedataserver/e-time-utils.c:194 ../libedataserver/e-time-utils.c:409
+msgid "%a %m/%d/%Y %H:%M"
+msgstr "%a %m/%d/%Y %H:%M"
+
+#. strptime format of a weekday, a date and a time,
+#. in 12-hour format, without minutes or seconds.
+#: ../libedataserver/e-time-utils.c:199
+msgid "%a %m/%d/%Y %I %p"
+msgstr "%a %m/%d/%Y %I %p"
+
+#. strptime format of a weekday, a date and a time,
+#. in 24-hour format, without minutes or seconds.
+#: ../libedataserver/e-time-utils.c:204
+msgid "%a %m/%d/%Y %H"
+msgstr "%a %m/%d/%Y %H"
+
+#. strptime format of a weekday and a date.
+#. strftime format of a weekday and a date.
+#: ../libedataserver/e-time-utils.c:207 ../libedataserver/e-time-utils.c:300
+#: ../libedataserver/e-time-utils.c:404
+msgid "%a %m/%d/%Y"
+msgstr "%a %m/%d/%Y"
+
+#. strptime format of a date and a time, in 12-hour format.
+#: ../libedataserver/e-time-utils.c:215
+msgid "%m/%d/%Y %I:%M:%S %p"
+msgstr "%m/%d/%Y %I:%M:%S %p"
+
+#. strptime format of a date and a time, in 24-hour format.
+#: ../libedataserver/e-time-utils.c:219
+msgid "%m/%d/%Y %H:%M:%S"
+msgstr "%m/%d/%Y %H:%M:%S"
+
+#. strptime format of a date and a time, in 12-hour format,
+#. without seconds.
+#: ../libedataserver/e-time-utils.c:224
+msgid "%m/%d/%Y %I:%M %p"
+msgstr "%m/%d/%Y %I:%M %p"
+
+#. strptime format of a date and a time, in 24-hour format,
+#. without seconds.
+#: ../libedataserver/e-time-utils.c:229
+msgid "%m/%d/%Y %H:%M"
+msgstr "%m/%d/%Y %H:%M"
+
+#. strptime format of a date and a time, in 12-hour format,
+#. without minutes or seconds.
+#: ../libedataserver/e-time-utils.c:234
+msgid "%m/%d/%Y %I %p"
+msgstr "%m/%d/%Y %I %p"
+
+#. strptime format of a date and a time, in 24-hour format,
+#. without minutes or seconds.
+#: ../libedataserver/e-time-utils.c:239
+msgid "%m/%d/%Y %H"
+msgstr "%m/%d/%Y %H"
+
+#. strptime format of a weekday and a date.
+#. This is the preferred date format for the locale.
+#: ../libedataserver/e-time-utils.c:242 ../libedataserver/e-time-utils.c:303
+msgid "%m/%d/%Y"
+msgstr "%m/%d/%Y"
+
+#. strptime format for a time of day, in 12-hour format.
+#. strftime format of a time in 12-hour format.
+#: ../libedataserver/e-time-utils.c:348 ../libedataserver/e-time-utils.c:467
+msgid "%I:%M:%S %p"
+msgstr "%I:%M:%S %p"
+
+#. strptime format for a time of day, in 24-hour format.
+#. strftime format of a time in 24-hour format.
+#: ../libedataserver/e-time-utils.c:352 ../libedataserver/e-time-utils.c:459
+msgid "%H:%M:%S"
+msgstr "%H:%M:%S"
+
+#. strptime format for time of day, without seconds,
+#. in 12-hour format.
+#. strftime format of a time in 12-hour format,
+#. without seconds.
+#: ../libedataserver/e-time-utils.c:357 ../libedataserver/e-time-utils.c:464
+msgid "%I:%M %p"
+msgstr "%I:%M %p"
+
+#. strptime format for time of day, without seconds 24-hour format.
+#. strftime format of a time in 24-hour format,
+#. without seconds.
+#: ../libedataserver/e-time-utils.c:361 ../libedataserver/e-time-utils.c:456
+msgid "%H:%M"
+msgstr "%H:%M"
+
+#. strptime format for hour and AM/PM, 12-hour format.
+#: ../libedataserver/e-time-utils.c:365
+msgid "%I %p"
+msgstr "%I %p"
+
+#: ../libedataserverui/e-book-auth-util.c:89
+msgid "Accessing LDAP Server anonymously"
+msgstr "Анонимен достъп до LDAP сървър"
+
+#: ../libedataserverui/e-book-auth-util.c:185
+msgid "Failed to authenticate.\n"
+msgstr "Неуспех при идентификация.\n"
+
+#: ../libedataserverui/e-categories-dialog.c:258
+#, c-format
+msgid ""
+"There is already a category '%s' in the configuration. Please use another "
+"name"
+msgstr "В тази конфигурация вече има категория „%s“. Изберете друго име"
+
+#: ../libedataserverui/e-categories-dialog.c:422
+msgid "Category"
+msgstr "Категория"
+
+#: ../libedataserverui/e-categories-dialog.glade.h:1
+msgid "Category Icon"
+msgstr "Икона на категорията"
+
+#: ../libedataserverui/e-categories-dialog.glade.h:2
+msgid "Category Properties"
+msgstr "Настройки на категорията"
+
+#: ../libedataserverui/e-categories-dialog.glade.h:3
+msgid "Category _Color"
+msgstr "_Цвят на категорията"
+
+#: ../libedataserverui/e-categories-dialog.glade.h:4
+msgid "Category _Icon"
+msgstr "_Икона на категорията"
+
+#: ../libedataserverui/e-categories-dialog.glade.h:5
+msgid "Category _Name"
+msgstr "И_ме на категорията"
+
+#: ../libedataserverui/e-categories-dialog.glade.h:6
+msgid "Item(s) belong to these _categories:"
+msgstr "Записът(ите) принадлежат на следните _категории:"
+
+#: ../libedataserverui/e-categories-dialog.glade.h:7
+msgid "_Available Categories:"
+msgstr "_Налични категории:"
+
+#: ../libedataserverui/e-categories-dialog.glade.h:8
+msgid "_Edit"
+msgstr "_Редактиране"
+
+#: ../libedataserverui/e-categories-dialog.glade.h:9
+msgid "categories"
+msgstr "категории"
+
+#: ../libedataserverui/e-name-selector-dialog.c:215
+msgid "Select Contacts from Address Book"
+msgstr "Избор на контакти от адресника"
+
+#: ../libedataserverui/e-name-selector-dialog.c:507
+msgid "_Add"
+msgstr "_Добавяне"
+
+#: ../libedataserverui/e-name-selector-dialog.c:532
+msgid "_Remove"
+msgstr "_Премахване"
+
+#: ../libedataserverui/e-name-selector-dialog.glade.h:1
+msgid "\t\t\t\t\t\t"
+msgstr "\t\t\t\t\t\t"
+
+#: ../libedataserverui/e-name-selector-dialog.glade.h:2
+msgid "*"
+msgstr "*"
+
+#: ../libedataserverui/e-name-selector-dialog.glade.h:3
+msgid "<b>Show Contacts</b>"
+msgstr "<b>Показване на контакти</b>"
+
+#: ../libedataserverui/e-name-selector-dialog.glade.h:4
+msgid "<b>_Contacts</b>"
+msgstr "<b>_Контакти</b>"
+
+#: ../libedataserverui/e-name-selector-dialog.glade.h:5
+msgid "Address Book"
+msgstr "Адресни_к"
+
+#: ../libedataserverui/e-name-selector-dialog.glade.h:6
+msgid "Address _Book:"
+msgstr "Адресни_к:"
+
+#: ../libedataserverui/e-name-selector-dialog.glade.h:7
+#: ../servers/exchange/storage/exchange-hierarchy-foreign.c:255
+msgid "Contacts"
+msgstr "Контакти"
+
+#: ../libedataserverui/e-name-selector-dialog.glade.h:8
+msgid "Search"
+msgstr "Търсене"
+
+#: ../libedataserverui/e-name-selector-dialog.glade.h:9
+msgid "_Search:"
+msgstr "_Търсене:"
+
+#. Edit Contact item
+#: ../libedataserverui/e-name-selector-entry.c:1830
+#, c-format
+msgid "_Edit %s"
+msgstr "_Редактиране на %s"
+
+#: ../libedataserverui/e-passwords.c:471
+msgid "_Remember this password"
+msgstr "_Запомняне на паролата"
+
+#: ../libedataserverui/e-passwords.c:472
+msgid "_Remember this password for the remainder of this session"
+msgstr "Запомняне на паролата до _края на тази сесия"
+
+#. prepare the dialog
+#: ../libedataserverui/e-source-selector-dialog.c:101
+msgid "Select destination"
+msgstr "Избор на цел"
+
+#: ../libedataserverui/e-source-selector-dialog.c:154
+msgid "_Destination"
+msgstr "_Цел"
+
+#: ../servers/exchange/lib/e2k-autoconfig.c:1574
+#: ../servers/exchange/storage/exchange-account.c:939
+#, c-format
+msgid "Enter password for %s"
+msgstr "Въведете парола за %s"
+
+#: ../servers/exchange/lib/e2k-autoconfig.c:1575
+#: ../servers/exchange/storage/exchange-account.c:944
+msgid "Enter password"
+msgstr "Въведете парола"
+
+#. i18n: These are Outlook's words for the default roles in
+#. the folder permissions dialog.
+#: ../servers/exchange/lib/e2k-security-descriptor.c:847
+msgid "Owner"
+msgstr "Собственик"
+
+#: ../servers/exchange/lib/e2k-security-descriptor.c:857
+msgid "Publishing Editor"
+msgstr "Публикуващ редактор"
+
+#: ../servers/exchange/lib/e2k-security-descriptor.c:865
+msgid "Editor"
+msgstr "Редактор"
+
+#: ../servers/exchange/lib/e2k-security-descriptor.c:872
+msgid "Publishing Author"
+msgstr "Публикуващ автор"
+
+#: ../servers/exchange/lib/e2k-security-descriptor.c:878
+msgid "Author"
+msgstr "Автор"
+
+#: ../servers/exchange/lib/e2k-security-descriptor.c:883
+msgid "Non-editing Author"
+msgstr "Нередактиращ автор"
+
+#: ../servers/exchange/lib/e2k-security-descriptor.c:887
+msgid "Reviewer"
+msgstr "Преглеждащ"
+
+#: ../servers/exchange/lib/e2k-security-descriptor.c:889
+msgid "Contributor"
+msgstr "Допринесъл"
+
+#: ../servers/exchange/lib/e2k-security-descriptor.c:891
+msgid "None"
+msgstr "Няма"
+
+#: ../servers/exchange/lib/e2k-security-descriptor.c:906
+msgid "Custom"
+msgstr "Личен"
+
+#: ../servers/exchange/lib/e2k-user-dialog.c:144
+msgid "Select User"
+msgstr "Избор на потребител"
+
+#: ../servers/exchange/lib/e2k-user-dialog.c:182
+msgid "Addressbook..."
+msgstr "Адресник..."
+
+#: ../servers/exchange/storage/e-storage.c:556
+msgid "Generic error"
+msgstr "Обща грешка"
+
+#: ../servers/exchange/storage/e-storage.c:558
+msgid "A folder with the same name already exists"
+msgstr "Папка със същото име вече съществува"
+
+#: ../servers/exchange/storage/e-storage.c:560
+msgid "The specified folder type is not valid"
+msgstr "Определеният вид папка не е валиден"
+
+#: ../servers/exchange/storage/e-storage.c:562
+msgid "I/O error"
+msgstr "I/O грешка"
+
+#: ../servers/exchange/storage/e-storage.c:564
+msgid "Not enough space to create the folder"
+msgstr "Няма достатъчно място, за да се създаде папката"
+
+#: ../servers/exchange/storage/e-storage.c:566
+msgid "The folder is not empty"
+msgstr "Папката не е празна"
+
+#: ../servers/exchange/storage/e-storage.c:568
+msgid "The specified folder was not found"
+msgstr "Определената папка не е открита"
+
+#: ../servers/exchange/storage/e-storage.c:570
+msgid "Function not implemented in this storage"
+msgstr "Функцията не се поддържа в това хранилище"
+
+#: ../servers/exchange/storage/e-storage.c:574
+msgid "Operation not supported"
+msgstr "Операцията не се поддържа"
+
+#: ../servers/exchange/storage/e-storage.c:576
+msgid "The specified type is not supported in this storage"
+msgstr "Определеният вид не се поддържа за това хранилище"
+
+#: ../servers/exchange/storage/e-storage.c:578
+msgid "The specified folder cannot be modified or removed"
+msgstr "Определената папка не може да бъде модифицирана или премахната"
+
+#: ../servers/exchange/storage/e-storage.c:580
+msgid "Cannot make a folder a child of one of its descendants"
+msgstr "Папка не може да бъде подпапка на своите подпапки"
+
+#: ../servers/exchange/storage/e-storage.c:582
+msgid "Cannot create a folder with that name"
+msgstr "Папка с такова име не може да бъде създадена"
+
+#: ../servers/exchange/storage/e-storage.c:584
+msgid "This operation cannot be performed in off-line mode"
+msgstr "Тази операция не може да бъде извършена в режим „Изключен“."
+
+#. i18n: This is the title of an "other user's folders"
+#. hierarchy. Eg, "John Doe's Folders".
+#: ../servers/exchange/storage/exchange-account.c:642
+#, c-format
+msgid "%s's Folders"
+msgstr "Папките на %s"
+
+#: ../servers/exchange/storage/exchange-account.c:1301
+msgid "Personal Folders"
+msgstr "Лични папки"
+
+#: ../servers/exchange/storage/exchange-account.c:1315
+msgid "Favorite Public Folders"
+msgstr "Любими публични папки"
+
+#. i18n: Outlookism
+#: ../servers/exchange/storage/exchange-account.c:1332
+msgid "All Public Folders"
+msgstr "Всички публични папки"
+
+#. i18n: Outlookism
+#: ../servers/exchange/storage/exchange-account.c:1346
+msgid "Global Address List"
+msgstr "Глобален списък с адреси"
+
+#: ../servers/exchange/storage/exchange-hierarchy-foreign.c:256
+msgid "Deleted Items"
+msgstr "Изтрити"
+
+#: ../servers/exchange/storage/exchange-hierarchy-foreign.c:257
+msgid "Drafts"
+msgstr "Чернови"
+
+#: ../servers/exchange/storage/exchange-hierarchy-foreign.c:259
+msgid "Journal"
+msgstr "Дневник"
+
+#: ../servers/exchange/storage/exchange-hierarchy-foreign.c:260
+msgid "Notes"
+msgstr "Бележки"
+
+#: ../servers/exchange/storage/exchange-hierarchy-foreign.c:261
+msgid "Outbox"
+msgstr "За изпращане"
+
+#: ../servers/exchange/storage/exchange-hierarchy-foreign.c:262
+msgid "Sent Items"
+msgstr "Изпратени съобщения"
+
+#: ../servers/exchange/storage/exchange-hierarchy-foreign.c:263
+msgid "Tasks"
+msgstr "Задачи"
+
+#: ../servers/groupwise/e-gw-connection.c:159
+msgid "Invalid connection"
+msgstr "Невалидна връзка"
+
+#: ../servers/groupwise/e-gw-connection.c:163
+msgid "Invalid response from server"
+msgstr "Сървърът отговори грешно"
+
+#: ../servers/groupwise/e-gw-connection.c:165
+msgid "No response from the server"
+msgstr "Сървърът не отговаря"
+
+#: ../servers/groupwise/e-gw-connection.c:171
+msgid "Bad parameter"
+msgstr "Лош параметър"
+
+#: ../src/GNOME_Evolution_DataServer.server.in.in.h:1
+msgid "Evolution Addressbook file backend"
+msgstr "Бек енд на адресника на Evolution"
+
+#: ../src/GNOME_Evolution_DataServer.server.in.in.h:2
+msgid "Evolution Calendar file and webcal backend"
+msgstr "Бек енд за календара и уеб календара на Evolution"
+
+#: ../src/GNOME_Evolution_DataServer.server.in.in.h:3
+msgid "Evolution Data Server interface check service"
+msgstr "Услуга за проверка на интерфейса на Evolution Data Server"
+
+#: ../src/GNOME_Evolution_DataServer.server.in.in.h:4
+msgid "Evolution Data Server logging service"
+msgstr "Услуга за създаване на дневник към Evolution Data Server"
+
+#. dialog display isn't working out
+#: ../src/server.c:101
+#, c-format
+msgid "Multiple segmentation faults occurred; can't display error dialog\n"
+msgstr ""
+"Получиха се много „segmentation faults“; диалоговия прозорец за грешките не "
+"може да бъде показан\n"

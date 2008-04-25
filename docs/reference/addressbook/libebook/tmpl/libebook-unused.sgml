@@ -1,28 +1,3 @@
-<!-- ##### SECTION ./tmpl/e-book-async.sgml:Long_Description ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### SECTION ./tmpl/e-book-async.sgml:See_Also ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### SECTION ./tmpl/e-book-async.sgml:Short_Description ##### -->
-
-Handles asynchronous interactions with the EBook.
-
-
-<!-- ##### SECTION ./tmpl/e-book-async.sgml:Stability_Level ##### -->
-
-
-
-<!-- ##### SECTION ./tmpl/e-book-async.sgml:Title ##### -->
-e-book-async
-
-
 <!-- ##### SECTION ./tmpl/e-book-marshal.sgml:Long_Description ##### -->
 <para>
 
@@ -41,30 +16,6 @@ e-book-async
 
 <!-- ##### SECTION ./tmpl/e-book-marshal.sgml:Title ##### -->
 e-book-marshal
-
-
-<!-- ##### SECTION ./tmpl/e-name-western-tables.sgml:Long_Description ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### SECTION ./tmpl/e-name-western-tables.sgml:See_Also ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### SECTION ./tmpl/e-name-western-tables.sgml:Short_Description ##### -->
-
-
-
-<!-- ##### SECTION ./tmpl/e-name-western-tables.sgml:Stability_Level ##### -->
-
-
-
-<!-- ##### SECTION ./tmpl/e-name-western-tables.sgml:Title ##### -->
-e-name-western-tables
 
 
 <!-- ##### SECTION ./tmpl/libebook-unused.sgml:Stability_Level ##### -->
@@ -101,64 +52,11 @@ e-name-western-tables
 @fields: 
 @closure: 
 
-<!-- ##### STRUCT EBookListener ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### SIGNAL EBookListener::response ##### -->
-<para>
-
-</para>
-
-@ebooklistener: the object which received the signal.
-@arg1: 
-
-<!-- ##### ENUM EBookListenerOperation ##### -->
-<para>
-
-</para>
-
-@OpenBookResponse: 
-@RemoveBookResponse: 
-@CreateContactResponse: 
-@RemoveContactResponse: 
-@ModifyContactResponse: 
-@GetContactResponse: 
-@GetContactListResponse: 
-@GetBookViewResponse: 
-@GetChangesResponse: 
-@AuthenticationResponse: 
-@GetSupportedFieldsResponse: 
-@GetRequiredFieldsResponse: 
-@GetSupportedAuthMethodsResponse: 
-@LinkStatusEvent: 
-@WritableStatusEvent: 
-@AuthRequiredEvent: 
-@ProgressEvent: 
-
 <!-- ##### STRUCT EBookListenerPrivate ##### -->
 <para>
 
 </para>
 
-
-<!-- ##### STRUCT EBookListenerResponse ##### -->
-<para>
-
-</para>
-
-@op: 
-@opid: 
-@status: 
-@book_view: 
-@list: 
-@msg: 
-@connected: 
-@writable: 
-@id: 
-@vcard: 
 
 <!-- ##### STRUCT EBookPrivate ##### -->
 <para>
@@ -166,47 +64,11 @@ e-name-western-tables
 </para>
 
 
-<!-- ##### STRUCT EBookViewListener ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### SIGNAL EBookViewListener::response ##### -->
-<para>
-
-</para>
-
-@ebookviewlistener: the object which received the signal.
-@arg1: 
-
-<!-- ##### ENUM EBookViewListenerOperation ##### -->
-<para>
-Asynchronous events that are listened for.
-</para>
-
-@ContactsAddedEvent: 
-@ContactsRemovedEvent: 
-@ContactsModifiedEvent: 
-@SequenceCompleteEvent: 
-@StatusMessageEvent: 
-
 <!-- ##### STRUCT EBookViewListenerPrivate ##### -->
 <para>
 
 </para>
 
-
-<!-- ##### STRUCT EBookViewListenerResponse ##### -->
-<para>
-Data sent back to the e-book object.
-</para>
-
-@op: 
-@status: 
-@ids: 
-@contacts: 
-@message: 
 
 <!-- ##### STRUCT EBookViewPrivate ##### -->
 <para>
@@ -214,77 +76,7 @@ Data sent back to the e-book object.
 </para>
 
 
-<!-- ##### ARG EContact:geo ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### ARG EContact:im-gadugadu ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### ARG EContact:im-gadugadu-home-1 ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### ARG EContact:im-gadugadu-home-2 ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### ARG EContact:im-gadugadu-home-3 ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### ARG EContact:im-gadugadu-work-1 ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### ARG EContact:im-gadugadu-work-2 ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### ARG EContact:im-gadugadu-work-3 ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### STRUCT EContactGeo ##### -->
-<para>
-
-</para>
-
-@latitude: 
-@longitude: 
-
-<!-- ##### ENUM EContactPhotoType ##### -->
-<para>
-
-</para>
-
-@E_CONTACT_PHOTO_TYPE_INLINED: 
-@E_CONTACT_PHOTO_TYPE_URI: 
-
 <!-- ##### STRUCT EContactPrivate ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### MACRO EVC_GEO ##### -->
 <para>
 
 </para>
@@ -294,6 +86,10 @@ Data sent back to the e-book object.
 <para>
 
 </para>
+
+
+<!-- ##### SECTION Stability_Level ##### -->
+
 
 
 <!-- ##### FUNCTION e_book_async_get_default_addressbook ##### -->
@@ -339,20 +135,6 @@ Data sent back to the e-book object.
 @book: 
 @error: 
 @Returns: 
-
-<!-- ##### FUNCTION e_book_listener_new ##### -->
-<para>
-
-</para>
-
-@Returns: 
-
-<!-- ##### FUNCTION e_book_listener_stop ##### -->
-<para>
-
-</para>
-
-@listener: 
 
 <!-- ##### FUNCTION e_book_load_local_addressbook ##### -->
 <para>
@@ -453,62 +235,4 @@ Data sent back to the e-book object.
 @book: 
 @error: 
 @Returns: 
-
-<!-- ##### FUNCTION e_book_view_listener_new ##### -->
-<para>
-
-</para>
-
-@Returns: 
-
-<!-- ##### FUNCTION e_book_view_listener_start ##### -->
-<para>
-
-</para>
-
-@listener: 
-
-<!-- ##### FUNCTION e_book_view_listener_stop ##### -->
-<para>
-
-</para>
-
-@listener: 
-
-<!-- ##### FUNCTION e_book_view_set_book ##### -->
-<para>
-
-</para>
-
-@book_view: 
-@book: 
-
-<!-- ##### FUNCTION e_contact_cert_get_type ##### -->
-<para>
-
-</para>
-
-@Returns: 
-
-<!-- ##### FUNCTION e_contact_geo_free ##### -->
-<para>
-
-</para>
-
-@geo: 
-
-<!-- ##### FUNCTION e_destination_get_type ##### -->
-<para>
-
-</para>
-
-@Returns: 
-
-<!-- ##### FUNCTION e_vcard_construct ##### -->
-<para>
-
-</para>
-
-@evc: 
-@str: 
 

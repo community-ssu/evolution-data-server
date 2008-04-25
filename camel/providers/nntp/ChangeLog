@@ -1,0 +1,57 @@
+2005-08-22  Not Zed  <NotZed@Ximian.com>
+
+	* camel-nntp-stream.c (stream_read): cast print args to int.
+
+2005-08-12  Tor Lillqvist  <tml@novell.com>
+
+	* Makefile.am: Use NO_UNDEFINED. Link with libcamel-provider,
+	libcamel and CAMEL_LIBS.
+
+2005-04-17  Changwoo Ryu  <cwryu@debian.org>
+
+	** See bug #300891
+	
+	* Makefile.am (INCLUDES): define
+	CAMEL_EXPLICIT_TRANSLATION_DOMAIN.
+
+	* camel-nntp-provider.c (camel_provider_module_init):
+	set translation_domain in CamelProvider struct.
+
+2005-08-02  Not Zed  <NotZed@Ximian.com>
+
+	* camel-nntp-store.c (nntp_construct): setup the cache here.
+	(nntp_connect_offline, nntp_connect_online): not here or here.
+	(nntp_store_finalize): free the cache.
+
+2005-04-30  Alessandro Decina  <alessandro@nnnva.org>
+
+	* camel-nntp-store.c (nntp_folder_info_from_store_info): Copy the
+	flags field when converting from CamelStoreInfo to CamelFolderInfo.
+
+2005-04-22  rganesan <rganesan@novell.com>
+
+        *camel-nntp-provide.c:  Patch for bug #301460 give space at the end of line.
+
+2005-04-22  Not Zed  <NotZed@Ximian.com>
+
+	* camel-nntp-store.c (nntp_store_get_folder_info_all): don't set
+	exceptions for failed date commands from last patch.
+
+2005-04-22  Alessandro Decina <alessandro@nnva.org>
+
+	* camel-nntp-store.c (nntp_store_get_folder_info_all): If we fail
+	to get the date, just abort.
+
+2005-03-16  Not Zed  <NotZed@Ximian.com>
+
+	* modified patch below to make it a bit simpler.
+
+2005-01-22  Jeff Bailey <jbailey@ubuntu.com>
+
+	* camel-nntp-store.c (connect_to_server): Allow the username to an
+	empty string as well as a NULL for anonymous connections.
+
+2005-03-16  Not Zed  <NotZed@Ximian.com>
+
+	* added nntp changelog
+

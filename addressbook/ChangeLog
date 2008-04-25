@@ -1,3 +1,38 @@
+2006-01-12  Harish Krishnaswamy  <kharish@novell.com>
+
+	* libebook/e-book.c: (activate_factories_for_uri):
+	The Book Factory oafid should reflect
+	the API version rather than the BASE version.
+	Fixes #323115.
+
+2005-10-26  Ross Burton  <ross@burtonini.com>
+
+	* libebook/e-destination.c:
+	Add casts to stop newer gcc moaning about libxml (#319612).
+
+2005-10-07  Carsten Guenther <carsten.guenther@scalix.com>
+
+	Fixes #318227
+
+	* backends/ldap/e-book-backend-ldap.c: Change ldap search filter
+	to include everything that has an email address. This will ensure
+	mailing-lists will be found as well.
+
+2005-10-14  Ross Burton  <ross@burtonini.com>
+
+	* libedata-book/e-book-backend-summary.c:
+	Fix writing race to avoid recalculating the index (#316955).
+
+2005-10-14  Ross Burton  <ross@burtonini.com>
+
+	* libebook/e-destination.c:
+	Fix typo when writing escaped names.
+
+2005-10-04  Sushma Rai  <rsushma@novell.com>
+
+	* backends/ldap/e-book-backend-ldap.c: Added a mutext for ldap 
+	connection handler, so that it is not accessed during ldap_reconnect.
+
 2005-08-22  Not Zed  <NotZed@Ximian.com>
 
 	* backends/groupwise/e-book-backend-groupwise.c

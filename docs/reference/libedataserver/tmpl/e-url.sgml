@@ -17,6 +17,22 @@ A URI data structure and associated functions.
 <!-- ##### SECTION Stability_Level ##### -->
 
 
+<!-- ##### STRUCT EUri ##### -->
+<para>
+
+</para>
+
+@protocol: 
+@user: 
+@authmech: 
+@passwd: 
+@host: 
+@port: 
+@path: 
+@params: 
+@query: 
+@fragment: 
+
 <!-- ##### FUNCTION e_url_shroud ##### -->
 <para>
 
@@ -35,22 +51,6 @@ A URI data structure and associated functions.
 @url2: 
 @Returns: 
 
-
-<!-- ##### STRUCT EUri ##### -->
-<para>
-
-</para>
-
-@protocol: 
-@user: 
-@authmech: 
-@passwd: 
-@host: 
-@port: 
-@path: 
-@params: 
-@query: 
-@fragment: 
 
 <!-- ##### FUNCTION e_uri_new ##### -->
 <para>

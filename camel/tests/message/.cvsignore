@@ -1,0 +1,15 @@
+.deps
+Makefile
+Makefile.in
+.libs
+.deps
+*.lo
+*.la
+test1
+test2
+test3
+*.msg
+*.bb
+*.bbg
+*.da
+*.gcov

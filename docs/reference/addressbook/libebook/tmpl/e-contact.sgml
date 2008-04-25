@@ -14,18 +14,15 @@ A convenient way of accessing the contact information in EVCard objects.
 #e-vcard
 </para>
 
-<!-- ##### SECTION Stability_Level ##### -->
-
-
 <!-- ##### STRUCT EContact ##### -->
 <para>
-#EContact has no publicly available members. 
+
 </para>
 
 
 <!-- ##### ARG EContact:Rev ##### -->
 <para>
-The revision of the vCard.
+
 </para>
 
 <!-- ##### ARG EContact:address ##### -->
@@ -80,15 +77,10 @@ The revision of the vCard.
 
 <!-- ##### ARG EContact:birth-date ##### -->
 <para>
-The birth date.
+
 </para>
 
 <!-- ##### ARG EContact:blog-url ##### -->
-<para>
-The blog URL.
-</para>
-
-<!-- ##### ARG EContact:book-uri ##### -->
 <para>
 
 </para>
@@ -115,7 +107,7 @@ The blog URL.
 
 <!-- ##### ARG EContact:caluri ##### -->
 <para>
-The URI of the contact's calendar.
+
 </para>
 
 <!-- ##### ARG EContact:car-phone ##### -->
@@ -498,16 +490,6 @@ The URI of the contact's calendar.
 
 </para>
 
-<!-- ##### ARG EContact:osso-contact-state ##### -->
-<para>
-
-</para>
-
-<!-- ##### ARG EContact:osso-last-used ##### -->
-<para>
-
-</para>
-
 <!-- ##### ARG EContact:other-fax ##### -->
 <para>
 
@@ -543,17 +525,7 @@ The URI of the contact's calendar.
 
 </para>
 
-<!-- ##### ARG EContact:sip ##### -->
-<para>
-
-</para>
-
 <!-- ##### ARG EContact:spouse ##### -->
-<para>
-
-</para>
-
-<!-- ##### ARG EContact:tel ##### -->
 <para>
 
 </para>
@@ -595,7 +567,6 @@ The URI of the contact's calendar.
 
 @E_CONTACT_UID: 
 @E_CONTACT_FILE_AS: 
-@E_CONTACT_BOOK_URI: 
 @E_CONTACT_FULL_NAME: 
 @E_CONTACT_GIVEN_NAME: 
 @E_CONTACT_FAMILY_NAME: 
@@ -702,15 +673,6 @@ The URI of the contact's calendar.
 @E_CONTACT_BIRTH_DATE: 
 @E_CONTACT_ANNIVERSARY: 
 @E_CONTACT_X509_CERT: 
-@E_CONTACT_IM_GADUGADU_HOME_1: 
-@E_CONTACT_IM_GADUGADU_HOME_2: 
-@E_CONTACT_IM_GADUGADU_HOME_3: 
-@E_CONTACT_IM_GADUGADU_WORK_1: 
-@E_CONTACT_IM_GADUGADU_WORK_2: 
-@E_CONTACT_IM_GADUGADU_WORK_3: 
-@E_CONTACT_IM_GADUGADU: 
-@E_CONTACT_PHONE_TELEPHONE: 
-@E_CONTACT_SIP: 
 @E_CONTACT_FIELD_LAST: 
 @E_CONTACT_FIELD_FIRST: 
 @E_CONTACT_LAST_SIMPLE_STRING: 
@@ -739,8 +701,8 @@ The URI of the contact's calendar.
 
 </para>
 
-@type: 
-@uri: 
+@length: 
+@data: 
 
 <!-- ##### STRUCT EContactAddress ##### -->
 <para>
@@ -764,14 +726,6 @@ The URI of the contact's calendar.
 @year: 
 @month: 
 @day: 
-
-<!-- ##### STRUCT EContactCert ##### -->
-<para>
-
-</para>
-
-@length: 
-@data: 
 
 <!-- ##### FUNCTION e_contact_new ##### -->
 <para>
@@ -896,7 +850,7 @@ The URI of the contact's calendar.
 
 </para>
 
-@n: 
+@name: 
 @Returns: 
 
 
@@ -956,43 +910,6 @@ The URI of the contact's calendar.
 </para>
 
 @field_name: 
-@Returns: 
-
-
-<!-- ##### FUNCTION e_contact_cert_free ##### -->
-<para>
-
-</para>
-
-@cert: 
-
-
-<!-- ##### FUNCTION e_contact_get_attributes ##### -->
-<para>
-
-</para>
-
-@contact: 
-@field_id: 
-@Returns: 
-
-
-<!-- ##### FUNCTION e_contact_set_attributes ##### -->
-<para>
-
-</para>
-
-@contact: 
-@field_id: 
-@attributes: 
-
-
-<!-- ##### FUNCTION e_contact_vcard_attribute ##### -->
-<para>
-
-</para>
-
-@field_id: 
 @Returns: 
 
 

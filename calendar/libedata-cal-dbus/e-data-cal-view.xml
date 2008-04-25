@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<node>
+	<interface name="org.gnome.evolution.dataserver.calendar.CalView">
+		<annotation name="org.freedesktop.DBus.GLib.CSymbol" value="EDataCalView"/>
+		
+		<method name="start">
+			<annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_EDataCalView_start"/>
+		</method>
+		
+	</interface>
+</node>

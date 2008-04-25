@@ -1,0 +1,590 @@
+2005-11-09  Sushma Rai  <rsushma@novell.com>
+	
+	* e-name-selector-dialog.c (e_name_selector_dialog_init)(add_section):
+	Setting the multiple selection mode.
+	(selection_changed)(contact_selection_changed): Using
+	gtk_tree_selection_count_selected_rows() to find if contacts are
+	slected or not.
+	(contact_activated)(transfer_button_clicked): Finding the selected set
+	of contacts and adding to destination.
+	(destination_activated)(remove_selection): Finding the selected set of
+	destinations and removing them from destination store. Fixes #319848.
+	(setup_name_selector_model): Sorting the contacts on full name instead
+	of file as name as we display full name.
+
+2005-09-27  Devashish Sharma <sdevashish@novell.com>
+
+	* e-name-selector-entry.c (user_delete_text): In name selector entry
+	while deleting character-by-character when u hit a comma, entire
+	address is selected and in the next keystroke whole address is deleted,
+	leaving behind a comma. Fixed this so that comma is also 
+	removed along with the address.
+	Fixes #314997.
+
+2005-08-26  Harish Krishnaswamy  <kharish@novell.com>
+
+	* e-name-selector-dialog.c: (e_name_selector_dialog_init):
+	Fix for #301116. Changwoo's earlier commit missed this part.
+
+2005-08-23  Not Zed  <NotZed@Ximian.com>
+
+	* e-name-selector-entry.h: fix prototype of temporary api's.
+
+2005-08-22  Not Zed  <NotZed@Ximian.com>
+
+	* e-name-selector-entry.c (find_existing_completion): assign
+	best_field to remove spurious warning.
+
+2005-08-17  Devashish Sharma <sdevashish@novell.com>
+
+	* e-name-selector-entry.c (completion_match_selected): automatically
+	adds a comma after autocompleting the address. Fixes #247706.
+
+2005-08-13  Tor Lillqvist  <tml@novell.com>
+
+	* Makefile.am: Link with libedataserver. Link with
+	E_DATA_SERVER_UI_LIBS, not E_DATA_SERVER_LIBS. Use NO_UNDEFINED.
+
+2005-08-04  Not Zed  <NotZed@Ximian.com>
+
+	** See bug #308512.
+
+	* e-passwords.c (ep_ask_password): implement new flag to disable
+	the remember password box.
+
+2005-07-24  Vivek Jain  <jvivek@novell.com>
+	
+	* e-name-selector-dialog.c: "Section" structure has two new members
+	label and remove button
+	(add_section): set these new members properly
+	add a callback on the changed signal of gtktreeview in section
+	Have new structure SelData to give us the selection data in callback
+	(destination_key_press) : moved actual code to new local function
+	(remove_selection).
+	(selection_changed):
+	(remove_button clicked): new functions to get the entry back from the
+	destination store and making sure UI is consistent
+
+2005-07-20  Sushma Rai  <rsushma@novell.com>
+
+	* e-name-selector-entry.c (populate_popup): In the popup menu, changed
+	label to edit a contact. Fixes #260851
+
+2005-07-07  S.Antony Vincent Pandian <santony@gmail.com>
+
+       * e-destination-store.c (e_destination_store_list_destinations):
+       adding g_list_reverse(..) after the loop shows the
+       addresses in the same order as sent thus solving the bug.
+
+       Fixes #301922
+
+       ** committed on behalf of antony, since he does not have commit rights
+
+2005-07-15  Jedy Wang  <jedy.wang@sun.com>
+
+	* e-passwords.c: (e_passwords_cancel): To kill a e-password-dialog,
+	we shall send a cancel reply, but not just simply destroy the widget.
+
+2005-07-11  Sushma Rai  <rsushma@novell.com>
+
+	* e-name-selector-dialog.c (e_name_selector_dialog_init): Making the
+	name selector dialog modal, useful when gets invoked from modal
+	dialogs.
+
+2005-07-09  Philip Van Hoof  <pvanhoof@gnome.org>
+
+	* e-name-selector-entry.c: Making it more easy to remove destinations.
+
+2005-07-06  Sushma Rai  <rsushma@novell.com>
+
+	* e-contact-store.c (view_sequence_complete): If the
+	current view is finished, stop the view and return. Fixes #309684.
+	Patch submitted by "ross@burtonini.com (Ross Burton)"
+
+2005-07-06  Kjartan Maraas  <kmaraas@gnome.org>
+
+	* e-source-option-menu.c: (populate): Fix a small leak.
+
+2005-07-06  Sushma Rai  <rsushma@novell.com>
+
+	* e-book-auth-util.c:
+	* e-name-selector-entry.c:
+	* e-name-selector-dialog.c:
+	* e-categories-dialog.c:
+	* e-destination-store.c:
+	* e-contact-store.c:
+	* e-name-selector.c:
+	* e-name-selector-model.c:
+	* e-tree-model-generator.c: Fixed compiler warnings.
+
+2005-07-04  Sushma Rai  <rsushma@novell.com>
+
+	* e-name-selector-entry.c: Setting COMPLETION_CUE_MIN_LEN to 3, to
+	start autocompletion from the 3rd character onwards.
+
+2005-06-28  Sushma Rai  <rsushma@novell.com>
+
+	* e-name-selector-entry.c (setup_contact_store): Added 
+	ensure_type_ahead_complete_on_idle() call back.
+	Patch by "Hans Petter Jansson" to fix #302006.
+
+2005-06-09  Ross Burton  <ross@burtonini.com>
+
+	* e-categories-dialog.c:
+	* e-categories-dialog.glade:
+	Use GtkFileChooserButton instead of a GnomeFileEntry.
+
+2005-05-24  Sushma Rai  <rsushma@novell.com>
+
+	* e-name-selector-dialog.c (contact_column_formatter): Using 
+	"full name" field instead of "file as", while displaying contacts in
+	the name selector dialog. 
+	Fixes #300290
+
+2005-05-13  Changwoo Ryu  <cwryu@debian.org>
+
+	Fixes #301116
+	
+	* e-categories-dialog.c (e_categories_dialog_init): specify the
+	translation domain on glade_xml_new().
+
+2005-05-09  Mengjie Yu  <meng-jie.yu@sun.com>
+
+	* e-source-selector.c: (selector_popup_menu),
+	(e_source_selector_class_init):
+	We need to implement the popup_menu function to make
+	'F10 + Shift Key' pressing work.
+
+	Fixes #303540
+
+2005-05-04  Hans Petter Jansson  <hpj@novell.com>
+
+	* e-book-auth-util.c:
+	* e-categories-dialog.c:
+	* e-contact-store.c:
+	* e-destination-store.c:
+	* e-name-selector-dialog.c:
+	* e-name-selector-entry.c:
+	* e-name-selector-model.c:
+	* e-name-selector.c:
+	* e-source-option-menu.c:
+	* e-source-selector.c:
+	* e-tree-model-generator.c: Wrote API docs.
+
+2005-04-11  Harish Krishnaswamy  <kharish@novell.com>
+
+	* Makefile.am: use API_VERSION 
+
+2005-04-04  Sivaiah Nallagatla <snallagatla@novell.com>
+
+       * e-book-auth-util.c (load_source_auth_cb)
+        (addressbook_authenticate) : get the uri from Ebook
+       instead of Esource. e_source_get_uri returns NULL when
+       it does not have a reference to source group with it
+       which happens when the source list from which this source
+       was taken is destroyed but Ebook has reference to that source.
+       e_book_get_uri returns the same uri and it will be always present
+       Fixes #73330
+
+2005-03-31  Hans Petter Jansson  <hpj@novell.com>
+
+	* e-name-selector.c (source_books_destroy): Implement.
+	(e_name_selector_init): Create a list of completion books, and open
+	them with interactive authentication.
+	(e_name_selector_peek_section_entry): Re-use the list of opened books
+	for each entry.
+
+	* e-name-selector-entry.c (e_name_selector_entry_realize): If the user
+	didn't set a contact store, create the default one here.
+	(e_name_selector_entry_class_init): Set up our realize method.
+	(e_name_selector_entry_init): Don't set up the default contact store
+	here.
+	(setup_default_contact_store): Also create the contact store itself.
+	(set_completion_query)
+	(find_existing_completion)
+	(completion_match_selected)
+	(contact_layout_formatter)
+	(popup_activate_contact)
+	(setup_contact_store)
+	(e_name_selector_entry_set_contact_store): Tolerate NULL contact store.
+
+2005-03-23  Rodrigo Moya <rodrigo@novell.com>
+
+	Fixes #73472
+
+	* e-categories-dialog.c (load_properties_dialog): make the
+	GnomeFileEntry use the file chooser widget.
+
+2005-03-22  Chenthill Palanisamy  <pchenthill@novell.com>
+     
+        * e-source-selector.c (selector_button_press_event): Do
+	not emit popup signals when clicked on the source group.
+
+2005-03-04  Rodrigo Moya <rodrigo@novell.com>
+
+	Fixes #38408
+
+	* e-categories-dialog.c (check_category_name): new function to check
+	categories entered by the user for invalid characters.
+	(new_button_clicked_cb): added category name checking. Also, run the
+	dialog continously while there are validation errors.
+
+2005-03-01  Harry Lu <harry.lu@sun.com>
+
+	Fix for 73010.
+
+	* e-categories-dialog.c: (load_properties_dialog): set modal for
+	the gnome_file_entry.
+
+2005-02-25  Rodrigo Moya  <rodrigo@novell.com>
+
+	* e-categories-dialog.c (new_button_clicked_cb) :
+	Pass iter to gtk_list_store_set , so that
+	new cateogy gets added properly.
+	Fixes #73011
+	
+2005-02-23  Hans Petter Jansson  <hpj@novell.com>
+
+	* Makefile.am (libedataserverui_1_2_la_SOURCES)
+	(libedataserveruiinclude_HEADERS): Add e-book-auth-util and
+	e-passwords.
+
+	* e-name-selector-dialog.c (source_selected): Use the authenticating
+	book loader utility.
+	(search_changed): Upgrade query to something that works with all
+	backends.
+
+	* e-name-selector-entry.c (setup_default_contact_store): Use the
+	authenticating book loader utility.
+
+	* e-book-auth-util.c:
+	* e-book-auth-util.h: Add the authenticating book loader utility.
+
+	* e-passwords.c: Remove e-error.h include, it's unnecessary.
+
+2005-02-21  Harry Lu <harry.lu@sun.com>
+
+	Fix for 9605.
+	* e-name-selector-dialog.c: (add_section),(destination_key_press):
+	add key-press-event handler to delete contact from the list if user
+	press Delete key.
+
+2005-02-07  Ross Burton  <ross@openedhand.com>
+
+	* test-source-option-menu.c:
+	* test-source-selector.c:
+	Remove useless libgnome use.
+
+2005-02-03  Ross Burton  <ross@burtonini.com>
+
+	* libedataserverui/e-categories-dialog.c:
+	* libedataserverui/e-contact-store.c:
+	* libedataserverui/e-destination-store.c:
+	* libedataserverui/e-name-selector-dialog.c:
+	* libedataserverui/e-name-selector-entry.c:
+	* libedataserverui/e-name-selector-model.c:
+	* libedataserverui/e-name-selector.c:
+	* libedataserverui/e-source-selector-dialog.c:
+	* libedataserverui/e-tree-model-generator.c:
+	Use glib/gi18n.h.
+
+2005-01-27  Hao Sheng <hao.sheng@sun.com>
+
+	* e-name-selector-dialog.c:
+	(e_name_selector_dialog_init): set label mnemonic widget.
+	(add_section): set a11y name for button and section.
+
+	* e-name-selector.c:    
+	(e_name_selector_peek_section_entry): set a11y name to the mail entry
+
+	* e-name-selector-dialog.glade: add access name and access key.
+
+2005-01-26  Rodrigo Moya <rodrigo@novell.com>
+
+	* e-categories-dialog.c (e_categories_dialog_init): only show categories
+	that are searchable (ie, user visible).
+
+2005-01-25  Rodrigo Moya <rodrigo@novell.com>
+
+	* e-categories-dialog.c (new_button_clicked): set all new categories to
+	be searchable.
+
+2005-01-24  Hans Petter Jansson  <hpj@novell.com>
+
+	* e-name-selector-entry.c (editor_closed_cb): Implement.
+	(popup_activate_contact): Set up unref callback for when an editor
+	closes.
+
+2005-01-24  Hans Petter Jansson  <hpj@novell.com>
+
+	* e-contact-store.c (get_book_at_row): Implement.
+	(e_contact_store_get_book): Implement.
+
+	* e-name-selector-entry.c (prepare_popup_destination): Implement.
+	(find_book_by_contact): Implement.
+	(popup_activate_contact): Implement.
+	(popup_activate_email): Implement.
+	(populate_popup): Implement.
+	(e_name_selector_entry_init): Hook us up to the popup menu.
+	(e_name_selector_entry_set_contact_editor_func)
+	(e_name_selector_entry_set_contact_list_editor_func): Implement lame,
+	temporary hack to get at the contact editors in Evolution.
+
+2005-01-24  Hans Petter Jansson  <hpj@novell.com>
+
+	* e-name-selector-dialog.c (add_section): Set up a custom formatter for
+	destination column.
+	(contact_column_formatter): Format contact lists differently.
+	(destination_column_formatter): Implement, and make special cases for
+	contact lists.
+
+	* e-name-selector-entry.c (contact_layout_formatter): Format contact
+	lists differently.
+	(generate_contact_rows): Contact lists are always one row only.
+
+	* e-name-selector-model.c (generate_contact_rows): Contact lists are
+	always one row only.
+
+2005-01-24  Hans Petter Jansson  <hpj@novell.com>
+
+	* e-name-selector-entry.c (user_delete_text): If all destinations are
+	removed in one fell swoop, remember to rebuild the attribute list.
+	(user_focus_out): Implement. Completes the current entry (if possible)
+	and clears the completion model so the popup won't show.
+	(e_name_selector_entry_init): Connect to the focus-out-event.
+
+2005-01-22  Hans Petter Jansson  <hpj@novell.com>
+
+	* e-name-selector-entry.c (name_style_query): Query for the full string
+	with spaces, and the same string elements with comma-space separation.
+	Fixes broken completion for names with spaces in them.
+	(contact_match_cue): Sanitize the value to match before matching. This
+	allows us to match strings that cannot be represented as-is in the
+	entry.
+
+2005-01-22  Hans Petter Jansson  <hpj@novell.com>
+
+	* Makefile.am (libedataserverui_1_2_la_SOURCES)
+	(libedataserveruiinclude_HEADERS): Add newly implemented
+	ETreeModelGenerator to build.
+
+	* e-tree-model-generator.[ch]: Implement ETreeModelGenerator, a model
+	wrapper similar to GtkTreeModelFilter, but with the capability to map
+	each child row to an arbitrary number of rows, including zero, and pass
+	a permutation identifier to the user's modify callback.
+
+	* e-name-selector-dialog.c (contact_column_formatter): Implement a
+	data formatter for the contact list. This makes it show both names
+	and e-mail addresses.
+	(e_name_selector_dialog_init): Set up data formatter.
+	(sort_iter_to_contact_store_iter): Replace GtkTreeModelFilter with
+	ETreeModelGenerator, and return the email permutation along with the
+	contact iter.
+	(add_destination): Take the email permutation as an argument, and set
+	it in the contact instead of defaulting to the first one.
+	(contact_activated): Pass on email_n.
+	(transfer_button_clicked): Ditto.
+	(setup_name_selector_model): Use ETreeModelGenerator.
+	(deep_free_list): Implement.
+
+	* e-name-selector-entry.c (completion_match_selected): Add the
+	conversion for the e-mail generator, and set the selected e-mail
+	permutation in the destination.
+	(deep_free_list): Implement.
+	(contact_layout_formatter): Implement a data formatter for the
+	completion list, so we can show both names and e-mail addresses.
+	(generate_contact_rows): Implement an e-mail permutation generator.
+	(setup_contact_store): Set up the e-mail generator.
+	(e_name_selector_entry_init): Init the generator pointer. Set up the
+	data formatter.
+
+	* e-name-selector-model.c (e_name_selector_model_init): Replace
+	the GtkTreeModelFilter with an ETreeModelGenerator.
+	(deep_free_list): Implement.
+	(generate_contact_rows): Replace filter_show_not_in_destinations ()
+	with this function, which both filters and generates per-email
+	permutations.
+	(override_email_address): Override the contents of the
+	E_CONTACT_EMAIL_1 string field with the relevant address.
+	(e_name_selector_model_peek_contact_filter): Now returns a generator.
+
+2005-01-19  Hans Petter Jansson  <hpj@novell.com>
+
+	* e-name-selector-entry.c (sanitize_string): Implement.
+	(get_range_at_position): Keep track of whether we're within quotes or
+	not, and act accordingly.
+	(get_index_at_position): Ditto.
+	(get_range_by_index): Ditto.
+	(is_quoted_at): Implement.
+	(build_textrep_for_contact): Remove ugly hack, no longer needed.
+	(contact_match_cue): Remove comment that no longer has any meaning.
+	(generate_attribute_list): Ditto.
+	(type_ahead_complete): Sanitize inserted string.
+	(sync_destination_at_position): Ditto.
+	(insert_unichar): Treat comma normally if we're within quotes. Update
+	attribute list if we're editing within the string and not appending.
+	(user_delete_text): Ditto, update attribute list if necessary.
+	(destination_row_changed): Sanitize inserted string.
+	(destination_row_inserted): Ditto.
+
+2005-01-18  Hans Petter Jansson  <hpj@novell.com>
+
+	* e-name-selector-entry.c (find_destination_by_index): Tolerate
+	the case where you're trying to get the first contact and we
+	have zero, without warning.
+	(sync_destination_at_position): Accept the fact that we may not get a
+	destination to sync (happens if there are no destinations and the user
+	activated the entry), and return instead of failing an assertion.
+
+2005-01-12  Rodrigo Moya <rodrigo@novell.com>
+
+	Fixes #28532
+	
+	* e-categories-dialog.c (new_button_clicked): don't allow creation of
+	categories with names already being used.
+
+2005-01-10  Rodrigo Moya <rodrigo@novell.com>
+
+	* e-categories-dialog.c (delete_button_clicked_cb): added missing
+	implementation.
+
+2005-01-10  Rodrigo Moya <rodrigo@novell.com>
+
+	* e-categories-dialog.glade: replaced the 'Edit master ...' button
+	with buttons for adding, editing and removing categories.
+	Added the category properties dialog.
+
+	* e-categories-dialog.c (e_categories_dialog_init): load the buttons
+	from the Glade file.
+	(new_button_clicked_cb, edit_button_clicked_cb,
+	delete_button_clicked_cb): added callbacks for the new buttons in the
+	dialog.
+
+2005-01-10  Hans Petter Jansson  <hpj@novell.com>
+
+	* e-contact-store.c (e_contact_store_find_contact): Implement.
+
+	* e-name-selector-model.c (e_name_selector_model_init): Set up UID hash
+	field.
+	(emit_destination_uid_changes_cb): Implement.
+	(destinations_changed): Instead of re-filtering everything, calculate
+	the differences between former and current destination UIDs, and
+	emit the change signal for the affected contacts, so they can be
+	re-filtered.
+	(e_name_selector_model_add_section): Call destinations_changed ()
+	instead of re-filtering.
+	(e_name_selector_model_remove_section): Ditto.
+
+2005-01-07  Rodrigo Moya <rodrigo@novell.com>
+
+	* e-categories-config.c (e_categories_dialog_init): set default response
+	and disable on startup the OK button.
+	(category_toggled_cb, entry_changed_cb): enable OK button on changes.
+
+2005-01-07  Rodrigo Moya <rodrigo@novell.com>
+
+	* e-categories-config.c (e_categories_dialog_init): set the "active"
+	property on the GtkTreeViewColumn.
+	(e_categories_dialog_set_categories): process correctly the strings
+	array we get from g_strsplit.
+
+2005-01-07  Rodrigo Moya <rodrigo@novell.com>
+
+	* e-categories-dialog.c (e_categories_dialog_set_categories): added
+	missing code to set the widgets to the specificied categories list.
+	(e_categories_dialog_init): set dialog's title and connect to "toggled"
+	signal on the GtkCellRendererToggle.
+	(category_toggled_cb): callback for the "toggled" signal.
+
+2005-01-05  Rodrigo Moya <rodrigo@novell.com>
+
+	* e-categories-dialog.h: fixed class structure.
+
+	* e-categories-dialog.c (e_categories_dialog_set_categories): init
+	correctly the private pointer before using it.
+	(e_categories_dialog_dispose): unref the GladeXML object.
+	(e_categories_dialog_init): add the main widget and some buttons to
+	the dialog. Set the correct properties to the category column in the
+	treeview widget.
+
+2005-01-05  Rodrigo Moya <rodrigo@novell.com>
+
+	* e-categories-dialog.[ch]:
+	* e-categories-dialog.glade:
+	* Makefile.am: added categories dialog implementation, to replace
+	the dialog in GAL.
+
+2005-01-04  Hans Petter Jansson  <hpj@novell.com>
+
+	* e-contact-store.c (e_contact_store_add_book): Add precondition.
+	(e_contact_store_remove_book): Add precondition.
+
+	* e-name-selector-dialog.c (escape_sexp_string): Implement.
+	(source_selected): If the book cannot be created, don't try to
+	load it.
+	(search_changed): Escape the query string.
+
+	* e-name-selector-entry.c (setup_default_contact_store): Only load
+	true completion sources. Don't try to load books that can't be
+	created.
+
+2004-12-30  JP Rosevear  <jpr@novell.com>
+
+	* Makefile.am (INCLUDES): include the addressbook builddir as well
+	for generated files
+
+2004-12-24  Hans Petter Jansson  <hpj@novell.com>
+
+	* e-name-selector-entry.c (find_destination_by_index): Return NULL on
+	failure.
+	(generate_attribute_list): Temporarily disable an assertion.
+	(setup_destination_store): Add previously existing destinations to
+	the store.
+
+2004-12-23  Hans Petter Jansson  <hpj@novell.com>
+
+	* e-name-selector-entry.c (escape_sexp_string): Implement as a wrapper
+	for e_sexp_encode_string ().
+	(set_completion_query): Encode strings. Free all strings after use.
+	(entry_activate): Implement.
+	(e_name_selector_entry_init): Connect to our own activation signal.
+
+2004-12-22  Hans Petter Jansson  <hpj@novell.com>
+
+	* e-destination-store.c (e_destination_store_insert_destination): Don't
+	push entries past end of array, ever.
+
+	* e-name-selector-dialog.c (e_name_selector_dialog_dispose): Disconnect
+	from model and clear out the books we're holding.
+	(remove_books): Convenience function that removes all boks from our
+	watch list.
+	(source_selected): Use remove_books ().
+
+	* e-name-selector.c (add_section): Don't take a destination store, we
+	don't need it here.
+	(e_name_selector_dialog): Connect to the window's delete-event, so we
+	can hide it instead of destroying.
+	(e_name_selector_peek_section_entry): Simplify this code a bit. Set the
+	common destination store for the relevant section, on the entry.
+
+	* e-name-selector-entry.c (build_textrep_for_contact): Use just the name
+	for completion, not name + email.
+	(contact_match_cue): Implement.
+	(find_existing_completion): Use contact_match_cue ().
+	(generate_attribute_list): Implement.
+	(expose_event): Implement, applies attribute list.
+	(type_ahead_complete): Rebuild the attribute list if we complete a
+	contact.
+	(modify_destination_at_position): Rebuild attributes as necessary.
+	(sync_destination_at_position): Update cursor position for caller.
+	Rebuild attribute list after sync.
+	(insert_unichar): Clean up handling of comma insertion.
+	(completion_match_selected): Implement.
+	(destination_row_changed): Don't insert the email address. Clear the
+	completion model so we don't get odd completion suggestions. Rebuild
+	the attribute list.
+	(destination_row_inserted): Don't insert the email address.
+	(destination_row_deleted): Clear the completion model. Rebuild the
+	attribute list.
+	(e_name_selector_entry_init): Connect to the expose signal so we can
+	apply attributes.

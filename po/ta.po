@@ -1,0 +1,4448 @@
+# translation of ta.po to Tamil
+# This file is distributed under the same license as the PACKAGE package.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
+# Jayaradha N <jaya@pune.redhat.com>, 2004.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ta\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2005-01-14 15:54+0800\n"
+"PO-Revision-Date: 2004-08-04 17:45+0530\n"
+"Last-Translator: Jayaradha N <jaya@pune.redhat.com>\n"
+"Language-Team: Tamil <zhakanini@yahoogroups.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.3.1\n"
+
+#: addressbook/backends/file/e-book-backend-file.c:485
+#: addressbook/backends/groupwise/e-book-backend-groupwise.c:2033
+#: addressbook/backends/vcf/e-book-backend-vcf.c:452
+msgid "Loading..."
+msgstr "ஏற்றுகிறது..."
+
+#: addressbook/backends/file/e-book-backend-file.c:487
+#: addressbook/backends/groupwise/e-book-backend-groupwise.c:2017
+#: addressbook/backends/groupwise/e-book-backend-groupwise.c:2031
+#: addressbook/backends/ldap/e-book-backend-ldap.c:3401
+#: addressbook/backends/vcf/e-book-backend-vcf.c:454
+msgid "Searching..."
+msgstr "தேடிகிறது"
+
+#: addressbook/backends/ldap/e-book-backend-ldap.c:647
+msgid "Using Distinguished Name (DN)"
+msgstr "மாறுபட்ட பெயரை பயன்படுத்துகிறது (DN)"
+
+#: addressbook/backends/ldap/e-book-backend-ldap.c:650
+msgid "Using Email Address"
+msgstr "மின்னஞ்சல் முகவரியை பயன்படுத்துகிறது"
+
+#: addressbook/backends/ldap/e-book-backend-ldap.c:820
+msgid "Reconnecting to LDAP server..."
+msgstr "LDAP சேவகனுடன் மீண்டும் இணைக்கிறது"
+
+#: addressbook/backends/ldap/e-book-backend-ldap.c:1368
+msgid "Adding contact to LDAP server..."
+msgstr "LDAP சேவகனுடன் தொடர்பை சேர்க்கிறது..."
+
+#: addressbook/backends/ldap/e-book-backend-ldap.c:1493
+msgid "Removing contact from LDAP server..."
+msgstr "LDAP சேவகனிலிருந்து தொடர்பை நீக்குகிறது..."
+
+#: addressbook/backends/ldap/e-book-backend-ldap.c:1750
+msgid "Modifying contact from LDAP server..."
+msgstr "LDAP லின் உள்ள தொடர்பில் மாற்றம் செய்கிறது"
+
+#: addressbook/backends/ldap/e-book-backend-ldap.c:3290
+msgid "Receiving LDAP search results..."
+msgstr "LDAP இல் தேடலின் முடிவை பெறுகிறது..."
+
+#: addressbook/backends/ldap/e-book-backend-ldap.c:3421
+msgid "Error performing search"
+msgstr "தேடும்போது பிழை"
+
+#. translators: the placeholders will be filled by
+#. * function names, e.g.
+#. * "e_book_add_contact" on book before
+#. * "e_book_open
+#: addressbook/libebook/e-book.c:240 addressbook/libebook/e-book.c:244
+#: addressbook/libebook/e-book.c:446 addressbook/libebook/e-book.c:450
+#: addressbook/libebook/e-book.c:579 addressbook/libebook/e-book.c:583
+#: addressbook/libebook/e-book.c:672 addressbook/libebook/e-book.c:676
+#: addressbook/libebook/e-book.c:952 addressbook/libebook/e-book.c:957
+#: addressbook/libebook/e-book.c:1132 addressbook/libebook/e-book.c:1136
+#: addressbook/libebook/e-book.c:1277 addressbook/libebook/e-book.c:1281
+#: addressbook/libebook/e-book.c:1479 addressbook/libebook/e-book.c:1483
+#: addressbook/libebook/e-book.c:1684 addressbook/libebook/e-book.c:1688
+#: addressbook/libebook/e-book.c:1910 addressbook/libebook/e-book.c:1914
+#: addressbook/libebook/e-book.c:2117 addressbook/libebook/e-book.c:2121
+#: addressbook/libebook/e-book.c:3200
+#, c-format
+msgid "\"%s\" on book before \"%s\""
+msgstr "\"%s\" முன் பதிவு செய் \"%s\""
+
+#: addressbook/libebook/e-book.c:253 addressbook/libebook/e-book.c:459
+#: addressbook/libebook/e-book.c:592 addressbook/libebook/e-book.c:685
+#: addressbook/libebook/e-book.c:967 addressbook/libebook/e-book.c:1146
+#: addressbook/libebook/e-book.c:1291 addressbook/libebook/e-book.c:1492
+#: addressbook/libebook/e-book.c:1697 addressbook/libebook/e-book.c:1924
+#: addressbook/libebook/e-book.c:2130 addressbook/libebook/e-book.c:2468
+#: addressbook/libebook/e-book.c:2664
+msgid "book busy"
+msgstr "பதிவு வேலையில் உள்ளது"
+
+#: addressbook/libebook/e-book.c:286 addressbook/libebook/e-book.c:290
+#: addressbook/libebook/e-book.c:492 addressbook/libebook/e-book.c:496
+#: addressbook/libebook/e-book.c:621 addressbook/libebook/e-book.c:625
+#: addressbook/libebook/e-book.c:714 addressbook/libebook/e-book.c:718
+#: addressbook/libebook/e-book.c:996 addressbook/libebook/e-book.c:999
+#: addressbook/libebook/e-book.c:1178 addressbook/libebook/e-book.c:1181
+#: addressbook/libebook/e-book.c:1320 addressbook/libebook/e-book.c:1324
+#: addressbook/libebook/e-book.c:1528 addressbook/libebook/e-book.c:1532
+#: addressbook/libebook/e-book.c:1744 addressbook/libebook/e-book.c:1748
+#: addressbook/libebook/e-book.c:1956 addressbook/libebook/e-book.c:1960
+#: addressbook/libebook/e-book.c:2158 addressbook/libebook/e-book.c:2162
+#: addressbook/libebook/e-book.c:2409 addressbook/libebook/e-book.c:2496
+#: addressbook/libebook/e-book.c:2500 addressbook/libebook/e-book.c:2692
+#: addressbook/libebook/e-book.c:2696 addressbook/libebook/e-book.c:3209
+#, c-format
+msgid "CORBA exception making \"%s\" call"
+msgstr "CORBA பிழை \"%s\" ஐ அழைக்கிறது"
+
+#: addressbook/libebook/e-book.c:2390
+msgid "e_book_cancel: there is no current operation"
+msgstr "இ_புத்தகம்_ரத்து:இப்போது எந்த செயலும் நடைபெறவில்லை"
+
+#: addressbook/libebook/e-book.c:2425
+msgid "e_book_cancel: couldn't cancel"
+msgstr "இ_புத்தகம்_ரத்து:ரத்து செய்ய முடியவில்லை"
+
+#: addressbook/libebook/e-book.c:2454 addressbook/libebook/e-book.c:2458
+#, c-format
+msgid "\"%s\" on book after \"%s\""
+msgstr "\"%s\" பதிவுக்கு பின் \"%s\""
+
+#: addressbook/libebook/e-book.c:2524
+msgid "e_book_open: cancelled"
+msgstr "e_book_open:ரத்து செய்யப்பட்டது"
+
+#: addressbook/libebook/e-book.c:3066
+msgid "e_book_load_uri: Invalid source."
+msgstr "e_book_load_uriஇ_புத்தகம்_uri_ஏற்றம்: செல்லாத மூலம்"
+
+#: addressbook/libebook/e-book.c:3074
+#, c-format
+msgid "e_book_load_uri: no factories available for uri `%s'"
+msgstr "இ_புத்தகம்_uri_ஏற்றம்:uri `%s' க்கான செயலகம் எதுவுமில்லை"
+
+#: addressbook/libebook/e-book.c:3086
+msgid "e_book_load_uri: Could not create EBookListener"
+msgstr "e_book_load_uri: இபுத்தககவணிப்பானை உருவாக்க முடியவில்லை"
+
+#: addressbook/libebook/e-book.c:3138
+#, c-format
+msgid "e_book_new: no factories available for uri `%s'"
+msgstr "e_book_new: uri `%s' க்கான செயலகம் எதுவுமில்லை"
+
+#: addressbook/libebook/e-book.c:3332
+msgid "e_book_get_self: there was no self contact uid stored in gconf"
+msgstr "e_book_get_self: அலமாரி இல்லை gconf இல் சேமிக்கப்பட்ட uid ஐ தொடர்புகொள்ளவும்"
+
+#: addressbook/libebook/e-book.c:3443
+#, c-format
+msgid ""
+"e_book_set_default_source: there was no source for uid `%s' stored in gconf."
+msgstr "e_book_set_default_source: uid `%s' இன் மூலம் gconf இல் இல்லை"
+
+#: addressbook/libebook/e-contact.c:102
+msgid "Unique ID"
+msgstr "தனிப்பட்ட ID"
+
+#: addressbook/libebook/e-contact.c:103
+msgid "File As"
+msgstr "கோப்பு என"
+
+#. Name fields
+#. FN isn't really a structured field - we use a getter/setter
+#. so we can set the N property (since evo 1.4 works fine with
+#. vcards that don't even have a N attribute.  *sigh*)
+#: addressbook/libebook/e-contact.c:109
+msgid "Full Name"
+msgstr "முழு பெயர்"
+
+#: addressbook/libebook/e-contact.c:110
+msgid "Name"
+msgstr "பெயர்"
+
+#: addressbook/libebook/e-contact.c:111
+msgid "Given Name"
+msgstr "கொடுக்கப்பட்ட பெயர்"
+
+#: addressbook/libebook/e-contact.c:112
+msgid "Family Name"
+msgstr "குடும்ப பெயர்"
+
+#: addressbook/libebook/e-contact.c:113
+msgid "Nickname"
+msgstr "புனைப்பெயர்"
+
+#: addressbook/libebook/e-contact.c:114
+msgid "Name or Org"
+msgstr "பெயர் அல்லது நிறுவனம்"
+
+#. Address fields
+#: addressbook/libebook/e-contact.c:117
+msgid "Address List"
+msgstr "முகவரி பட்டியல்"
+
+#: addressbook/libebook/e-contact.c:118
+msgid "Home Address"
+msgstr "வீட்டு விலாசம்"
+
+#: addressbook/libebook/e-contact.c:119
+msgid "Work Address"
+msgstr "அலுவலக விலாசம்"
+
+#: addressbook/libebook/e-contact.c:120
+msgid "Other Address"
+msgstr "மற்ற விலாசம்"
+
+#: addressbook/libebook/e-contact.c:122
+msgid "Home Address Label"
+msgstr "வீட்டு விலாச அடையாளம்"
+
+#: addressbook/libebook/e-contact.c:123
+msgid "Work Address Label"
+msgstr "அலுவலக ்டு விலாச அடையாளம்"
+
+#: addressbook/libebook/e-contact.c:124
+msgid "Other Address Label"
+msgstr "மற்றட்டு விலாச அடையாளம்"
+
+#: addressbook/libebook/e-contact.c:126
+msgid "Assistant Phone"
+msgstr "உதவியாள்ணை தொலைபேசி"
+
+#: addressbook/libebook/e-contact.c:127
+msgid "Business Phone"
+msgstr "வியாபார தொலைபேசி"
+
+#: addressbook/libebook/e-contact.c:128
+msgid "Business Phone 2"
+msgstr "வியாபார தொலைபேசி 2"
+
+#: addressbook/libebook/e-contact.c:129
+msgid "Business Fax"
+msgstr "வியாபார தொலைநகலி"
+
+#: addressbook/libebook/e-contact.c:130
+msgid "Callback Phone"
+msgstr "மீண்டும் அழைக்க வேண்டிய தொலைபேசி"
+
+#: addressbook/libebook/e-contact.c:131
+msgid "Car Phone"
+msgstr "கார் தொலைபேசி"
+
+#: addressbook/libebook/e-contact.c:132
+msgid "Company Phone"
+msgstr "அலுவலக தொலைபேசி"
+
+#: addressbook/libebook/e-contact.c:133
+msgid "Home Phone"
+msgstr "வீட்டு தொலைபேசி"
+
+#: addressbook/libebook/e-contact.c:134
+msgid "Home Phone 2"
+msgstr "வீட்டு தொலைபேசி 2"
+
+#: addressbook/libebook/e-contact.c:135
+msgid "Home Fax"
+msgstr "வீட்டு தொலைநகலி"
+
+#: addressbook/libebook/e-contact.c:136
+msgid "ISDN"
+msgstr "ISDN"
+
+#: addressbook/libebook/e-contact.c:137
+msgid "Mobile Phone"
+msgstr "மொபைல் தொலைபேசி"
+
+#: addressbook/libebook/e-contact.c:138
+msgid "Other Phone"
+msgstr "மற்ற தொலைபேசி"
+
+#: addressbook/libebook/e-contact.c:139
+msgid "Other Fax"
+msgstr "மற்ற தொலைநகலி"
+
+#: addressbook/libebook/e-contact.c:140
+msgid "Pager"
+msgstr "பேஜர்"
+
+#: addressbook/libebook/e-contact.c:141
+msgid "Primary Phone"
+msgstr "முதன்மை தொலைபேசி"
+
+#: addressbook/libebook/e-contact.c:142
+msgid "Radio"
+msgstr "வானெலி"
+
+#: addressbook/libebook/e-contact.c:143
+msgid "Telex"
+msgstr "டெலக்ஸ்"
+
+#: addressbook/libebook/e-contact.c:144
+msgid "TTY"
+msgstr "TTY"
+
+#. Email fields
+#: addressbook/libebook/e-contact.c:147
+msgid "Email List"
+msgstr "மின்னஞ்சல் பட்டியல்"
+
+#: addressbook/libebook/e-contact.c:148
+msgid "Email 1"
+msgstr "மின்னஞ்சல் 1"
+
+#: addressbook/libebook/e-contact.c:149
+msgid "Email 2"
+msgstr "மின்னஞ்சல் 2"
+
+#: addressbook/libebook/e-contact.c:150
+msgid "Email 3"
+msgstr "மின்னஞ்சல் 3"
+
+#: addressbook/libebook/e-contact.c:151
+msgid "Email 4"
+msgstr "மின்னஞ்சல் 4"
+
+#: addressbook/libebook/e-contact.c:152
+msgid "Mailer"
+msgstr "மின்னஞ்சல்குழுவுக்கு"
+
+#: addressbook/libebook/e-contact.c:153
+msgid "Wants HTML Mail"
+msgstr "HTML மின்னஞ்சல் தேவை"
+
+#. Instant messaging fields
+#: addressbook/libebook/e-contact.c:156
+msgid "AIM Screen Name List"
+msgstr "AIM திரை பெயர் பட்டியல்"
+
+#: addressbook/libebook/e-contact.c:157
+msgid "Groupwise Id List"
+msgstr "குழுவாரியாக முகவரி பட்டியல்"
+
+#: addressbook/libebook/e-contact.c:158
+msgid "Jabber Id List"
+msgstr "ஜப்பார் மின்னஞ்சல் பட்டியல்"
+
+#: addressbook/libebook/e-contact.c:159
+msgid "Yahoo! Screen Name List"
+msgstr "யாஹூ! திரை பெயர் பட்டியல்"
+
+#: addressbook/libebook/e-contact.c:160
+msgid "MSN Screen Name List"
+msgstr "MSN திரை பெயர் பட்டியல்"
+
+#: addressbook/libebook/e-contact.c:161
+msgid "ICQ Id List"
+msgstr "ICQ முகவரி பட்டியல்"
+
+#: addressbook/libebook/e-contact.c:163
+msgid "AIM Home Screen Name 1"
+msgstr "AIM வீடு திரை பெயர் 1"
+
+#: addressbook/libebook/e-contact.c:164
+msgid "AIM Home Screen Name 2"
+msgstr "AIM வீடு திரை பெயர் 2"
+
+#: addressbook/libebook/e-contact.c:165
+msgid "AIM Home Screen Name 3"
+msgstr "AIM வீடு திரை பெயர் 3"
+
+#: addressbook/libebook/e-contact.c:166
+msgid "AIM Work Screen Name 1"
+msgstr "AIM வேலை திரை பெயர் 1"
+
+#: addressbook/libebook/e-contact.c:167
+msgid "AIM Work Screen Name 2"
+msgstr "AIM வேலை திரை பெயர் 2"
+
+#: addressbook/libebook/e-contact.c:168
+msgid "AIM Work Screen Name 3"
+msgstr "AIM வேலை திரை பெயர் 3"
+
+#: addressbook/libebook/e-contact.c:169
+msgid "Groupwise Home Screen Name 1"
+msgstr "குழுவாக வீட்டு திரை பெயர் 1"
+
+#: addressbook/libebook/e-contact.c:170
+msgid "Groupwise Home Screen Name 2"
+msgstr "குழுவாக வீட்டு திரை பெயர் 2"
+
+#: addressbook/libebook/e-contact.c:171
+msgid "Groupwise Home Screen Name 3"
+msgstr "குழுவாக வீட்டு திரை பெயர் 3"
+
+#: addressbook/libebook/e-contact.c:172
+msgid "Groupwise Work Screen Name 1"
+msgstr "குழுவாக வேலை திரை பெயர் 1"
+
+#: addressbook/libebook/e-contact.c:173
+msgid "Groupwise Work Screen Name 2"
+msgstr "குழுவாக வேலை திரை பெயர் 2"
+
+#: addressbook/libebook/e-contact.c:174
+msgid "Groupwise Work Screen Name 3"
+msgstr "குழுவாக வேலை திரை பெயர் 3"
+
+#: addressbook/libebook/e-contact.c:175
+msgid "Jabber Home Id 1"
+msgstr "ஜப்பார் வீடு முகவரி 1"
+
+#: addressbook/libebook/e-contact.c:176
+msgid "Jabber Home Id 2"
+msgstr "ஜப்பார் வீடு முகவரி 2"
+
+#: addressbook/libebook/e-contact.c:177
+msgid "Jabber Home Id 3"
+msgstr "ஜப்பார் வீடு முகவரி 3"
+
+#: addressbook/libebook/e-contact.c:178
+msgid "Jabber Work Id 1"
+msgstr "ஜப்பார் வேலை முகவரி 1"
+
+#: addressbook/libebook/e-contact.c:179
+msgid "Jabber Work Id 2"
+msgstr "ஜப்பார் வேலை முகவரி 2"
+
+#: addressbook/libebook/e-contact.c:180
+msgid "Jabber Work Id 3"
+msgstr "ஜப்பார் வேலை முகவரி 3"
+
+#: addressbook/libebook/e-contact.c:181
+msgid "Yahoo! Home Screen Name 1"
+msgstr "யாஹூ! வீடு திரை பெயர் 1கவரி 1"
+
+#: addressbook/libebook/e-contact.c:182
+msgid "Yahoo! Home Screen Name 2"
+msgstr "யாஹூ! வீடு திரை பெயர் 2"
+
+#: addressbook/libebook/e-contact.c:183
+msgid "Yahoo! Home Screen Name 3"
+msgstr "யாஹூ! வீடு திரை பெயர் 3"
+
+#: addressbook/libebook/e-contact.c:184
+msgid "Yahoo! Work Screen Name 1"
+msgstr "யாஹூ! வேலை திரை பெயர் 1"
+
+#: addressbook/libebook/e-contact.c:185
+msgid "Yahoo! Work Screen Name 2"
+msgstr "யாஹூ! வேலை திரை பெயர் 2"
+
+#: addressbook/libebook/e-contact.c:186
+msgid "Yahoo! Work Screen Name 3"
+msgstr "யாஹூ! வேலை திரை பெயர் 3"
+
+#: addressbook/libebook/e-contact.c:187
+msgid "MSN Home Screen Name 1"
+msgstr "MSN வீடுேலை திரை பெயர் 1"
+
+#: addressbook/libebook/e-contact.c:188
+msgid "MSN Home Screen Name 2"
+msgstr "MSN வீடு திரை பெயர் 2"
+
+#: addressbook/libebook/e-contact.c:189
+msgid "MSN Home Screen Name 3"
+msgstr "MSN வீடு திரை பெயர் 3"
+
+#: addressbook/libebook/e-contact.c:190
+msgid "MSN Work Screen Name 1"
+msgstr "MSN வேலைடு திரை பெயர1 3"
+
+#: addressbook/libebook/e-contact.c:191
+msgid "MSN Work Screen Name 2"
+msgstr "MSN வேலை திரை பெயர் 2"
+
+#: addressbook/libebook/e-contact.c:192
+msgid "MSN Work Screen Name 3"
+msgstr "MSN வேலை திரை பெயர் 3"
+
+#: addressbook/libebook/e-contact.c:193
+msgid "ICQ Home Id 1"
+msgstr "ICQ வீட்டு மின்னஞ்சல் முகவரி 1"
+
+#: addressbook/libebook/e-contact.c:194
+msgid "ICQ Home Id 2"
+msgstr "ICQ வீட்டு மின்னஞ்சல் முகவரி 2"
+
+#: addressbook/libebook/e-contact.c:195
+msgid "ICQ Home Id 3"
+msgstr "ICQ வீட்டு மின்னஞ்சல் முகவரி 3"
+
+#: addressbook/libebook/e-contact.c:196
+msgid "ICQ Work Id 1"
+msgstr "ICQ வேலை மின்னஞ்சல் முகவரி 1"
+
+#: addressbook/libebook/e-contact.c:197
+msgid "ICQ Work Id 2"
+msgstr "ICQ வேலை மின்னஞ்சல் முகவரி 2"
+
+#: addressbook/libebook/e-contact.c:198
+msgid "ICQ Work Id 3"
+msgstr "ICQ வேலை மின்னஞ்சல் முகவரி 3"
+
+#. Organizational fields
+#: addressbook/libebook/e-contact.c:201
+msgid "Organization"
+msgstr "நிறுவனம்"
+
+#: addressbook/libebook/e-contact.c:202
+msgid "Organizational Unit"
+msgstr "நிறுவனத்தின் பகுதி"
+
+#: addressbook/libebook/e-contact.c:203
+msgid "Office"
+msgstr "அலுவலகம்"
+
+#: addressbook/libebook/e-contact.c:205
+msgid "Title"
+msgstr "தலைப்பு"
+
+#: addressbook/libebook/e-contact.c:206
+msgid "Role"
+msgstr "பங்கு"
+
+#: addressbook/libebook/e-contact.c:207
+msgid "Manager"
+msgstr "மேலாளர்"
+
+#: addressbook/libebook/e-contact.c:208
+msgid "Assistant"
+msgstr "உதவியாள்"
+
+#. Web fields
+#: addressbook/libebook/e-contact.c:211
+msgid "Homepage URL"
+msgstr "வீட்டு பக்க வலைமனை"
+
+#: addressbook/libebook/e-contact.c:212
+msgid "Weblog URL"
+msgstr "வலைப்பூ வலைமனை"
+
+#: addressbook/libebook/e-contact.c:213
+msgid "Video Conferencing URL"
+msgstr "வீடியோ கூட்டம் வலைமனை"
+
+#. Photo/Logo
+#: addressbook/libebook/e-contact.c:216
+msgid "Photo"
+msgstr "புகைப்படம்"
+
+#: addressbook/libebook/e-contact.c:217
+msgid "Logo"
+msgstr "சின்னம்"
+
+#. Security fields
+#: addressbook/libebook/e-contact.c:220
+msgid "X.509 Certificate"
+msgstr "X.509 சான்றிதழ்"
+
+#. Contact categories
+#: addressbook/libebook/e-contact.c:223
+msgid "Category List"
+msgstr "வகை பட்டியல்"
+
+#: addressbook/libebook/e-contact.c:224
+#: libedataserverui/e-categories-dialog.c:369
+msgid "Categories"
+msgstr "வகைகள்"
+
+#. Collaboration fields
+#: addressbook/libebook/e-contact.c:227
+msgid "Calendar URI"
+msgstr "நாளிதழ் வலைமனை"
+
+#: addressbook/libebook/e-contact.c:228
+msgid "Free/Busy URL"
+msgstr "வேலை/வேலை இல்லை வலைமனை"
+
+#: addressbook/libebook/e-contact.c:229
+msgid "ICS Calendar"
+msgstr "ICS நாளிதழ்"
+
+#. Misc fields
+#: addressbook/libebook/e-contact.c:232
+msgid "Spouse's Name"
+msgstr "மனைவி பெயர்"
+
+#: addressbook/libebook/e-contact.c:233
+msgid "Note"
+msgstr "குறிப்பு"
+
+#: addressbook/libebook/e-contact.c:235
+msgid "Birth Date"
+msgstr "பிறந்த நாள்"
+
+#: addressbook/libebook/e-contact.c:236
+msgid "Anniversary"
+msgstr "ஆண்டுவிழாாண்டு"
+
+#: addressbook/libebook/e-contact.c:238
+msgid "List"
+msgstr "பட்டியல்"
+
+#: addressbook/libebook/e-contact.c:239
+msgid "List Show Addresses"
+msgstr "முகவரிகளின் பட்டியலை காட்டு"
+
+#: addressbook/libebook/e-contact.c:1208
+msgid "Unnamed List"
+msgstr "பெயரில்லாத பட்டியல்"
+
+#. Set category and visibility
+#: calendar/backends/contacts/e-cal-backend-contacts.c:446
+msgid "Birthday"
+msgstr "பிறந்தநாள்"
+
+#: calendar/backends/contacts/e-cal-backend-contacts.c:470
+#, c-format
+msgid "Birthday: %s"
+msgstr "பிறந்த நாள்: %s"
+
+#: calendar/backends/contacts/e-cal-backend-contacts.c:491
+#, c-format
+msgid "Anniversary: %s"
+msgstr "ஆண்டுவிழா: %s"
+
+#: calendar/backends/file/e-cal-backend-file.c:174
+msgid "Can't save calendar data: Malformed URI."
+msgstr "நாள்காட்டி தகவலை சேமிக்க முடியாது : தவறான URI."
+
+#: calendar/backends/groupwise/e-cal-backend-groupwise.c:484
+msgid "Invalid server URI"
+msgstr "செல்லாத URI சேவகன்"
+
+#: calendar/backends/groupwise/e-cal-backend-groupwise.c:531
+#: calendar/backends/groupwise/e-cal-backend-groupwise.c:534
+#: camel/providers/groupwise/camel-gw-listener.c:405
+#: camel/providers/groupwise/camel-gw-listener.c:435
+msgid "Calendar"
+msgstr "நாள்காட்டி"
+
+#: calendar/backends/groupwise/e-cal-backend-groupwise.c:541
+#: calendar/backends/groupwise/e-cal-backend-groupwise.c:784
+#: calendar/backends/http/e-cal-backend-http.c:484
+msgid "Could not create cache file"
+msgstr "தற்காலிக கோப்பை உருவாக்க முடியவில்லை"
+
+#: calendar/backends/groupwise/e-cal-backend-groupwise.c:551
+#, fuzzy
+msgid "Could not create thread for populating cache"
+msgstr "தற்காலிக கோப்பை உருவாக்க முடியவில்லை"
+
+#: calendar/backends/groupwise/e-cal-backend-groupwise.c:557
+#: calendar/libecal/e-cal.c:4560
+#: camel/providers/groupwise/camel-groupwise-folder.c:533
+#: camel/providers/groupwise/camel-groupwise-store.c:503
+#: camel/providers/groupwise/camel-groupwise-store.c:641
+#: camel/providers/groupwise/camel-groupwise-store.c:800
+msgid "Authentication failed"
+msgstr "அனுமதித்தல் தோல்வி"
+
+#: calendar/backends/groupwise/e-cal-backend-groupwise.c:776
+#, fuzzy
+msgid "Repository is Offline"
+msgstr "கிடங்கு இணையத்தொடர்பில் இல்லை"
+
+#: calendar/backends/http/e-cal-backend-http.c:240
+msgid "Redirected to Invalid URI"
+msgstr "செல்லாத URI க்கு திசை மாற்றப்பட்டது"
+
+#: calendar/backends/http/e-cal-backend-http.c:264
+msgid "Bad file format."
+msgstr "மோசமான கோப்பு அமைப்பு"
+
+#: calendar/backends/http/e-cal-backend-http.c:270
+msgid "Not a calendar."
+msgstr "நாள்காட்டி இல்லை"
+
+#: calendar/libecal/e-cal-component.c:1299
+msgid "Untitled appointment"
+msgstr "தலைப்பில்லாத நேர ஒதுக்கம்"
+
+#: calendar/libecal/e-cal-recur.c:3996
+msgid "1st"
+msgstr "முதன்"
+
+#: calendar/libecal/e-cal-recur.c:3997
+msgid "2nd"
+msgstr "2 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:3998
+msgid "3rd"
+msgstr "3 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:3999
+msgid "4th"
+msgstr "4 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4000
+msgid "5th"
+msgstr "5 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4001
+msgid "6th"
+msgstr "6 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4002
+msgid "7th"
+msgstr "7 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4003
+msgid "8th"
+msgstr "8 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4004
+msgid "9th"
+msgstr "9 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4005
+msgid "10th"
+msgstr "10 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4006
+msgid "11th"
+msgstr "11 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4007
+msgid "12th"
+msgstr "12 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4008
+msgid "13th"
+msgstr "13ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4009
+msgid "14th"
+msgstr "14 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4010
+msgid "15th"
+msgstr "15 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4011
+msgid "16th"
+msgstr "16 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4012
+msgid "17th"
+msgstr "17 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4013
+msgid "18th"
+msgstr "18 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4014
+msgid "19th"
+msgstr "19 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4015
+msgid "20th"
+msgstr "20 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4016
+msgid "21st"
+msgstr "21 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4017
+msgid "22nd"
+msgstr "22 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4018
+msgid "23rd"
+msgstr "23 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4019
+msgid "24th"
+msgstr "24 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4020
+msgid "25th"
+msgstr "25 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4021
+msgid "26th"
+msgstr "26 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4022
+msgid "27th"
+msgstr "27 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4023
+msgid "28th"
+msgstr "28 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4024
+msgid "29th"
+msgstr "29 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4025
+msgid "30th"
+msgstr "30 ஆவது"
+
+#: calendar/libecal/e-cal-recur.c:4026
+msgid "31st"
+msgstr "31 ஆவது"
+
+#: calendar/libecal/e-cal-util.c:569 calendar/libecal/e-cal-util.c:591
+msgid "High"
+msgstr "அதிகமான"
+
+#: calendar/libecal/e-cal-util.c:571 calendar/libecal/e-cal-util.c:593
+msgid "Normal"
+msgstr "இயல்பான"
+
+#: calendar/libecal/e-cal-util.c:573 calendar/libecal/e-cal-util.c:595
+msgid "Low"
+msgstr "குறைவான்"
+
+#. An empty string is the same as 'None'.
+#: calendar/libecal/e-cal-util.c:589
+msgid "Undefined"
+msgstr "குறிப்பில்லா"
+
+#. actually ask the client for authentication
+#: calendar/libecal/e-cal.c:1590
+#, c-format
+msgid "Enter password for %s (user %s)"
+msgstr "%s கடவுச்சொல்லை உள்ளிடவும் (பயனீட்டாளர் %s)"
+
+#: calendar/libecal/e-cal.c:4532
+msgid "Invalid argument"
+msgstr "செல்லாத அளவுரு"
+
+#: calendar/libecal/e-cal.c:4534
+msgid "Backend is busy"
+msgstr "பின்தரவு தளம் வேலையில் உள்ளது"
+
+#: calendar/libecal/e-cal.c:4536
+msgid "Repository is offline"
+msgstr "கிடங்கு இணையத்தொடர்பில் இல்லை"
+
+#: calendar/libecal/e-cal.c:4538
+msgid "No such calendar"
+msgstr "இப்படி ஒரு நாள்காட்டி இல்லை"
+
+#: calendar/libecal/e-cal.c:4540 servers/groupwise/e-gw-connection.c:158
+msgid "Object not found"
+msgstr "பொருள் காணவில்லை"
+
+#: calendar/libecal/e-cal.c:4542 servers/groupwise/e-gw-connection.c:154
+msgid "Invalid object"
+msgstr "செல்லாத பொருள்"
+
+#: calendar/libecal/e-cal.c:4544
+msgid "URI not loaded"
+msgstr "URI ஏற்றப்படவில்லை"
+
+#: calendar/libecal/e-cal.c:4546
+msgid "URI already loaded"
+msgstr "URI ஏற்கெனவே ஏற்றப்பட்டது"
+
+#: calendar/libecal/e-cal.c:4548
+msgid "Permission denied"
+msgstr "அனுமதி மறுக்கப்பட்டது"
+
+#: calendar/libecal/e-cal.c:4550 servers/groupwise/e-gw-connection.c:160
+#, fuzzy
+msgid "Unknown User"
+msgstr "தெரியாத பிழை"
+
+#: calendar/libecal/e-cal.c:4552
+msgid "Object ID already exists"
+msgstr "பொருள் ID ஏற்கெனவே உள்ளது"
+
+#: calendar/libecal/e-cal.c:4554
+msgid "Protocol not supported"
+msgstr "விதிமுறைக்கு ஆதரவு இல்லை"
+
+#: calendar/libecal/e-cal.c:4556
+msgid "Operation has been cancelled"
+msgstr "செயல்பாடு ரத்து செய்யப்பட்டது"
+
+#: calendar/libecal/e-cal.c:4558
+msgid "Could not cancel operation"
+msgstr "செயல்பாட்டை ரத்து செய்ய முடியவில்லை"
+
+#: calendar/libecal/e-cal.c:4562
+#: camel/providers/smtp/camel-smtp-transport.c:215
+msgid "Authentication required"
+msgstr "அனுமதி தேவை"
+
+#: calendar/libecal/e-cal.c:4564
+msgid "A CORBA exception has occurred"
+msgstr "CORBA பிழை நேர்ந்தது"
+
+#: calendar/libecal/e-cal.c:4566 camel/providers/imap/camel-imap-command.c:304
+#: camel/providers/imap/camel-imap-command.c:401
+#: camel/providers/imap4/camel-imap4-store.c:294
+#: camel/providers/pop3/camel-pop3-store.c:535
+#: camel/providers/pop3/camel-pop3-store.c:542
+#: camel/providers/pop3/camel-pop3-store.c:548
+#: servers/groupwise/e-gw-connection.c:166
+msgid "Unknown error"
+msgstr "தெரியாத பிழை"
+
+#: calendar/libecal/e-cal.c:4568
+msgid "No error"
+msgstr "பிழை இல்லை"
+
+#: calendar/libedata-cal/e-cal-backend-sexp.c:50
+#: calendar/libedata-cal/e-cal-backend-sexp.c:529
+#: calendar/libedata-cal/e-cal-backend-sexp.c:722
+#: calendar/libedata-cal/e-cal-backend-sexp.c:749
+#, c-format
+msgid "\"%s\" expects no arguments"
+msgstr "\"%s\" அளபுருவை எதிர்பார்க்கவில்லை"
+
+#: calendar/libedata-cal/e-cal-backend-sexp.c:75
+#: calendar/libedata-cal/e-cal-backend-sexp.c:169
+#: calendar/libedata-cal/e-cal-backend-sexp.c:203
+#: calendar/libedata-cal/e-cal-backend-sexp.c:239
+#: calendar/libedata-cal/e-cal-backend-sexp.c:787
+#, c-format
+msgid "\"%s\" expects one argument"
+msgstr "\"%s\" ஒரு அளபுருவை எதிர்பார்க்கிறது"
+
+#: calendar/libedata-cal/e-cal-backend-sexp.c:81
+#: calendar/libedata-cal/e-cal-backend-sexp.c:88
+#: calendar/libedata-cal/e-cal-backend-sexp.c:245
+#: calendar/libedata-cal/e-cal-backend-sexp.c:473
+#, c-format
+msgid "\"%s\" expects the first argument to be a string"
+msgstr "\"%s\" முதல் அளபுரு சரமாக இருக்க வேண்டும் என எதிர்பார்க்கிறது"
+
+#: calendar/libedata-cal/e-cal-backend-sexp.c:96
+#, c-format
+msgid "\"%s\" expects the first argument to be an ISO 8601 date/time string"
+msgstr ""
+"\"%s\" முதல் அளபுரு ISO 860 தேதி/நேர சரமாக இருக்க வேண்டும் என எதிர்பார்க்கிறது"
+
+#: calendar/libedata-cal/e-cal-backend-sexp.c:127
+#: calendar/libedata-cal/e-cal-backend-sexp.c:312
+#: calendar/libedata-cal/e-cal-backend-sexp.c:467
+#: calendar/libedata-cal/e-cal-backend-sexp.c:561
+#, c-format
+msgid "\"%s\" expects two arguments"
+msgstr "\"%s\" இரண்டு அளபுருக்களை எதிர்பார்க்கிறது"
+
+#: calendar/libedata-cal/e-cal-backend-sexp.c:133
+#: calendar/libedata-cal/e-cal-backend-sexp.c:175
+#: calendar/libedata-cal/e-cal-backend-sexp.c:209
+#: calendar/libedata-cal/e-cal-backend-sexp.c:318
+#: calendar/libedata-cal/e-cal-backend-sexp.c:567
+#: calendar/libedata-cal/e-cal-backend-sexp.c:793
+#, c-format
+msgid "\"%s\" expects the first argument to be a time_t"
+msgstr "\"%s\" முதல் அளபுரு time_t யாக இருக்க வேண்டும் என எதிர்பார்க்கிறது"
+
+#: calendar/libedata-cal/e-cal-backend-sexp.c:141
+#, c-format
+msgid "\"%s\" expects the second argument to be an integer"
+msgstr "\"%s\" இரண்டாவது அளபுரு  எண்ணாகாக இருக்க வேண்டும் என எதிர்பார்க்கிறது"
+
+#: calendar/libedata-cal/e-cal-backend-sexp.c:326
+#: calendar/libedata-cal/e-cal-backend-sexp.c:575
+#, c-format
+msgid "\"%s\" expects the second argument to be a time_t"
+msgstr "\"%s\" இரண்டாவது அளபுரு time_t யாக இருக்க வேண்டும் என எதிர்பார்க்கிறது"
+
+#: calendar/libedata-cal/e-cal-backend-sexp.c:481
+#, c-format
+msgid "\"%s\" expects the second argument to be a string"
+msgstr "\"%s\" இரண்டாவது அளபுரு சரமாகக இருக்க வேண்டும் என எதிர்பார்க்கிறது"
+
+#: calendar/libedata-cal/e-cal-backend-sexp.c:501
+#, c-format
+msgid ""
+"\"%s\" expects the first argument to be either \"any\", \"summary\", or "
+"\"description\", or \"location\""
+msgstr ""
+"\"%s\" முதல் அளபுரு \"any\", \"summary\", அல்லது\"description\", அல்லது "
+"\"location\" ஆக இருக்க வேண்டும் என எதிர்பார்க்கிறது"
+
+#: calendar/libedata-cal/e-cal-backend-sexp.c:624
+#, c-format
+msgid "\"%s\" expects at least one argument"
+msgstr "\"%s\" ஒரு அளபுருவாவது இருக்க வேண்டும் என எதிர்பார்கிறது"
+
+#: calendar/libedata-cal/e-cal-backend-sexp.c:638
+#, c-format
+msgid ""
+"\"%s\" expects all arguments to be strings or one and only one argument to "
+"be a boolean false (#f)"
+msgstr ""
+"\"%s\" எல்லா அளபுருக்களும் சரமாகவோ அல்லது ஒரே ஒரு அளபுரு மட்டும் பூலியன் மதிப்பு "
+"தவறாகவோ(#f) இருக்க வேண்டும் என எதிர்பார்க்கிறது"
+
+#: camel/camel-cipher-context.c:103
+msgid "Signing is not supported by this cipher"
+msgstr "சிப்பரில் உள்நுழைவதற்கான ஆதரவு இல்லை"
+
+#: camel/camel-cipher-context.c:129
+msgid "Signing message"
+msgstr "உள்நுழைய செய்தி"
+
+#: camel/camel-cipher-context.c:146
+msgid "Verifying is not supported by this cipher"
+msgstr "சிப்பரில் சரி பார்ப்பதற்கான ஆதரவு இல்லை"
+
+#: camel/camel-cipher-context.c:172
+msgid "Verifying message"
+msgstr "செய்தியை சரிபார்க்கிறது"
+
+#: camel/camel-cipher-context.c:190
+msgid "Encryption is not supported by this cipher"
+msgstr "சிப்பரில் குறிமுறையாக்கத்திற்கான ஆதரவு இல்லை"
+
+#: camel/camel-cipher-context.c:216
+msgid "Encrypting message"
+msgstr "செய்தி குறிமுறையாக்கப்படுகிறது"
+
+#: camel/camel-cipher-context.c:233
+msgid "Decryption is not supported by this cipher"
+msgstr "சிப்பரில் மறையீடு நீக்கத்திற்கான ஆதரவு இல்லை"
+
+#: camel/camel-cipher-context.c:255
+msgid "Decrypting message"
+msgstr "செய்தி மறையீடு நீக்கம் செய்யப்படுகிறது"
+
+#: camel/camel-cipher-context.c:272
+msgid "You may not import keys with this cipher"
+msgstr "சிப்பரால் கடவுச்சொல்லை உள்வாங்க முடியவில்லை"
+
+#: camel/camel-cipher-context.c:302
+msgid "You may not export keys with this cipher"
+msgstr "சிப்பரால் கடவுச்சொல்லை அனுப்ப முடியவில்லை"
+
+#: camel/camel-data-cache.c:134
+msgid "Unable to create cache path"
+msgstr "தற்காலிக நினைவிட பாதையை உருவாக்க முடியவில்லை"
+
+#: camel/camel-data-cache.c:376
+#, c-format
+msgid "Could not remove cache entry: %s: %s"
+msgstr "தற்காலிக நினைவிட தகவலை நீக்க முடியவில்லை: %s: %s"
+
+#: camel/camel-disco-diary.c:195
+#, c-format
+msgid ""
+"Could not write log entry: %s\n"
+"Further operations on this server will not be replayed when you\n"
+"reconnect to the network."
+msgstr ""
+"பதிவு தகவல்களை எழுத முடியவில்லை:%s\n"
+"இனி வரும் செய்திகள் சேவகனுடன் மீண்டும் இணையும் போது \n"
+"மீண்டும் இயக்க முடியாது."
+
+#: camel/camel-disco-diary.c:258
+#, c-format
+msgid ""
+"Could not open `%s':\n"
+"%s\n"
+"Changes made to this folder will not be resynchronized."
+msgstr ""
+"'%s' ஐ திறக்க முடியவில்லை:\n"
+"%s\n"
+"இந்த அடைவில் செய்யப்பட்ட மாற்றங்களை மீண்டும் ஒத்திசைக்க முடியாது"
+
+#: camel/camel-disco-diary.c:294
+msgid "Resynchronizing with server"
+msgstr "சேவனோடு மீண்டும் ஒத்திசைவு நிகழ்கிறது"
+
+#: camel/camel-disco-folder.c:42 camel/camel-offline-folder.c:50
+msgid "Copy folder content locally for offline operation"
+msgstr "இணையத்தின் இணையாமல் வேலை செய்ய அடைவை உங்கள் கணினியில் நகலெடுக்கவும்"
+
+#: camel/camel-disco-folder.c:104 camel/camel-offline-folder.c:107
+msgid "Downloading new messages for offline mode"
+msgstr "இணையத்தின் இணையாமல் வேலை செய்ய புதிய செய்தியை பதிவிறக்கம் செய்கிறது"
+
+#: camel/camel-disco-folder.c:467
+#, c-format
+msgid "Preparing folder '%s' for offline"
+msgstr "இணையத்தொடர்பில்லாத நிலைக்காக '%s' அடைவு தயாராகிறது"
+
+#: camel/camel-disco-store.c:405
+msgid "You must be working online to complete this operation"
+msgstr "இந்த செயலை முடிக்க இணையதொடர்பு தேவை"
+
+#: camel/camel-filter-driver.c:669 camel/camel-filter-search.c:512
+#: camel/camel-process.c:48
+#, c-format
+msgid "Failed to create pipe to '%s': %s"
+msgstr "குழாத் தொடர்பை உருவாக்குதல் தோல்வியில் முடிந்தது'%s': %s"
+
+#: camel/camel-filter-driver.c:713 camel/camel-process.c:90
+#, c-format
+msgid "Failed to create child process '%s': %s"
+msgstr "துணை செயலை உருவாக்குவதில் தோல்வி '%s': %s"
+
+#: camel/camel-filter-driver.c:756
+#, c-format
+msgid "Invalid message stream received from %s: %s"
+msgstr "செல்லாத செய்தி தொடர்பு  %s: லிருந்து பெறப்பட்டது %s"
+
+#: camel/camel-filter-driver.c:945 camel/camel-filter-driver.c:954
+msgid "Syncing folders"
+msgstr "அடைவுகளை ஒத்திசைக்கிறது"
+
+#: camel/camel-filter-driver.c:1043 camel/camel-filter-driver.c:1420
+#, c-format
+msgid "Error parsing filter: %s: %s"
+msgstr "வடிகட்டியை பகுக்கும் போது பிழை : %s: %s"
+
+#: camel/camel-filter-driver.c:1052 camel/camel-filter-driver.c:1429
+#, c-format
+msgid "Error executing filter: %s: %s"
+msgstr "வடிகட்டியை இயக்கும் போது பிழை: %s: %s"
+
+#: camel/camel-filter-driver.c:1119
+msgid "Unable to open spool folder"
+msgstr "ஸ்பூல் அடைவை திறக்க முடியவில்லை"
+
+#: camel/camel-filter-driver.c:1128
+msgid "Unable to process spool folder"
+msgstr "ஸ்பூட் அடைவை செயல்படுத்த முடியவில்லை"
+
+#: camel/camel-filter-driver.c:1143
+#, c-format
+msgid "Getting message %d (%d%%)"
+msgstr "%d (%d%%) செய்தியை பெறுகிறது"
+
+#: camel/camel-filter-driver.c:1147
+msgid "Cannot open message"
+msgstr "செய்தியை திறக்க முடியவில்லை"
+
+#: camel/camel-filter-driver.c:1148 camel/camel-filter-driver.c:1160
+#, c-format
+msgid "Failed on message %d"
+msgstr "%d செய்தி தோல்வியில் முடிந்தது"
+
+#: camel/camel-filter-driver.c:1174 camel/camel-filter-driver.c:1265
+msgid "Syncing folder"
+msgstr "அடைவு ஒத்திசைகிறது"
+
+#: camel/camel-filter-driver.c:1178 camel/camel-filter-driver.c:1270
+msgid "Complete"
+msgstr "முடிந்தது"
+
+#: camel/camel-filter-driver.c:1235
+#, c-format
+msgid "Getting message %d of %d"
+msgstr "%d யில் %d செய்தியை பெறுகிறது"
+
+#: camel/camel-filter-driver.c:1250
+#, c-format
+msgid "Failed at message %d of %d"
+msgstr "%d யில் %d செய்தியை பெறும்போது தோல்வி"
+
+#: camel/camel-filter-search.c:135
+msgid "Failed to retrieve message"
+msgstr "செய்தியை பெறும்போது பிழை"
+
+#: camel/camel-filter-search.c:385
+msgid "Invalid arguments to (system-flag)"
+msgstr "செல்லாத பயனிலை (system-flag)"
+
+#: camel/camel-filter-search.c:400
+msgid "Invalid arguments to (user-tag)"
+msgstr "செல்லாத பயனிலை (user-tag)"
+
+#: camel/camel-filter-search.c:548
+#, c-format
+msgid "Failed to create create child process '%s': %s"
+msgstr "துணை செயலை உருவாக்குதல் தோல்வியில் முடிந்தது '%s': %s"
+
+#. A filter search is a search through your filters, ie. your filters is the corpus being searched thru.
+#: camel/camel-filter-search.c:670 camel/camel-filter-search.c:678
+#, c-format
+msgid "Error executing filter search: %s: %s"
+msgstr "வடிகட்டி தேடலை இயக்கும் போது பிழை : %s: %s"
+
+#: camel/camel-folder-search.c:357 camel/camel-folder-search.c:478
+#, c-format
+msgid ""
+"Cannot parse search expression: %s:\n"
+"%s"
+msgstr ""
+"இது போன்ற தொடர்களை பகுக்க முடியாது: %s:\n"
+"%s"
+
+#: camel/camel-folder-search.c:367 camel/camel-folder-search.c:488
+#, c-format
+msgid ""
+"Error executing search expression: %s:\n"
+"%s"
+msgstr ""
+"தேடல் தொடரை இயக்கும் போது பிழை: %s:\n"
+"%s"
+
+#: camel/camel-folder-search.c:674 camel/camel-folder-search.c:707
+msgid "(match-all) requires a single bool result"
+msgstr "(எல்ல-பொருத்தம்) ஒரு பூலியன் விடை தேவைப்படுகிறது"
+
+#: camel/camel-folder-search.c:757
+msgid "(match-threads) not allowed inside match-all"
+msgstr "(சங்கிலி-பொருத்தம்) உள்ளே அனைத்தையும் பொருத்தி பார்க்க அனுமதி இல்லை"
+
+#: camel/camel-folder-search.c:760 camel/camel-folder-search.c:764
+msgid "(match-threads) requires a match type string"
+msgstr "(சங்கிலி-பொருத்தம்) சரப்பொருத்தம் அவசியம்"
+
+#: camel/camel-folder-search.c:786
+msgid "(match-threads) expects an array result"
+msgstr "(சங்கிலி-பொருத்தம்) அணி விடை தேவைப்படுகிறது"
+
+#: camel/camel-folder-search.c:792
+msgid "(match-threads) requires the folder set"
+msgstr "(சங்கிலி பொருத்தம்) அடைவை அமைக்க வேண்டியது அவசியம்"
+
+#: camel/camel-folder-search.c:881
+#, c-format
+msgid "Performing query on unknown header: %s"
+msgstr "தெரியாத தலைப்புக்கான கேள்வியை செயல்படுத்துகிறது: %s"
+
+#: camel/camel-folder.c:610
+#, c-format
+msgid "Unsupported operation: append message: for %s"
+msgstr "ஆதரவில்லா செயல்:%s க்கான செய்தி புதுப்பிக்கப்படுகிறது"
+
+#: camel/camel-folder.c:1200
+#, c-format
+msgid "Unsupported operation: search by expression: for %s"
+msgstr "ஆதரவில்லா செயல்: தொடர்களாக தேடு: %s"
+
+#: camel/camel-folder.c:1240
+#, c-format
+msgid "Unsupported operation: search by uids: for %s"
+msgstr "ஆதரவில்லா செயல்: uids வாரியாக தேடு %s"
+
+#: camel/camel-folder.c:1352
+msgid "Moving messages"
+msgstr "செய்திகளை நகர்த்துகிறது"
+
+#: camel/camel-folder.c:1352
+msgid "Copying messages"
+msgstr "செய்திகளை படியெடுக்கிறது"
+
+#: camel/camel-folder.c:1601
+msgid "Learning junk"
+msgstr "தேவையற்றவையை படிக்கிறது"
+
+#: camel/camel-folder.c:1618
+msgid "Learning non-junk"
+msgstr "தேயையானவையை படிக்கிறது"
+
+#: camel/camel-folder.c:1637
+msgid "Filtering new message(s)"
+msgstr "புதிய செய்தி(களை) வடிகட்டுகிறது"
+
+#: camel/camel-gpg-context.c:735
+#, c-format
+msgid ""
+"Unexpected GnuPG status message encountered:\n"
+"\n"
+"%s"
+msgstr ""
+"எதிர்பாராத GnuPG நிலை செய்தி கிடைத்துள்ளது:\n"
+"\n"
+"%s"
+
+#: camel/camel-gpg-context.c:749
+msgid "Failed to parse gpg userid hint."
+msgstr "gpg பயனீட்டாளர் அடையாள எண் குறிப்பை பகுக்க முடியவில்லை"
+
+#: camel/camel-gpg-context.c:773
+msgid "Failed to parse gpg passphrase request."
+msgstr "gpg கடவுச்சொல் கோரிக்கையை பகுத்தல் தோல்வியடைந்தது"
+
+#: camel/camel-gpg-context.c:787
+#, c-format
+msgid ""
+"You need a passphrase to unlock the key for\n"
+"user: \"%s\""
+msgstr ""
+"ள் பூட்டை திறக்க கசொல் தேவை \n"
+"user: \"%s\"்ச்"
+
+#: camel/camel-gpg-context.c:804 camel/camel-gpg-context.c:1314
+#: camel/camel-gpg-context.c:1498 camel/camel-gpg-context.c:1589
+#: camel/camel-gpg-context.c:1701 camel/providers/nntp/camel-nntp-store.c:1274
+msgid "Cancelled."
+msgstr "ரத்து செய்யப்பட்டது"
+
+#: camel/camel-gpg-context.c:822
+msgid "Failed to unlock secret key: 3 bad passphrases given."
+msgstr "ரகசிய பூட்டை திறக்க முடியவில்லை 3 முறை தவறாக கடவுச்சொல் தரப்பட்டது"
+
+#: camel/camel-gpg-context.c:828
+#, c-format
+msgid "Unexpected response from GnuPG: %s"
+msgstr "GnuPG விலிருந்து எதிர்பாராத கோரிக்கை : %s"
+
+#: camel/camel-gpg-context.c:880
+msgid "Failed to encrypt: No valid recipients specified."
+msgstr "குறிமுறையாக்க முடியவில்லை: சரியான பெறுநர் குறிப்பிடப்படவில்லை"
+
+#: camel/camel-gpg-context.c:1157
+#, c-format
+msgid ""
+"Failed to GPG %s: %s\n"
+"\n"
+"%s"
+msgstr ""
+"GPG தோல்வி %s: %s\n"
+"\n"
+"%s"
+
+#: camel/camel-gpg-context.c:1162
+#, c-format
+msgid "Failed to GPG %s: %s\n"
+msgstr "GPG தோல்வி %s: %s\n"
+
+#: camel/camel-gpg-context.c:1275 camel/camel-smime-context.c:389
+#, c-format
+msgid "Could not generate signing data: %s"
+msgstr "தகவல் கைஓப்பத்தை உருவாக்க முடியவில்லை: %s"
+
+#: camel/camel-gpg-context.c:1307 camel/camel-gpg-context.c:1766
+#: camel/camel-gpg-context.c:1817
+#, c-format
+msgid "Failed to execute gpg: %s"
+msgstr "gpgயை இயக்க முடியவில்லை: %s"
+
+#: camel/camel-gpg-context.c:1331 camel/camel-gpg-context.c:1491
+#: camel/camel-gpg-context.c:1582 camel/camel-gpg-context.c:1605
+#: camel/camel-gpg-context.c:1694 camel/camel-gpg-context.c:1718
+#: camel/camel-gpg-context.c:1788 camel/camel-gpg-context.c:1839
+msgid "Failed to execute gpg."
+msgstr "gpg யை இயக்க முடியவில்லை"
+
+#: camel/camel-gpg-context.c:1350
+msgid "This is a digitally signed message part"
+msgstr "இது டிஜிடல் கையொப்பமிடப்பட்ட பகுதி"
+
+#: camel/camel-gpg-context.c:1431 camel/camel-gpg-context.c:1437
+#: camel/camel-gpg-context.c:1443 camel/camel-smime-context.c:692
+#: camel/camel-smime-context.c:703 camel/camel-smime-context.c:710
+msgid "Cannot verify message signature: Incorrect message format"
+msgstr "செய்தி கையொப்பத்தை சரிபார்க்க முடியவில்லை: தவறான வடிவம்"
+
+#: camel/camel-gpg-context.c:1477
+#, c-format
+msgid "Cannot verify message signature: could not create temp file: %s"
+msgstr ""
+"செய்தி கையொப்பத்தை சரிபார்க்க முடியவில்லை: தற்காலிக கோப்பை உருவாக்க முடியவில்லை: %s"
+
+#: camel/camel-gpg-context.c:1565
+#, c-format
+msgid "Could not generate encrypting data: %s"
+msgstr "குறியாக்கப்பட்ட தகவலை உருவாக்க முடியவில்லை: %s"
+
+#: camel/camel-gpg-context.c:1623
+msgid "This is a digitally encrypted message part"
+msgstr "இது டிஜிடல் குறியாக்கம் செய்யப்பட்ட தகவல்"
+
+#: camel/camel-gpg-context.c:1674
+msgid "Failed to decrypt MIME part: protocol error"
+msgstr "MIME பகுதியை மறைநீக்கம் செய்வது தோல்வியுற்றது: விதிமுறை பிழை"
+
+#: camel/camel-gpg-context.c:1725 camel/camel-smime-context.c:966
+msgid "Encrypted content"
+msgstr "குறியாக்கம் செய்யப்பட்ட தகவல்"
+
+#: camel/camel-gpg-context.c:1744
+msgid "Unable to parse message content"
+msgstr "செய்தியை பகுக்க முடியவில்லை"
+
+#: camel/camel-gpg-context.c:1767 camel/camel-gpg-context.c:1818
+#: camel/camel-tcp-stream-openssl.c:631
+#: camel/providers/imap4/camel-imap4-engine.c:1465
+#: camel/providers/imap4/camel-imap4-engine.c:1504
+#: camel/providers/imap4/camel-imap4-engine.c:1549
+#: camel/providers/imap4/camel-imap4-engine.c:1605
+#: camel/providers/imap4/camel-imap4-store.c:1250
+#: camel/providers/imap4/camel-imap4-utils.c:575
+#: camel/providers/smtp/camel-smtp-transport.c:163
+#: camel/providers/smtp/camel-smtp-transport.c:218
+msgid "Unknown"
+msgstr "தெரியாது"
+
+#: camel/camel-lock-client.c:100
+#, c-format
+msgid "Cannot build locking helper pipe: %s"
+msgstr "பூட்டப்பட்ட உதவிக்குழாய்களை அமைக்க முடியாது: %s"
+
+#: camel/camel-lock-client.c:113
+#, c-format
+msgid "Cannot fork locking helper: %s"
+msgstr "பூட்டப்பட்ட உதவியை பிளக்க முடியாது: %s"
+
+#: camel/camel-lock-client.c:191 camel/camel-lock-client.c:214
+#, c-format
+msgid "Could not lock '%s': protocol error with lock-helper"
+msgstr "'%s' ஐ பூட்ட முடியாது. பூட்டு-உதவியில் விதிமுறை பிழை"
+
+#: camel/camel-lock-client.c:204
+#, c-format
+msgid "Could not lock '%s'"
+msgstr "'%s' ஐ பூட்ட முடியவில்லை"
+
+#: camel/camel-lock.c:92 camel/camel-lock.c:113
+#, c-format
+msgid "Could not create lock file for %s: %s"
+msgstr "%s க்கான பூட்டு கோப்பை உருவாக்க முடியவில்லை: %s"
+
+#: camel/camel-lock.c:154
+#, c-format
+msgid "Timed out trying to get lock file on %s. Try again later."
+msgstr "பூட்டு கோப்பை பெறுவதற்கான நேரம் முடிந்தது %s. மீண்டும் முயலவும்"
+
+#: camel/camel-lock.c:209
+#, c-format
+msgid "Failed to get lock using fcntl(2): %s"
+msgstr "fcntl(2) ஐ பயன்படுத்தி பூட்டை பெற முடியவில்லை:  %s"
+
+#: camel/camel-lock.c:272
+#, c-format
+msgid "Failed to get lock using flock(2): %s"
+msgstr "flock(2) ஐ பயன்படுத்தி பூட்டை பெற முடியவில்லை:  %s"
+
+#: camel/camel-movemail.c:104
+#, c-format
+msgid "Could not check mail file %s: %s"
+msgstr "மின்னஞ்சல் கோப்பு %s ஐ பார்க்க முடியவில்லை : %s"
+
+#: camel/camel-movemail.c:117
+#, c-format
+msgid "Could not open mail file %s: %s"
+msgstr "மின்னஞ்சல் கோப்பு %s ஐ திறக்க முடியவில்லை: %s"
+
+#: camel/camel-movemail.c:125
+#, c-format
+msgid "Could not open temporary mail file %s: %s"
+msgstr "தற்காலிக மின்னஞ்சல் கோப்பு%s ஐ திறக்க முடியவில்லை: %s"
+
+#: camel/camel-movemail.c:154
+#, c-format
+msgid "Failed to store mail in temp file %s: %s"
+msgstr "தற்காலிக கோப்பி %s இல் மின்னஞ்சலை சேமிக்க முடியவில்லை: %s"
+
+#: camel/camel-movemail.c:184
+#, c-format
+msgid "Could not create pipe: %s"
+msgstr "குழாயை உருவாக்க முடியவில்லை %s"
+
+#: camel/camel-movemail.c:196
+#, c-format
+msgid "Could not fork: %s"
+msgstr "பிளக்க முடியவில்லை: %s"
+
+#: camel/camel-movemail.c:234
+#, c-format
+msgid "Movemail program failed: %s"
+msgstr "மின்னஞ்சல் நகர்த்தல் தோல்வியுற்றது: %s"
+
+#: camel/camel-movemail.c:235
+msgid "(Unknown error)"
+msgstr "(தெரியாத பிழை)"
+
+#: camel/camel-movemail.c:258
+#, c-format
+msgid "Error reading mail file: %s"
+msgstr "மின்னஞ்சல் கோப்பை படிக்கும் போது பிழை: %s"
+
+#: camel/camel-movemail.c:269
+#, c-format
+msgid "Error writing mail temp file: %s"
+msgstr "மின்னஞ்சலை தற்காலிக கோப்பில் எழுதும்போது பிழை: %s"
+
+#: camel/camel-movemail.c:462 camel/camel-movemail.c:529
+#, c-format
+msgid "Error copying mail temp file: %s"
+msgstr "மின்னஞ்சலை தற்காலிக கோப்பில் நகலெடுக்கும் போது பிழை: %s"
+
+#: camel/camel-multipart-signed.c:586
+msgid "parse error"
+msgstr "பகுப்பு பிழை"
+
+#: camel/camel-net-utils.c:446 camel/camel-net-utils.c:608
+#: camel/camel-net-utils.c:739 camel/providers/pop3/camel-pop3-store.c:448
+#: camel/providers/pop3/camel-pop3-store.c:529
+msgid "Cancelled"
+msgstr "ரத்து செய்யப்பட்டது"
+
+#: camel/camel-net-utils.c:465
+#, fuzzy
+msgid "cannot create thread"
+msgstr "CMS செய்தியை உருவாக்க முடியவில்லை"
+
+#: camel/camel-net-utils.c:612
+#, c-format
+msgid "Resolving: %s"
+msgstr "கண்டுபிடிக்கிறது: %s"
+
+#: camel/camel-net-utils.c:634
+#, fuzzy
+msgid "Host lookup failed"
+msgstr "புரவலனை பெயருடன் பொருத்த முடியவில்லை: புரவலனை காணவில்லை"
+
+#: camel/camel-net-utils.c:636
+#, fuzzy, c-format
+msgid "Host lookup failed: %s: %s"
+msgstr "புரவலன் பெயர்அறிதல் தோல்வியடைந்தது: %s: புரவலனை காணவில்லை"
+
+#: camel/camel-net-utils.c:743
+msgid "Resolving address"
+msgstr "முகவரியை பெயருடன் பொருத்துகிறது"
+
+#: camel/camel-net-utils.c:763
+msgid "Name lookup failed"
+msgstr ""
+
+#: camel/camel-net-utils.c:766
+#, fuzzy, c-format
+msgid "Name lookup failed: %s"
+msgstr "NNTP கட்டளை தோல்வி: %s"
+
+#: camel/camel-offline-folder.c:250
+#, fuzzy, c-format
+msgid "Syncing messages in folder '%s' to disk"
+msgstr "%s இல் செய்திகளை நகலெடுக்கிறது"
+
+#: camel/camel-offline-journal.c:140 camel/camel-offline-journal.c:163
+#, fuzzy, c-format
+msgid "Cannot write offline journal for folder `%s': %s"
+msgstr "அடைவை உருவாக்க முடியவில்லை `%s': %s"
+
+#: camel/camel-provider.c:59
+msgid "Virtual folder email provider"
+msgstr "மெய்நிகர் அடைவு மின்னஞ்சல் சேவை"
+
+#: camel/camel-provider.c:61
+msgid "For reading mail as a query of another set of folders"
+msgstr "வேறு அடைவில் உள்ள கேள்விகளுக்கான மின்னஞ்சலை படிக்கிறது"
+
+#: camel/camel-provider.c:185
+#, c-format
+msgid "Could not load %s: Module loading not supported on this system."
+msgstr "%s ஏற்ற முடியவில்லை: பகுதியை மட்டும் ஏற்றுவதற்கு இங்கே அனுமதி இல்லை"
+
+#: camel/camel-provider.c:194
+#, c-format
+msgid "Could not load %s: %s"
+msgstr "ஏற்ற முடியவில்லை %s: %s"
+
+#: camel/camel-provider.c:202
+#, c-format
+msgid "Could not load %s: No initialization code in module."
+msgstr "ஏற்ற முடியவில்லை %s: இந்த பகுதியில் துவக்க அடையாளம் இல்லை"
+
+#: camel/camel-provider.c:374 camel/camel-session.c:161
+#, c-format
+msgid "No provider available for protocol `%s'"
+msgstr "இந்த விதிமுறைக்கான சேவை இல்லை`%s'"
+
+#: camel/camel-sasl-anonymous.c:35
+msgid "Anonymous"
+msgstr "பெயரில்லாத"
+
+#: camel/camel-sasl-anonymous.c:37
+msgid "This option will connect to the server using an anonymous login."
+msgstr "இந்த தேர்வு பெயரில்லாமல் சேவகனில் உங்களை இணைக்கும்"
+
+#: camel/camel-sasl-anonymous.c:112 camel/camel-sasl-plain.c:88
+msgid "Authentication failed."
+msgstr "அனுமதி மறுக்கப்பட்டது"
+
+#: camel/camel-sasl-anonymous.c:121
+#, c-format
+msgid ""
+"Invalid email address trace information:\n"
+"%s"
+msgstr ""
+"செல்லாத மின்னஞ்சல் முகவரி சுவடு தகவல்:\n"
+"%s"
+
+#: camel/camel-sasl-anonymous.c:133
+#, c-format
+msgid ""
+"Invalid opaque trace information:\n"
+"%s"
+msgstr ""
+"செல்லாத ஒபேக் சுவடு தகவல்:\n"
+"%s"
+
+#: camel/camel-sasl-anonymous.c:145
+#, c-format
+msgid ""
+"Invalid trace information:\n"
+"%s"
+msgstr ""
+"செல்லாத சுவடு தகவல்:\n"
+"%s"
+
+#: camel/camel-sasl-cram-md5.c:36
+msgid "CRAM-MD5"
+msgstr "CRAM-MD5"
+
+#: camel/camel-sasl-cram-md5.c:38
+msgid ""
+"This option will connect to the server using a secure CRAM-MD5 password, if "
+"the server supports it."
+msgstr ""
+"இந்த தேர்வுல் உங்களை பாதுகாப்ப CRAM-MD5 கடவுச்சொல்லை பயன்படுத்தி சேகனுடன் இணைக்கும். "
+"இதற்கு சேவகன் ஆதரவு தேவை"
+
+#: camel/camel-sasl-digest-md5.c:49
+msgid "DIGEST-MD5"
+msgstr "DIGEST-MD5"
+
+#: camel/camel-sasl-digest-md5.c:51
+msgid ""
+"This option will connect to the server using a secure DIGEST-MD5 password, "
+"if the server supports it."
+msgstr ""
+"இந்த தேர்வுல் உங்களை பாதுகாப்ப DIGEST-MD5 கடவுச்சொல்லை பயன்படுத்தி சேகனுடன் இணைக்கும். "
+"இதற்கு சேவகன் ஆதரவு தேவை"
+
+#: camel/camel-sasl-digest-md5.c:814
+msgid "Server challenge too long (>2048 octets)\n"
+msgstr "சேவகன் சவால் மிகப்பெரியாது (>2048 octets)\n"
+
+#: camel/camel-sasl-digest-md5.c:823
+msgid "Server challenge invalid\n"
+msgstr "சேவகன் சவால் செல்லாது\n"
+
+#: camel/camel-sasl-digest-md5.c:829
+msgid "Server challenge contained invalid \"Quality of Protection\" token\n"
+msgstr "சேவகன் சவாலில் செல்லாத \"பாதுகாப்பு\" தகவல்\n"
+
+#: camel/camel-sasl-digest-md5.c:859
+msgid "Server response did not contain authorization data\n"
+msgstr "சேவகன் பதிலில் அனுமதி தகவல் இல்லை\n"
+
+#: camel/camel-sasl-digest-md5.c:877
+msgid "Server response contained incomplete authorization data\n"
+msgstr "சேவகன் பதிலில் முடியாத அனுமதி தகவல் உள்ளது\n"
+
+#: camel/camel-sasl-digest-md5.c:887
+msgid "Server response does not match\n"
+msgstr "சேவகன் பதிலில் பொருத்தம் இல்லை\n"
+
+#: camel/camel-sasl-gssapi.c:57
+msgid "GSSAPI"
+msgstr "GSSAPI"
+
+#: camel/camel-sasl-gssapi.c:59
+msgid "This option will connect to the server using Kerberos 5 authentication."
+msgstr "இந்த தேர்வு கர்ப்ரோஸ் கடவுச்சொல்லை பயன்படுத்தி இணைக்கும்"
+
+#: camel/camel-sasl-gssapi.c:157
+msgid ""
+"The specified mechanism is not supported by the provided credential, or is "
+"unrecognized by the implementation."
+msgstr ""
+"குறிப்பிட்ட செயலுக்கு தேவையான ஆதரவு இல்லை அல்லது செயல்பாட்டை புரிந்துகொள்ள முடியவில்லை."
+
+#: camel/camel-sasl-gssapi.c:162
+msgid "The provided target_name parameter was ill-formed."
+msgstr "கொடுக்கப்பட்ட சேருமிட_பெயர் பயனிலைகள் சரியான அமைப்பின் இல்லை"
+
+#: camel/camel-sasl-gssapi.c:165
+msgid ""
+"The provided target_name parameter contained an invalid or unsupported type "
+"of name."
+msgstr ""
+"கொடுக்கப்பட்ட சேருமிட_பெயர்களின் பயனிலையில் செல்லாத அல்லது ஆதரவு இல்லாத பெயர் உள்ளது."
+
+#: camel/camel-sasl-gssapi.c:169
+msgid ""
+"The input_token contains different channel bindings to those specified via "
+"the input_chan_bindings parameter."
+msgstr ""
+"input_token இல் வேறு அலைவரிசை குறிப்பிடப்பட்டுள்ளதால் nput_chan_bindings பயனிலை "
+"வழியாக குறிப்பிட வேண்டும்."
+
+#: camel/camel-sasl-gssapi.c:174
+msgid ""
+"The input_token contains an invalid signature, or a signature that could not "
+"be verified."
+msgstr "input_token இல் செல்லாத கையொப்பம் உள்ளது அல்லது சரிபார்க்காத கையொப்பம் உள்ளது."
+
+#: camel/camel-sasl-gssapi.c:178
+msgid ""
+"The supplied credentials were not valid for context initiation, or the "
+"credential handle did not reference any credentials."
+msgstr ""
+"தொடரை துவக்க கொடுக்கப்பட்ட தகவல்கள் போதாது அல்லது தகவல் குறிப்பை அணுக முடியவில்லை"
+
+#: camel/camel-sasl-gssapi.c:183
+msgid "The supplied context handle did not refer to a valid context."
+msgstr "கொடுக்கப்பட தகவல் சரியான தகவலை குறிக்கவில்லை"
+
+#: camel/camel-sasl-gssapi.c:186
+msgid "The consistency checks performed on the input_token failed."
+msgstr "input_token செய்யப்பட்ட ஒத்திசைவு சோதனையில் தோல்வி"
+
+#: camel/camel-sasl-gssapi.c:189
+msgid "The consistency checks performed on the credential failed."
+msgstr "தகவலுக்காக செய்யப்பட்ட ஒத்திசைவு சோதனையில் தோல்வி"
+
+#: camel/camel-sasl-gssapi.c:192
+msgid "The referenced credentials have expired."
+msgstr "கொடுக்கப்பட்ட நம்பக தகவலின் காலம் முடிவுற்றது"
+
+#: camel/camel-sasl-gssapi.c:198 camel/camel-sasl-gssapi.c:246
+#: camel/camel-sasl-gssapi.c:282 camel/camel-sasl-gssapi.c:297
+#: camel/camel-sasl-kerberos4.c:226
+#: camel/providers/imap/camel-imap-store.c:1222
+msgid "Bad authentication response from server."
+msgstr "சேவகனிலிருந்து மோசமான அனுமதி சோதனை பதில்"
+
+#: camel/camel-sasl-gssapi.c:307
+msgid "Unsupported security layer."
+msgstr "ஆதரவு இல்லாத பாதுகாப்பு அடுக்கு"
+
+#: camel/camel-sasl-kerberos4.c:42
+msgid "Kerberos 4"
+msgstr "கர்ப்ரோஸ் 4"
+
+#: camel/camel-sasl-kerberos4.c:44
+msgid "This option will connect to the server using Kerberos 4 authentication."
+msgstr "இந்த தேர்வு சேவகனுடன் கர்ப்ரோஸ் 4 அனுமதி சோதனை பயன்படுத்தி இணையும்"
+
+#: camel/camel-sasl-kerberos4.c:169
+#, c-format
+msgid ""
+"Could not get Kerberos ticket:\n"
+"%s"
+msgstr ""
+"கர்ப்ரோஸ் டிக்கெட்டை பெற முடியவில்லை:\n"
+"%s"
+
+#: camel/camel-sasl-login.c:33
+msgid "Login"
+msgstr "உள்நுழை"
+
+#: camel/camel-sasl-login.c:35 camel/camel-sasl-plain.c:35
+msgid "This option will connect to the server using a simple password."
+msgstr "இந்த தேர்வு சுலபமான கடவுச்சொல்லை பயன்படுத்தி சேவகனுடன் இணையும்."
+
+#: camel/camel-sasl-login.c:128
+msgid "Unknown authentication state."
+msgstr "தெரியாத அனுமதி சரிபார்த்தல் நிலை."
+
+#: camel/camel-sasl-ntlm.c:32
+msgid "NTLM / SPA"
+msgstr "NTLM / SPA"
+
+#: camel/camel-sasl-ntlm.c:34
+msgid ""
+"This option will connect to a Windows-based server using NTLM / Secure "
+"Password Authentication."
+msgstr ""
+"NTLM/ பாதுகாப்பான கடவுச்சொல் அனுமதி முறையை பயன்படுத்தி விண்டோஸ் சார்ந்த சேவகனுடன் இணைய "
+"இந்த முறை பயன்படும்."
+
+#: camel/camel-sasl-plain.c:33
+msgid "PLAIN"
+msgstr "PLAIN"
+
+#: camel/camel-sasl-popb4smtp.c:37
+msgid "POP before SMTP"
+msgstr "SMTP க்கு முன் POP"
+
+#: camel/camel-sasl-popb4smtp.c:39
+msgid "This option will authorise a POP connection before attempting SMTP"
+msgstr "இந்த தேர்வு SMTP இணைப்புக்கு முயல்வதற்கு முன் பாப் இணைப்பை சோதிக்கும்"
+
+#: camel/camel-sasl-popb4smtp.c:104
+msgid "POP Source URI"
+msgstr "POP மூலம் URI"
+
+#: camel/camel-sasl-popb4smtp.c:107
+msgid "POP Before SMTP auth using an unknown transport"
+msgstr "SMTP அனுமதி தெரியாத தகவல் பறிமாற்றத்துக்கு முன் POP "
+
+#: camel/camel-sasl-popb4smtp.c:112
+msgid "POP Before SMTP auth using a non-pop source"
+msgstr "SMTP பாப் அல்லாத மூலத்தை பயன்படுத்துவதற்கு முன் POP "
+
+#: camel/camel-search-private.c:151
+#, c-format
+msgid "Regular expression compilation failed: %s: %s"
+msgstr "இயல்பான கூற்று முடித்தல் தோல்வியுற்றது: %s: %s"
+
+#: camel/camel-service.c:272
+#, c-format
+msgid "URL '%s' needs a username component"
+msgstr "URL '%s' க்கு பயனீட்டாளர் பெயர் தேவை"
+
+#: camel/camel-service.c:276
+#, c-format
+msgid "URL '%s' needs a host component"
+msgstr "URL '%s' புரவலன் பெயர் தேவை"
+
+#: camel/camel-service.c:280
+#, c-format
+msgid "URL '%s' needs a path component"
+msgstr "URL '%s' க்கு பாதை தேவை"
+
+#: camel/camel-session.c:283
+#, c-format
+msgid ""
+"Could not create directory %s:\n"
+"%s"
+msgstr ""
+"அடைவை உருவாக்க முடியவில்லை%s:\n"
+"%s"
+
+#: camel/camel-smime-context.c:231
+#, c-format
+msgid "Cannot find certificate for '%s'"
+msgstr "`%s' க்கான சான்றிதழ் காணவில்லை"
+
+#: camel/camel-smime-context.c:237
+msgid "Cannot create CMS message"
+msgstr "CMS செய்தியை உருவாக்க முடியவில்லை"
+
+#: camel/camel-smime-context.c:242
+#, fuzzy
+msgid "Cannot create CMS signed data"
+msgstr "CMS கையயொப்பதகவலை உருவாக்க முடியவில்லை"
+
+#: camel/camel-smime-context.c:248
+#, fuzzy
+msgid "Cannot attach CMS signed data"
+msgstr "CMS கையயொப்பதகவலை இணைக்க முடியவில்லை"
+
+#: camel/camel-smime-context.c:255
+msgid "Cannot attach CMS data"
+msgstr "CMS கையயொப்பதகவலை இணைக்க முடியவில்லை"
+
+#: camel/camel-smime-context.c:261
+#, fuzzy
+msgid "Cannot create CMS Signer information"
+msgstr "CMS கையயொப்ப தகவலை உருவாக்க முடியவில்லை"
+
+#: camel/camel-smime-context.c:267
+#, fuzzy
+msgid "Cannot find certificate chain"
+msgstr "கையொப்ப தொடரை காணவில்லை"
+
+#: camel/camel-smime-context.c:273
+#, fuzzy
+msgid "Cannot add CMS Signing time"
+msgstr "CMS கையொப்ப நேரத்தை சேர்க்க முடியவில்லை"
+
+#: camel/camel-smime-context.c:295 camel/camel-smime-context.c:307
+#, fuzzy, c-format
+msgid "Encryption certificate for '%s' does not exist"
+msgstr "'%s' க்கான குறிமுறையாக்க சான்றிதழை காணவில்லை"
+
+#: camel/camel-smime-context.c:314
+msgid "Cannot add SMIMEEncKeyPrefs attribute"
+msgstr "SMIMEEncKeyPrefs பண்பை சேர்க்க முடியவில்லை"
+
+#: camel/camel-smime-context.c:319
+msgid "Cannot add MS SMIMEEncKeyPrefs attribute"
+msgstr "MS SMIMEEncKeyPrefs பண்பை சேர்க்க முடியவில்லை"
+
+#: camel/camel-smime-context.c:324
+msgid "Cannot add encryption certificate"
+msgstr "குறிமுறையாக்க சான்றிதழை சேர்க்க முடியவில்லை"
+
+#: camel/camel-smime-context.c:330
+#, fuzzy
+msgid "Cannot add CMS Signer information"
+msgstr "CMS கையொப்ப தகவலை சேர்க்க முடியவில்லை"
+
+#: camel/camel-smime-context.c:400 camel/camel-smime-context.c:848
+msgid "Cannot create encoder context"
+msgstr "குறியாக்க செய்தியை உருவாக்க முடியவில்லை"
+
+#: camel/camel-smime-context.c:406
+msgid "Failed to add data to CMS encoder"
+msgstr "CMS குறியாக்கியில் தகவலை சேர்க்க முடியவில்லை"
+
+#: camel/camel-smime-context.c:411 camel/camel-smime-context.c:865
+msgid "Failed to encode data"
+msgstr "தகவலை குறியாக்கல் தோல்வியுற்றது"
+
+#: camel/camel-smime-context.c:484
+msgid "Unverified"
+msgstr "சரிபார்க்காத"
+
+#: camel/camel-smime-context.c:486
+msgid "Good signature"
+msgstr "சரியான கையொப்பம்"
+
+#: camel/camel-smime-context.c:488
+msgid "Bad signature"
+msgstr "மேசமான கைப்யொப்பம்"
+
+#: camel/camel-smime-context.c:490
+msgid "Content tampered with or altered in transit"
+msgstr ""
+" பரிமாற்த்தின் போது தகவலில் குறுக்கீடு நிகழ்ந்தது அல்லது தகவலில் மாற்றம் நிகழ்துள்ளதுற"
+
+#: camel/camel-smime-context.c:492
+msgid "Signing certificate not found"
+msgstr "கையொப்ப சான்றிதழ் காணவில்லை"
+
+#: camel/camel-smime-context.c:494
+msgid "Signing certificate not trusted"
+msgstr "கையொப்ப சான்றிதழில் நம்பகம் இல்லை"
+
+#: camel/camel-smime-context.c:496
+msgid "Signature algorithm unknown"
+msgstr "கையொப்ப முறைமை தெரியாத முறை"
+
+#: camel/camel-smime-context.c:498
+msgid "Signature algorithm unsupported"
+msgstr "கையொப்ப முறைமைக்கு ஆதரவு இல்லை"
+
+#: camel/camel-smime-context.c:500
+msgid "Malformed signature"
+msgstr "தவறான கையொப்பம்"
+
+#: camel/camel-smime-context.c:502
+msgid "Processing error"
+msgstr "பிழையை சரிசெய்கிறது"
+
+#: camel/camel-smime-context.c:539
+#, fuzzy
+msgid "No signed data in signature"
+msgstr "கையொப்பத்தில் சரியான தகவல் இல்லை"
+
+#: camel/camel-smime-context.c:546
+msgid "Digests missing from enveloped data"
+msgstr "கடித உறையில் சுருக்க தகவல் காணவில்லை"
+
+#: camel/camel-smime-context.c:559 camel/camel-smime-context.c:569
+msgid "Cannot calculate digests"
+msgstr "சுருக்கத் தொகுப்பை கணக்கிட முடியவில்லை"
+
+#: camel/camel-smime-context.c:574
+msgid "Cannot set message digests"
+msgstr "சுருக்கத் தொகுப்பை அமைக்க முடியவில்லை"
+
+#: camel/camel-smime-context.c:584 camel/camel-smime-context.c:589
+msgid "Certificate import failed"
+msgstr "சான்றிதழ் உள்வாங்குதல் தோல்வியுற்றது"
+
+#: camel/camel-smime-context.c:599
+#, fuzzy
+msgid "Certificate is the only message, cannot verify certificates"
+msgstr "சான்றிதழ் மட்டுமுள்ள செய்தி, சான்றிதழை சரிபார்க்க முடியவில்லை"
+
+#: camel/camel-smime-context.c:602
+#, fuzzy
+msgid "Certificate is the only message, certificates imported and verified"
+msgstr "சான்றிதழ் மட்டுமுள்ள செய்தி, சான்றிதழை உள்வாங்கி சரிபார்க்க பட்டது"
+
+#: camel/camel-smime-context.c:606
+msgid "Cannot find signature digests"
+msgstr "கையொப்ப சுருக்கத்தை கண்டுபிடிக்க முடியவில்லை"
+
+#: camel/camel-smime-context.c:622
+#, c-format
+msgid "Signer: %s <%s>: %s\n"
+msgstr "கையொப்பமிட்டவர்: %s <%s>: %s\n"
+
+#: camel/camel-smime-context.c:723
+msgid "Decoder failed"
+msgstr "மறைநீக்கம் தோல்வியுற்றது"
+
+#: camel/camel-smime-context.c:775
+#, c-format
+msgid "Cannot find certificate for `%s'"
+msgstr "'%s' க்கான சான்றிதழ் காணவில்லை"
+
+#: camel/camel-smime-context.c:782
+msgid "Cannot find common bulk encryption algorithm"
+msgstr "பொதுவான குறிமுறயாக்க படிமுறையை காணவில்லை"
+
+#. PORT_GetError(); ??
+#: camel/camel-smime-context.c:791
+msgid "Cannot allocate slot for encryption bulk key"
+msgstr "சங்கேதங்களை குறிமுறையாக்கத்திற்காக மொத்தமாக ஒதுக்குவதற்கான வழி தெரியவிலலை"
+
+#: camel/camel-smime-context.c:802
+msgid "Cannot create CMS Message"
+msgstr "CMS செய்தியை உருவாக்க முடியவில்லை"
+
+#: camel/camel-smime-context.c:808
+#, fuzzy
+msgid "Cannot create CMS Enveloped data"
+msgstr "CMS கடித உரை தகவலை உருவாக்க முடியவில்லை"
+
+#: camel/camel-smime-context.c:814
+#, fuzzy
+msgid "Cannot attach CMS Enveloped data"
+msgstr "CMS கடித உரை தகவலை இணைக்க முடியவில்லை"
+
+#: camel/camel-smime-context.c:820
+msgid "Cannot attach CMS data object"
+msgstr "CMS தகவலை இணைக்க முடியவில்லை"
+
+#: camel/camel-smime-context.c:829
+#, fuzzy
+msgid "Cannot create CMS Recipient information"
+msgstr "CMS கடிதம் பெறுபவர் தகவலை உருவாக்க முடியவில்லை"
+
+#: camel/camel-smime-context.c:834
+#, fuzzy
+msgid "Cannot add CMS Recipient information"
+msgstr "CMS கடிதம் பெறுபவர் தகவலை சேர்க்க முடியவில்லை"
+
+#: camel/camel-smime-context.c:859
+msgid "Failed to add data to encoder"
+msgstr "குறியாக்கியை சேர்த்தல் தோல்வியில் முடிந்தது"
+
+#: camel/camel-smime-context.c:946
+#, c-format
+msgid "Decoder failed, error %d"
+msgstr "மறை நீக்கி தோல்வி, பிழை %d"
+
+#: camel/camel-smime-context.c:953
+msgid "S/MIME Decrypt: No encrypted content found"
+msgstr "S/MIME மறைநீக்கி, குறிமுறையாக்கப்பட்ட செய்திகள் எதுவும் கிடைக்க வில்லை"
+
+#: camel/camel-smime-context.c:980
+msgid "import keys: unimplemented"
+msgstr "விசை உள்வாங்கள்: செயல்படுத்தப்படவில்லை"
+
+#: camel/camel-smime-context.c:988
+msgid "export keys: unimplemented"
+msgstr "விசை மேலேற்றம்: செயல்படுத்தப்படவில்லை"
+
+#: camel/camel-store.c:214
+msgid "Cannot get folder: Invalid operation on this store"
+msgstr "அடைவை பெற முடியவில்லை: இந்த கிடங்கில் செல்லாத செயல்"
+
+#: camel/camel-store.c:244
+#, c-format
+msgid "Cannot create folder `%s': folder exists"
+msgstr "'%s' அடைவை உருவாக்க முடிவில்லை: அடைவு ஏற்கெனவே உள்ளது"
+
+#: camel/camel-store.c:298
+msgid "Cannot create folder: Invalid operation on this store"
+msgstr "அடைவை உருவாக்க முடியவில்லை : இந்த கிடங்கில் செல்லாத செயல்"
+
+#: camel/camel-store.c:326
+#, c-format
+msgid "Cannot create folder: %s: folder exists"
+msgstr "அடைவை உருவாக்க முடியவில்லை %s: அடைவு ஏற்கெனவே உள்ளது"
+
+#: camel/camel-store.c:390 camel/camel-vee-store.c:367
+#: camel/providers/local/camel-maildir-store.c:221
+#, c-format
+msgid "Cannot delete folder: %s: Invalid operation"
+msgstr "அடைவை நீக்க முடியவில்லை %s: செல்லாத செயல்"
+
+#: camel/camel-store.c:440 camel/camel-vee-store.c:404
+#: camel/providers/local/camel-maildir-store.c:293
+#, c-format
+msgid "Cannot rename folder: %s: Invalid operation"
+msgstr "அடைவின் பெயரை மாற்ற முடியவில்லை %s: செல்லாத செயல்"
+
+#: camel/camel-store.c:778
+msgid "Trash"
+msgstr "குப்பைதொட்டி"
+
+#: camel/camel-store.c:780
+msgid "Junk"
+msgstr "தேவையற்ற"
+
+#: camel/camel-tcp-stream-openssl.c:568
+msgid "Unable to get issuer's certificate"
+msgstr "வழங்கியவரின் சான்றிதழை பெற முடியவில்லை"
+
+#: camel/camel-tcp-stream-openssl.c:570
+msgid "Unable to get Certificate Revocation List"
+msgstr "மீட்கும் பட்டியலிலிருந்து சான்றிதழை பெற முடியவில்லை"
+
+#: camel/camel-tcp-stream-openssl.c:572
+msgid "Unable to decrypt certificate signature"
+msgstr "சான்றிதழ் கையொப்பத்தை மறை நீக்கம் செய்ய முடியவில்லை"
+
+#: camel/camel-tcp-stream-openssl.c:574
+msgid "Unable to decrypt Certificate Revocation List signature"
+msgstr "மீட்டலுக்கான கையொப்ப பட்டியலில் சான்றிதழை மறை நீக்கம் செய்ய முடியவில்லை"
+
+#: camel/camel-tcp-stream-openssl.c:576
+msgid "Unable to decode issuer's public key"
+msgstr "வழங்கியவரின் பொது சங்கேதத்தை மறை நீக்கம் செய்ய முடியவில்லை"
+
+#: camel/camel-tcp-stream-openssl.c:578
+msgid "Certificate signature failure"
+msgstr "சான்றிதழ் கையொப்பம் தோல்வியுற்றது"
+
+#: camel/camel-tcp-stream-openssl.c:580
+msgid "Certificate Revocation List signature failure"
+msgstr "சான்றிதழ் மீட்டல் பட்டியலில் கையொப்பம் தோல்வியுற்றது"
+
+#: camel/camel-tcp-stream-openssl.c:582
+msgid "Certificate not yet valid"
+msgstr "சான்றிதழ் செல்லாது"
+
+#: camel/camel-tcp-stream-openssl.c:584
+msgid "Certificate has expired"
+msgstr "சான்றிதழ் காலாவதியாகிவிட்டது"
+
+#: camel/camel-tcp-stream-openssl.c:586
+msgid "CRL not yet valid"
+msgstr "CRL செல்லாது"
+
+#: camel/camel-tcp-stream-openssl.c:588
+msgid "CRL has expired"
+msgstr "CRL காலாவதியாகிவிட்டது"
+
+#: camel/camel-tcp-stream-openssl.c:593
+msgid "Error in CRL"
+msgstr "CRL லில் பிழை"
+
+#: camel/camel-tcp-stream-openssl.c:595
+msgid "Out of memory"
+msgstr "நினைவிடம் போதவில்லை"
+
+#: camel/camel-tcp-stream-openssl.c:597
+msgid "Zero-depth self-signed certificate"
+msgstr "பூஜ்ஜிய-ஆழம் தானாக-கையொப்பமிடப்பட்ட சான்றிதழ்"
+
+#: camel/camel-tcp-stream-openssl.c:599
+msgid "Self-signed certificate in chain"
+msgstr "தானாக கையொப்பம் இடப்பட்ட பட்டியல் தொடர்"
+
+#: camel/camel-tcp-stream-openssl.c:601
+msgid "Unable to get issuer's certificate locally"
+msgstr "வழங்கியவரின் சான்றிதழை பெற முடியவில்லை"
+
+#: camel/camel-tcp-stream-openssl.c:603
+msgid "Unable to verify leaf signature"
+msgstr "இதழ் சான்றிதழை பெற முடியவில்லை"
+
+#: camel/camel-tcp-stream-openssl.c:605
+msgid "Certificate chain too long"
+msgstr "சான்றிதம் தொடர் பெரிதாக உள்ளது"
+
+#: camel/camel-tcp-stream-openssl.c:607
+msgid "Certificate Revoked"
+msgstr "சான்றிதழ் மீண்டும் துவக்கப்பட்டது"
+
+#: camel/camel-tcp-stream-openssl.c:609
+msgid "Invalid Certificate Authority (CA)"
+msgstr "செல்லாத சான்றிதழ் வினியோகிப்பாளர் (CA)"
+
+#: camel/camel-tcp-stream-openssl.c:611
+msgid "Path length exceeded"
+msgstr "பாதை நீளம் அதிகமாக உள்ளது"
+
+#: camel/camel-tcp-stream-openssl.c:613
+msgid "Invalid purpose"
+msgstr "செல்லாத காரணம்"
+
+#: camel/camel-tcp-stream-openssl.c:615
+msgid "Certificate untrusted"
+msgstr "சான்றிதழில் நம்பக தன்மை இல்லை"
+
+#: camel/camel-tcp-stream-openssl.c:617
+msgid "Certificate rejected"
+msgstr "சான்றிதழ் நிராகரிக்கப்பட்டது"
+
+#: camel/camel-tcp-stream-openssl.c:620
+msgid "Subject/Issuer mismatch"
+msgstr "தலைப்பு/வழங்கியவர் பொருந்தவில்லை"
+
+#: camel/camel-tcp-stream-openssl.c:622
+msgid "AKID/SKID mismatch"
+msgstr "AKID/SKID பொருத்தமில்லை"
+
+#: camel/camel-tcp-stream-openssl.c:624
+msgid "AKID/Issuer serial mismatch"
+msgstr "AKID/வழங்கியவர் எண் பொருத்தமில்லை"
+
+#: camel/camel-tcp-stream-openssl.c:626
+msgid "Key usage does not support certificate signing"
+msgstr "விசை பயன்பாடு சான்றிதழ் கையொப்பத்திற்கு ஆதரவு தராது"
+
+#: camel/camel-tcp-stream-openssl.c:629
+msgid "Error in application verification"
+msgstr "பயன்பாட்டை சரிபார்த்தலில் பிழை"
+
+#: camel/camel-tcp-stream-openssl.c:696 camel/camel-tcp-stream-ssl.c:827
+#, c-format
+msgid ""
+"Issuer:            %s\n"
+"Subject:           %s\n"
+"Fingerprint:       %s\n"
+"Signature:         %s"
+msgstr ""
+"வழங்கியவர்:            %s\n"
+"தலைப்பு:           %s\n"
+"கைரேகை:       %s\n"
+"கையொப்பம்:         %s"
+
+#: camel/camel-tcp-stream-openssl.c:702 camel/camel-tcp-stream-ssl.c:833
+msgid "GOOD"
+msgstr "நன்று"
+
+#: camel/camel-tcp-stream-openssl.c:702 camel/camel-tcp-stream-ssl.c:833
+msgid "BAD"
+msgstr "தவறு"
+
+#: camel/camel-tcp-stream-openssl.c:704
+#, c-format
+msgid ""
+"Bad certificate from %s:\n"
+"\n"
+"%s\n"
+"\n"
+"%s\n"
+"\n"
+"Do you wish to accept anyway?"
+msgstr ""
+" தவறான சான்றிதழ்%s:\n"
+"\n"
+"%s\n"
+"\n"
+"%s\n"
+"\n"
+"எப்படி இருந்தாலும் ஏற்க விருப்பமா?"
+
+#. construct our user prompt
+#: camel/camel-tcp-stream-ssl.c:837
+#, c-format
+msgid ""
+"SSL Certificate check for %s:\n"
+"\n"
+"%s\n"
+"\n"
+"Do you wish to accept?"
+msgstr ""
+"SSL சான்றிதழ் சோதனை %s:\n"
+"\n"
+"%s\n"
+"\n"
+"ஏற்க விருப்பமா?"
+
+#: camel/camel-tcp-stream-ssl.c:881
+#, c-format
+msgid ""
+"Certificate problem: %s\n"
+"Issuer: %s"
+msgstr ""
+"சான்றிதழ் பிரச்சனை %s\n"
+"வழங்கியவர்: %s"
+
+#: camel/camel-tcp-stream-ssl.c:933
+#, c-format
+msgid ""
+"Bad certificate domain: %s\n"
+"Issuer: %s"
+msgstr ""
+"தவறான சான்றிதழ்: %s\n"
+"வழங்கியவர்: %s"
+
+#: camel/camel-tcp-stream-ssl.c:951
+#, c-format
+msgid ""
+"Certificate expired: %s\n"
+"Issuer: %s"
+msgstr ""
+"சான்றிதழ் காலாவதியானது: %s\n"
+"வழங்கியவர்: %s"
+
+#: camel/camel-tcp-stream-ssl.c:968
+#, c-format
+msgid ""
+"Certificate revocation list expired: %s\n"
+"Issuer: %s"
+msgstr ""
+"சான்றிதழ் மீட்டல் பட்டியல் காலாவதியானது: %s\n"
+"வழங்கியவர்: %s"
+
+#: camel/camel-url.c:293
+#, c-format
+msgid "Could not parse URL `%s'"
+msgstr "URL ஐ பகுக்க முடியவில்லை `%s'"
+
+#: camel/camel-vee-folder.c:476
+#, c-format
+msgid "Error storing `%s': %s"
+msgstr "சேமிக்கும் போது பிழை `%s': %s"
+
+#: camel/camel-vee-folder.c:518
+#, c-format
+msgid "No such message %s in %s"
+msgstr "%s இல் %s தகவல் இல்லை"
+
+#: camel/camel-vee-folder.c:643 camel/camel-vee-folder.c:649
+msgid "Cannot copy or move messages into a Virtual Folder"
+msgstr "மெய்நிகர் அடைவில் செய்தியை நகர்த்த நகலெடுக்க முடியவில்லை"
+
+#: camel/camel-vee-store.c:343
+msgid "Unmatched"
+msgstr "பொருந்தவில்லை"
+
+#: camel/camel-vee-store.c:390
+#, c-format
+msgid "Cannot delete folder: %s: No such folder"
+msgstr "அடைவை நீக்க முடியவில்லை: %s: அப்படி ஒரு அடைவு இல்லை"
+
+#: camel/camel-vee-store.c:412
+#, c-format
+msgid "Cannot rename folder: %s: No such folder"
+msgstr "அடைவின் பெயரை மாற்ற முடியவில்லை: %s: அப்படி ஒரு அடைவு இல்லை"
+
+#: camel/camel-vtrash-folder.c:47
+msgid "Cannot copy messages to the Trash folder"
+msgstr "செய்தியை குப்பை தொட்டி அடைவிற்கு நகலெடுக்க முடியவில்லை"
+
+#: camel/camel-vtrash-folder.c:49
+msgid "Cannot copy messages to the Junk folder"
+msgstr "செய்தியை தேவையற்றவை அடைவிற்கு நகலெடுக்க முடியவில்லை"
+
+#: camel/providers/groupwise/camel-groupwise-folder.c:104
+#: camel/providers/imap/camel-imap-folder.c:1979
+#, c-format
+msgid ""
+"Cannot get message: %s\n"
+"  %s"
+msgstr ""
+"செய்தியை பெற முடியவில்லை: %s\n"
+"  %s"
+
+#: camel/providers/groupwise/camel-groupwise-folder.c:104
+#: camel/providers/imap/camel-imap-folder.c:1979
+#: camel/providers/local/camel-maildir-folder.c:245
+#: camel/providers/local/camel-mbox-folder.c:403
+#: camel/providers/local/camel-mh-folder.c:203
+msgid "No such message"
+msgstr "இது போன்ற செய்தி இல்லை"
+
+#: camel/providers/groupwise/camel-groupwise-folder.c:120
+#: camel/providers/imap4/camel-imap4-folder.c:696
+#: camel/providers/nntp/camel-nntp-folder.c:157
+#: camel/providers/nntp/camel-nntp-folder.c:233
+#: camel/providers/nntp/camel-nntp-folder.c:372
+#: camel/providers/pop3/camel-pop3-folder.c:263
+#: camel/providers/pop3/camel-pop3-folder.c:431
+#: camel/providers/pop3/camel-pop3-folder.c:492
+#: camel/providers/pop3/camel-pop3-folder.c:510
+msgid "User cancelled"
+msgstr "பயனீட்டாளர் ரத்து செய்யப்பட்டார்"
+
+#: camel/providers/groupwise/camel-groupwise-folder.c:125
+#: camel/providers/imap4/camel-imap4-folder.c:701
+#: camel/providers/nntp/camel-nntp-folder.c:148
+#: camel/providers/nntp/camel-nntp-folder.c:150
+#: camel/providers/nntp/camel-nntp-folder.c:159
+#: camel/providers/nntp/camel-nntp-folder.c:235
+#: camel/providers/pop3/camel-pop3-folder.c:434
+#: camel/providers/pop3/camel-pop3-folder.c:495
+#: camel/providers/pop3/camel-pop3-folder.c:502
+#: camel/providers/pop3/camel-pop3-folder.c:513
+#, c-format
+msgid "Cannot get message %s: %s"
+msgstr "%s செய்தியை பெற முடியவில்லை: %s"
+
+#: camel/providers/groupwise/camel-groupwise-folder.c:145
+#: camel/providers/imap4/camel-imap4-folder.c:719
+#, fuzzy
+msgid "This message is not available in offline mode."
+msgstr "இந்த செய்தி தற்போது கிடைக்கவில்லை"
+
+#: camel/providers/groupwise/camel-groupwise-folder.c:171
+#: camel/providers/groupwise/camel-groupwise-folder.c:272
+#, fuzzy
+msgid "Could not get message"
+msgstr "செய்தியை உருவாக்க முடியவில்லை"
+
+#: camel/providers/groupwise/camel-groupwise-folder.c:471
+#: camel/providers/imap/camel-imap-folder.c:245
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "%s க்கான சுருக்கத்தை உருவாக்க முடியவில்லை"
+
+#: camel/providers/groupwise/camel-groupwise-folder.c:685
+#, fuzzy, c-format
+msgid "Cannot create message: %s"
+msgstr "CMS செய்தியை உருவாக்க முடியவில்லை"
+
+#: camel/providers/groupwise/camel-groupwise-folder.c:697
+#, fuzzy, c-format
+msgid "Cannot append message to folder `%s': %s"
+msgstr "mh அடைவிலிருந்து செய்தியை பின்சேர்க்க முடியவில்லை : %s: %s"
+
+#: camel/providers/groupwise/camel-groupwise-journal.c:240
+#, fuzzy, c-format
+msgid "Cannot get folder container %s"
+msgstr "அடைவை பெற முடியவில்லை: %s: %s"
+
+#: camel/providers/groupwise/camel-groupwise-journal.c:328
+#: camel/providers/imap4/camel-imap4-journal.c:276
+#, fuzzy
+msgid "Cannot append message in offline mode: cache unavailable"
+msgstr "mh அடைவிலிருந்து செய்தியை பின்சேர்க்க முடியவில்லை : %s: %s"
+
+#: camel/providers/groupwise/camel-groupwise-journal.c:344
+#: camel/providers/imap4/camel-imap4-journal.c:292
+#, fuzzy, c-format
+msgid "Cannot append message in offline mode: %s"
+msgstr "mbox கோப்பில் செய்தியை பின்சேர்க்க முடியாது: %s: %s"
+
+#: camel/providers/groupwise/camel-groupwise-provider.c:51
+#: camel/providers/imap4/camel-imap4-provider.c:36
+msgid "Checking for new mail"
+msgstr "புதிய மின்னஞ்சல் உள்ளதா என பார்க்கிறது"
+
+#: camel/providers/groupwise/camel-groupwise-provider.c:53
+msgid "Check for new messages in all folders"
+msgstr "புதிய மின்னஞ்சல் உள்ளதா என அனைத்து அடைவிலும் பார்க்கிறது"
+
+#: camel/providers/groupwise/camel-groupwise-provider.c:56
+#: camel/providers/imap/camel-imap-provider.c:64
+#: camel/providers/imap4/camel-imap4-provider.c:49
+#: camel/providers/local/camel-local-provider.c:43
+#: camel/providers/local/camel-local-provider.c:79
+#: camel/providers/local/camel-local-provider.c:99
+msgid "Options"
+msgstr "தேர்வுகள்"
+
+#: camel/providers/groupwise/camel-groupwise-provider.c:58
+msgid "Apply filters to new messages in Inbox on this server"
+msgstr ""
+"இந்த சேவகனில் உள்ள மின்னஞ்சல்பெட்டிக்கும் உள்ள அனைத்து புதிய அஞ்சலுக்கும் வழிகட்டியை "
+"பொருத்துகிறது"
+
+#: camel/providers/groupwise/camel-groupwise-provider.c:60
+msgid "Check new messages for Junk contents"
+msgstr "தேவையற்ற பட்டியலில் உள்ள புதிய செய்தியை பார்க்கவும்"
+
+#: camel/providers/groupwise/camel-groupwise-provider.c:62
+msgid "Only check for Junk messages in the INBOX folder"
+msgstr "தேவையற்ற செய்திகளை உள்பெட்டி அடைவில் மட்டும் சோதிக்கவும்"
+
+#: camel/providers/groupwise/camel-groupwise-provider.c:64
+#, fuzzy
+msgid "Automatically synchronize account locally"
+msgstr "தொலை மின்னஞ்சல்களை தானாக ஒத்திசை"
+
+#: camel/providers/groupwise/camel-groupwise-provider.c:69
+msgid "Address Book and Calendar"
+msgstr "முகவரி புத்தகம் மற்றும் நாள்காட்டி"
+
+#: camel/providers/groupwise/camel-groupwise-provider.c:72
+msgid "Post Office Agent:"
+msgstr "போஸ்ட் ஆபீஸ் ஏஜென்டுக்கான SOAP முனையம்"
+
+#: camel/providers/groupwise/camel-groupwise-provider.c:75
+msgid "Post Office Agent SOAP Port:"
+msgstr "போஸ் ஆபீஸ் ஏஜென்டுக்கான SOAP முனையம்"
+
+#: camel/providers/groupwise/camel-groupwise-provider.c:78
+msgid "Use Secure Connection (SSL)"
+msgstr "பாதுகாப்பான இணைப்பை பயன்படுத்து (SSL)"
+
+#: camel/providers/groupwise/camel-groupwise-provider.c:91
+msgid "Novell GroupWise"
+msgstr "நாவல் குழுவாக"
+
+#: camel/providers/groupwise/camel-groupwise-provider.c:93
+msgid "For accessing Novell Groupwise servers"
+msgstr "நாவல் குழு சேவலை அணுக"
+
+#: camel/providers/groupwise/camel-groupwise-provider.c:108
+#: camel/providers/imap/camel-imap-provider.c:96
+#: camel/providers/imap4/camel-imap4-provider.c:81
+#: camel/providers/nntp/camel-nntp-provider.c:72
+#: camel/providers/pop3/camel-pop3-provider.c:72
+msgid "Password"
+msgstr "கடவுச்சொல்"
+
+#: camel/providers/groupwise/camel-groupwise-provider.c:110
+#, fuzzy
+msgid ""
+"This option will connect to the GroupWise server using a plaintext password."
+msgstr "இந்த தேர்வு IMAP சேவகனை சாதாரண உரை கடவுச்சொல்லை பயன்படுத்தி இணைக்கும்"
+
+#: camel/providers/groupwise/camel-groupwise-store.c:267
+#, fuzzy
+msgid "Host or user not availbale in url"
+msgstr "வகை தொகுப்பி உபயோகத்தில் இல்லை"
+
+#: camel/providers/groupwise/camel-groupwise-store.c:359
+#, fuzzy, c-format
+msgid "%sPlease enter the Groupwise password for %s@%s"
+msgstr "%s  %s@%s க்கான IMAP கடவுச்சொல்லை உள்ளிடவும்"
+
+#: camel/providers/groupwise/camel-groupwise-store.c:373
+#: camel/providers/imap/camel-imap-store.c:1301
+msgid "You didn't enter a password."
+msgstr "நீங்கள் கடவுச்சொல்லை உள்ளிடவில்லை"
+
+#: camel/providers/groupwise/camel-groupwise-store.c:382
+#, fuzzy
+msgid "Unable to authenticate to GroupWise server."
+msgstr ""
+"IMAP சேவகனில் அனுமதிக்க முடியவில்லை.\n"
+"%s\n"
+"\n"
+
+#: camel/providers/groupwise/camel-groupwise-store.c:479
+#: camel/providers/imap/camel-imap-store.c:1852
+#: camel/providers/imap/camel-imap-store.c:2042
+#, c-format
+msgid "No such folder %s"
+msgstr "இப்படி ஒரு அடைவு இல்லை %s"
+
+#: camel/providers/groupwise/camel-groupwise-store.c:499
+#: camel/providers/imap/camel-imap-folder.c:2287
+#: camel/providers/imap/camel-imap-folder.c:2357
+msgid "Fetching summary information for new messages"
+msgstr "புதிய செய்திக்கான சுருக்க தகவலை உள்ளிடுகிறது"
+
+#: camel/providers/groupwise/camel-groupwise-store.c:610
+#, fuzzy
+msgid "Cannot get folder info in offline mode."
+msgstr "`%s'அடைவை பெற முடியவில்லை: அடைவு இல்லை"
+
+#: camel/providers/groupwise/camel-groupwise-store.c:781
+#, fuzzy
+msgid "Cannot create GroupWise folders in offline mode."
+msgstr "இந்த பெயரில் அடைவை உருவாக்க முடியாது"
+
+#: camel/providers/groupwise/camel-groupwise-store.c:830
+#, fuzzy
+msgid "Cannot delete GroupWise folders in offline mode."
+msgstr "அடைவை நீக்க முடியாது %s: சிறப்பு அடைவு"
+
+#: camel/providers/groupwise/camel-groupwise-store.c:873
+#, fuzzy
+msgid "Cannot rename GroupWise folders in offline mode."
+msgstr "செய்தி கிடங்கில் உள்ள அடைவிற்கு மறுபெயரிட முடியாது"
+
+#: camel/providers/groupwise/camel-groupwise-store.c:879
+#, fuzzy, c-format
+msgid "Cannot rename Groupwise folder `%s' to `%s'"
+msgstr "%s' லிருந்து`%s' ஆக அடைவின் பெயரை மாற்ற முடியாது. தவறான கட்டளை"
+
+#: camel/providers/groupwise/camel-groupwise-store.c:911
+#, fuzzy, c-format
+msgid "GroupWise server %s"
+msgstr "குழுக்களாக"
+
+#: camel/providers/groupwise/camel-groupwise-store.c:913
+#, fuzzy, c-format
+msgid "GroupWise service for %s on %s"
+msgstr "%s இல் %s க்கான IMAP சேவை"
+
+#: camel/providers/groupwise/camel-groupwise-transport.c:121
+#, fuzzy, c-format
+msgid "Groupwise server %s"
+msgstr "குழுவாரியாக முகவரி பட்டியல்"
+
+#: camel/providers/groupwise/camel-groupwise-transport.c:123
+#, fuzzy, c-format
+msgid "Groupwise mail delivery via %s"
+msgstr "%s SMTP வழியாக மின்னஞ்சல் அனுப்புதல்"
+
+#: camel/providers/groupwise/camel-groupwise-transport.c:159
+#, fuzzy
+msgid "Sending Message"
+msgstr "செய்தி அனுப்பப்படுகிறது"
+
+#: camel/providers/groupwise/camel-gw-listener.c:406
+msgid "Tasks"
+msgstr "பணிகள்"
+
+#: camel/providers/groupwise/camel-gw-listener.c:436
+msgid "Checklist"
+msgstr "சோதனை பட்டியல்"
+
+#: camel/providers/groupwise/camel-gw-listener.c:483
+#, c-format
+msgid "%sEnter password for %s (user %s)"
+msgstr "%sக்கான %s கடவுச்சொல்லை (பயனீட்டாளர் %s) உள்ளிடவும்"
+
+#: camel/providers/groupwise/camel-gw-listener.c:494
+msgid "Failed to authenticate.\n"
+msgstr "உறுதிப்படுத்த முடியவில்லை.\n"
+
+#: camel/providers/imap/camel-imap-command.c:219
+#: camel/providers/imap/camel-imap-command.c:258
+#: camel/providers/imap/camel-imap-command.c:460
+#: camel/providers/imap/camel-imap-store.c:3209
+msgid "Operation cancelled"
+msgstr "செயல் ரத்து செய்யப்பட்டது"
+
+#: camel/providers/imap/camel-imap-command.c:303
+#: camel/providers/imap/camel-imap-store.c:3212
+#, c-format
+msgid "Server unexpectedly disconnected: %s"
+msgstr "எதிர்பாராமல் சேவகன் இணைப்பு துண்டிக்கப்பட்டது: %s"
+
+#. for imap ALERT codes, account user@host
+#: camel/providers/imap/camel-imap-command.c:321
+#, c-format
+msgid ""
+"Alert from IMAP server %s@%s:\n"
+"%s"
+msgstr ""
+"IMAP சேவகனிலிருந்து மாற்று %s@%s:\n"
+"%s"
+
+#: camel/providers/imap/camel-imap-command.c:390
+#, c-format
+msgid "Unexpected response from IMAP server: %s"
+msgstr "IMAP சேவகனிலிருந்து எதிர்பாராத பதில் : %s"
+
+#: camel/providers/imap/camel-imap-command.c:400
+#, c-format
+msgid "IMAP command failed: %s"
+msgstr "IMAP கட்டளை தோல்வியுற்றது : %s"
+
+#: camel/providers/imap/camel-imap-command.c:470
+msgid "Server response ended too soon."
+msgstr "சேவகன் பதில் அதிவேகமாக முடிந்தது"
+
+#: camel/providers/imap/camel-imap-command.c:675
+#, c-format
+msgid "IMAP server response did not contain %s information"
+msgstr "IMAP சேவகனில் %s தகவலுக்கான பதில் இல்லை"
+
+#: camel/providers/imap/camel-imap-command.c:711
+#, c-format
+msgid "Unexpected OK response from IMAP server: %s"
+msgstr "IMAP சேவகனிலிருந்து எதிர்பாராத சரி பதில்: %s"
+
+#: camel/providers/imap/camel-imap-folder.c:226
+#, c-format
+msgid "Could not create directory %s: %s"
+msgstr "அடைவை உருவாக்க முடியவில்லை %s: %s"
+
+#: camel/providers/imap/camel-imap-folder.c:330
+msgid "Folder was destroyed and recreated on server."
+msgstr "சேவகனில் அடைவுகள் சிதைக்கப்பட்டு மீண்டும் உருவாக்கபடுகிறது"
+
+#. Check UIDs and flags of all messages we already know of.
+#: camel/providers/imap/camel-imap-folder.c:573
+#: camel/providers/imap4/camel-imap4-summary.c:1270
+msgid "Scanning for changed messages"
+msgstr "மாற்றப்பட்ட செய்தியை தேடுகிறது"
+
+#: camel/providers/imap/camel-imap-folder.c:1939
+#, c-format
+msgid "Unable to retrieve message: %s"
+msgstr "செய்தியை பெற முடியவில்லை: %s"
+
+#: camel/providers/imap/camel-imap-folder.c:2021
+#: camel/providers/imap/camel-imap-folder.c:2623
+#: camel/providers/nntp/camel-nntp-folder.c:221
+msgid "This message is not currently available"
+msgstr "இந்த செய்தி தற்போது கிடைக்கவில்லை"
+
+#: camel/providers/imap/camel-imap-folder.c:2464
+#, c-format
+msgid "Incomplete server response: no information provided for message %d"
+msgstr "முடியாத சேவகன் பதில்:%d க்கான தகவல் எதுவுமில்லை"
+
+#: camel/providers/imap/camel-imap-folder.c:2472
+#, c-format
+msgid "Incomplete server response: no UID provided for message %d"
+msgstr "அறைகுறையாக சேவகன் பதில் : %d செய்திக்கான UID கொடுக்கப்படவில்லை"
+
+#: camel/providers/imap/camel-imap-folder.c:2485
+#, c-format
+msgid ""
+"Unexpected server response: Identical UIDs provided for messages %d and %d"
+msgstr "எதிர்பாராத சேவகன் பிழை: %d மற்றும் %d க்கு ஒரே UIDs வழங்கப்பட்டுள்ளது"
+
+#: camel/providers/imap/camel-imap-folder.c:2661
+msgid "Could not find message body in FETCH response."
+msgstr "FETCH பதிலில் செய்தியை காணவில்லை"
+
+#: camel/providers/imap/camel-imap-message-cache.c:156
+#, c-format
+msgid "Could not open cache directory: %s"
+msgstr "தற்காலிக அடைவை திறக்க முடியவில்லை : %s"
+
+#: camel/providers/imap/camel-imap-message-cache.c:253
+#: camel/providers/imap/camel-imap-message-cache.c:310
+#: camel/providers/imap/camel-imap-message-cache.c:341
+#: camel/providers/imap/camel-imap-message-cache.c:373
+#, c-format
+msgid "Failed to cache message %s: %s"
+msgstr "தற்காலிகமாக செய்தியை சேமிக்க முடியவில்லை%s: %s"
+
+#: camel/providers/imap/camel-imap-message-cache.c:418
+#, c-format
+msgid "Failed to cache %s: %s"
+msgstr "தற்காலிக நினைவிடத்தில் சேர்பதில் தோல்வி %s: %s"
+
+#: camel/providers/imap/camel-imap-provider.c:44
+msgid "Checking for New Mail"
+msgstr "புதிய மின்னஞ்சலுக்காக சோதிக்கிறது"
+
+#: camel/providers/imap/camel-imap-provider.c:46
+#: camel/providers/imap4/camel-imap4-provider.c:38
+#, fuzzy
+msgid "C_heck for new messages in all folders"
+msgstr "புதிய மின்னஞ்சல் உள்ளதா என அனைத்து அடைவிலும் பார்க்கிறது"
+
+#: camel/providers/imap/camel-imap-provider.c:49
+msgid "Connection to Server"
+msgstr "சேவகனுடன் இணைகிறது"
+
+#: camel/providers/imap/camel-imap-provider.c:51
+#, fuzzy
+msgid "_Use custom command to connect to server"
+msgstr "சேவகனுடன் இணைய உங்கள் கட்டளைகளை பயன்படுத்தவும்"
+
+#: camel/providers/imap/camel-imap-provider.c:53
+msgid "Command:"
+msgstr "கட்டளை:"
+
+#: camel/providers/imap/camel-imap-provider.c:56
+#: camel/providers/imap4/camel-imap4-provider.c:41
+#: camel/providers/nntp/camel-nntp-provider.c:42
+msgid "Folders"
+msgstr "அடைவுகள்"
+
+#: camel/providers/imap/camel-imap-provider.c:58
+#: camel/providers/imap4/camel-imap4-provider.c:43
+#, fuzzy
+msgid "_Show only subscribed folders"
+msgstr "சந்தா அடைவை மட்டும் காட்டு"
+
+#: camel/providers/imap/camel-imap-provider.c:60
+#: camel/providers/imap4/camel-imap4-provider.c:45
+#, fuzzy
+msgid "O_verride server-supplied folder namespace"
+msgstr "அடைவுக்கான பெயரிடம் சேவகன்-ஒதுக்கியதை மீறுகிறது"
+
+#: camel/providers/imap/camel-imap-provider.c:62
+#: camel/providers/imap4/camel-imap4-provider.c:47
+msgid "Namespace"
+msgstr "பெயரிடம்"
+
+#: camel/providers/imap/camel-imap-provider.c:66
+#: camel/providers/imap4/camel-imap4-provider.c:51
+#, fuzzy
+msgid "_Apply filters to new messages in INBOX on this server"
+msgstr "இந்த சேவகனில் உள்ள உள்பெட்டியில் புதிய செய்திக்கான வடிகட்டியை அமைக்கவும்"
+
+#: camel/providers/imap/camel-imap-provider.c:68
+#: camel/providers/imap4/camel-imap4-provider.c:53
+#, fuzzy
+msgid "Check new messages for _Junk contents"
+msgstr "தேவையற்ற பட்டியலில் உள்ள புதிய செய்தியை பார்க்கவும்"
+
+#: camel/providers/imap/camel-imap-provider.c:70
+#: camel/providers/imap4/camel-imap4-provider.c:55
+#, fuzzy
+msgid "Only check for Junk messa_ges in the INBOX folder"
+msgstr "தேவையற்ற செய்திகளை உள்பெட்டி அடைவில் மட்டும் சோதிக்கவும்"
+
+#: camel/providers/imap/camel-imap-provider.c:72
+#: camel/providers/imap4/camel-imap4-provider.c:57
+#, fuzzy
+msgid "Automatically synchroni_ze remote mail locally"
+msgstr "தொலை மின்னஞ்சல்களை தானாக ஒத்திசை"
+
+#: camel/providers/imap/camel-imap-provider.c:79
+msgid "IMAP"
+msgstr "IMAP"
+
+#: camel/providers/imap/camel-imap-provider.c:81
+msgid "For reading and storing mail on IMAP servers."
+msgstr "மின்னஞ்சல்களை படிக்க மற்றும் IMAP சேவகனில் சேமிக்க"
+
+#: camel/providers/imap/camel-imap-provider.c:98
+msgid "This option will connect to the IMAP server using a plaintext password."
+msgstr "இந்த தேர்வு IMAP சேவகனை சாதாரண உரை கடவுச்சொல்லை பயன்படுத்தி இணைக்கும்"
+
+#: camel/providers/imap/camel-imap-store.c:421
+#: camel/providers/imap4/camel-imap4-store.c:206
+#, c-format
+msgid "IMAP server %s"
+msgstr "IMAP சேவகன் %s"
+
+#: camel/providers/imap/camel-imap-store.c:423
+#: camel/providers/imap4/camel-imap4-store.c:208
+#, c-format
+msgid "IMAP service for %s on %s"
+msgstr "%s இல் %s க்கான IMAP சேவை"
+
+#: camel/providers/imap/camel-imap-store.c:535
+#: camel/providers/imap/camel-imap-store.c:550
+#: camel/providers/imap4/camel-imap4-store.c:240
+#: camel/providers/imap4/camel-imap4-store.c:255
+#: camel/providers/nntp/camel-nntp-store.c:200
+#: camel/providers/nntp/camel-nntp-store.c:215
+#: camel/providers/pop3/camel-pop3-store.c:169
+#: camel/providers/pop3/camel-pop3-store.c:184
+#: camel/providers/smtp/camel-smtp-transport.c:257
+#: camel/providers/smtp/camel-smtp-transport.c:272
+#, fuzzy, c-format
+msgid "Could not connect to %s: %s"
+msgstr "%s (முனையம் %d): %s உடன் இணைக்க முடியவில்லை"
+
+#: camel/providers/imap/camel-imap-store.c:536
+#: camel/providers/imap4/camel-imap4-store.c:241
+#: camel/providers/nntp/camel-nntp-store.c:201
+#: camel/providers/pop3/camel-pop3-store.c:170
+#: camel/providers/smtp/camel-smtp-transport.c:258
+msgid "SSL unavailable"
+msgstr "SSL கிடைக்கவில்லை"
+
+#: camel/providers/imap/camel-imap-store.c:547
+#: camel/providers/imap/camel-imap-store.c:817
+#: camel/providers/imap4/camel-imap4-store.c:252
+#: camel/providers/nntp/camel-nntp-store.c:212
+#: camel/providers/nntp/camel-nntp-store.c:231
+#: camel/providers/pop3/camel-pop3-store.c:181
+#: camel/providers/smtp/camel-smtp-transport.c:269
+msgid "Connection cancelled"
+msgstr "இணைப்பு ரத்து செய்யபப்ட்டது"
+
+#: camel/providers/imap/camel-imap-store.c:655
+#: camel/providers/imap/camel-imap-store.c:677
+#: camel/providers/imap/camel-imap-store.c:683
+#: camel/providers/imap4/camel-imap4-store.c:280
+#: camel/providers/imap4/camel-imap4-store.c:293
+#: camel/providers/imap4/camel-imap4-store.c:309
+#, c-format
+msgid "Failed to connect to IMAP server %s in secure mode: %s"
+msgstr "IMAP சேவகன் %s உடன் பாதுக்காப்பாக %s ஐ இணைப்பதில் தோல்வி"
+
+#: camel/providers/imap/camel-imap-store.c:656
+#: camel/providers/smtp/camel-smtp-transport.c:326
+#, fuzzy
+msgid "STARTTLS not supported"
+msgstr "SSL/TLS நீட்டிப்புக்கு ஆதரவு இல்லை"
+
+#: camel/providers/imap/camel-imap-store.c:678
+#: camel/providers/imap4/camel-imap4-store.c:281
+#: camel/providers/pop3/camel-pop3-store.c:246
+msgid "SSL negotiations failed"
+msgstr "SSL பேரம் தோல்வியுற்றது"
+
+#: camel/providers/imap/camel-imap-store.c:684
+#: camel/providers/imap4/camel-imap4-store.c:310
+#: camel/providers/pop3/camel-pop3-store.c:252
+#: camel/providers/smtp/camel-smtp-transport.c:365
+msgid "SSL is not available in this build"
+msgstr ""
+
+#: camel/providers/imap/camel-imap-store.c:820
+#, c-format
+msgid "Could not connect with command \"%s\": %s"
+msgstr "\"%s\" கட்டளையுடன் இணைய முடியவில்லை: %s"
+
+#: camel/providers/imap/camel-imap-store.c:1254
+#, c-format
+msgid "IMAP server %s does not support requested authentication type %s"
+msgstr "IMAP சேவகன் %s %s வகை அனுமதிக்கு ஆதரவு தராது"
+
+#: camel/providers/imap/camel-imap-store.c:1264
+#: camel/providers/smtp/camel-smtp-transport.c:498
+#, c-format
+msgid "No support for authentication type %s"
+msgstr "%s வகை அனுமதிக்கு ஆதரவு இல்லை"
+
+#: camel/providers/imap/camel-imap-store.c:1287
+#, c-format
+msgid "%sPlease enter the IMAP password for %s@%s"
+msgstr "%s  %s@%s க்கான IMAP கடவுச்சொல்லை உள்ளிடவும்"
+
+#: camel/providers/imap/camel-imap-store.c:1330
+#, c-format
+msgid ""
+"Unable to authenticate to IMAP server.\n"
+"%s\n"
+"\n"
+msgstr ""
+"IMAP சேவகனில் அனுமதிக்க முடியவில்லை.\n"
+"%s\n"
+"\n"
+
+#: camel/providers/imap/camel-imap-store.c:1870
+#: camel/providers/imap/camel-imap-store.c:2248
+#: camel/providers/imap4/camel-imap4-store.c:770
+#, c-format
+msgid ""
+"The folder name \"%s\" is invalid because it contains the character \"%c\""
+msgstr "அடைவின் பெயர் \"%s\" செல்லாது காரணம் எழுத்து \"%c\" உள்ளது"
+
+#: camel/providers/imap/camel-imap-store.c:1928
+#: camel/providers/imap/camel-imap-store.c:2309
+msgid "The parent folder is not allowed to contain subfolders"
+msgstr "இந்த முதன்மை அடைவுக்கு துணை அடைவுகளை உருவாக்க அனுமதி இல்லை"
+
+#: camel/providers/imap/camel-imap-store.c:1983
+#: camel/providers/local/camel-maildir-store.c:192
+#: camel/providers/local/camel-mbox-store.c:210
+#: camel/providers/local/camel-mh-store.c:237
+#, c-format
+msgid "Cannot create folder `%s': folder exists."
+msgstr "அடைவை உருவாக்க முடியாது `%s': அடைவு இல்லை"
+
+#: camel/providers/imap/camel-imap-store.c:2259
+#, c-format
+msgid "Unknown parent folder: %s"
+msgstr "தெரியாத முதன்மை அடைவு: %s"
+
+#: camel/providers/imap4/camel-imap4-command.c:551
+#: camel/providers/imap4/camel-imap4-command.c:558
+#, c-format
+msgid "Failed sending command to IMAP server %s: %s"
+msgstr "கட்டளையை IMAP சேவகனுக்கு அனுப்புவது தோல்வியில் முடிந்தது %s: %s"
+
+#: camel/providers/imap4/camel-imap4-command.c:661
+#, c-format
+msgid "Unexpected response from IMAP4 server %s: %s"
+msgstr "IMAP4 சேவகனில் எதிர்பாராத பதில் %s: %s"
+
+#: camel/providers/imap4/camel-imap4-engine.c:216
+#, c-format
+msgid "Unexpected greeting from IMAP server %s."
+msgstr "IMAP4 சேவகனில் எதிர்பாராத அழைப்பு %s"
+
+#: camel/providers/imap4/camel-imap4-engine.c:410
+#, c-format
+msgid "Cannot select folder `%s': Invalid mailbox name"
+msgstr "அடைவை தேர்வுசெய்ய முடியவில்லை `%s': செல்லாத மின்னஞ்சல் பெட்டியின் பெயர்"
+
+#: camel/providers/imap4/camel-imap4-engine.c:416
+#, c-format
+msgid "Cannot select folder `%s': Bad command"
+msgstr "அடைவு`%s' ஐ திறக்க முடியவில்லை:தவறான கட்டளை"
+
+#: camel/providers/imap4/camel-imap4-engine.c:1464
+#: camel/providers/imap4/camel-imap4-engine.c:1503
+#: camel/providers/imap4/camel-imap4-engine.c:1548
+#: camel/providers/imap4/camel-imap4-engine.c:1604
+#, c-format
+msgid "IMAP4 server %s unexpectedly disconnected: %s"
+msgstr "IMAP4 சேவகன் %s எதிர்பாராமல் துண்டிக்கப்பட்டது: %s"
+
+#: camel/providers/imap4/camel-imap4-folder.c:306
+#, fuzzy, c-format
+msgid "Cannot access folder `%s': %s"
+msgstr "அடைவை பெற முடியவில்லை `%s': %s"
+
+#: camel/providers/imap4/camel-imap4-folder.c:365
+#, c-format
+msgid "Cannot sync flags to folder `%s': Unknown"
+msgstr "`%s' குறியீடு செய்யப்பட்டதை ஒத்திசைக்க முடியாது: தெரியாது"
+
+#: camel/providers/imap4/camel-imap4-folder.c:371
+#, c-format
+msgid "Cannot sync flags to folder `%s': Bad command"
+msgstr "`%s' குறியீடு செய்யப்பட்டதை ஒத்திசைக்க முடியாது: தவறான கட்டளை"
+
+#: camel/providers/imap4/camel-imap4-folder.c:512
+#, c-format
+msgid "Cannot expunge folder `%s': Unknown"
+msgstr "அடைவை அழிக்க முடியாது %s': தெரியாது"
+
+#: camel/providers/imap4/camel-imap4-folder.c:517
+#, c-format
+msgid "Cannot expunge folder `%s': Bad command"
+msgstr "அடைவை அழிக்க முடியாது %s': தவறான கட்டளை"
+
+#: camel/providers/imap4/camel-imap4-folder.c:773
+#, c-format
+msgid "Cannot get message %s from folder `%s': No such message"
+msgstr "செய்தி %s ஐ `%s' லிருந்து பெற முடியவில்லை : இது போன்ற செய்தி இல்லை"
+
+#: camel/providers/imap4/camel-imap4-folder.c:778
+#, c-format
+msgid "Cannot get message %s from folder `%s': Bad command"
+msgstr "செய்தி %s ஐ `%s' லிருந்து பெற முடியவில்லை : தவறான கட்டளை"
+
+#: camel/providers/imap4/camel-imap4-folder.c:911
+#, c-format
+msgid "Cannot append message to folder `%s': Unknown error"
+msgstr " செய்தியை `%s' க்குள் பின்சேர்க்க முடியவில்லை: தெரியாத பிழை"
+
+#: camel/providers/imap4/camel-imap4-folder.c:940
+#, c-format
+msgid "Cannot append message to folder `%s': Bad command"
+msgstr " செய்தியை `%s' க்குள் பின்சேர்க்க முடியவில்லை: தவறான கட்டளை"
+
+#: camel/providers/imap4/camel-imap4-folder.c:1048
+#, c-format
+msgid "Cannot move messages from folder `%s' to folder `%s': Unknown"
+msgstr "அடைவு `%s' லிருந்து `%s' செய்தியை நகர்த்த முடியவில்லை : தெரியாது"
+
+#: camel/providers/imap4/camel-imap4-folder.c:1052
+#, c-format
+msgid "Cannot copy messages from folder `%s' to folder `%s': Unknown"
+msgstr "அடைவு `%s' லிருந்து `%s' செய்தியை நகலெடுக்க முடியவில்லை : தெரியாது"
+
+#: camel/providers/imap4/camel-imap4-folder.c:1060
+#, c-format
+msgid "Cannot move messages from folder `%s' to folder `%s': Bad command"
+msgstr "அடைவு `%s' லிருந்து `%s' செய்தியை நகர்த்த முடியவில்லைவில்லை : தவறான கட்டளை"
+
+#: camel/providers/imap4/camel-imap4-folder.c:1064
+#, c-format
+msgid "Cannot copy messages from folder `%s' to folder `%s': Bad command"
+msgstr "அடைவு `%s' லிருந்து `%s' செய்தியை நகலெடுக்க முடியவில்லை : தவறான கட்டளை"
+
+#: camel/providers/imap4/camel-imap4-provider.c:64
+msgid "IMAPv4rev1"
+msgstr "IMAPv4rev1"
+
+#: camel/providers/imap4/camel-imap4-provider.c:66
+#, fuzzy
+msgid "For reading and storing mail on IMAPv4rev1 servers."
+msgstr "மின்னஞ்சல்களை படிக்க மற்றும் IMAP சேவகனில் சேமிக்க"
+
+#: camel/providers/imap4/camel-imap4-provider.c:83
+msgid ""
+"This option will connect to the IMAPv4rev1 server using a plaintext password."
+msgstr "இந்த தேர்வு IMAPv4rev1 சேவகனுடன் சாதாரணஉரை கடவுச்சொல்லை பயன்படுத்தி இணைக்கும்"
+
+#: camel/providers/imap4/camel-imap4-store.c:391
+#, c-format
+msgid ""
+"Cannot authenticate to IMAP server %s using the %s authentication mechanism"
+msgstr "IMAP சேவகன் %s ஐ %s அனுமதி முறையை பயன்படுத்தி அனுமதிக்க முடியாது"
+
+#: camel/providers/imap4/camel-imap4-store.c:436
+#, c-format
+msgid "%sPlease enter the IMAP password for %s on host %s"
+msgstr "%sதயவுசெய்து %s க்கான IMAP கடவுச்சொல்லை புரவலன் %s இல் உள்ளிடவும்"
+
+#: camel/providers/imap4/camel-imap4-store.c:506
+#, c-format
+msgid "Cannot authenticate to IMAP server %s using %s"
+msgstr "IMAP சேவகன் %s ஐ %s பயன்படுத்தி அனுமதிக்க முடியாது"
+
+#: camel/providers/imap4/camel-imap4-store.c:668
+#: camel/providers/imap4/camel-imap4-store.c:780
+#, fuzzy
+msgid "Cannot create IMAP folders in offline mode."
+msgstr "இந்த பெயரில் அடைவை உருவாக்க முடியாது"
+
+#: camel/providers/imap4/camel-imap4-store.c:707
+#, c-format
+msgid "Cannot get folder `%s' on IMAP server %s: Unknown"
+msgstr "அடைவு `%s' ஐ IMAP சேவகன் %s ஆல் பெறமுடியாது : தெரியாது"
+
+#: camel/providers/imap4/camel-imap4-store.c:828
+#, c-format
+msgid "Cannot create folder `%s': Invalid mailbox name"
+msgstr "அடைவு %s ஐ உருவாக்க முடியாது : செல்லாத மின்னஞ்சல் பெட்டி பெயர்"
+
+#: camel/providers/imap4/camel-imap4-store.c:834
+#, c-format
+msgid "Cannot create folder `%s': Bad command"
+msgstr "அடைவை உருவாக்க முடியாது %s: தவறான கட்டளை"
+
+#: camel/providers/imap4/camel-imap4-store.c:865
+#, c-format
+msgid "Cannot delete folder `%s': Special folder"
+msgstr "அடைவை நீக்க முடியாது %s: சிறப்பு அடைவு"
+
+#: camel/providers/imap4/camel-imap4-store.c:872
+#, fuzzy
+msgid "Cannot delete IMAP folders in offline mode."
+msgstr "அடைவை நீக்க முடியாது %s: சிறப்பு அடைவு"
+
+#: camel/providers/imap4/camel-imap4-store.c:931
+#, c-format
+msgid "Cannot delete folder `%s': Invalid mailbox name"
+msgstr "அடைவை நீக்க முடியாது `%s': செல்லாத மின்னஞ்சல் பெட்டி பெயர்"
+
+#: camel/providers/imap4/camel-imap4-store.c:936
+#, c-format
+msgid "Cannot delete folder `%s': Bad command"
+msgstr "அடைவை நீக்க முடியாது `%s':தவறான கட்டளை"
+
+#: camel/providers/imap4/camel-imap4-store.c:956
+#, c-format
+msgid "Cannot rename folder `%s' to `%s': Special folder"
+msgstr "%s' லிருந்து`%s' ஆக அடைவின் பெயரை மாற்ற முடியாது. சிறப்பு அடைவு"
+
+#: camel/providers/imap4/camel-imap4-store.c:963
+#, fuzzy
+msgid "Cannot rename IMAP folders in offline mode."
+msgstr "செய்தி கிடங்கில் உள்ள அடைவிற்கு மறுபெயரிட முடியாது"
+
+#: camel/providers/imap4/camel-imap4-store.c:994
+#, c-format
+msgid "Cannot rename folder `%s' to `%s': Invalid mailbox name"
+msgstr "%s' லிருந்து`%s' ஆக அடைவின் பெயரை மாற்ற முடியாது. செல்லாத பெயர்"
+
+#: camel/providers/imap4/camel-imap4-store.c:999
+#, c-format
+msgid "Cannot rename folder `%s' to `%s': Bad command"
+msgstr "%s' லிருந்து`%s' ஆக அடைவின் பெயரை மாற்ற முடியாது. தவறான கட்டளை"
+
+#: camel/providers/imap4/camel-imap4-store.c:1248
+#, c-format
+msgid "Cannot get %s information for pattern `%s' on IMAP server %s: %s"
+msgstr "%s க்கான தகவல் வடிவத்தை `%s'  இன் IMAP சேவகனில் பெற முடியவில்லை %s: %s "
+
+#: camel/providers/imap4/camel-imap4-store.c:1250
+msgid "Bad command"
+msgstr "தவறான கட்டளை"
+
+#: camel/providers/imap4/camel-imap4-store.c:1288
+#, fuzzy
+msgid "Cannot subscribe to IMAP folders in offline mode."
+msgstr "அடைவு `%s' க்கான சந்தாதாரக முடியவில்லை: தவறான கட்டளை"
+
+#: camel/providers/imap4/camel-imap4-store.c:1333
+#, c-format
+msgid "Cannot subscribe to folder `%s': Invalid mailbox name"
+msgstr "அடைவு `%s' க்கான சந்தாதாரக முடியவில்லை: செல்லாத மின்னஞ்சல் பெட்டி"
+
+#: camel/providers/imap4/camel-imap4-store.c:1338
+#, c-format
+msgid "Cannot subscribe to folder `%s': Bad command"
+msgstr "அடைவு `%s' க்கான சந்தாதாரக முடியவில்லை: தவறான கட்டளை"
+
+#: camel/providers/imap4/camel-imap4-store.c:1360
+#, fuzzy
+msgid "Cannot unsubscribe from IMAP folders in offline mode."
+msgstr "அடைவு `%s' க்கான சந்தாதா நீக்கம் செய்ய முடியவில்லை: தவறான கட்டளை"
+
+#: camel/providers/imap4/camel-imap4-store.c:1405
+#, c-format
+msgid "Cannot unsubscribe from folder `%s': Invalid mailbox name"
+msgstr "அடைவு `%s' க்கான சந்தாதாநீக்கம் செய்ய முடியவில்லை: செல்லாத மின்னஞ்சல் பெட்டி"
+
+#: camel/providers/imap4/camel-imap4-store.c:1410
+#, c-format
+msgid "Cannot unsubscribe from folder `%s': Bad command"
+msgstr "அடைவு `%s' க்கான சந்தாதா நீக்கம் செய்ய முடியவில்லை: தவறான கட்டளை"
+
+#: camel/providers/imap4/camel-imap4-summary.c:1294
+#, fuzzy
+msgid "Fetching envelopes for new messages"
+msgstr "புதிய செய்திகளை சோதிக்கிறது"
+
+#: camel/providers/imap4/camel-imap4-utils.c:368
+#, c-format
+msgid "Unexpected token in response from IMAP server %s: "
+msgstr "IMAP சேவகனிலிருந்து எதிர்பாராத பதில் %s: "
+
+#: camel/providers/imap4/camel-imap4-utils.c:391
+msgid "No data"
+msgstr "தகவல் இல்லை"
+
+#: camel/providers/imap4/camel-imap4-utils.c:574
+#, c-format
+msgid "IMAP server %s unexpectedly disconnected: %s"
+msgstr "MAP சேவகன் %s எதிர்பாராமல் துண்டிக்கப்பட்டது : %s"
+
+#: camel/providers/local/camel-local-folder.c:179
+msgid "Index message body data"
+msgstr "அடவணை செய்தி தகவல்"
+
+#. $HOME relative path + protocol string
+#: camel/providers/local/camel-local-folder.c:391
+#, c-format
+msgid "~%s (%s)"
+msgstr "~%s (%s)"
+
+#. /var/spool/mail relative path + protocol
+#: camel/providers/local/camel-local-folder.c:395
+#: camel/providers/local/camel-local-folder.c:398
+#, c-format
+msgid "mailbox:%s (%s)"
+msgstr "மின்னஞ்சல் பெட்டி:%s (%s)"
+
+#. a full path + protocol
+#: camel/providers/local/camel-local-folder.c:402
+#, c-format
+msgid "%s (%s)"
+msgstr "%s (%s)"
+
+#: camel/providers/local/camel-local-provider.c:45
+msgid "Use the `.folders' folder summary file (exmh)"
+msgstr "`.folders' இன் அடைவு சுருக்க கோப்பை பயன்படுத்தவும் (exmh)"
+
+#: camel/providers/local/camel-local-provider.c:52
+msgid "MH-format mail directories"
+msgstr "MH-வடிவமைப்பு மின்னஞ்சல் அடைவு"
+
+#: camel/providers/local/camel-local-provider.c:53
+msgid "For storing local mail in MH-like mail directories."
+msgstr "MH-like மின்னஞ்சல் அடைவில் பொது மின்னஞ்சலை சேமிக்க"
+
+#: camel/providers/local/camel-local-provider.c:68
+msgid "Local delivery"
+msgstr "இடத்தில் சேர்பித்தல்"
+
+#: camel/providers/local/camel-local-provider.c:69
+msgid ""
+"For retrieving (moving) local mail from standard mbox formated spools into "
+"folders managed by Evolution."
+msgstr ""
+"உங்கள் மின்னஞ்சல்கலை mbox அமைப்பிலுள்ள எவல்யூஷனால் மேலாண்மை செய்யப்படும் அடைவிலிருந்து "
+"பெற்றுக்கொள்ள(நகர்த்த)."
+
+#: camel/providers/local/camel-local-provider.c:81
+#: camel/providers/local/camel-local-provider.c:100
+msgid "Apply filters to new messages in INBOX"
+msgstr "உள்பெட்டியில் உள்ள புதிய செய்திக்கான வடிகட்டியை அமைக்கவும்"
+
+#: camel/providers/local/camel-local-provider.c:88
+msgid "Maildir-format mail directories"
+msgstr "Maildir-வடிவமைப்பு மின்னஞ்சல் அடைவு"
+
+#: camel/providers/local/camel-local-provider.c:89
+msgid "For storing local mail in maildir directories."
+msgstr "maildir அடைவில் உள் மின்னஞ்சல்களை சேமிக்க."
+
+#: camel/providers/local/camel-local-provider.c:101
+msgid "Store status headers in Elm/Pine/Mutt format"
+msgstr "Elm/Pine/Mutt அமைப்பில் தலைப்புகளை சேமிக்கவும்"
+
+#: camel/providers/local/camel-local-provider.c:108
+msgid "Standard Unix mbox spool or directory"
+msgstr "நிலையான Unix mbox spool அல்லது அடைவு"
+
+#: camel/providers/local/camel-local-provider.c:109
+msgid ""
+"For reading and storing local mail in external standard mbox spool files.\n"
+"May also be used to read a tree of Elm, Pine, or Mutt style folders."
+msgstr ""
+"மற்ற தரத்தில் mbox spool கோப்பு மின்னஞ்சல்களை மற்ற தரத்தில் ன்னிஞ்சல்களை படிக்கவும்பயன்படும்\n"
+"Elm, Pine, அல்லது Mutt பாணியில் உள்ள கிளைகளையும் படிக்கலாம். சேமிக்கவும் "
+
+#: camel/providers/local/camel-local-store.c:143
+#: camel/providers/local/camel-local-store.c:254
+#: camel/providers/local/camel-mbox-store.c:353
+#: camel/providers/local/camel-spool-store.c:117
+#, c-format
+msgid "Store root %s is not an absolute path"
+msgstr "மூலம் %s சரியான பாதை இல்லை"
+
+#: camel/providers/local/camel-local-store.c:150
+#, c-format
+msgid "Store root %s is not a regular directory"
+msgstr "கிடங்கு மூலம் %s இயல்பான அடைவு இல்லை"
+
+#: camel/providers/local/camel-local-store.c:159
+#: camel/providers/local/camel-local-store.c:167
+#: camel/providers/local/camel-local-store.c:265
+#, c-format
+msgid "Cannot get folder: %s: %s"
+msgstr "அடைவை பெற முடியவில்லை: %s: %s"
+
+#: camel/providers/local/camel-local-store.c:179
+msgid "Local stores do not have an inbox"
+msgstr "உள் சேமிப்புகளுக்கு உள்பெட்டி கிடையாது"
+
+#: camel/providers/local/camel-local-store.c:225
+#, c-format
+msgid "Local mail file %s"
+msgstr "உள் மின்னஞ்சல் கோப்பு %s"
+
+#: camel/providers/local/camel-local-store.c:334
+#, c-format
+msgid "Could not rename folder %s to %s: %s"
+msgstr "%s ஐ %s ஆக பெயர் மாற்றம் செய்ய முடியவில்லை: %s"
+
+#: camel/providers/local/camel-local-store.c:399
+#, c-format
+msgid "Could not rename '%s': %s"
+msgstr "பெயரை மாற்றய்ய முடியவில்லை'%s': %s"
+
+#: camel/providers/local/camel-local-store.c:424
+#: camel/providers/local/camel-mbox-store.c:282
+#, c-format
+msgid "Could not delete folder summary file `%s': %s"
+msgstr "அடைவு சுருக்க கோப்பை நீக்க முடியவில்லை  `%s': %s"
+
+#: camel/providers/local/camel-local-store.c:434
+#: camel/providers/local/camel-mbox-store.c:294
+#, c-format
+msgid "Could not delete folder index file `%s': %s"
+msgstr "அட்டவணை கோப்பை நீக்க முடியவில்லை `%s': %s"
+
+#: camel/providers/local/camel-local-store.c:457
+#: camel/providers/local/camel-mbox-store.c:318
+#, c-format
+msgid "Could not delete folder meta file `%s': %s"
+msgstr "மெட்டா கோப்பை நீக்க முடியவில்லை  `%s': %s"
+
+#: camel/providers/local/camel-local-summary.c:406
+#, c-format
+msgid "Could not save summary: %s: %s"
+msgstr "சுருக்கத்தை சேமிக்க முடியவில்லை: %s: %s"
+
+#: camel/providers/local/camel-local-summary.c:464
+msgid "Unable to add message to summary: unknown reason"
+msgstr "சுருக்கத்தில் செய்தியை சேர்க்க முடியவில்லை: காரணம் தெரியவில்லை"
+
+#. create a dummy "." parent inbox, use to scan, then put back at the top level
+#: camel/providers/local/camel-maildir-folder.c:75
+#: camel/providers/local/camel-maildir-store.c:221
+#: camel/providers/local/camel-maildir-store.c:293
+#: camel/providers/local/camel-maildir-store.c:515
+#: camel/providers/local/camel-maildir-store.c:528
+#: camel/providers/local/camel-spool-store.c:452
+msgid "Inbox"
+msgstr "உள்பெட்டி"
+
+#: camel/providers/local/camel-maildir-folder.c:215
+msgid "Maildir append message cancelled"
+msgstr "Maildir பின்சேர்க்கும் செய்தி ரத்துசெய்யப்பட்டது"
+
+#: camel/providers/local/camel-maildir-folder.c:218
+#, c-format
+msgid "Cannot append message to maildir folder: %s: %s"
+msgstr "maildir அடைவில் செய்தியை பின்சேர்க்க முடியவில்லை: %s: %s"
+
+#: camel/providers/local/camel-maildir-folder.c:244
+#: camel/providers/local/camel-maildir-folder.c:258
+#: camel/providers/local/camel-maildir-folder.c:267
+#: camel/providers/local/camel-mbox-folder.c:402
+#: camel/providers/local/camel-mbox-folder.c:421
+#: camel/providers/local/camel-mbox-folder.c:452
+#: camel/providers/local/camel-mbox-folder.c:460
+#: camel/providers/local/camel-mh-folder.c:202
+#: camel/providers/local/camel-mh-folder.c:213
+#: camel/providers/local/camel-mh-folder.c:222
+#, c-format
+msgid ""
+"Cannot get message: %s from folder %s\n"
+"  %s"
+msgstr ""
+"%s லிருந்து %sசெய்தியை பெற முடியவில்லை\n"
+"  %s"
+
+#: camel/providers/local/camel-maildir-folder.c:268
+msgid "Invalid message contents"
+msgstr "செல்லாத செய்தி"
+
+#: camel/providers/local/camel-maildir-store.c:148
+#: camel/providers/local/camel-maildir-store.c:173
+#: camel/providers/local/camel-mbox-store.c:182
+#: camel/providers/local/camel-mbox-store.c:194
+#, c-format
+msgid "Cannot create folder `%s': %s"
+msgstr "அடைவை உருவாக்க முடியவில்லை `%s': %s"
+
+#: camel/providers/local/camel-maildir-store.c:161
+#: camel/providers/local/camel-mbox-store.c:152
+#: camel/providers/local/camel-mh-store.c:205
+#, c-format
+msgid "Cannot get folder `%s': %s"
+msgstr "அடைவை பெற முடியவில்லை `%s': %s"
+
+#: camel/providers/local/camel-maildir-store.c:165
+#: camel/providers/local/camel-mbox-store.c:160
+#: camel/providers/local/camel-mh-store.c:212
+#, c-format
+msgid "Cannot get folder `%s': folder does not exist."
+msgstr "'%s' அடைவை பெற முடியவில்லை: அடைவு இல்லை"
+
+#: camel/providers/local/camel-maildir-store.c:189
+#, c-format
+msgid "Cannot get folder `%s': not a maildir directory."
+msgstr "அடைவை பெற முடியவில்லை`%s':maildir அடைவு இல்லை"
+
+#: camel/providers/local/camel-maildir-store.c:236
+#: camel/providers/local/camel-maildir-store.c:274
+#: camel/providers/local/camel-mh-store.c:261
+#, c-format
+msgid "Could not delete folder `%s': %s"
+msgstr "அடைவை நீக்க முடியவில்லை `%s': %s"
+
+#: camel/providers/local/camel-maildir-store.c:238
+msgid "not a maildir directory"
+msgstr "maildir அடைவு இல்லை"
+
+#: camel/providers/local/camel-maildir-store.c:440
+#: camel/providers/local/camel-spool-store.c:319
+#: camel/providers/local/camel-spool-store.c:333
+#, c-format
+msgid "Could not scan folder `%s': %s"
+msgstr "அடைவை சோதிக்க  முடியவில்லை `%s': %s"
+
+#: camel/providers/local/camel-maildir-summary.c:425
+#: camel/providers/local/camel-maildir-summary.c:556
+#, c-format
+msgid "Cannot open maildir directory path: %s: %s"
+msgstr "maildir அடைவில் பாதையை திறக்க முடியவில்லை: %s: %s"
+
+#: camel/providers/local/camel-maildir-summary.c:549
+msgid "Checking folder consistency"
+msgstr "அடைவின் நிலைப்புத்தன்மையை சோதிக்கிறது"
+
+#: camel/providers/local/camel-maildir-summary.c:652
+msgid "Checking for new messages"
+msgstr "புதிய செய்திகளை சோதிக்கிறது"
+
+#: camel/providers/local/camel-maildir-summary.c:741
+#: camel/providers/local/camel-mbox-summary.c:416
+#: camel/providers/local/camel-mbox-summary.c:589
+#: camel/providers/local/camel-mbox-summary.c:680
+#: camel/providers/local/camel-spool-summary.c:140
+msgid "Storing folder"
+msgstr "அடைவுகளை சேமிக்கிறது"
+
+#: camel/providers/local/camel-mbox-folder.c:210
+#: camel/providers/local/camel-spool-folder.c:176
+#, c-format
+msgid "Cannot create folder lock on %s: %s"
+msgstr "அடைவு பூட்டு  %s ஐ உருவாக்க முடியவில்லை: %s"
+
+#: camel/providers/local/camel-mbox-folder.c:269
+#, c-format
+msgid "Cannot open mailbox: %s: %s\n"
+msgstr "மின்னஞ்சல் பெட்டியை திறக்க முடியவில்லை: %s: %s\n"
+
+#: camel/providers/local/camel-mbox-folder.c:329
+msgid "Mail append cancelled"
+msgstr "மின்னஞ்சல் பின்சேர்தல் ரத்து செய்யப்பட்டது"
+
+#: camel/providers/local/camel-mbox-folder.c:332
+#, c-format
+msgid "Cannot append message to mbox file: %s: %s"
+msgstr "mbox கோப்பில் செய்தியை பின்சேர்க்க முடியாது: %s: %s"
+
+#: camel/providers/local/camel-mbox-folder.c:453
+msgid "The folder appears to be irrecoverably corrupted."
+msgstr "இந்த அடைவு மீட்கமுடியாத நிலையில் சேதமடைந்துள்ளது."
+
+#: camel/providers/local/camel-mbox-folder.c:461
+#: camel/providers/local/camel-mh-folder.c:223
+msgid "Message construction failed."
+msgstr "செய்தி கட்டுமானம் தோல்வியுற்றது"
+
+#: camel/providers/local/camel-mbox-store.c:174
+#: camel/providers/local/camel-mbox-store.c:359
+msgid "Cannot create a folder by this name."
+msgstr "இந்த பெயரில் அடைவை உருவாக்க முடியாது"
+
+#: camel/providers/local/camel-mbox-store.c:204
+#, c-format
+msgid "Cannot get folder `%s': not a regular file."
+msgstr "`%s' அடைவை பெற முடியாது: இயல்பான கோப்பு இல்லை"
+
+#: camel/providers/local/camel-mbox-store.c:234
+#: camel/providers/local/camel-mbox-store.c:245
+#: camel/providers/local/camel-mbox-store.c:268
+#, c-format
+msgid ""
+"Could not delete folder `%s':\n"
+"%s"
+msgstr ""
+"அடைவை நீக்க முடியாது `%s':\n"
+"%s"
+
+#: camel/providers/local/camel-mbox-store.c:253
+#, c-format
+msgid "`%s' is not a regular file."
+msgstr "`%s' இயல்பான கோப்பு இல்லை"
+
+#: camel/providers/local/camel-mbox-store.c:260
+#, c-format
+msgid "Folder `%s' is not empty. Not deleted."
+msgstr "அடைவு `%s' காலியாக இல்லை : நீக்க முடியாது"
+
+#: camel/providers/local/camel-mbox-store.c:372
+#, c-format
+msgid "Cannot create directory `%s': %s."
+msgstr "அடைவை உருவாக்க முடியாது `%s': %s."
+
+#: camel/providers/local/camel-mbox-store.c:386
+#, c-format
+msgid "Cannot create folder: %s: %s"
+msgstr "அடைவை உருவாக்க முடியாது : %s: %s"
+
+#: camel/providers/local/camel-mbox-store.c:388
+msgid "Folder already exists"
+msgstr "அடைவு ஏற்கெனவே உள்ளது"
+
+#: camel/providers/local/camel-mbox-store.c:470
+msgid "The new folder name is illegal."
+msgstr "புதிய அடைவின் பெயரை ஏற்க முடியாது"
+
+#: camel/providers/local/camel-mbox-store.c:483
+#, c-format
+msgid "Could not rename `%s': `%s': %s"
+msgstr "மறுபெயரிட முடியாது  `%s': `%s': %s"
+
+#: camel/providers/local/camel-mbox-store.c:558
+#, c-format
+msgid "Could not rename '%s' to %s: %s"
+msgstr "'%s' ஐ %s ஆக மறுபெயரிட முடியாது: %s"
+
+#: camel/providers/local/camel-mbox-summary.c:422
+#, c-format
+msgid "Could not open folder: %s: %s"
+msgstr "அடைவை திறக்க முடியவில்லை: %s: %s"
+
+#: camel/providers/local/camel-mbox-summary.c:470
+#, c-format
+msgid "Fatal mail parser error near position %ld in folder %s"
+msgstr " %ld இல் %sஅடைவில் மின்னஞ்சல் பகுத்தல் பிழை"
+
+#: camel/providers/local/camel-mbox-summary.c:526
+#, c-format
+msgid "Cannot check folder: %s: %s"
+msgstr "அடைவு %s ஐ சோதிக்க முடியவில்லை: %s"
+
+#: camel/providers/local/camel-mbox-summary.c:594
+#: camel/providers/local/camel-mbox-summary.c:685
+#: camel/providers/local/camel-spool-summary.c:145
+#, c-format
+msgid "Could not open file: %s: %s"
+msgstr "அடைவு %s ஐ திறக்க முடியவில்லை: %s"
+
+#: camel/providers/local/camel-mbox-summary.c:606
+#: camel/providers/local/camel-spool-summary.c:165
+#, c-format
+msgid "Cannot open temporary mailbox: %s"
+msgstr "தற்காலிக மின்னஞ்சல் பெட்டியை திறக்க முடியவில்லை: %s"
+
+#: camel/providers/local/camel-mbox-summary.c:619
+#: camel/providers/local/camel-mbox-summary.c:783
+#, c-format
+msgid "Could not close source folder %s: %s"
+msgstr "மூல அடைவை மூட முடியவில்லை %s: %s"
+
+#: camel/providers/local/camel-mbox-summary.c:628
+#, c-format
+msgid "Could not close temp folder: %s"
+msgstr "தற்காலிக அடைவை மூட முடியவில்லை: %s"
+
+#: camel/providers/local/camel-mbox-summary.c:639
+#, c-format
+msgid "Could not rename folder: %s"
+msgstr "அடைவிற்கு மறுபெயரிட முடியவில்லை: %s"
+
+#: camel/providers/local/camel-mbox-summary.c:723
+#: camel/providers/local/camel-mbox-summary.c:731
+#: camel/providers/local/camel-mbox-summary.c:925
+#: camel/providers/local/camel-mbox-summary.c:933
+msgid "Summary and folder mismatch, even after a sync"
+msgstr "ஒத்திசைத்த பின்னும், சுருக்கம் மற்றும் அடைவில் பொருத்தமில்லை"
+
+#: camel/providers/local/camel-mbox-summary.c:859
+#: camel/providers/local/camel-spool-summary.c:337
+#, c-format
+msgid "Unknown error: %s"
+msgstr "தெரியாத பிழை: %s"
+
+#: camel/providers/local/camel-mbox-summary.c:894
+#, c-format
+msgid "Could not store folder: %s"
+msgstr "அடைவை சேமிக்க முடியவில்லை: %s"
+
+#: camel/providers/local/camel-mbox-summary.c:988
+#: camel/providers/local/camel-mbox-summary.c:1014
+#, c-format
+msgid "Error writing to temp mailbox: %s"
+msgstr "தற்காலிக மின்னஞ்சல்பெட்டியில் எழுதும்போது பிழை: %s"
+
+#: camel/providers/local/camel-mbox-summary.c:1005
+#, c-format
+msgid "Writing to tmp mailbox failed: %s: %s"
+msgstr "தற்காலிக மின்னஞ்சல் பெட்டியில் எழுதும் போது தோல்வி: %s: %s"
+
+#: camel/providers/local/camel-mh-folder.c:175
+msgid "MH append message cancelled"
+msgstr "MH பின்சேர் செய்தி ரத்து செய்யப்பட்டது."
+
+#: camel/providers/local/camel-mh-folder.c:178
+#, c-format
+msgid "Cannot append message to mh folder: %s: %s"
+msgstr "mh அடைவிலிருந்து செய்தியை பின்சேர்க்க முடியவில்லை : %s: %s"
+
+#: camel/providers/local/camel-mh-store.c:220
+#, c-format
+msgid "Could not create folder `%s': %s"
+msgstr "அடைவை உருவாக்க முடியவில்லை `%s': %s"
+
+#: camel/providers/local/camel-mh-store.c:232
+#, c-format
+msgid "Cannot get folder `%s': not a directory."
+msgstr "`%s'அடைவை பெற முடியவில்லை: அடைவு இல்லை"
+
+#: camel/providers/local/camel-mh-summary.c:247
+#, c-format
+msgid "Cannot open MH directory path: %s: %s"
+msgstr "MH அடைவு பாதையை திறக்க முடியவில்லை: %s: %s"
+
+#: camel/providers/local/camel-spool-store.c:123
+#, c-format
+msgid "Spool `%s' cannot be opened: %s"
+msgstr "சுருள்  `%s' ஐ திறக்க முடியவில்லை : %s"
+
+#: camel/providers/local/camel-spool-store.c:135
+#, c-format
+msgid "Spool `%s' is not a regular file or directory"
+msgstr "சுருள் `%s' இயல்பான அடைவோ அல்லது கோப்போ இல்லை"
+
+#: camel/providers/local/camel-spool-store.c:154
+#, c-format
+msgid "Folder `%s/%s' does not exist."
+msgstr "அடைவு `%s/%s' காணவில்லை"
+
+#: camel/providers/local/camel-spool-store.c:164
+#, c-format
+msgid ""
+"Could not open folder `%s':\n"
+"%s"
+msgstr ""
+"அடைவை திறக்க முடியவில்லை `%s':\n"
+"%s"
+
+#: camel/providers/local/camel-spool-store.c:168
+#, c-format
+msgid "Folder `%s' does not exist."
+msgstr "அடைவு `%s' இல்லை"
+
+#: camel/providers/local/camel-spool-store.c:173
+#, c-format
+msgid ""
+"Could not create folder `%s':\n"
+"%s"
+msgstr ""
+"அடைவை உருவாக்க முடியவில்லை`%s':\n"
+"%s"
+
+#: camel/providers/local/camel-spool-store.c:181
+#, c-format
+msgid "`%s' is not a mailbox file."
+msgstr "`%s' மின்னஞ்சல் பெட்டி கோப்பு இல்லை"
+
+#: camel/providers/local/camel-spool-store.c:198
+msgid "Store does not support an INBOX"
+msgstr "உள்பெட்டிக்கு சேமிப்பு கிடங்கின் ஆதரவு இல்லை"
+
+#: camel/providers/local/camel-spool-store.c:210
+#, c-format
+msgid "Spool mail file %s"
+msgstr "சுருள் மின்னஞ்சல் கோப்பு %s"
+
+#: camel/providers/local/camel-spool-store.c:210
+#, c-format
+msgid "Spool folder tree %s"
+msgstr "சுருள் அடைவு கிளை %s"
+
+#: camel/providers/local/camel-spool-store.c:218
+msgid "Spool folders cannot be renamed"
+msgstr "சுருள் அடைவிற்கு மறுபெயரிட முடியாது"
+
+#: camel/providers/local/camel-spool-store.c:226
+msgid "Spool folders cannot be deleted"
+msgstr "சுருள் அடைவை நீக்க முடியாது."
+
+#: camel/providers/local/camel-spool-summary.c:178
+#: camel/providers/local/camel-spool-summary.c:188
+#: camel/providers/local/camel-spool-summary.c:198
+#, c-format
+msgid "Could not sync temporary folder %s: %s"
+msgstr "தற்காலிக அடைவை ஒத்திசைக்க முடியாது%s: %s"
+
+#: camel/providers/local/camel-spool-summary.c:214
+#, c-format
+msgid "Could not sync spool folder %s: %s"
+msgstr "சுருள் அடைவை ஒத்திசைக்க முடியாது %s: %s"
+
+#: camel/providers/local/camel-spool-summary.c:245
+#: camel/providers/local/camel-spool-summary.c:264
+#: camel/providers/local/camel-spool-summary.c:277
+#, c-format
+msgid ""
+"Could not sync spool folder %s: %s\n"
+"Folder may be corrupt, copy saved in `%s'"
+msgstr ""
+"சுருள் அடைவை ஒத்திசைக்க முடியாது%s: %s\n"
+"அடைவு சிதைக்கப்பட்டிருக்கலாம் இதன் நகல் `%s' இல் இருக்கும்"
+
+#: camel/providers/nntp/camel-nntp-auth.c:44
+#: camel/providers/nntp/camel-nntp-store.c:1156
+#, c-format
+msgid "Please enter the NNTP password for %s@%s"
+msgstr " %s@%s க்கான NNTP கடவுச்சொல்லை உள்ளிடவும்"
+
+#: camel/providers/nntp/camel-nntp-auth.c:64
+msgid "Server rejected username"
+msgstr "சேவகன் மறுத்த பயனீட்டாளர் பெயர்"
+
+#: camel/providers/nntp/camel-nntp-auth.c:70
+msgid "Failed to send username to server"
+msgstr "பயனீட்டாளர் பெயரை சேவகனுக்கு அனுப்புவதில் தோல்வி"
+
+#: camel/providers/nntp/camel-nntp-auth.c:79
+msgid "Server rejected username/password"
+msgstr "பயனீட்டாளர்பெயர்/கடவுச்சொல் மறுக்கப்பட்டது"
+
+#: camel/providers/nntp/camel-nntp-folder.c:177
+#: camel/providers/nntp/camel-nntp-folder.c:209
+#, c-format
+msgid "Internal error: uid in invalid format: %s"
+msgstr "உள் பிழை: uid செல்லாத வடிவத்தில் உள்ளது : %s"
+
+#: camel/providers/nntp/camel-nntp-folder.c:329
+#: camel/providers/nntp/camel-nntp-folder.c:332
+#: camel/providers/nntp/camel-nntp-folder.c:374
+#: camel/providers/nntp/camel-nntp-folder.c:376
+#, c-format
+msgid "Posting failed: %s"
+msgstr "சமர்ப்பிதல் தோல்வி: %s"
+
+#: camel/providers/nntp/camel-nntp-folder.c:394
+msgid "You cannot post NNTP messages while working offline!"
+msgstr "NNTP செய்தியை இணைய இணைப்பில் இல்லாத போது பயன்படுத்த முடியாது"
+
+#: camel/providers/nntp/camel-nntp-folder.c:405
+msgid "You cannot copy messages from a NNTP folder!"
+msgstr "NNTP அடைவை நகலெடுக்க முடியாது"
+
+#: camel/providers/nntp/camel-nntp-grouplist.c:44
+msgid "Could not get group list from server."
+msgstr "ழுழு பட்டியலை சேவகனிலிருந்து பெறமுடியவில்லை"
+
+#: camel/providers/nntp/camel-nntp-grouplist.c:97
+#: camel/providers/nntp/camel-nntp-grouplist.c:106
+#, c-format
+msgid "Unable to load grouplist file for %s: %s"
+msgstr "குழுபட்டியலை %s க்காக ஏற்ற முடியவில்லை: %s"
+
+#: camel/providers/nntp/camel-nntp-grouplist.c:157
+#, c-format
+msgid "Unable to save grouplist file for %s: %s"
+msgstr "%s க்காக குழுபட்டியலை சேமிக்க முடியவில்லை:%s"
+
+#: camel/providers/nntp/camel-nntp-provider.c:44
+msgid ""
+"Show folders in short notation (e.g. c.o.linux rather than comp.os.linux)"
+msgstr ""
+"அடைவை சிறு குறிமானமாக காட்டமுடியவில்லை :(உம்comp.os.linux க்கு பதில் c.o.linux )"
+
+#: camel/providers/nntp/camel-nntp-provider.c:46
+msgid "In the subscription dialog, show relative folder names"
+msgstr "இந்த சந்தா உரையாடல் பெட்டியில், தொடர்புள்ள அடைவின் பெயரை காட்டு"
+
+#: camel/providers/nntp/camel-nntp-provider.c:53
+msgid "USENET news"
+msgstr "USENET செய்திகள்"
+
+#: camel/providers/nntp/camel-nntp-provider.c:55
+msgid "This is a provider for reading from and posting toUSENET newsgroups."
+msgstr "toUSENET செய்தி குழுவிலிருந்து படிக்க மற்றும் செய்தி அனுப்ப இந்த சேவை பயன்படும்"
+
+#: camel/providers/nntp/camel-nntp-provider.c:74
+msgid ""
+"This option will authenticate with the NNTP server using a plaintext "
+"password."
+msgstr "இந்த தேர்வு NNTP சேவகனில் வெற்று உரை கடவுச்சொல்லை பயன்படுத்தி அனுமதி பெறும்"
+
+#: camel/providers/nntp/camel-nntp-store.c:234
+#, c-format
+msgid "Could not read greeting from %s: %s"
+msgstr "%s லிருந்து அழைப்பை படிக்க முடியவில்லை: %s"
+
+#: camel/providers/nntp/camel-nntp-store.c:246
+#, c-format
+msgid "NNTP server %s returned error code %d: %s"
+msgstr "%s சேவகன் %dபிழை செய்தி கிடைத்துள்ளது: %s"
+
+#: camel/providers/nntp/camel-nntp-store.c:422
+#, c-format
+msgid "USENET News via %s"
+msgstr "USENET செய்தி %s வழியாக"
+
+#: camel/providers/nntp/camel-nntp-store.c:811
+#, c-format
+msgid ""
+"Error retrieving newsgroups:\n"
+"\n"
+"%s"
+msgstr ""
+"செய்திகுழுவை பெறுகையில் பிழை:\n"
+"\n"
+"%s"
+
+#: camel/providers/nntp/camel-nntp-store.c:905
+msgid ""
+"You cannot subscribe to this newsgroup:\n"
+"\n"
+"No such newsgroup. The selected item is a probably a parent folder."
+msgstr ""
+"இந்த செய்தி குழுவிற்கு சந்தாதாரக உங்களால் முடியாது:\n"
+"\n"
+"இப்படி ஒரு செய்திகுழு இல்லை. தேர்வு செய்யப்பட்ட அடைவு முதன்மை அடைவாக இருக்கலாம்."
+
+#: camel/providers/nntp/camel-nntp-store.c:937
+msgid ""
+"You cannot unsubscribe to this newsgroup:\n"
+"\n"
+"newsgroup does not exist!"
+msgstr ""
+"இந்த செய்திகுழுவிலிருந்து வெளியேற முடியாது:\n"
+"\n"
+"இப்படி ஒரு செய்தி குழு இல்லை"
+
+#: camel/providers/nntp/camel-nntp-store.c:962
+msgid "You cannot create a folder in a News store: subscribe instead."
+msgstr "செய்தி கிடங்கில் அடைவை உருவாக்க முடியாது: சந்தாதாரராகவும்"
+
+#: camel/providers/nntp/camel-nntp-store.c:970
+msgid "You cannot rename a folder in a News store."
+msgstr "செய்தி கிடங்கில் உள்ள அடைவிற்கு மறுபெயரிட முடியாது"
+
+#: camel/providers/nntp/camel-nntp-store.c:978
+msgid "You cannot remove a folder in a News store: unsubscribe instead."
+msgstr "இந்த செய்தி கிடங்கில் உள்ள அடைவை நீக்க முடியாது: சந்தாவை ரத்து செய்யலாம்"
+
+#: camel/providers/nntp/camel-nntp-store.c:1148
+#, fuzzy
+msgid "Authentication requested but no username provided"
+msgstr "பயனீட்டாளர் பெயர் இல்லாமல் அனுமதி கோரப்பட்டது"
+
+#: camel/providers/nntp/camel-nntp-store.c:1160
+#, c-format
+msgid "Cannot authenticate to server: %s"
+msgstr "சேவகனில் அனுமதி இல்லை: %s"
+
+#: camel/providers/nntp/camel-nntp-store.c:1276
+#, c-format
+msgid "NNTP Command failed: %s"
+msgstr "NNTP கட்டளை தோல்வி: %s"
+
+#: camel/providers/nntp/camel-nntp-store.c:1332
+msgid "Not connected."
+msgstr "இணைப்பு இல்லை"
+
+#: camel/providers/nntp/camel-nntp-store.c:1385
+#, c-format
+msgid "No such folder: %s"
+msgstr "அடைவி இல்லை : %s"
+
+#: camel/providers/nntp/camel-nntp-summary.c:221
+#: camel/providers/nntp/camel-nntp-summary.c:317
+#, c-format
+msgid "%s: Scanning new messages"
+msgstr "%s: செய்திகளை சோதிக்கிறது"
+
+#: camel/providers/nntp/camel-nntp-summary.c:228
+#, c-format
+msgid "Unexpected server response from xover: %s"
+msgstr "xover லிருந்து எதிர்பாராத சேவகன் பதில்: %s"
+
+#: camel/providers/nntp/camel-nntp-summary.c:331
+#, c-format
+msgid "Unexpected server response from head: %s"
+msgstr "தலைப்பிலி்லிருந்து எதிர்பாராத சேவகன் பதில்: %s"
+
+#: camel/providers/nntp/camel-nntp-summary.c:371
+msgid "Use cancel"
+msgstr "ரத்துசெய் பயன்படுத்து"
+
+#: camel/providers/nntp/camel-nntp-summary.c:373
+#, c-format
+msgid "Operation failed: %s"
+msgstr "செயல் தோல்வியுற்றது: %s"
+
+#: camel/providers/pop3/camel-pop3-folder.c:247
+msgid "Retrieving POP summary"
+msgstr "பாப் சுருக்கத்தை பெறுகிறது"
+
+#: camel/providers/pop3/camel-pop3-folder.c:266
+#, c-format
+msgid "Cannot get POP summary: %s"
+msgstr "பாப் சுருக்கத்தை பெற முடியவில்லை: %s"
+
+#: camel/providers/pop3/camel-pop3-folder.c:309
+msgid "Expunging deleted messages"
+msgstr "நீக்கிய செய்திகளை அழிக்கிறது"
+
+#: camel/providers/pop3/camel-pop3-folder.c:405
+#, c-format
+msgid "No message with uid %s"
+msgstr "uid %s உள்ள செய்தி இல்லை"
+
+#. Sigh, most of the crap in this function is so that the cancel button
+#. returns the proper exception code.  Sigh.
+#: camel/providers/pop3/camel-pop3-folder.c:412
+#, c-format
+msgid "Retrieving POP message %d"
+msgstr "பாப் செய்தி %d ஐ பெறுகிறது"
+
+#: camel/providers/pop3/camel-pop3-folder.c:502
+msgid "Unknown reason"
+msgstr "தெரியாத காரணம்"
+
+#: camel/providers/pop3/camel-pop3-provider.c:39
+msgid "Message storage"
+msgstr "செய்தி சேகரிப்பு"
+
+#: camel/providers/pop3/camel-pop3-provider.c:41
+msgid "Leave messages on server"
+msgstr "சேவகனில் செய்தியை விட்டு வைக்கவும்"
+
+#: camel/providers/pop3/camel-pop3-provider.c:44
+#, c-format
+msgid "Delete after %s day(s)"
+msgstr "%s நாள்(களுக்கு) பிறகு நீக்கவும்"
+
+#: camel/providers/pop3/camel-pop3-provider.c:47
+msgid "Disable support for all POP3 extensions"
+msgstr "POP3 விரிவாக்கத்திற்கான ஆதரவை செயல் நீக்கப் செய்யவும்"
+
+#: camel/providers/pop3/camel-pop3-provider.c:55
+msgid "POP"
+msgstr "POP"
+
+#: camel/providers/pop3/camel-pop3-provider.c:57
+msgid "For connecting to and downloading mail from POP servers."
+msgstr "இணைக்கவும் பாப் சேவகனிலிருந்து மின்னஞ்சலை பெறவும்"
+
+#: camel/providers/pop3/camel-pop3-provider.c:74
+msgid ""
+"This option will connect to the POP server using a plaintext password. This "
+"is the only option supported by many POP servers."
+msgstr ""
+"இந்த தேர்வு பாப் சேவகனுடன் வெற்று உரை கடவுச்சொல்லை பயன்படுத்தி இணைக்கும். இது பாப் சேவகன் "
+"ஆதரவு தரும் ஒரே சேவை"
+
+#: camel/providers/pop3/camel-pop3-provider.c:84
+msgid ""
+"This option will connect to the POP server using an encrypted password via "
+"the APOP protocol. This may not work for all users even on servers that "
+"claim to support it."
+msgstr ""
+"இந்த தேர்வு பாப் சேவகனை குறிமுறையாக்கம் செய்யப்பட்ட கடவுச்சொல்லுவன் APOP விதிமுறை "
+"வழியாக இணைக்கு. இது எல்லா பயனீட்டாளர்களுக்கும் வேலை செய்யாது"
+
+#: camel/providers/pop3/camel-pop3-store.c:204
+#, fuzzy, c-format
+msgid "Failed to read a valid greeting from POP server %s"
+msgstr "பாப் சேவகனிலிருந்து வரவேற்பு சேவையை படிக்க முடியாது  %s (முனையம் %d)"
+
+#: camel/providers/pop3/camel-pop3-store.c:218
+#: camel/providers/pop3/camel-pop3-store.c:235
+#: camel/providers/pop3/camel-pop3-store.c:245
+#: camel/providers/pop3/camel-pop3-store.c:251
+#, c-format
+msgid "Failed to connect to POP server %s in secure mode: %s"
+msgstr "பாப் சேவகன் %s ஐ பாதுகாப்பாக இணைப்பதில் தோல்வி: %s"
+
+#: camel/providers/pop3/camel-pop3-store.c:219
+#, fuzzy
+msgid "STLS not supported"
+msgstr "SSL/TLS நீட்டிப்புக்கு ஆதரவு இல்லை"
+
+#: camel/providers/pop3/camel-pop3-store.c:363
+#, c-format
+msgid "Could not connect to POP server %s"
+msgstr "பாப் சேவகனுடன் இணைக்க முடியவில்லை %s"
+
+#: camel/providers/pop3/camel-pop3-store.c:404
+#: camel/providers/pop3/camel-pop3-store.c:518
+#, c-format
+msgid ""
+"Unable to connect to POP server %s: No support for requested authentication "
+"mechanism."
+msgstr "பாப் சேவகனுடன் இணைக்க முடியவில்லை %s வேண்டப்பட்ட அனுமதி முறைக்கு ஆதரவு இல்லை"
+
+#: camel/providers/pop3/camel-pop3-store.c:420
+#, c-format
+msgid "SASL `%s' Login failed for POP server %s: %s"
+msgstr "SASL `%s' பாப் சேவகனுக்குள் நுழைவதில் தோல்வி %s: %s"
+
+#: camel/providers/pop3/camel-pop3-store.c:432
+#, c-format
+msgid "Cannot login to POP server %s: SASL Protocol error"
+msgstr "பாப் சேவகன் %s இல் நுழைய முடியவில்லை:SASL விதிமுறை பிழை"
+
+#: camel/providers/pop3/camel-pop3-store.c:451
+#, c-format
+msgid "Failed to authenticate on POP server %s: %s"
+msgstr "பாப் சேவகனில் அனுமதி பெறுதல் தோல்வியடைந்தது %s: %s"
+
+#: camel/providers/pop3/camel-pop3-store.c:477
+#, c-format
+msgid "%sPlease enter the POP password for %s on host %s"
+msgstr "%s தயவு செய்து பாப் கடவுச்சொல் %s ஐ புரவலன் %s இல் உள்ளிடவும்"
+
+#: camel/providers/pop3/camel-pop3-store.c:532
+#: camel/providers/pop3/camel-pop3-store.c:545
+#, c-format
+msgid ""
+"Unable to connect to POP server %s.\n"
+"Error sending password: %s"
+msgstr ""
+"பாப் சேவகனுடன் இணைக்க முடியவில்லை %s.\n"
+"கடவுச்சொல்லை அனுப்புவதில் பிழை : %s"
+
+#: camel/providers/pop3/camel-pop3-store.c:539
+#, c-format
+msgid ""
+"Unable to connect to POP server %s.\n"
+"Error sending username: %s"
+msgstr ""
+"பாப் சேவகனுடன் இணைக்க முடியவில்லை %s.\n"
+"பயனீட்டாளர் பெயரை அனுப்புவதில் பிழை : %s"
+
+#: camel/providers/pop3/camel-pop3-store.c:644
+#, c-format
+msgid "No such folder `%s'."
+msgstr "அடைவு இல்லை `%s'"
+
+#: camel/providers/sendmail/camel-sendmail-provider.c:37
+msgid "Sendmail"
+msgstr "Sendmail"
+
+#: camel/providers/sendmail/camel-sendmail-provider.c:39
+msgid ""
+"For delivering mail by passing it to the \"sendmail\" program on the local "
+"system."
+msgstr "\"sendmail\" நிரல் வழியாக தனி கணிகளுக்கு மின்னஞ்சல் சென்றுகொண்டிருக்கிறது."
+
+#: camel/providers/sendmail/camel-sendmail-transport.c:114
+msgid "Could not parse recipient list"
+msgstr "பெறுபவர் பட்டியலை பகுக்க முடியவில்லை"
+
+#: camel/providers/sendmail/camel-sendmail-transport.c:145
+#, c-format
+msgid "Could not create pipe to sendmail: %s: mail not sent"
+msgstr "sendmail: %s க்கான வழியை உருவாக்க முடியவில்லை: மின்னஞ்சல் அனுப்பவில்லை"
+
+#: camel/providers/sendmail/camel-sendmail-transport.c:166
+#, c-format
+msgid "Could not fork sendmail: %s: mail not sent"
+msgstr "sendmail: %s ஐ பிளக்க முடியவில்லை: மின்னஞ்சல் அனுப்ப முடியவில்லை"
+
+#: camel/providers/sendmail/camel-sendmail-transport.c:206
+#, c-format
+msgid "Could not send message: %s"
+msgstr "செய்தி அனுப்ப முடியவில்லை: %s"
+
+#: camel/providers/sendmail/camel-sendmail-transport.c:234
+#, c-format
+msgid "sendmail exited with signal %s: mail not sent."
+msgstr "%s சிகனலுடன் சென்மெயில் வெளியேறியது: மின்னஞ்சல் அனுப்ப முடியவில்லை"
+
+#: camel/providers/sendmail/camel-sendmail-transport.c:241
+#, c-format
+msgid "Could not execute %s: mail not sent."
+msgstr "%s ஐ இயக்க முடியவில்லை : மின்னஞ்சல் அனுப்ப முடியவில்லை"
+
+#: camel/providers/sendmail/camel-sendmail-transport.c:246
+#, c-format
+msgid "sendmail exited with status %d: mail not sent."
+msgstr "%d நிலையுடன் சென்ட்மெயில் வெளியேறியது: மின்னஞ்சல் அனுப்ப முடியவில்லை"
+
+#: camel/providers/sendmail/camel-sendmail-transport.c:260
+msgid "sendmail"
+msgstr "சென்ட்மெயில்"
+
+#: camel/providers/sendmail/camel-sendmail-transport.c:262
+msgid "Mail delivery via the sendmail program"
+msgstr "சென்ட்மெயில் நிரல் வழியாக மின்னஞ்சல் அனுப்புகிறது"
+
+#: camel/providers/smtp/camel-smtp-provider.c:38
+msgid "SMTP"
+msgstr "SMTP"
+
+#: camel/providers/smtp/camel-smtp-provider.c:40
+msgid "For delivering mail by connecting to a remote mailhub using SMTP."
+msgstr ""
+"தொலை மின்னஞ்சல் மையத்தின் வழியாக SMTP பயன்படுத்தி இணையத்துடன் இணைக்கப்பட்டு மின்னஞ்சல் "
+"அனுபப்படுகிறது."
+
+#: camel/providers/smtp/camel-smtp-transport.c:165
+msgid "Syntax error, command unrecognized"
+msgstr "தொடரியல் பிழை, கட்டளையை புரிந்துகொள்ள முடியவில்லைிழை"
+
+#: camel/providers/smtp/camel-smtp-transport.c:167
+msgid "Syntax error in parameters or arguments"
+msgstr "அளவுரு அல்லது பயனிலையில் தொடர் பிழை"
+
+#: camel/providers/smtp/camel-smtp-transport.c:169
+msgid "Command not implemented"
+msgstr "கட்டளையை செயல்படுத்த முடியவில்லை"
+
+#: camel/providers/smtp/camel-smtp-transport.c:171
+msgid "Command parameter not implemented"
+msgstr "கட்டளை அளவுருவை செயல்படுத்த முடியவில்லை"
+
+#: camel/providers/smtp/camel-smtp-transport.c:173
+msgid "System status, or system help reply"
+msgstr "கணினி நிலை, அல்லது கணினி உதவி பதில்"
+
+#: camel/providers/smtp/camel-smtp-transport.c:175
+msgid "Help message"
+msgstr "உதவி செய்திகள்"
+
+#: camel/providers/smtp/camel-smtp-transport.c:177
+msgid "Service ready"
+msgstr "சேவை தயார்"
+
+#: camel/providers/smtp/camel-smtp-transport.c:179
+msgid "Service closing transmission channel"
+msgstr "சேவை அனுப்பும் பாதை மூடப்படுகிறது"
+
+#: camel/providers/smtp/camel-smtp-transport.c:181
+msgid "Service not available, closing transmission channel"
+msgstr "சேவை இல்லை, அனுப்பும் பாதை மூடப்படுகிறது"
+
+#: camel/providers/smtp/camel-smtp-transport.c:183
+msgid "Requested mail action okay, completed"
+msgstr "மின்னஞ்சல் செயல்பாட்டுக்கான கோரிக்கை ஏற்கப்பட்டது, முடிவுற்றது"
+
+#: camel/providers/smtp/camel-smtp-transport.c:185
+msgid "User not local; will forward to <forward-path>"
+msgstr "உள் பயனீடாளர் இல்லை என்றால், <forward-path> பாதைக்கு அனுப்பப்படும்"
+
+#: camel/providers/smtp/camel-smtp-transport.c:187
+msgid "Requested mail action not taken: mailbox unavailable"
+msgstr "கோரப்பட்ட மின்னஞ்சல் செயல் பெறவில்லை :மின்னஞ்சல் பெட்டிபெட்டி கிடைக்கவில்லை"
+
+#: camel/providers/smtp/camel-smtp-transport.c:189
+msgid "Requested action not taken: mailbox unavailable"
+msgstr "கோரப்பட்ட செயல் பெறவில்லை: மின்னஞ்சல் பெட்டி கிடைக்கவில்லை "
+
+#: camel/providers/smtp/camel-smtp-transport.c:191
+msgid "Requested action aborted: error in processing"
+msgstr "கோரப்பட்ட செயல் தடை செய்யபப்ட்டது: செயல் படுத்துகையில் பிழை"
+
+#: camel/providers/smtp/camel-smtp-transport.c:193
+msgid "User not local; please try <forward-path>"
+msgstr "பயனீடாளர் உள்ளூர் இல்லை ; முயற்சிக்கவும் <forward-path>"
+
+#: camel/providers/smtp/camel-smtp-transport.c:195
+msgid "Requested action not taken: insufficient system storage"
+msgstr "கோரப்பட்ட செயல் நடைபெறவில்லை : கணினியில் இடம் இல்லை"
+
+#: camel/providers/smtp/camel-smtp-transport.c:197
+msgid "Requested mail action aborted: exceeded storage allocation"
+msgstr "கோரப்பட்ட மின்னஞ்சல் செயல் தடை செய்யப்பட்டது: சேமித்த இடம் போதவில்லை"
+
+#: camel/providers/smtp/camel-smtp-transport.c:199
+msgid "Requested action not taken: mailbox name not allowed"
+msgstr "கோரப்பட்ட செயல் நடைபெறவில்லை: மின்னஞ்சல் பெட்டியில் பெயருக்கு அனுமதி இல்லை"
+
+#: camel/providers/smtp/camel-smtp-transport.c:201
+msgid "Start mail input; end with <CRLF>.<CRLF>"
+msgstr "மின்னஞ்சல் உள்ளீடு துவங்கியது; <CRLF>.<CRLF> ஓடு முடிந்தது"
+
+#: camel/providers/smtp/camel-smtp-transport.c:203
+msgid "Transaction failed"
+msgstr "பரிமாற்றம் தோல்வியுற்றது"
+
+#: camel/providers/smtp/camel-smtp-transport.c:207
+msgid "A password transition is needed"
+msgstr "கடவுச்சொல் மாற்றம் தேவை"
+
+#: camel/providers/smtp/camel-smtp-transport.c:209
+msgid "Authentication mechanism is too weak"
+msgstr "அனுமதி முறை மிகவும் மோசமாக உள்ளது"
+
+#: camel/providers/smtp/camel-smtp-transport.c:211
+msgid "Encryption required for requested authentication mechanism"
+msgstr "கோரப்பட்ட அனுமதி முறைமைக்கு குறிமுறையாக்கம் தேவை"
+
+#: camel/providers/smtp/camel-smtp-transport.c:213
+msgid "Temporary authentication failure"
+msgstr "தற்காலிக அனுமதி முறைமை தோல்வியுற்றது"
+
+#: camel/providers/smtp/camel-smtp-transport.c:294
+msgid "Welcome response error"
+msgstr "பதில் பிழை வரவேற்பு"
+
+#: camel/providers/smtp/camel-smtp-transport.c:325
+#: camel/providers/smtp/camel-smtp-transport.c:358
+#: camel/providers/smtp/camel-smtp-transport.c:364
+#, c-format
+msgid "Failed to connect to SMTP server %s in secure mode: %s"
+msgstr "SMTP சேவகன் %s உடன் பாதுகாப்பாக இணைவது தோல்வியுற்றது : %s"
+
+#: camel/providers/smtp/camel-smtp-transport.c:334
+#, c-format
+msgid "STARTTLS command failed: %s"
+msgstr "STARTTLS கட்டளை தோல்வியுற்றது: %s "
+
+#: camel/providers/smtp/camel-smtp-transport.c:349
+msgid "STARTTLS command failed"
+msgstr "STARTTLS கட்டளை தோல்வுயுற்றது"
+
+#: camel/providers/smtp/camel-smtp-transport.c:488
+#, c-format
+msgid "SMTP server %s does not support requested authentication type %s."
+msgstr "SMTP சேவகன் %s குறிப்பிட்ட அனுமதி முறைக்கு ஆதரவுதராது %s."
+
+#: camel/providers/smtp/camel-smtp-transport.c:526
+#, c-format
+msgid "%sPlease enter the SMTP password for %s on host %s"
+msgstr "%s தயவு செய்து %s க்கான SMTP கடவுச்சொல்லை புரவலன் %s இல் உள்ளிடவும்."
+
+#: camel/providers/smtp/camel-smtp-transport.c:545
+#, c-format
+msgid ""
+"Unable to authenticate to SMTP server.\n"
+"%s\n"
+"\n"
+msgstr ""
+"SMTP சேவகனுடன் அனுமதி பெற முடியவில்லை \n"
+"%s\n"
+"\n"
+
+#: camel/providers/smtp/camel-smtp-transport.c:669
+#, c-format
+msgid "SMTP server %s"
+msgstr "SMTP சேவகம் %s"
+
+#: camel/providers/smtp/camel-smtp-transport.c:671
+#, c-format
+msgid "SMTP mail delivery via %s"
+msgstr "%s SMTP வழியாக மின்னஞ்சல் அனுப்புதல்"
+
+#: camel/providers/smtp/camel-smtp-transport.c:689
+msgid "Cannot send message: service not connected."
+msgstr "செய்தி அனுப்ப முடியவில்லை : சேவை இணைப்பில் இல்லை"
+
+#: camel/providers/smtp/camel-smtp-transport.c:695
+msgid "Cannot send message: sender address not valid."
+msgstr "செய்தி அனுப்ப முடியவில்லை : அனுப்பியவர் முகவரி செல்லாது"
+
+#: camel/providers/smtp/camel-smtp-transport.c:699
+msgid "Sending message"
+msgstr "செய்தி அனுப்பப்படுகிறது"
+
+#: camel/providers/smtp/camel-smtp-transport.c:714
+msgid "Cannot send message: no recipients defined."
+msgstr "செய்தி அனுப்ப முடியவில்லை : பெறுபவர் முகவரி குறிப்பிடப்படவில்லை"
+
+#: camel/providers/smtp/camel-smtp-transport.c:725
+msgid "Cannot send message: one or more invalid recipients"
+msgstr "செய்தி அனுப்ப முடியவில்லை: ஒன்றுக்கும் மேற்பட்ட செல்லாத பெறுநர் முகவரிகள்"
+
+#: camel/providers/smtp/camel-smtp-transport.c:894
+msgid "SMTP Greeting"
+msgstr "SMTP வரவேற்பு"
+
+#: camel/providers/smtp/camel-smtp-transport.c:920
+#, c-format
+msgid "HELO command failed: %s"
+msgstr "HELO கட்டளை தோல்வியுற்றது: %s"
+
+#: camel/providers/smtp/camel-smtp-transport.c:937
+msgid "HELO command failed"
+msgstr "HELO கட்டளை தோல்வியுற்றது"
+
+#: camel/providers/smtp/camel-smtp-transport.c:1003
+msgid "SMTP Authentication"
+msgstr "SMTP அனுமதி முறை"
+
+#: camel/providers/smtp/camel-smtp-transport.c:1009
+msgid "Error creating SASL authentication object."
+msgstr "SASL அனுமதியை உருவாக்குவதில் பிழை"
+
+#: camel/providers/smtp/camel-smtp-transport.c:1026
+#: camel/providers/smtp/camel-smtp-transport.c:1037
+#, c-format
+msgid "AUTH command failed: %s"
+msgstr "AUTH கட்டளை தோல்வியுற்றது: %s"
+
+#: camel/providers/smtp/camel-smtp-transport.c:1043
+msgid "AUTH command failed"
+msgstr "AUTH கட்டளை தோல்வியுற்றது"
+
+#: camel/providers/smtp/camel-smtp-transport.c:1105
+msgid "Bad authentication response from server.\n"
+msgstr "சேவகனிலிருந்து மோசமான அனுமதி பதில்\n"
+
+#: camel/providers/smtp/camel-smtp-transport.c:1130
+#, c-format
+msgid "MAIL FROM command failed: %s: mail not sent"
+msgstr "MAIL FROM கட்டளை தோல்வியுற்றது: %s: மின்னஞ்சல் அனுப்ப முடியவில்லை"
+
+#: camel/providers/smtp/camel-smtp-transport.c:1147
+msgid "MAIL FROM command failed"
+msgstr "MAIL FROM கட்டளை தோல்வியுற்றது"
+
+#: camel/providers/smtp/camel-smtp-transport.c:1171
+#, c-format
+msgid "RCPT TO command failed: %s: mail not sent"
+msgstr "RCPT TO கட்டளை தோல்வியுற்றது : %s: மின்னஞ்சல் அனுப்ப முடியவில்லை"
+
+#: camel/providers/smtp/camel-smtp-transport.c:1190
+#, c-format
+msgid "RCPT TO <%s> failed"
+msgstr "RCPT TO <%s> தோல்வியுற்றது"
+
+#: camel/providers/smtp/camel-smtp-transport.c:1229
+#: camel/providers/smtp/camel-smtp-transport.c:1287
+#: camel/providers/smtp/camel-smtp-transport.c:1306
+#, c-format
+msgid "DATA command failed: %s: mail not sent"
+msgstr "DATA கட்டளை தோல்வியுற்றது : %s: மின்னஞ்சல் அனுப்ப முடியவில்லை"
+
+#. we should have gotten instructions on how to use the DATA command:
+#. * 354 Enter mail, end with "." on a line by itself
+#.
+#: camel/providers/smtp/camel-smtp-transport.c:1246
+#: camel/providers/smtp/camel-smtp-transport.c:1322
+msgid "DATA command failed"
+msgstr "DATA கட்டளை தோல்வியுற்றது"
+
+#: camel/providers/smtp/camel-smtp-transport.c:1345
+#, c-format
+msgid "RSET command failed: %s"
+msgstr "RSET கட்டளை தோல்வியுற்றது : %s"
+
+#: camel/providers/smtp/camel-smtp-transport.c:1361
+msgid "RSET command failed"
+msgstr "RSET கட்டளை தோல்வியுற்றது"
+
+#: camel/providers/smtp/camel-smtp-transport.c:1384
+#, c-format
+msgid "QUIT command failed: %s"
+msgstr "QUIT கட்டளை தோல்வியுற்றது: %s"
+
+#: camel/providers/smtp/camel-smtp-transport.c:1398
+msgid "QUIT command failed"
+msgstr "QUIT கட்டளை தோல்வியுற்றது"
+
+#: libedataserverui/e-categories-dialog.c:90
+#, fuzzy
+msgid "Category Icon"
+msgstr "வகை"
+
+#: libedataserverui/e-categories-dialog.c:236
+#, c-format
+msgid ""
+"There is already a category '%s' in the configuration. Please use another "
+"name"
+msgstr ""
+
+#: libedataserverui/e-categories-dialog.c:391
+#, fuzzy
+msgid "Category"
+msgstr "(_C)வகை:"
+
+#: libedataserverui/e-categories-dialog.glade.h:1
+#, fuzzy
+msgid "Category Properties"
+msgstr "வகை"
+
+#: libedataserverui/e-categories-dialog.glade.h:2
+#, fuzzy
+msgid "Category _Color"
+msgstr "வகை"
+
+#: libedataserverui/e-categories-dialog.glade.h:3
+#, fuzzy
+msgid "Category _Icon"
+msgstr "வகை"
+
+#: libedataserverui/e-categories-dialog.glade.h:4
+#, fuzzy
+msgid "Category _Name"
+msgstr "வகை"
+
+#: libedataserverui/e-categories-dialog.glade.h:5
+#, fuzzy
+msgid "Item(s) belong to these _categories:"
+msgstr "இந்த தொடர்புகள் இந்த வகையை சார்ந்தது"
+
+#: libedataserverui/e-categories-dialog.glade.h:6
+#, fuzzy
+msgid "_Available Categories:"
+msgstr "(_C)வகைகள்"
+
+#: libedataserverui/e-categories-dialog.glade.h:7
+msgid "_Edit"
+msgstr "(_E) திருத்து"
+
+#: libedataserverui/e-categories-dialog.glade.h:8
+#, fuzzy
+msgid "categories"
+msgstr "வகைகள்"
+
+#: libedataserverui/e-name-selector-dialog.c:184
+msgid "Select Contacts from Address Book"
+msgstr "முகவரிப்புத்தகத்திலிருந்து தொடர்புகளை தேர்வுசெய்"
+
+#: libedataserverui/e-name-selector-dialog.glade.h:1
+msgid "*"
+msgstr " "
+
+#: libedataserverui/e-name-selector-dialog.glade.h:2
+msgid "<b>Contacts</b>"
+msgstr "<b>தொடர்புகள்</b>"
+
+#: libedataserverui/e-name-selector-dialog.glade.h:3
+msgid "<b>Show Contacts</b>"
+msgstr "<b>தொடர்புகளை காட்டு</b>"
+
+#: libedataserverui/e-name-selector-dialog.glade.h:4
+msgid "Address _Book:"
+msgstr "முகவரி புத்தகம்(_B):"
+
+#: libedataserverui/e-name-selector-dialog.glade.h:5
+msgid "_Search:"
+msgstr "(_S)தேடு:"
+
+#. prepare the dialog
+#: libedataserverui/e-source-selector-dialog.c:101
+msgid "Select destination"
+msgstr "சேருமிடத்தை தேர்வு செய்"
+
+#: libedataserverui/e-source-selector-dialog.c:154
+msgid "_Destination"
+msgstr "(_D)சேருமிடம்"
+
+#: servers/groupwise/e-gw-connection.c:152
+msgid "Invalid connection"
+msgstr "செல்லாத இணைப்பு"
+
+#: servers/groupwise/e-gw-connection.c:156
+msgid "Invalid response from server"
+msgstr "சேவகனிலிருந்து செல்லாத பதில்"
+
+#: servers/groupwise/e-gw-connection.c:162
+msgid "Bad parameter"
+msgstr "மோசமான பயனிலை"
+
+#: src/GNOME_Evolution_DataServer.server.in.in.h:1
+msgid "Evolution Addressbook file backend"
+msgstr "எவல்யூஷன் முகவரிபுத்தக கோப்பு பின்புலம்"
+
+#: src/GNOME_Evolution_DataServer.server.in.in.h:2
+msgid "Evolution Calendar file and webcal backend"
+msgstr "எவல்யூஷன் நாள்காட்டி கோப்பு மற்றும் வெப்கால் பின்புலம்"
+
+#. dialog display isn't working out
+#: src/server.c:101
+#, c-format
+msgid "Multiple segmentation faults occurred; can't display error dialog\n"
+msgstr ""
+
+#~ msgid "Evolution Addressbook file and LDAP backend"
+#~ msgstr "எவல்யூஷன் முகவரி கோப்பு மற்றும் LDAP பின்புலம்"

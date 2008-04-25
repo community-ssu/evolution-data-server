@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+
+<node>
+	
+	<interface name="org.gnome.evolution.dataserver.calendar.DataCalViewListener">
+		<annotation name="org.freedesktop.DBus.GLib.CSymbol" value="EDataCalViewListener"/>
+
+		<signal name="ListenerDied"/>
+		
+		<method name="notifyObjectsAdded">
+			<annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_notifyObjectsAdded"/>
+			<annotation name="org.freedesktop.DBus.GLib.Async" value=""/>
+			<arg name="objects" type="as" direction="in"/>
+		</method>
+
+		<method name="notifyObjectsModified">
+			<annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_notifyObjectsModified"/>
+			<annotation name="org.freedesktop.DBus.GLib.Async" value=""/>
+			<arg name="objects" type="as" direction="in"/>
+		</method>
+
+		<method name="notifyObjectsRemoved">
+			<annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_notifyObjectsRemoved"/>
+			<annotation name="org.freedesktop.DBus.GLib.Async" value=""/>
+			<arg name="uids" type="as" direction="in"/>
+		</method>
+
+		<method name="notifyQueryProgress">
+			<annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_notifyQueryProgress"/>
+			<annotation name="org.freedesktop.DBus.GLib.Async" value=""/>
+			<arg name="message" type="s" direction="in"/>
+			<arg name="progress" type="n" direction="in"/>
+		</method>
+
+		<method name="notifyQueryDone">
+			<annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_notifyQueryDone"/>
+			<annotation name="org.freedesktop.DBus.GLib.Async" value=""/>
+			<arg name="status" type="u" direction="in"/>
+		</method>
+
+	</interface>
+
+</node>

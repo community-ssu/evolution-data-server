@@ -1,0 +1,945 @@
+2005-12-14  Parthasarathi Susarla <sparthasarathi@novell.com>
+
+       ** See bug 317794
+       * camel-groupwise-store-summary.c:
+       (camel_groupwise_store_summary_full_to_path):
+       (camel_groupwise_store_summary_path_to_full):
+       Do not convert folder names here, there are already converted
+
+
+2005-11-07  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	** See bug #320736
+	* camel-groupwise-folder.c: (groupwise_folder_item_to_msg):
+	Check if the attachment is indeed a valid string. Prevents
+	a crash.
+
+2005-10-19 Vivek Jain <jvivek@novell.com>
+	
+	**See bug #319045
+	* camel-groupwise-store.c: 
+	(convert_to_folder_info)
+	(get_one_folder_offline): Don't set folder type as 
+	CAMEL_FOLDER_JUNK, it assumes it as a search folder, which
+	it is not in groupwise
+	
+	* camel-groupwise-folder.c: (transfer_messages_to):
+	set the flags correctly for GW_JUNK
+
+2005-10-03  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* reverting commits made for JUNK folder type
+
+2005-10-03  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	** See bug 314751
+
+	* camel-groupwise-utils.c: 
+	(send_as_attachment): set file name as text.htm
+	(camel_groupwise_util_item_from_message): if its multipart/alternative
+	get the html and text parts independently
+	
+2005-09-30 Vivek Jain <jvivek@novell.com>
+	
+	* camel-groupwise-store.c: (get_folder_info)
+	remove env chceck GROUPWISE_SHARED_FOLDER
+	to enable shared folder functionality
+
+2005-09-28  Sankar P  <psankar@novell.com>
+
+	* camel-groupwise-folder.c (groupwise_refresh_folder):
+	Added peek to the view so that the unread status of mails doesnt get 
+	changed during a proxy access.
+	Fixes #309993
+
+2005-09-26 Vivek Jain <jvivek@novell.com>
+
+	* camel-groupwise-folder.c :(update_junk_list)
+	initialize variables email and from.
+	**Fixes #314942
+			
+2005-09-18  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c: (groupwise_refresh_info):
+	Save changes made to the folder counts to the store summary.
+
+	* camel-groupwise-store.c: (check_for_connection): Method 
+	checks if we are really connected when online or not.
+	(groupwise_base_url_lookup): returns the base url of the store
+
+2005-09-16  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	** See bug 310742
+	* camel-groupwise-folder.c: (groupwise_append_message):
+	Makes sure that messages can be copied only to Mailbox
+	or SentItems as per GW server specs
+	
+2005-09-16  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-store.c: (match_path): method
+	matches the patch given a pattern and a path.
+	* camel-groupwise-utils.c: (gw_concat): concats the path
+	to the base_url
+
+2005-09-15  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-store.c: (groupwise_create_folder):
+	Does not allow creating subfolders under system folder
+
+2005-09-15  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c:
+	(groupwise_folder_get_message): free message info
+	Dont cache messages in Sent Items folder.
+	(groupwise_populate_details_from_item):
+	(gw_update_cache):
+	(gw_update_summary):
+	Use the delivered time instead of the created time
+	in the summary and cache.
+	(groupwise_sync): Use folder Locks. This should fix 
+	the summary corruption bug, logically.
+
+	* camel-groupwise-store.c:
+	(groupwise_connect): sync folders here when the user 
+	creats the account the first time.
+	(groupwise_get_folder): destroy cursor when something 
+	fails
+	(convert_to_folder_info): parse date in EGwcontainer 
+	and create a corresponding CamelFolderInfo
+	(get_folders_sync): sync folder list with the server
+	(groupwise_get_folder_info): basically work from the
+	cache, and refresh only asynchronously.
+	(groupwise_get_folder_info_offline): Changed radically.
+	gets stuff from the StoreInfo and populates the folder
+	info.
+	(camel_groupwise_store_connected): checks if we are 
+	really connected and online. Based on an equivalent
+	IMAP function.
+
+	* camel-groupwise-transport.c: (groupwise_send_to):
+	Free url.
+	Report a proper error message when the mail cannot be 
+	sent.
+
+2005-09-02 Vivek Jain <jvivek@novell.com>
+	
+	* camel-groupwise-folder.c: (groupwise_folder_item_to_msg)
+	check contentType to be NULL before we set it.
+	**Fixes #310953
+
+2005-08-25  Parthasarathi Susarla <sparthasarathi@novell.com>
+
+	** See bug # 312857
+
+	* camel-groupwise-folder.c: 
+	(groupwise_sync):
+	(updata_update):
+	(gw_update_all_items):
+	(groupwise_expunge): Use folder locks while deleting mail. 
+
+2005-08-25 Vivek Jain <jvivek@novell.com>
+	
+	* camel-groupwise-folder.c: put back the commit i did on 
+	22-08-2005 not sure how it got reverted
+
+2005-08-24  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	** See bug #310996
+
+	* camel-groupwise-store.c:
+	(groupwise_get_folder_info): unlock when returning
+	(groupwise_rename_folder): unlock on the groupwise_store
+	
+2005-08-24  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c:
+	(groupwise_folder_item_to_msg): show multipart/signed and
+	multipart/encrytepd messages
+
+2005-08-24  Sankar P  <psankar@novell.com>
+
+	* camel-groupwise-folder.c: (update_update)
+	Moved from getQuickMessages to readCursor, while geting
+	list of all ids for syncing deleted items.
+	Fixes #306803
+
+2005-08-24  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	** See bug #310996
+
+	* camel-groupwise-store.c:
+	(groupwise_get_folder_info): unlock when returning
+	(groupwise_rename_folder): unlock on the groupwise_store
+	
+2005-08-22  Not Zed  <NotZed@Ximian.com>
+
+	* camel-groupwise-summary.c (gw_info_set_flags): return FALSE if
+	no flags were set.
+
+	* camel-groupwise-store.c (groupwise_get_folder): remove unused session.
+	(groupwise_get_folder_info): comment out unused msg.
+
+	* camel-groupwise-folder.c (move_to_mailbox): ugh, take an
+	exception argument, don't just make one up, and then not
+	initialise it!
+	(move_to_junk): same.
+	(gw_update_cache): initialise type.
+	(gw_update_summary): same.
+	(groupwise_folder_item_to_msg): use the right type for
+	container_id.
+	(groupwise_folder_item_to_msg): dont unref the as-yet-unset part.
+
+2005-08-23  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c: (gw_update_all_items):
+	use cache lock before deleting items from cache.
+	Prevents a possibility of crash.
+	
+2005-08-22 Vivek Jain <jvivek@novell.com>
+	
+	* camel-groupwise-store.c: (get_folder_info)
+	change SHARED_FOLDER to GROUPWISE_SHARED_FOLDER
+	to be specific
+
+2005-08-22 Vivek Jain <jvivek@novell.com>
+	
+	* camel-groupwise-folder.c:(update_junk_list)
+	check if 'from' or email is NULL
+	return otherwise
+
+2005-08-22 Vivek Jain <jvivek@novell.com>
+	
+	* camel-groupwise-store.c: (get_folder_info)
+	disabled support for shared folder temporarily
+	you have to export SHARED_FOLDER to see a shared folder
+	with diff icon.
+
+2005-08-22  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-store.c:
+	(groupwise_get_folder_info): Set Junk icon for Junk Mail
+	folder
+
+2005-08-19  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	** see bug #313806
+
+	* camel-groupwise-utils.c:
+	(send_as_attachment): Encode the signature in base64. Thats
+	how the groupwise soap interface expects it.
+
+2005-08-18  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	** see bug #312184
+
+	* camel-groupwise-folder.c:
+	(gw_update_cache): show signatures inline.
+
+2005-08-18 Vivek Jain <jvivek@novell.com>
+	
+	* camel-groupwise-store.c: (groupwise_create_folder):
+	disallow special folder names only when created at the top level
+	**Fixes #313058
+
+2005-08-17  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	** see bug #310956
+
+	* camel-groupwise-store.c:
+	(groupwise_get_folder_info): if the selected folder is
+	a system folder, return data from the cache, since system
+	folders are not allowed to have sub folders.
+
+2005-08-16  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	** see bug #3028355
+	
+	* camel-groupwise-store.c:
+	(get_one_folder_offline): check if it is mailbox and set
+	the folder type.
+
+2005-08-16 Vivek Jain <jvivek@novell.com>
+	
+	* camel-groupwise-folder.c : (groupwise_folder_item_to_msg),
+	initialize container_id and assign this a valid value
+	**Fixes #313381
+
+2005-08-12  Tor Lillqvist  <tml@novell.com>
+
+	* Makefile.am: Use NO_UNDEFINED. Link with libcamel-provider,
+	libcamel and CAMEL_LIBS.
+
+2005-08-11  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c: (gw_update_cache):
+	fix the message on the status bar when downloading
+	summary for new messages
+	* camel-groupwise-store.c: remove commented code.
+
+2005-08-10  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	** see bug 300797
+	
+	* camel-groupwise-folder.c: (groupwise_refresh_folder):
+	handle an error. 
+
+2005-08-09  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	** see bug #312857
+
+	* camel-groupwise-folder.c: (groupwise_refresh_folder):
+	update summary only if there are new/modified items
+
+2005-08-09 Vivek Jain <jvivek@novell.com>
+	
+	* camel-groupwise-utils.c : (camel_groupwise_util_item_from_message)
+	enable status tracking options by default, unless user modified them.
+	**Fixes #302963
+
+2005-08-09 Vivek Jain <jvivek@novell.com>
+
+	* camel-groupwise-utils.c : (camel_groupwise_util_item_from_message)
+	check for the content type, Message can be none other than text/plain,
+	.(server doesn't support it). if its not, send as attachment,
+	Moved the code of handling attachment part into a new function 
+	:(send_as_attachment).
+	**Fixes: #310325
+
+2005-08-09: NotZed <notzed@ximian.com>
+	
+	patch by:
+	(2005-04-17  Changwoo Ryu  <cwryu@debian.org>)
+	** See bug #300891
+	
+	* Makefile.am (INCLUDES): define
+	CAMEL_EXPLICIT_TRANSLATION_DOMAIN.
+
+	* camel-groupwise-provider.c (camel_provider_module_init):
+	set translation_domain in CamelProvider struct.
+
+2005-08-04  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c
+	(groupwise_folder_item_to_msg): set the CamelMimeMsg into
+	a CamelMimePart and then into a CamelMultipart.
+	Fixes Bug ** #312535
+
+2005-08-04 Dinesh Layek < LDinesh@novell.com >
+
+	Fixes #305304
+	* camel-groupwise-folder.c
+	(convert_to_calendar): encoded the new-line('\n') characters 
+	of description-field as \n (two different characters'\','n').
+
+2005-08-04  Parthasarathi Susarla <sparthasarathi@novell.com>
+
+	* camel-groupwise-store.c:
+	(groupwise_connect): set the service status flag to
+	connected.
+	* camel-groupwise-folder.c:
+	(groupwise_expunge): purge items if it is a Trash 
+	Folder.
+	Fixes Bug ** 311887
+	
+2005-08-03  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c: 
+	(gw_update_all_items): compare item id only until the 
+	first '@'. Fixes bug 311585
+
+2005-08-03  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c:
+	* camel-groupwise-store.c:
+	* camel-groupwise-utils.c:
+	* camel-groupwise-transport.c:
+	Formatting code. Removed space between statement and ';'.
+
+2005-08-03 Vivek Jain <jvivek@novell.com>
+
+	* camel-groupwise-folder.c:
+	* camel-groupwise-store.c: Don't use g_ascii_strncasecmp in all
+	the cases when lenght is going to be constant, replace it with
+	g_ascii_strcasecmp where we need case insensitive comparison, 
+	and strcmp in others.
+
+2005-08-02 Vivek Jain <jvivek@novell.com>
+	
+	* camel-groupwise-transport.c: (groupwise_send_to)
+	if account is not even enabled we don't have that store.
+	g_error crashes evolution for that, use g_warning
+
+2005-08-02 Vivek Jain <jvivek@novell.com>
+	
+	* camel-groupwise-folder.c: (transfer_messages_to)
+	check for the flags to be reset while transferring to/from junk
+	folder.
+	**Fixes #312190
+	(groupwise_sync): make sure we never call mark_read when list is NULL
+
+2005-08-02  Sankar P  <psankar@novell.com>
+	
+	* camel-groupwise-provider.c: (groupwise_url_equal) 
+	Added code to check the protocol while comparing two URLs.
+	Fixes bug #312185
+
+2005-08-01  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-store.c:
+	(groupwise_is_system_folder):Check if a folder is a system 
+	folder or not before deleting or renaming
+	(groupwise_store_construct):remove flag CAMEL_STORE_VTRASH
+	
+2005-07-30  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-store.c:
+	formatted code, issues in coding style.
+
+2005-07-29  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-utils.c : 
+	(camel_groupwise_util_item_from_message): in case of
+	forwarded mails, do not populate data and size
+	Fixes bug 303065
+
+2005-07-29 Vivek Jain <jvivek@novell.com>
+
+	* camel-groupwise-folder.c :(move_to_junk)
+	pass valid exception value in get_folder here NULL, so that clear 
+	doesn't cause crash. 	
+
+2005-07-28  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-store.c: (groupwise_get_folder)
+	remove unwanted code. 
+	* camel-groupwise-folder.c: 
+	(groupwise_update_summary):
+	This function updates only the summary
+	(groupwise_update_cache):
+	This method updates the cache with the message body
+	and attachment
+
+2005-07-27  Sankar P  <psankar@novell.com>
+
+	* camel-groupwise-transport.c: (groupwise_send_to)
+	Setting an exception if delivery fails, so as to 
+	retain unsent items in Outbox.
+	Fixes #302968
+	
+2005-07-27  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c 
+	(groupwise_folder_get_message): remove some unnecessary locks
+	(gw_update_summary): remove unused code
+
+	* camel-groupwise-store.c
+	(groupwise_get_folder): remove locks
+
+2005-07-25  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c: (groupwise_folder_item_to_msg)
+	fix a crash freeing attachment buffer
+
+2005-07-24  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-provider.c:
+	  string changes made. ** Fixes bug 272505
+
+2005-07-20  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c:
+	  ** Fix for bug ** 310953
+
+2005-07-19  Chenthill Palanisamy  <pchenthill@novell.com>
+
+	* camel-groupwise-folder.c: (convert_to_calendar): Use the
+	recurrence key as the UID if it is non-zero.
+
+2005-07-19  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-store.c: 
+	(does_folder_exist): checks if a folder exists or not
+	** Fixes bug 310716
+
+2005-07-19  Shreyas Srinivasan <sshreyas@novell.com>
+
+	* camel-groupwise-store.c: Remove some redundant code in 
+	groupwise_get_folder which was crashing evolution on Mac. 
+	
+2005-07-10  Shreyas Srinivasan <sshreyas@novell.com>
+
+	* camel-groupwise-store.c: Add check that uses parents password
+	for a proxy.
+	* camel-groupwise-folder.c: Use GetItems as GetQM is not valid on
+	proxy login.
+
+2005-07-07  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c: (gw_update_summary):
+	  do not insert ',' if there are no mail ids in 'TO'
+	  field.
+	  ** Fixes bug 302965 **
+
+2005-07-07 Vivek Jain <jvivek@novell.com>
+	
+	* camel-groupwise-folder.c:(groupwise_sync)
+	check for the junk flags
+	(move_to_junk), (move_to_mailbox), (update_junk_list)
+	(free_node): are new utility functions
+	(gw_update_summary): ensure messages in "Junk Mail" folder 
+	have JUNK flag set
+	* camel-groupwise-summary.c: implemented virtual function
+	(gw_info_set_flag): extends default (info_set_flag) to have
+	checks for junk flags
+	* came-groupwise-summary.h : added extra summary flags for junk
+	* camel-groupwise-store.[ch]: (create_junk_folder):creates a juk
+	folder by modifying the junk settings
+	
+2005-07-06  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c:
+	  (groupwise_folder_item_to_msg): function to convert
+	   an item to a CamelMimeMessage
+	  (groupwise_refresh_folder): This calls get Item for
+	   each id that is being update in the summary. This
+	   operates in a new thread.
+	  (gw_update_all_items): Free summary after working on
+	   it
+	* camel-groupwise-store.c:
+	  (store_refresh_refresh): This method works in a
+	   thread. And refreshes the summary of all the 'open'
+	   folders.
+	  (folder_refresh_refresh): This method refreshes a
+	   folder the first time it is opened. This works in a
+	   new thread.
+	
+	* camel-groupwise-transport.c:
+	  (groupwise_send_to): set LinkInfo when a mail is 
+	   replied to.
+	
+	* camel-groupwise-utils.c:
+	  (camel_groupwise_util_item_from_message): set LinkInfo
+	  when a mail is forwarded.
+	  
+2005-06-16  Parthasarathi Susarla <sparthasarathi@novell.com>
+	* came-groupwise-folder.c:
+	  (gw_update_summary): make appointments appear the 
+	  groupwise client way, which appear based on the
+	  date of the appointment and not the received time.
+
+2005-06-16  Parthasarathi Susarla <sparthasarathi@novell.com>
+	* camel-groupwise-folder.c:
+	  (groupwise_sync): reverting back the removeItemsRequest
+	  patch since the server interface is not working as yet.
+
+2005-06-07  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c:
+	  (groupwise_transfer_messages_to): set the current_folder.
+	  ** Fixes bug #300599
+
+2005-06-07  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c:
+	 (groupwise_sync): use removeItemsRequest instead of
+	 removeItemRequest. This syncs up mailbox faster.
+
+2005-06-07  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c:
+	(groupwise_refresh_info): now updates all items on a 
+	camel session thread
+	(update_update): the thread update operation function
+	(update_free): the thread free operation function
+
+2005-05-24  Chenthill Palanisamy  <pchenthill@novell.com>
+
+	Commiting for Daniel van Eeden <daniel_e@dds.nl>
+	* camel-groupwise-transport.c: 
+	(groupwise_transport_get_name): naming consistency for
+	GroupWise.
+	Fixes bug #271901
+
+2005-05-20  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-transport.c (groupwise_send_to):
+	  Call the replyRequest api before replying to a message
+
+2005-04-07  Sankar P  <psankar@novell.com>
+
+	* camel-groupwise-provider.c 
+	Added code so as to disable sent items button and prevent
+	copying of sent items to any folder, for a GroupWise account.
+
+2005-05-06  Chenthill Palanisamy  <pchenthill@novell.com>
+
+	Fixes #272504
+	* camel-groupwise-store.c: (groupwise_auth_loop): GroupWise is
+	the right way to spell.
+
+2005-05-06  Sarfraaz Ahmed <asarfraaz@novell.com>
+
+	* camel-groupwise-store.c : A typo. Fixes 272503. Patch submitted
+	by Thierry Moisan
+
+2005-04-27  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c: 
+	  (camel_gw_folder_new): set the 'CAMEL_FOLDER_FILTER_RECENT' 
+	  folder flag for the Mailbox folder
+	  (gw_update_summary): add the new messages in the ChangeInfo
+	  structure under 'recent' type. Only those uids which fall
+	  under recent are filtered.
+	
+	* camel-groupwise-store.c:
+	  (groupwise_store_construct): set 'CAMEL_STORE_FILTER_INBOX' 
+	  to store flags, to enable filtering
+
+	  ** Fixes bug #274194
+	  
+2005-04-27  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c: code formatting done.
+	  removed space between the statement and ';' as per
+	  the coding style
+
+2005-04-27  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c: (groupwise_folder_get_message):
+	  ** Fixes bug - 273246: the Mime.822 file would not be shown
+	  anymore
+	  ** Fixes bug - 273243: HTML mail would be displayed inline
+	  and not as an attachment
+
+2005-04-15  Jeffrey Stedfast  <fejj@novell.com>
+
+	* camel-groupwise-provider.c: s/offline_sync/sync_offline/. Fixes
+	bug #274257
+
+2005-04-18  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-store.c (groupwise_get_folder): Remove redundant
+	  getQuickMessageRequest
+
+2005-04-08  Sankar P <psankar@novell.com>
+
+	* camel-groupwise-folder.c: (groupwise_folder_get_message)
+	Added code to handle the item type NOTIFICATION so as to 
+        enable viewing notification mails such as Shared Folder Notification.
+	Fixes #74369
+	
+2005-04-07  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c: 
+	  (groupwise_refresh_info): get the ids of all items
+	  in a folder from the server. 
+	  (gw_update_all_items): update summary with items
+	  that have been deleted from the server.
+	  Fixes bug **72302 **74381 **72303
+	
+2005-04-05  Parthasarathi Susarla <sparthasarathi@novell.com>
+
+	* camel-groupwise-folder.c: (groupwise_refresh_info):
+	  The Trash folder in the groupwise server works well
+	  only with getItems request. So we compare the	folder
+	  full name (?) and if it is a trash folder, we use 
+	  getItems instead of getQuickMessages.
+	
+	  Fixes bugs **72310 and **73318
+
+2005-03-31  Sankar P <psankar@novell.com>
+
+	* camel-groupwise-folder.c: 
+	  (groupwise_expunge) (groupwise_sync)
+	  Pushed the index up one count on deletion of a summary item.
+ 	  Fixes #74183
+
+2005-03-31  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c:(groupwise_transfer_messages_to):
+	  deleting the messages only if the copy is successful
+	  ***	fixes bug 73897
+	
+2005-03-15  Chenthill Palanisamy  <pchenthill@novell.com>
+
+	Fixes #73421
+	* camel-groupwise-folder.c: (groupwise_folder_get_message),
+	(convert_to_task): Converts the groupwise item to task ical
+	string checking for the type.
+
+2005-03-18  Gary Ekker  <gekker@novell.com>
+
+	* camel-groupwise-folder.c: Added #include "camel-string-utils.h"
+	to prevent warnings that break 64-bit build in SuSE build system
+
+2005-03-18  Vivek Jain <jvivek@novell.com>
+	
+	**Fixes bug #73458
+	* camel-groupwise-utils.h: changed the  X_RETURN_NOTIFY_DECLINE to 
+	 X_RETURN_NOTIFY_DELETE 
+	* camel-groupwise-utils.c: check the property and then call
+	 (e_gw_item_set_notify_deleted) instead of
+	 (e_gw_item_set_notify_declined )
+
+2005-03-17  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c:(convert_to_calendar):
+	  using GString for all string operations.
+
+2005-03-11  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c:
+	  (gw_update_summary): using GString. An efficient way
+	  for fixing bug #72145
+
+2005-03-10  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-store.c:
+	  (groupwise_get_folder): add peek and status views to 
+	  the creatCursorRequest
+	* camel-groupwise-folder.c:
+	  (gw_update_summary): initialise the status flag
+	  variable.
+	  *** Fixes bug #73308
+
+2005-03-09  Sankar P <psankar@novell.com>
+
+	* camel-groupwise-utils.c:(camel_groupwise_util_item_from_message)
+	Added code to fix the problem of Priority not set in outgoing mails
+
+2005-03-07  JP Rosevear  <jpr@novell.com>
+
+	From Dave Malcolm <dmalcolm@redhat.com>
+	
+	* camel-groupwise-store-summary.c
+	(camel_groupwise_store_summary_namespace_set): move forward
+	declaration out of block
+	
+2005-03-03  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-store.c:
+	  (groupwise_get_folder): added recipient view
+	  for get quick messages
+	* camel-groupwise-folder.c:
+	  (groupwise_refresh_info): added recipient view
+	  for get quick messages
+	  (gw_update_summary): parse the recipient list
+	  for mail ids to be set in the "To" field of the 
+	  summary.
+	  ** Fixes # 72145
+
+2005-03-03  Vivek Jain <jvivek@novell.com>
+
+	***Fixes # 72455
+		 #73231
+		 #73239		
+	* camel-groupwise-folder.c :(gw_update_summary)
+	initialize status_flags to 0
+
+2005-03-02  Vivek Jain <jvivek@novell.com>
+
+	***Fixes # 72373
+	* camel-groupwise-store.c :(groupwise_get_folder)
+	* camel-groupwise_folder.c :(groupwise_refresh_info)
+	pass types as NULL in the call of e_gw_connection_get_quick_messages
+	to retrieve all the items
+
+2005-02-28  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c: (groupwise_refresh_info):
+	* camel-groupwise-store.c: (groupwise_get_folder):
+	  Removed unused variables which were causing compiler 
+	  warnings caused by the previous commit
+
+2005-02-28  Harish Krishnaswamy <kharish@novell.com>
+
+	* camel-groupwise-folder.c: (groupwise_refresh_info):
+	* camel-groupwise-store.c: (groupwise_get_folder):
+	Use the timestamp from the summary as argument to the
+	getQuickMessagesRequest.
+	* camel-groupwise-summary.[ch] (gw_summary_header_load),
+	(gw_summary_header_save): read/write the timestamp returned
+	by the getQuickMessages 'New' request into/from the gw summary.
+
+2005-02-28  Sankar P <psankar@novell.com>
+
+	* camel-groupwise-utils.c: (camel_groupwise_util_item_from_message):
+	  Changed the way in which the recipients list is generated so as to 
+	  facilitate handling of CC and BCC addresses.
+	* camel-groupwise-utils.[ch]: (add_recipients)
+	  Implemented the function add_recipients to prepare recipients list of 
+	  specified type.
+	  Fixes bug #73008
+
+2005-02-25  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-store.c: 
+	  (groupwise_rename_folder),
+	  (groupwise_get_folder_info) : 
+	  Fixes bug #72965
+	  
+2005-02-25  Chenthill Palanisamy  <pchenthill@novell.com>
+
+	* camel-groupwise-folder.c: (groupwise_refresh_info):
+	* camel-groupwise-store.c: (groupwise_get_folder),
+	(groupwise_get_folder_info): Made changes since the
+	getQm function has been changed to take the fourth 
+	argument (startdate) as double pointer.
+
+2005-02-25  Harish Krishnaswamy  <kharish@novell.com>
+
+	* camel-groupwise-store.c: (groupwise_get_folder):
+	update calls to read_cursor request to use the 
+	position argument. do not use the position cursor 
+	calls anymore.
+
+2005-02-23  Sankar P <psankar@novell.com>
+
+       * camel-groupwise-folder.c: (groupwise_folder_get_message):
+         Changed handling of addresses by using _camel_header_address
+         to enable display of gwpoa generated messages.
+   	Fix for #72285 
+
+2005-02-23  Sivaiah Nallagatla <snallagatla@novell.com.
+
+       * camel-groupwise-folder.c (groupwise_folder_get_message) :
+       cache message always irrespective of whehter receipent status
+       element is there or not.
+       Fix #72907
+
+2005-02-22  Chenthill Palanisamy  <pchenthill@novell.com>
+
+	* camel-groupwise-folder.c: (convert_to_calendar): Append
+	the UID to the ICAL string.
+
+2005-02-17  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-store.c: (groupwise_get_folder):
+	* camel-groupwise-folder.c: (groupwise_refresh_info):
+	  the variable which holds the UTC time is not static
+	  anymore. 
+	  
+2005-02-10  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-store.c:
+	  (groupwise_get_folder): fixed the percentage display problem
+	  while fetching summary
+	* camel-groupwise-folder.c:
+	  (groupwise_expunge): fixed the problem with deleting mails
+	  using removeItemRequest instead of removeItemsrequest
+
+2005-02-10  Vivek Jain  <jvivek@novell.com>
+	
+	* camel-groupwise-store.c: 
+	(groupwise_get_folder):
+	* camel-groupwise-folder.c
+	(groupwise_refresh_info):	
+	get the "Modified" items in the second_list and
+	append it to the "list"
+
+2005-02-09  Vivek Jain  <jvivek@novell.com>
+
+	* camel-groupwise-store.c:
+	 (groupwise_auth_loop): make sure auth_domain is "Groupwise"
+	  Fixes bug ** #71752	
+
+2005-02-08  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-utils.c:
+	  (camel_groupwise_util_item_from_message):
+	  set the message type even if it is not a multipart
+	  Fixes bug ** #72339
+
+2005-02-08  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-store.c:
+	  (groupwise_get_folder)
+	* camel-groupwise-folder.c:
+	  (groupwise_refresh_info):
+	  Fixes bug ** #72106
+	  
+2005-02-08  Vivek Jain  <jvivek@novell.com>
+
+	* camel-groupwise-store.c :
+	 (groupwise_connect): fix the display of garbage in the	
+	 alert for server version	
+
+2005-02-08  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c: 
+	  (groupwise_folder_get_message): converting time to local 
+	  time-zone.
+	  (groupwise_refresh_info): service unlock when getquick messages
+	  fails
+
+2005-02-07  JP Rosevear  <jpr@novell.com>
+
+	* camel-gw-listener.[hc]: remove dead files
+
+2005-02-06  Sivaiah Nallagatla    <snallagatla@novell.com>
+
+	* camel-groupwise-provider.c : Change the "Address and Calendar"
+	section to "SOAP Settings"
+
+2005-02-04  Chenthill Palanisamy  <pchenthill@novell.com>
+
+	* camel-groupwise-folder.c: (groupwise_folder_get_message): Added
+	a string for Reply requested. Appended with the subject.
+	* camel-groupwise-utils.c:
+	(camel_groupwise_util_item_from_message): set reply requested to
+	true.
+
+2005-02-04  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-store.c: 
+	  (groupwise_get_folder_info): call refresh info 
+	  when Send/Recieve is clicked
+	* camel-groupwise-folder.c:
+	  initialisation of variables and a little code 
+	  cleanup
+
+2005-02-03  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-store.c
+	  (groupwise_get_folder): uncommented the position cursor
+	  request
+
+2005-02-03  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-folder.c
+	  (groupwise_folder_get_message): fix for Bug #72142
+	  resolved a deadlock
+	
+	* camel-groupwise-store.c
+	  (groupwise_get_folder_info): fix for Bug #71990
+	  add a '/' whenever we find it missing
+
+2005-02-02  Parthasarathi Susarla <sparthasarathi@novell.com>
+	
+	* camel-groupwise-store.c
+	  (groupwise_get_folder): camel flag for folder type
+	  trash
+	  (groupwise_rename_folder): fixed issue with renaming
+	  subfolders. The summary was not being renamed.
+
+2005-02-02  Vivek Jain  <jvivek@novell.com>
+	
+	* /providers/groupwise/camel-groupwise-store.c 
+	(groupwise_connect): add an alert message if the server doesn't return
+	the version  
+
+2005-02-01  Chenthill Palanisamy  <pchenthill@novell.com>
+
+	* camel-groupwise-folder.c: (convert_to_calendar): Remove
+	the container id, from the item id and set it to X-GWRECORD
+	id. Add temp to strconcat so that all attendees get appended
+	to the string.
+
+2005-02-01 Vivek Jain <jvivek@novell.com>
+	 
+	 ** see bug #71758 
+	 * camel-groupwise-store.c 
+	 (groupwise_get_folder_info) : set the folder type of Inbox to Inbox using
+	 flag	
+Refer to main changelog for earlier changes.
+

@@ -14,9 +14,6 @@ Does the low-level parsing work for contact information. This data is more conve
 #e-contact
 </para>
 
-<!-- ##### SECTION Stability_Level ##### -->
-
-
 <!-- ##### STRUCT EVCard ##### -->
 <para>
 
@@ -41,6 +38,15 @@ Does the low-level parsing work for contact information. This data is more conve
 <para>
 
 </para>
+
+
+<!-- ##### FUNCTION e_vcard_construct ##### -->
+<para>
+
+</para>
+
+@evc: 
+@str: 
 
 
 <!-- ##### FUNCTION e_vcard_new ##### -->
@@ -110,7 +116,7 @@ Does the low-level parsing work for contact information. This data is more conve
 
 </para>
 
-@evc: 
+@evcard: 
 @attr_group: 
 @attr_name: 
 
@@ -120,7 +126,7 @@ Does the low-level parsing work for contact information. This data is more conve
 
 </para>
 
-@evc: 
+@evcard: 
 @attr: 
 
 
@@ -129,7 +135,7 @@ Does the low-level parsing work for contact information. This data is more conve
 
 </para>
 
-@evc: 
+@evcard: 
 @attr: 
 
 
@@ -189,15 +195,6 @@ Does the low-level parsing work for contact information. This data is more conve
 @attr: 
 
 
-<!-- ##### FUNCTION e_vcard_attribute_remove_value ##### -->
-<para>
-
-</para>
-
-@attr: 
-@s: 
-
-
 <!-- ##### FUNCTION e_vcard_attribute_remove_params ##### -->
 <para>
 
@@ -206,31 +203,12 @@ Does the low-level parsing work for contact information. This data is more conve
 @attr: 
 
 
-<!-- ##### FUNCTION e_vcard_attribute_remove_param ##### -->
-<para>
-
-</para>
-
-@attr: 
-@param_name: 
-
-
-<!-- ##### FUNCTION e_vcard_attribute_remove_param_value ##### -->
-<para>
-
-</para>
-
-@attr: 
-@param_name: 
-@s: 
-
-
 <!-- ##### FUNCTION e_vcard_attribute_param_new ##### -->
 <para>
 
 </para>
 
-@name: 
+@param_name: 
 @Returns: 
 
 
@@ -306,34 +284,6 @@ Does the low-level parsing work for contact information. This data is more conve
 @param: 
 
 
-<!-- ##### FUNCTION e_vcard_attribute_param_get_name ##### -->
-<para>
-
-</para>
-
-@param: 
-@Returns: 
-
-
-<!-- ##### FUNCTION e_vcard_attribute_param_get_values ##### -->
-<para>
-
-</para>
-
-@param: 
-@Returns: 
-
-
-<!-- ##### FUNCTION e_vcard_get_attribute ##### -->
-<para>
-
-</para>
-
-@evc: 
-@name: 
-@Returns: 
-
-
 <!-- ##### FUNCTION e_vcard_get_attributes ##### -->
 <para>
 
@@ -388,68 +338,21 @@ Does the low-level parsing work for contact information. This data is more conve
 @Returns: 
 
 
-<!-- ##### FUNCTION e_vcard_attribute_get_param ##### -->
+<!-- ##### FUNCTION e_vcard_attribute_param_get_name ##### -->
 <para>
 
 </para>
 
-@attr: 
-@name: 
+@param: 
 @Returns: 
 
 
-<!-- ##### FUNCTION e_vcard_attribute_get_value ##### -->
+<!-- ##### FUNCTION e_vcard_attribute_param_get_values ##### -->
 <para>
 
 </para>
 
-@attr: 
-@Returns: 
-
-
-<!-- ##### FUNCTION e_vcard_attribute_get_value_decoded ##### -->
-<para>
-
-</para>
-
-@attr: 
-@Returns: 
-
-
-<!-- ##### FUNCTION e_vcard_attribute_has_type ##### -->
-<para>
-
-</para>
-
-@attr: 
-@typestr: 
-@Returns: 
-
-
-<!-- ##### FUNCTION e_vcard_attribute_is_single_valued ##### -->
-<para>
-
-</para>
-
-@attr: 
-@Returns: 
-
-
-<!-- ##### FUNCTION e_vcard_escape_string ##### -->
-<para>
-
-</para>
-
-@s: 
-@Returns: 
-
-
-<!-- ##### FUNCTION e_vcard_unescape_string ##### -->
-<para>
-
-</para>
-
-@s: 
+@param: 
 @Returns: 
 
 
@@ -510,13 +413,6 @@ Email address
 
 
 <!-- ##### MACRO EVC_ICSCALENDAR ##### -->
-<para>
-
-</para>
-
-
-
-<!-- ##### MACRO EVC_KEY ##### -->
 <para>
 
 </para>
@@ -698,13 +594,6 @@ File As
 
 
 
-<!-- ##### MACRO EVC_X_GADUGADU ##### -->
-<para>
-
-</para>
-
-
-
 <!-- ##### MACRO EVC_X_ICQ ##### -->
 <para>
 ICQ number
@@ -764,104 +653,6 @@ Wants HTML mail
 <!-- ##### MACRO EVC_X_YAHOO ##### -->
 <para>
 Yahoo ID
-</para>
-
-
-
-<!-- ##### MACRO EVC_X_BOOK_URI ##### -->
-<para>
-
-</para>
-
-
-
-<!-- ##### MACRO EVC_X_CALLBACK ##### -->
-<para>
-
-</para>
-
-
-
-<!-- ##### MACRO EVC_X_COMPANY ##### -->
-<para>
-
-</para>
-
-
-
-<!-- ##### MACRO EVC_X_DEST_CONTACT_UID ##### -->
-<para>
-
-</para>
-
-
-
-<!-- ##### MACRO EVC_X_DEST_EMAIL ##### -->
-<para>
-
-</para>
-
-
-
-<!-- ##### MACRO EVC_X_DEST_EMAIL_NUM ##### -->
-<para>
-
-</para>
-
-
-
-<!-- ##### MACRO EVC_X_DEST_HTML_MAIL ##### -->
-<para>
-
-</para>
-
-
-
-<!-- ##### MACRO EVC_X_DEST_NAME ##### -->
-<para>
-
-</para>
-
-
-
-<!-- ##### MACRO EVC_X_DEST_SOURCE_UID ##### -->
-<para>
-
-</para>
-
-
-
-<!-- ##### MACRO EVC_X_GROUPWISE ##### -->
-<para>
-
-</para>
-
-
-
-<!-- ##### MACRO EVC_X_RADIO ##### -->
-<para>
-
-</para>
-
-
-
-<!-- ##### MACRO EVC_X_TELEX ##### -->
-<para>
-
-</para>
-
-
-
-<!-- ##### MACRO EVC_X_TTYTDD ##### -->
-<para>
-
-</para>
-
-
-
-<!-- ##### MACRO EVC_X_VIDEO_URL ##### -->
-<para>
-
 </para>
 
 
