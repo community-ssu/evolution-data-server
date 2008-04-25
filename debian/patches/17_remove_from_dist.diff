@@ -1,0 +1,46 @@
+Index: git/Makefile.am
+===================================================================
+--- git.orig/Makefile.am	2008-04-24 18:28:02.000000000 +0100
++++ git/Makefile.am	2008-04-24 18:31:51.000000000 +0100
+@@ -15,7 +15,7 @@
+ SUBDIRS = $(LIBDB) libedataserver servers camel addressbook $(CALENDAR_DIR) libedataserverui src docs art po
+ endif
+ 
+-DIST_SUBDIRS= libedataserver servers camel addressbook calendar libedataserverui src docs art po
++DIST_SUBDIRS = $(SUBDIRS)
+ 
+ changelogs =			\
+ 	ChangeLog
+@@ -37,8 +37,12 @@
+ 	marshal.mk					\
+ 	iconv-detect.c					\
+ 	$(pkgconfig_DATA:-$(API_VERSION).pc=.pc.in) 	\
+-	autogen.sh					\
++	autogen.sh					
++
++if ! WITH_LIBDB
++EXTRA_DIST += \
+ 	$(LIBDB_FILES)
++endif
+ 
+ DISTCLEANFILES = intltool-extract intltool-merge intltool-update iconv-detect.h $(pkgconfig_DATA)
+ distclean-local:
+Index: git/addressbook/Makefile.am
+===================================================================
+--- git.orig/addressbook/Makefile.am	2008-04-24 18:21:38.000000000 +0100
++++ git/addressbook/Makefile.am	2008-04-24 18:28:02.000000000 +0100
+@@ -5,3 +5,4 @@
+ endif
+ 
+ SUBDIRS = $(DIRS)
++DIST_SUBDIRS = $(SUBDIRS)
+Index: git/addressbook/backends/Makefile.am
+===================================================================
+--- git.orig/addressbook/backends/Makefile.am	2008-04-24 18:21:38.000000000 +0100
++++ git/addressbook/backends/Makefile.am	2008-04-24 18:28:02.000000000 +0100
+@@ -6,4 +6,4 @@
+ 
+ # groupwise isn't ported yet.
+ SUBDIRS = file $(LDAP_SUBDIR)
+-DIST_SUBDIRS = file ldap groupwise vcf
++DIST_SUBDIRS = $(SUBDIRS)
