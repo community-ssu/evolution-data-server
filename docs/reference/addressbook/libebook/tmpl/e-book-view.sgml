@@ -16,6 +16,9 @@ addressbook itself.
 #e-book-view-listener, #e-book
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### STRUCT EBookView ##### -->
 <para>
 
@@ -69,18 +72,9 @@ keep.
 
 </para>
 
-@corba_book_view: 
-@listener: 
-@Returns: 
-
-
-<!-- ##### FUNCTION e_book_view_set_book ##### -->
-<para>
-
-</para>
-
-@book_view: 
 @book: 
+@view_proxy: 
+@Returns: 
 
 
 <!-- ##### FUNCTION e_book_view_start ##### -->

@@ -14,6 +14,9 @@ Does the low-level parsing work for contact information. This data is more conve
 #e-contact
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### STRUCT EVCard ##### -->
 <para>
 
@@ -116,7 +119,7 @@ Does the low-level parsing work for contact information. This data is more conve
 
 </para>
 
-@evcard: 
+@evc: 
 @attr_group: 
 @attr_name: 
 
@@ -126,7 +129,7 @@ Does the low-level parsing work for contact information. This data is more conve
 
 </para>
 
-@evcard: 
+@evc: 
 @attr: 
 
 
@@ -135,7 +138,7 @@ Does the low-level parsing work for contact information. This data is more conve
 
 </para>
 
-@evcard: 
+@evc: 
 @attr: 
 
 
@@ -208,7 +211,7 @@ Does the low-level parsing work for contact information. This data is more conve
 
 </para>
 
-@param_name: 
+@name: 
 @Returns: 
 
 
