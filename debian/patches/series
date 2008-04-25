@@ -6,7 +6,6 @@
 05_contact-no-fileas.diff -p0
 07_peer-view.diff -p0
 09_query-visible.diff -p0
-10_remove-unused.diff -p0
 12_summary-visible.diff -p0
 13_no_camel.diff -p0
 14_disable_i18n.diff
