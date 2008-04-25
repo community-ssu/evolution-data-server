@@ -1,0 +1,36 @@
+<Project xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:foaf="http://xmlns.com/foaf/0.1/"
+  xmlns="http://usefulinc.com/ns/doap#">
+  
+  <name>eds-dbus</name>
+  <created>2005-04-24</created>
+  
+  <shortdesc xml:lang="en">A port of Evolution Data Server to use DBus</shortdesc>
+  
+  <description xml:lang="en">
+    A port of Evolution Data Server to use DBus.
+  </description>
+
+  <homepage rdf:resource="http://projects.o-hand.com/eds" />
+  <license rdf:resource="http://usefulinc.com/doap/licenses/lgpl" />
+  <bug-database rdf:resource="http://bugzilla.openedhand.com/enter_bug.cgi?product=EDS%20%28DBus%20Port%29"/>
+
+  <os>linux</os>
+  <programming-language>C</programming-language>
+
+  <category rdf:resource="http://labs.o-hand.com/doap/category/embedded"/>
+  <category rdf:resource="http://labs.o-hand.com/doap/category/library"/>
+
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>Ross Burton</foaf:name>
+    </foaf:Person>
+  </maintainer>
+
+  <repository>
+    <SVNRepository>
+      <browse rdf:resource="http://svn.o-hand.com/view/eds-dbus/trunk"/>
+      <location rdf:resource="https://svn.o-hand.com/repos/eds-dbus/trunk"/>
+    </SVNRepository>
+  </repository>
+</Project>
