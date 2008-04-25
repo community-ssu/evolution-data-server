@@ -10,4 +10,3 @@
 13_no_camel.diff -p0
 14_disable_i18n.diff
 15_remove_from_subdirs.diff
-16_documentation_fixes.diff
