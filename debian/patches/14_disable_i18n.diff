@@ -1,7 +1,7 @@
-Index: n-eds.trunk/configure.in
+Index: git/configure.in
 ===================================================================
---- n-eds.trunk.orig/configure.in	2008-04-23 16:08:53.000000000 +0100
-+++ n-eds.trunk/configure.in	2008-04-23 16:09:10.000000000 +0100
+--- git.orig/configure.in	2008-04-24 14:15:59.000000000 +0100
++++ git/configure.in	2008-04-24 14:19:34.000000000 +0100
 @@ -120,10 +120,10 @@
  AC_SUBST(HAVE_JW)
  
@@ -16,3 +16,25 @@ Index: n-eds.trunk/configure.in
  
  GETTEXT_PACKAGE=evolution-data-server-$BASE_VERSION
  AC_SUBST(GETTEXT_PACKAGE)
+@@ -1450,7 +1450,6 @@
+ docs/reference/calendar/libecal/Makefile
+ docs/reference/calendar/libedata-cal/Makefile
+ docs/reference/libedataserver/Makefile
+-po/Makefile.in
+ ])
+ 
+ case $host in
+Index: git/Makefile.am
+===================================================================
+--- git.orig/Makefile.am	2008-04-24 14:19:39.000000000 +0100
++++ git/Makefile.am	2008-04-24 14:19:50.000000000 +0100
+@@ -36,9 +36,6 @@
+ 	NEWS						\
+ 	marshal.mk					\
+ 	iconv-detect.c					\
+-	intltool-merge.in				\
+-	intltool-update.in				\
+-	intltool-extract.in				\
+ 	$(pkgconfig_DATA:-$(API_VERSION).pc=.pc.in) 	\
+ 	autogen.sh					\
+ 	$(LIBDB_FILES)
