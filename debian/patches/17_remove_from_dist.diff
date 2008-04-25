@@ -1,3 +1,5 @@
+Make the dist contain only coded that we build by forcing DIST_SUBDIRS.
+
 Index: git/Makefile.am
 ===================================================================
 --- git.orig/Makefile.am	2008-04-24 18:28:02.000000000 +0100

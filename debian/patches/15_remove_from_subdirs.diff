@@ -1,3 +1,5 @@
+Remove subdirectories we don't use.
+
 Index: git/Makefile.am
 ===================================================================
 --- git.orig/Makefile.am	2008-04-24 14:29:36.000000000 +0100

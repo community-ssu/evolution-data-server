@@ -1,3 +1,6 @@
+Don't build these files into libedataserver but instead directly into the
+backend.
+
 Index: n-eds.trunk/addressbook/backends/file/Makefile.am
 ===================================================================
 --- n-eds.trunk.orig/addressbook/backends/file/Makefile.am	2008-04-23 16:56:22.000000000 +0100

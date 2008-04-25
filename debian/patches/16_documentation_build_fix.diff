@@ -1,3 +1,5 @@
+Don't build documentation for components we don't ship.
+
 Index: git/docs/reference/Makefile.am
 ===================================================================
 --- git.orig/docs/reference/Makefile.am	2008-04-24 17:29:49.000000000 +0100

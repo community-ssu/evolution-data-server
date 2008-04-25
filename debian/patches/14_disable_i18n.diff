@@ -1,3 +1,5 @@
+Disable i18n in the builds.
+
 Index: git/configure.in
 ===================================================================
 --- git.orig/configure.in	2008-04-24 14:15:59.000000000 +0100
