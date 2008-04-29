@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20080425.1) unstable; urgency=low
+
+  * Add a patch to remove unused things from configure.in
+
+ -- Rob Bradford <ro@o-hand.com>  Tue, 29 Apr 2008 12:21:31 +0100
+
 evolution-data-server (1.4.2.1-20080425) unstable; urgency=low
 
   * Move all changes from OH eds-dbus into patches in the debian/patches
