@@ -1,0 +1,115 @@
+Index: git/configure.in
+===================================================================
+--- git.orig/configure.in	2008-04-29 11:44:03.000000000 +0100
++++ git/configure.in	2008-04-29 11:55:48.000000000 +0100
+@@ -1208,11 +1208,11 @@
+ AC_SUBST(E_DATA_SERVER_CFLAGS)
+ AC_SUBST(E_DATA_SERVER_LIBS)
+ 
+-E_DATA_SERVER_UI_DEPS="libxml-2.0 gtk+-2.0 libglade-2.0 gconf-2.0"
++dnl E_DATA_SERVER_UI_DEPS="libxml-2.0 gtk+-2.0 libglade-2.0 gconf-2.0"
+ 
+-EVO_SET_COMPILE_FLAGS(E_DATA_SERVER_UI, $E_DATA_SERVER_UI_DEPS, $THREADS_CFLAGS, $THREADS_LIBS)
+-AC_SUBST(E_DATA_SERVER_UI_CFLAGS)
+-AC_SUBST(E_DATA_SERVER_UI_LIBS)
++dnl EVO_SET_COMPILE_FLAGS(E_DATA_SERVER_UI, $E_DATA_SERVER_UI_DEPS, $THREADS_CFLAGS, $THREADS_LIBS)
++dnl AC_SUBST(E_DATA_SERVER_UI_CFLAGS)
++dnl AC_SUBST(E_DATA_SERVER_UI_LIBS)
+ 
+ dnl --- evolution-addressbook flags
+ 
+@@ -1363,21 +1363,14 @@
+ AC_CONFIG_LINKS(
+         addressbook/libebook:addressbook/libebook-$IPC
+         addressbook/libedata-book:addressbook/libedata-book-$IPC
+-        calendar/libecal:calendar/libecal-$IPC
+-        calendar/libedata-cal:calendar/libedata-cal-$IPC
+ )
+ 
+ AC_OUTPUT([
+ Makefile
+ evolution-data-server.pc
+ addressbook/Makefile
+-addressbook/idl/Makefile
+-addressbook/libebook-orbit/Makefile
+-addressbook/libebook-orbit/libebook.pc
+ addressbook/libebook-dbus/Makefile
+ addressbook/libebook-dbus/libebook.pc
+-addressbook/libedata-book-orbit/Makefile
+-addressbook/libedata-book-orbit/libedata-book.pc
+ addressbook/libedata-book-dbus/Makefile
+ addressbook/libedata-book-dbus/libedata-book.pc
+ addressbook/backends/Makefile
+@@ -1388,68 +1381,15 @@
+ addressbook/tests/Makefile
+ addressbook/tests/ebook/Makefile
+ addressbook/tests/vcard/Makefile
+-art/Makefile
+-calendar/Makefile
+-calendar/idl/Makefile
+-calendar/libecal-orbit/Makefile
+-calendar/libecal-orbit/libecal.pc
+-calendar/libecal-dbus/Makefile
+-calendar/libecal-dbus/libecal.pc
+-calendar/libedata-cal-orbit/Makefile
+-calendar/libedata-cal-orbit/libedata-cal.pc
+-calendar/libedata-cal-dbus/Makefile
+-calendar/libedata-cal-dbus/libedata-cal.pc
+-calendar/backends/Makefile
+-calendar/backends/file/Makefile
+-calendar/backends/groupwise/Makefile
+-calendar/backends/http/Makefile
+-calendar/backends/contacts/Makefile
+-calendar/backends/weather/Makefile
+-calendar/tests/Makefile
+-calendar/tests/ecal/Makefile
+-camel/Makefile
+-camel/providers/Makefile
+-camel/providers/groupwise/Makefile
+-camel/providers/imap/Makefile
+-camel/providers/imapp/Makefile
+-camel/providers/imap4/Makefile
+-camel/providers/local/Makefile
+-camel/providers/nntp/Makefile
+-camel/providers/pop3/Makefile
+-camel/providers/sendmail/Makefile
+-camel/providers/smtp/Makefile
+-camel/tests/Makefile
+-camel/tests/folder/Makefile
+-camel/tests/lib/Makefile
+-camel/tests/message/Makefile
+-camel/tests/mime-filter/Makefile
+-camel/tests/misc/Makefile
+-camel/tests/smime/Makefile
+-camel/tests/stream/Makefile
+-camel/camel.pc
+-camel/camel-provider.pc
+-libdb/Makefile
+-libedataserver/Makefile
+-libedataserver/libedataserver.pc
+-libedataserverui/Makefile
+-libedataserverui/libedataserverui.pc
+-servers/Makefile
+-servers/groupwise/Makefile
+-servers/groupwise/libegroupwise.pc
+-servers/exchange/Makefile
+-servers/exchange/xntlm/Makefile
+-servers/exchange/lib/Makefile
+-servers/exchange/storage/Makefile
+-servers/exchange/storage/libexchange-storage.pc 
+-src/Makefile
+ docs/Makefile
+ docs/reference/Makefile
+ docs/reference/addressbook/Makefile
+ docs/reference/addressbook/libebook/Makefile
+-docs/reference/calendar/Makefile
+-docs/reference/calendar/libecal/Makefile
+-docs/reference/calendar/libedata-cal/Makefile
+ docs/reference/libedataserver/Makefile
++libdb/Makefile
++libedataserver/Makefile
++libedataserver/libedataserver.pc
++src/Makefile
+ ])
+ 
+ case $host in
