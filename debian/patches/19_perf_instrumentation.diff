@@ -1,0 +1,148 @@
+Index: git/addressbook/backends/file/e-book-backend-file.c
+===================================================================
+--- git.orig/addressbook/backends/file/e-book-backend-file.c	2008-04-28 14:53:28.000000000 +0100
++++ git/addressbook/backends/file/e-book-backend-file.c	2008-04-28 14:53:29.000000000 +0100
+@@ -64,6 +64,8 @@
+ #define PAS_ID_PREFIX "pas-id-"
+ #define SUMMARY_FLUSH_TIMEOUT 5000
+ 
++#define p(x...) g_debug(x)
++
+ G_DEFINE_TYPE (EBookBackendFile, e_book_backend_file, E_TYPE_BOOK_BACKEND_SYNC);
+ 
+ struct _EBookBackendFilePrivate {
+@@ -567,6 +569,7 @@
+ 	EBookBackendFile *bf;
+ 	GThread *thread;
+ 	EFlag *running;
++	GTimer *seq_timer;
+ } FileBackendSearchClosure;
+ 
+ static void
+@@ -574,6 +577,7 @@
+ {
+ 	d(printf ("destroying search closure\n"));
+ 	e_flag_free (closure->running);
++	g_timer_destroy (closure->seq_timer);
+ 	g_free (closure);
+ }
+ 
+@@ -589,6 +593,7 @@
+ 	g_object_set_data_full (G_OBJECT (book_view), "EBookBackendFile.BookView::closure",
+ 				closure, (GDestroyNotify)closure_destroy);
+ 
++	closure->seq_timer = g_timer_new();
+ 	return closure;
+ }
+ 
+@@ -627,10 +632,13 @@
+ 	bf = closure->bf;
+ 
+ 	d(printf ("starting initial population of book view\n"));
++	g_timer_reset (closure->seq_timer);
+ 
+ 	db = bf->priv->file_db;
+ 	query = e_data_book_view_get_card_query (book_view);
+ 
++	p("starting population of book view for query: %s", query);
++
+ 	if ( ! strcmp (query, "(contains \"x-evolution-any-field\" \"\")")) {
+ 		e_data_book_view_notify_status_message (book_view, _("Loading..."));
+ 		allcontacts = TRUE;
+@@ -639,6 +647,7 @@
+ 		allcontacts = FALSE;
+ 	}
+ 
++	p("doing an allcontacts query: %s", allcontacts ? "yes": "no");
+ 	d(printf ("signalling parent thread\n"));
+ 	e_flag_set (closure->running);
+ 
+@@ -646,7 +655,8 @@
+ 		/* do a summary query */
+ 		GPtrArray *ids = e_book_backend_summary_search (bf->priv->summary, e_data_book_view_get_card_query (book_view));
+ 		int i;
+-
++		
++		p("doing a summary query");
+ 		for (i = 0; i < ids->len; i ++) {
+ 			char *id = g_ptr_array_index (ids, i);
+ 
+@@ -673,6 +683,7 @@
+ 		/* iterate over the db and do the query there */
+ 		DBC    *dbc;
+ 
++		p("doing a non-summary query");
+ 		memset (&id_dbt, 0, sizeof (id_dbt));
+ 		memset (&vcard_dbt, 0, sizeof (vcard_dbt));
+ 		vcard_dbt.flags = DB_DBT_MALLOC;
+@@ -709,8 +720,6 @@
+ 				   bf->priv->filename);
+ 			abort ();
+ 		}
+-
+-
+ 	}
+ 
+ 	if (e_flag_is_set (closure->running))
+@@ -721,6 +730,9 @@
+ 
+ 	d(printf ("finished population of book view\n"));
+ 
++	g_timer_stop (closure->seq_timer);
++
++	p("book view population took: %fs", g_timer_elapsed (closure->seq_timer, NULL));
+ 	return NULL;
+ }
+ 
+Index: git/addressbook/libebook-dbus/e-book-view.c
+===================================================================
+--- git.orig/addressbook/libebook-dbus/e-book-view.c	2008-04-28 14:47:20.000000000 +0100
++++ git/addressbook/libebook-dbus/e-book-view.c	2008-04-28 15:07:31.000000000 +0100
+@@ -31,10 +31,13 @@
+ #define E_BOOK_VIEW_GET_PRIVATE(o) \
+   (G_TYPE_INSTANCE_GET_PRIVATE ((o), E_TYPE_BOOK_VIEW, EBookViewPrivate))
+ 
++#define p(x...) g_debug(x)
++
+ struct _EBookViewPrivate {
+   EBook *book;
+   DBusGProxy *view_proxy;
+   gboolean running;
++  GTimer *timer;
+ };
+ 
+ enum {
+@@ -140,6 +143,7 @@
+   if (!book_view->priv->running)
+     return;
+ 
++  p("book view contacts_added_cb: %fs", g_timer_elapsed (book_view->priv->timer, NULL));
+   for (p = vcards; *p; p++) {
+     contacts = g_list_prepend (contacts, e_contact_new_from_vcard (*p));
+   }
+@@ -197,6 +201,7 @@
+   if (!book_view->priv->running)
+     return;
+ 
++  p("book view sequence complete: %fs", g_timer_elapsed (book_view->priv->timer, NULL));
+   g_signal_emit (book_view, signals[SEQUENCE_COMPLETE], 0, status);
+ }
+ 
+@@ -237,6 +242,8 @@
+   dbus_g_proxy_add_signal (view_proxy, "Complete", G_TYPE_UINT, G_TYPE_INVALID);
+   dbus_g_proxy_connect_signal (view_proxy, "Complete", G_CALLBACK (complete_cb), view, NULL);
+ 
++  priv->timer = g_timer_new ();
++
+   return view;
+ }
+ 
+@@ -264,6 +271,8 @@
+   book_view->priv->running = TRUE;
+ 
+   if (book_view->priv->view_proxy) {
++    g_timer_reset (book_view->priv->timer);
++    p("book view query started");
+     org_gnome_evolution_dataserver_addressbook_BookView_start (book_view->priv->view_proxy, &error);
+     if (error) {
+       g_warning ("Cannot start book view: %s\n", error->message);

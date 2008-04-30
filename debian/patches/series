@@ -13,3 +13,4 @@
 16_documentation_build_fix.diff
 17_remove_from_dist.diff
 18_remove_from_configure.diff
+# 19_perf_instrumentation.diff
