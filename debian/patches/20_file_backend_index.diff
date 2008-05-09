@@ -1,7 +1,7 @@
 Index: git-foo/addressbook/backends/file/Makefile.am
 ===================================================================
---- git-foo.orig/addressbook/backends/file/Makefile.am	2008-05-06 12:34:14.000000000 +0100
-+++ git-foo/addressbook/backends/file/Makefile.am	2008-05-06 12:34:14.000000000 +0100
+--- git-foo.orig/addressbook/backends/file/Makefile.am	2008-05-07 17:17:14.000000000 +0100
++++ git-foo/addressbook/backends/file/Makefile.am	2008-05-07 17:17:14.000000000 +0100
 @@ -12,6 +12,8 @@
  libebookbackendfile_la_SOURCES =			\
  	e-book-backend-file.c				\
@@ -13,8 +13,8 @@ Index: git-foo/addressbook/backends/file/Makefile.am
  	$(top_srcdir)/libedataserver/e-dbhash.c
 Index: git-foo/addressbook/backends/file/e-book-backend-file.c
 ===================================================================
---- git-foo.orig/addressbook/backends/file/e-book-backend-file.c	2008-05-06 12:34:14.000000000 +0100
-+++ git-foo/addressbook/backends/file/e-book-backend-file.c	2008-05-07 12:29:11.000000000 +0100
+--- git-foo.orig/addressbook/backends/file/e-book-backend-file.c	2008-05-07 17:17:14.000000000 +0100
++++ git-foo/addressbook/backends/file/e-book-backend-file.c	2008-05-07 17:17:14.000000000 +0100
 @@ -54,6 +54,8 @@
  
  #include "e-book-backend-file.h"
@@ -173,8 +173,8 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
 Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ git-foo/addressbook/backends/file/e-book-backend-file-index.c	2008-05-07 16:23:36.000000000 +0100
-@@ -0,0 +1,871 @@
++++ git-foo/addressbook/backends/file/e-book-backend-file-index.c	2008-05-07 17:57:01.000000000 +0100
+@@ -0,0 +1,863 @@
 +/*
 + * Copyright (C) 2008 OpenedHand Ltd
 + *
@@ -244,13 +244,13 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +{
 +  gchar *query_term;                    /* what the query uses to get this */
 +  gchar *index_name;                    /* name for index */
-+  EContactField vfield;                 /* the (vcard) field this an index of */
-+  EBookBackendFileIndexFieldType type;  /* the type of this field */
++  gchar *vfield;                        /* the (vcard) field this an index of */
 +} EBookBackendFileIndexData;
 +
 +static const EBookBackendFileIndexData indexes[] = {
-+  {"full-name", "full_name", E_CONTACT_FULL_NAME, INDEX_FIELD_TYPE_STRING},
-+  {"im-jabber", "im_jabber", E_CONTACT_IM_JABBER, INDEX_FIELD_TYPE_STRING_LIST},
++  {"full-name", "full_name", EVC_FN},
++  {"im-jabber", "im_jabber", EVC_X_JABBER},
++  {"tel", "tel", EVC_TEL},
 +};
 +
 +typedef struct _EBookBackendFileIndexPrivate EBookBackendFileIndexPrivate;
@@ -724,8 +724,8 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +  gchar *uid = NULL;
 +  DBT index_dbt, id_dbt;
 +  DB *db = NULL;
-+  gchar *value; /* for the INDEX_FIELD_TYPE_STRING case */
-+  GList *l, *values; /* for the INDEX_FIELD_TYPE_STRING_LIST case */
++  GList *attrs; 
++  GList *values;
 +  gint db_error = 0;
 +  gchar *tmp = NULL;
 +
@@ -736,40 +736,32 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +  /* we need the index database too */
 +  db = g_hash_table_lookup (priv->sdbs, data->query_term);
 +
-+  if (data->type == INDEX_FIELD_TYPE_STRING)
++  for (attrs = e_vcard_get_attributes (E_VCARD (contact)); 
++      attrs != NULL; 
++      attrs = attrs->next)
 +  {
-+    tmp = (gchar *)e_contact_get (contact, data->vfield);
-+    value = g_utf8_casefold (tmp, -1);
-+    g_free (tmp);
-+    dbt_fill_with_string (&index_dbt, value);
++    EVCardAttribute *attr = (EVCardAttribute *)attrs->data;
 +
-+    g_debug (G_STRLOC ": adding to index with key %s and data %s", index_dbt.data, id_dbt.data);
-+    db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
-+
-+    if (db_error != 0)
++    if (g_str_equal (e_vcard_attribute_get_name (attr), data->vfield))
 +    {
-+      g_warning (G_STRLOC ":db->put failed: %s", db_strerror (db_error));
-+    }
-+  } else if (data->type == INDEX_FIELD_TYPE_STRING_LIST) {
-+    values = (GList *)e_contact_get (contact, E_CONTACT_IM_JABBER);
-+
-+    for  (l = values; l != NULL; l = l->next)
-+    {
-+      tmp = (gchar *)l->data;
-+      value = g_utf8_casefold (tmp, -1);
-+      g_free (tmp);
-+
-+      dbt_fill_with_string (&index_dbt, value);
-+      g_debug (G_STRLOC ": adding to index with key %s and data %s", index_dbt.data, id_dbt.data);
-+      db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
-+
-+      if (db_error != 0)
++      for (values = e_vcard_attribute_get_values (attr);
++          values != NULL; 
++          values = values->next)
 +      {
-+        g_warning (G_STRLOC ": db->put failed: %s", db_strerror (db_error));
++        tmp = g_utf8_casefold (values->data, -1);
++        dbt_fill_with_string (&index_dbt, tmp);
++
++        g_debug (G_STRLOC ": adding to index with key %s and data %s", 
++            index_dbt.data, id_dbt.data);
++
++        db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
++
++        if (db_error != 0)
++        {
++          g_warning (G_STRLOC ": db->put failed: %s", db_strerror (db_error));
++        }
 +      }
 +    }
-+  } else {
-+    g_warning (G_STRLOC ": Unexpected field type.");
 +  }
 +
 +  db_error = db->sync (db, 0);
@@ -1049,7 +1041,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 Index: git-foo/addressbook/backends/file/e-book-backend-file-index.h
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ git-foo/addressbook/backends/file/e-book-backend-file-index.h	2008-05-07 12:16:54.000000000 +0100
++++ git-foo/addressbook/backends/file/e-book-backend-file-index.h	2008-05-07 17:17:14.000000000 +0100
 @@ -0,0 +1,68 @@
 +/*
 + * Copyright (C) 2008 OpenedHand Ltd
