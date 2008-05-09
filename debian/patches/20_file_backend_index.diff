@@ -1,0 +1,337 @@
+Index: git/addressbook/backends/file/Makefile.am
+===================================================================
+--- git.orig/addressbook/backends/file/Makefile.am	2008-04-30 19:46:59.000000000 +0100
++++ git/addressbook/backends/file/Makefile.am	2008-04-30 21:50:18.000000000 +0100
+@@ -12,6 +12,8 @@
+ libebookbackendfile_la_SOURCES =			\
+ 	e-book-backend-file.c				\
+ 	e-book-backend-file.h				\
++	e-book-backend-file-index.c				\
++	e-book-backend-file-index.h				\
+ 	e-book-backend-file-factory.c			\
+ 	$(top_srcdir)/libedataserver/e-db3-utils.c	\
+ 	$(top_srcdir)/libedataserver/e-dbhash.c
+Index: git/addressbook/backends/file/e-book-backend-file.c
+===================================================================
+--- git.orig/addressbook/backends/file/e-book-backend-file.c	2008-04-30 19:46:59.000000000 +0100
++++ git/addressbook/backends/file/e-book-backend-file.c	2008-04-30 21:50:18.000000000 +0100
+@@ -54,6 +54,8 @@
+ 
+ #include "e-book-backend-file.h"
+ 
++#include "e-book-backend-file-index.h"
++
+ #define d(x)
+ 
+ #define CHANGES_DB_SUFFIX ".changes.db"
+@@ -73,6 +75,7 @@
+ 	DB       *file_db;
+ 	DB_ENV   *env;
+ 	EBookBackendSummary *summary;
++	EBookBackendFileIndex *index;
+ };
+ 
+ G_LOCK_DEFINE_STATIC (global_env);
+@@ -642,6 +645,12 @@
+ 	d(printf ("signalling parent thread\n"));
+ 	e_flag_set (closure->running);
+ 
++
++	if (e_book_backend_file_index_is_usable (bf->priv->index, query))
++	{
++		g_debug ("Able to use EBookBackendFileIndex for %s", query);
++	}
++
+ 	if (e_book_backend_summary_is_summary_query (bf->priv->summary, query)) {
+ 		/* do a summary query */
+ 		GPtrArray *ids = e_book_backend_summary_search (bf->priv->summary, e_data_book_view_get_card_query (book_view));
+@@ -1317,12 +1326,14 @@
+ 	g_free (bf->priv->summary_filename);
+ 	bf->priv->summary_filename = g_strconcat (bf->priv->filename, ".summary", NULL);
+ 	bf->priv->summary = e_book_backend_summary_new (bf->priv->summary_filename, SUMMARY_FLUSH_TIMEOUT);
+-
+ 	if (e_book_backend_summary_is_up_to_date (bf->priv->summary, db_mtime) == FALSE
+ 	    || e_book_backend_summary_load (bf->priv->summary) == FALSE ) {
+ 		build_summary (bf->priv);
+ 	}
+ 
++
++	bf->priv->index = e_book_backend_file_index_new ();
++
+ 	e_book_backend_set_is_loaded (backend, TRUE);
+ 	e_book_backend_set_is_writable (backend, writable);
+ 	return GNOME_Evolution_Addressbook_Success;
+@@ -1486,6 +1497,11 @@
+ 		bf->priv->summary = NULL;
+ 	}
+ 
++	if (bf->priv->index) {
++		g_object_unref (bf->priv->index);
++		bf->priv->index = NULL;
++	}
++
+ 	G_OBJECT_CLASS (e_book_backend_file_parent_class)->dispose (object);	
+ }
+ 
+Index: git/addressbook/backends/file/e-book-backend-file-index.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ git/addressbook/backends/file/e-book-backend-file-index.c	2008-04-30 21:50:18.000000000 +0100
+@@ -0,0 +1,212 @@
++#include "e-book-backend-file-index.h"
++#include "libedataserver/e-sexp.h"
++#include "libebook/e-contact.h"
++
++#include "db.h"
++
++#include <string.h>
++
++G_DEFINE_TYPE (EBookBackendFileIndex, e_book_backend_file_index, G_TYPE_OBJECT)
++
++#define GET_PRIVATE(o) \
++  (G_TYPE_INSTANCE_GET_PRIVATE ((o), E_TYPE_BOOK_BACKEND_FILE_INDEX, EBookBackendFileIndexPrivate))
++
++/* structures used for the parsing side of things */
++
++typedef struct 
++{
++  gchar *name;            /* function name */
++  ESExpFunc *test_function;   /* for just testing to see if we can use the index */
++  ESExpFunc *result_function; /* for actually producing a result */
++} EBookBackendFileIndexSExpSymbol;
++
++static ESExpResult *test_always_fails (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
++static ESExpResult *test_generic_field_is_indexed (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
++
++static const EBookBackendFileIndexSExpSymbol sexp_symbols[] = {
++  {"contains", test_always_fails, NULL},
++  {"is", test_generic_field_is_indexed, NULL},
++  {"beginswith", test_generic_field_is_indexed, NULL},
++  {"endswith", test_always_fails, NULL},
++  {"exists", test_always_fails, NULL},
++  {"exists_vcard", test_always_fails, NULL},
++  {"is_vcard", test_always_fails, NULL},
++};
++
++/* structures used for maintaining the indexes */
++typedef struct _EBookBackendFileIndexField EBookBackendFileIndexField;
++
++typedef int (* EBookBackendFileBDBIndexCallback) (DB *sdb, const DBT *pkey, const DBT *pdata, DBT *skey);
++typedef int (* EBookBackendFileIndexCallback) (EBookBackendFileIndex *index, EBookBackendFileIndexField *field, 
++    DB *sdb, const DBT *pkey, const DBT *pdata, DBT *skey);
++
++struct _EBookBackendFileIndexField
++{
++  gchar *query_term;                /* what the query uses to get this */
++  EContactField vfield;            /* the (vcard) field this an index of */
++  gchar *index_name;                /* name for index */
++  EBookBackendFileIndexCallback cb; /* callback for index generation */
++};
++
++static int generic_field_cb (EBookBackendFileIndex *index,
++    EBookBackendFileIndexField *field, DB *sdb, const DBT *pkey, const DBT *pdata, DBT *skey);
++
++static const EBookBackendFileIndexField indexes[] = {
++  {"full-name", E_CONTACT_FULL_NAME, "full_name", generic_field_cb}
++};
++
++typedef struct _EBookBackendFileIndexPrivate EBookBackendFileIndexPrivate;
++
++struct _EBookBackendFileIndexPrivate {
++  DB **sdbs;
++};
++
++
++static void
++e_book_backend_file_index_dispose (GObject *object)
++{
++  if (G_OBJECT_CLASS (e_book_backend_file_index_parent_class)->dispose)
++    G_OBJECT_CLASS (e_book_backend_file_index_parent_class)->dispose (object);
++}
++
++static void
++e_book_backend_file_index_finalize (GObject *object)
++{
++  if (G_OBJECT_CLASS (e_book_backend_file_index_parent_class)->finalize)
++    G_OBJECT_CLASS (e_book_backend_file_index_parent_class)->finalize (object);
++}
++
++static void
++e_book_backend_file_index_class_init (EBookBackendFileIndexClass *klass)
++{
++  GObjectClass *object_class = G_OBJECT_CLASS (klass);
++
++  g_type_class_add_private (klass, sizeof (EBookBackendFileIndexPrivate));
++
++  object_class->dispose = e_book_backend_file_index_dispose;
++  object_class->finalize = e_book_backend_file_index_finalize;
++}
++
++static void
++e_book_backend_file_index_init (EBookBackendFileIndex *self)
++{
++}
++
++EBookBackendFileIndex *
++e_book_backend_file_index_new (void)
++{
++  return g_object_new (E_TYPE_BOOK_BACKEND_FILE_INDEX, NULL);
++}
++
++gboolean
++e_book_backend_file_index_is_usable (EBookBackendFileIndex *index, const gchar *query)
++{
++  ESExp *sexp = NULL;
++  ESExpResult *sexp_result = NULL;
++  gint i = 0;
++  gint sexp_error = 0;
++  gboolean res = FALSE; /* whether we can actually use the index */
++
++  sexp = e_sexp_new ();
++
++  /* Now add the 'test' functions, we just use these to find out whether we
++   * can do a query. They return booleans and then ESexp logic should figure
++   * out the logic...
++   */
++  for (i = 0; i < G_N_ELEMENTS (sexp_symbols); i++)
++  {
++    e_sexp_add_function (sexp, 0, sexp_symbols[i].name, 
++        sexp_symbols[i].test_function, index);
++  }
++
++  /* Pull in the query as the text for the s-exp */
++  e_sexp_input_text (sexp, query, strlen (query));
++  sexp_error = e_sexp_parse (sexp);
++
++  if (sexp_error == -1)
++  {
++    g_warning ("Failed to parse query %s, %s", query, e_sexp_error (sexp));
++    e_sexp_unref (sexp);
++    return FALSE;
++  }
++
++  /* evaluate ... */
++  sexp_result = e_sexp_eval(sexp);
++
++  if (sexp_result)
++  {
++    if (sexp_result->type == ESEXP_RES_BOOL)
++    {
++      /* return the value of whether we can actually use the index */
++      res = sexp_result->value.bool;
++    } else {
++      g_warning ("Unexpected result type");
++    }
++
++    e_sexp_result_free (sexp, sexp_result);
++  }
++
++  e_sexp_unref (sexp);
++  return res;
++}
++
++/* functions used for testing whether we can use the index */
++
++/* always return false since we can't handle that type of query */
++static ESExpResult *
++test_always_fails (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
++{
++  ESExpResult *result;
++
++  result = e_sexp_result_new (sexp, ESEXP_RES_BOOL);
++  result->value.bool = FALSE;
++  
++  return result;
++}
++
++/* 
++ * return true or false based on whether we recognise that query field as
++ * something we have an index for or not
++ */
++static ESExpResult *
++test_generic_field_is_indexed (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
++{
++  ESExpResult *result = NULL;
++  gint i = 0;
++
++  result = e_sexp_result_new (sexp, ESEXP_RES_BOOL);
++
++  /* set to false now, we may set it to true in the loop below */
++  result->value.bool = FALSE;
++
++  /* we must have two arguments and they must both be strings */
++  if (argc == 2 &&
++      argv[0]->type == ESEXP_RES_STRING &&
++      argv[1]->type == ESEXP_RES_STRING)
++  {
++    for (i = 0; i < G_N_ELEMENTS (indexes); i++)
++    {
++      gchar *query_term = argv[0]->value.string;
++
++      if (query_term && g_str_equal (query_term, indexes[i].query_term))
++      {
++        /* we found that we support this query term as an index. woohoo */
++        result->value.bool = TRUE;
++      }
++    }
++
++  } else {
++    g_warning ("Unexpected query structure");
++  }
++
++  return result;
++}
++
++/* index operations themselves */
++static int 
++generic_field_cb (EBookBackendFileIndex *index,
++    EBookBackendFileIndexField *field, DB *sdb, const DBT *pkey, const DBT *pdata, DBT *skey)
++{
++  return 0;
++}
++
+Index: git/addressbook/backends/file/e-book-backend-file-index.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ git/addressbook/backends/file/e-book-backend-file-index.h	2008-04-30 21:50:18.000000000 +0100
+@@ -0,0 +1,40 @@
++#ifndef _E_BOOK_BACKEND_FILE_INDEX
++#define _E_BOOK_BACKEND_FILE_INDEX
++
++#include <glib-object.h>
++
++G_BEGIN_DECLS
++
++#define E_TYPE_BOOK_BACKEND_FILE_INDEX e_book_backend_file_index_get_type()
++
++#define E_BOOK_BACKEND_FILE_INDEX(obj) \
++  (G_TYPE_CHECK_INSTANCE_CAST ((obj), E_TYPE_BOOK_BACKEND_FILE_INDEX, EBookBackendFileIndex))
++
++#define E_BOOK_BACKEND_FILE_INDEX_CLASS(klass) \
++  (G_TYPE_CHECK_CLASS_CAST ((klass), E_TYPE_BOOK_BACKEND_FILE_INDEX, EBookBackendFileIndexClass))
++
++#define E_IS_BOOK_BACKEND_FILE_INDEX(obj) \
++  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), E_TYPE_BOOK_BACKEND_FILE_INDEX))
++
++#define E_IS_BOOK_BACKEND_FILE_INDEX_CLASS(klass) \
++  (G_TYPE_CHECK_CLASS_TYPE ((klass), E_TYPE_BOOK_BACKEND_FILE_INDEX))
++
++#define E_BOOK_BACKEND_FILE_INDEX_GET_CLASS(obj) \
++  (G_TYPE_INSTANCE_GET_CLASS ((obj), E_TYPE_BOOK_BACKEND_FILE_INDEX, EBookBackendFileIndexClass))
++
++typedef struct {
++  GObject parent;
++} EBookBackendFileIndex;
++
++typedef struct {
++  GObjectClass parent_class;
++} EBookBackendFileIndexClass;
++
++GType e_book_backend_file_index_get_type (void);
++
++EBookBackendFileIndex *e_book_backend_file_index_new (void);
++gboolean e_book_backend_file_index_is_usable (EBookBackendFileIndex *index, const gchar *query);
++G_END_DECLS
++
++#endif /* _E_BOOK_BACKEND_FILE_INDEX */
++

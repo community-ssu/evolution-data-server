@@ -14,3 +14,4 @@
 17_remove_from_dist.diff
 18_remove_from_configure.diff
 # 19_perf_instrumentation.diff
+20_file_backend_index.diff
