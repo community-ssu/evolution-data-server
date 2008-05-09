@@ -1,7 +1,7 @@
 Index: git-foo/addressbook/backends/file/Makefile.am
 ===================================================================
---- git-foo.orig/addressbook/backends/file/Makefile.am	2008-05-07 17:17:14.000000000 +0100
-+++ git-foo/addressbook/backends/file/Makefile.am	2008-05-07 17:17:14.000000000 +0100
+--- git-foo.orig/addressbook/backends/file/Makefile.am	2008-05-08 12:37:29.000000000 +0100
++++ git-foo/addressbook/backends/file/Makefile.am	2008-05-08 12:37:30.000000000 +0100
 @@ -12,6 +12,8 @@
  libebookbackendfile_la_SOURCES =			\
  	e-book-backend-file.c				\
@@ -13,8 +13,8 @@ Index: git-foo/addressbook/backends/file/Makefile.am
  	$(top_srcdir)/libedataserver/e-dbhash.c
 Index: git-foo/addressbook/backends/file/e-book-backend-file.c
 ===================================================================
---- git-foo.orig/addressbook/backends/file/e-book-backend-file.c	2008-05-07 17:17:14.000000000 +0100
-+++ git-foo/addressbook/backends/file/e-book-backend-file.c	2008-05-07 17:17:14.000000000 +0100
+--- git-foo.orig/addressbook/backends/file/e-book-backend-file.c	2008-05-08 12:37:29.000000000 +0100
++++ git-foo/addressbook/backends/file/e-book-backend-file.c	2008-05-08 16:26:32.000000000 +0100
 @@ -54,6 +54,8 @@
  
  #include "e-book-backend-file.h"
@@ -56,12 +56,13 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
  		return GNOME_Evolution_Addressbook_Success;
  	} else {
  		g_warning (G_STRLOC ": db->put failed with %s", db_strerror (db_error));
-@@ -642,7 +648,37 @@
+@@ -642,11 +648,44 @@
  	d(printf ("signalling parent thread\n"));
  	e_flag_set (closure->running);
  
 -	if (e_book_backend_summary_is_summary_query (bf->priv->summary, query)) {
 +
++	g_debug (G_STRLOC ": Query is %s", query);
 +	if (e_book_backend_file_index_is_usable (bf->priv->index, query))
 +	{
 +		GPtrArray *ids = NULL;
@@ -95,7 +96,13 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
  		/* do a summary query */
  		GPtrArray *ids = e_book_backend_summary_search (bf->priv->summary, e_data_book_view_get_card_query (book_view));
  		int i;
-@@ -668,8 +704,7 @@
+ 
++		g_debug (G_STRLOC ": Using summmary for %s", query);
++
+ 		for (i = 0; i < ids->len; i ++) {
+ 			char *id = g_ptr_array_index (ids, i);
+ 
+@@ -668,8 +707,7 @@
  		}
  
  		g_ptr_array_free (ids, TRUE);
@@ -105,7 +112,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
  		/* iterate over the db and do the query there */
  		DBC    *dbc;
  
-@@ -709,13 +744,14 @@
+@@ -709,13 +747,14 @@
  				   bf->priv->filename);
  			abort ();
  		}
@@ -122,7 +129,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
  	/* unref the */
  	g_object_unref (book_view);
  
-@@ -1143,6 +1179,8 @@
+@@ -1143,6 +1182,8 @@
  	time_t db_mtime;
  	struct stat sb;
  	gchar *uri;
@@ -131,7 +138,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
  
  	uri = e_source_get_uri (source);
  
-@@ -1317,12 +1355,22 @@
+@@ -1317,12 +1358,22 @@
  	g_free (bf->priv->summary_filename);
  	bf->priv->summary_filename = g_strconcat (bf->priv->filename, ".summary", NULL);
  	bf->priv->summary = e_book_backend_summary_new (bf->priv->summary_filename, SUMMARY_FLUSH_TIMEOUT);
@@ -155,7 +162,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
  	e_book_backend_set_is_loaded (backend, TRUE);
  	e_book_backend_set_is_writable (backend, writable);
  	return GNOME_Evolution_Addressbook_Success;
-@@ -1474,6 +1522,14 @@
+@@ -1474,6 +1525,14 @@
  	}
  	
  	G_LOCK (global_env);
@@ -173,10 +180,10 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
 Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ git-foo/addressbook/backends/file/e-book-backend-file-index.c	2008-05-07 17:57:01.000000000 +0100
-@@ -0,0 +1,863 @@
++++ git-foo/addressbook/backends/file/e-book-backend-file-index.c	2008-05-08 16:14:53.000000000 +0100
+@@ -0,0 +1,856 @@
 +/*
-+ * Copyright (C) 2008 OpenedHand Ltd
++ * Copyright (C) 2008 Nokia Corporation.
 + *
 + * This program is free software; you can redistribute it and/or modify it under
 + * the terms of version 2 of the GNU Lesser General Public License as published
@@ -334,7 +341,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +  ESExpResult *sexp_result = NULL;
 +  gint i = 0;
 +  gint sexp_error = 0;
-+  gboolean res = FALSE; /* whether we can actually use the index */
++  gboolean res = TRUE; /* whether we can actually use the index */
 +
 +  sexp = e_sexp_new ();
 +
@@ -345,7 +352,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +  for (i = 0; i < G_N_ELEMENTS (sexp_symbols); i++)
 +  {
 +    e_sexp_add_function (sexp, 0, sexp_symbols[i].name, 
-+        sexp_symbols[i].test_function, index);
++        sexp_symbols[i].test_function, &res);
 +  }
 +
 +  /* Pull in the query as the text for the s-exp */
@@ -362,20 +369,10 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +  /* evaluate ... */
 +  sexp_result = e_sexp_eval(sexp);
 +
-+  if (sexp_result)
-+  {
-+    if (sexp_result->type == ESEXP_RES_BOOL)
-+    {
-+      /* return the value of whether we can actually use the index */
-+      res = sexp_result->value.bool;
-+    } else {
-+      g_warning (G_STRLOC ": Unexpected result type");
-+    }
-+
-+    e_sexp_result_free (sexp, sexp_result);
-+  }
-+
++  /* and then ignore the result */
++  e_sexp_result_free (sexp, sexp_result);
 +  e_sexp_unref (sexp);
++
 +  return res;
 +}
 +
@@ -588,8 +585,9 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +  ESExpResult *result;
 +
 +  result = e_sexp_result_new (sexp, ESEXP_RES_BOOL);
-+  result->value.bool = FALSE;
-+  
++
++  *(gboolean *)userdata = FALSE;
++
 +  return result;
 +}
 +
@@ -620,12 +618,14 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +    {
 +      if (query_term && g_str_equal (query_term, indexes[i].query_term))
 +      {
-+        /* we found that we support this query term as an index. woohoo */
-+        result->value.bool = TRUE;
++        /* if we can we do nothing since the value defaults to true */
++      } else {
++        *(gboolean *)userdata = FALSE;
 +      }
 +    }
 +  } else {
 +    g_warning (G_STRLOC ": Unexpected query structure");
++    *(gboolean *)userdata = FALSE;
 +  }
 +
 +  return result;
@@ -1041,10 +1041,10 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 Index: git-foo/addressbook/backends/file/e-book-backend-file-index.h
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ git-foo/addressbook/backends/file/e-book-backend-file-index.h	2008-05-07 17:17:14.000000000 +0100
++++ git-foo/addressbook/backends/file/e-book-backend-file-index.h	2008-05-08 12:37:30.000000000 +0100
 @@ -0,0 +1,68 @@
 +/*
-+ * Copyright (C) 2008 OpenedHand Ltd
++ * Copyright (C) 2008 Nokia Corporation.
 + *
 + * This program is free software; you can redistribute it and/or modify it under
 + * the terms of version 2 of the GNU Lesser General Public License as published
