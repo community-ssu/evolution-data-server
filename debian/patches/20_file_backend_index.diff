@@ -14,7 +14,7 @@ Index: git-foo/addressbook/backends/file/Makefile.am
 Index: git-foo/addressbook/backends/file/e-book-backend-file.c
 ===================================================================
 --- git-foo.orig/addressbook/backends/file/e-book-backend-file.c	2008-05-06 12:34:14.000000000 +0100
-+++ git-foo/addressbook/backends/file/e-book-backend-file.c	2008-05-06 15:48:55.000000000 +0100
++++ git-foo/addressbook/backends/file/e-book-backend-file.c	2008-05-07 12:29:11.000000000 +0100
 @@ -54,6 +54,8 @@
  
  #include "e-book-backend-file.h"
@@ -56,7 +56,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
  		return GNOME_Evolution_Addressbook_Success;
  	} else {
  		g_warning (G_STRLOC ": db->put failed with %s", db_strerror (db_error));
-@@ -642,7 +648,36 @@
+@@ -642,7 +648,37 @@
  	d(printf ("signalling parent thread\n"));
  	e_flag_set (closure->running);
  
@@ -68,8 +68,6 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
 +		int i;
 +
 +		ids = e_book_backend_file_index_query (bf->priv->index, query);
-+
-+		g_debug ("Able to use EBookBackendFileIndex for %s", query);
 +
 +		for (i = 0; i < ids->len; i ++) {
 +			char *id = g_ptr_array_index (ids, i);
@@ -90,11 +88,14 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
 +				g_warning (G_STRLOC ": db->get failed with %s", db_strerror (db_error));
 +			}
 +		}
++
++		e_book_backend_file_index_finish_query (bf->priv->index);
++		g_ptr_array_free (ids, TRUE);
 +	} else if (e_book_backend_summary_is_summary_query (bf->priv->summary, query)) {
  		/* do a summary query */
  		GPtrArray *ids = e_book_backend_summary_search (bf->priv->summary, e_data_book_view_get_card_query (book_view));
  		int i;
-@@ -668,8 +703,7 @@
+@@ -668,8 +704,7 @@
  		}
  
  		g_ptr_array_free (ids, TRUE);
@@ -104,7 +105,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
  		/* iterate over the db and do the query there */
  		DBC    *dbc;
  
-@@ -709,8 +743,6 @@
+@@ -709,13 +744,14 @@
  				   bf->priv->filename);
  			abort ();
  		}
@@ -113,15 +114,24 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
  	}
  
  	if (e_flag_is_set (closure->running))
-@@ -1143,6 +1175,7 @@
++	{
+ 		e_data_book_view_notify_complete (book_view, GNOME_Evolution_Addressbook_Success);
+ 
++	}
++
+ 	/* unref the */
+ 	g_object_unref (book_view);
+ 
+@@ -1143,6 +1179,8 @@
  	time_t db_mtime;
  	struct stat sb;
  	gchar *uri;
 +	gchar *index_filename;
++
  
  	uri = e_source_get_uri (source);
  
-@@ -1317,12 +1350,22 @@
+@@ -1317,12 +1355,22 @@
  	g_free (bf->priv->summary_filename);
  	bf->priv->summary_filename = g_strconcat (bf->priv->filename, ".summary", NULL);
  	bf->priv->summary = e_book_backend_summary_new (bf->priv->summary_filename, SUMMARY_FLUSH_TIMEOUT);
@@ -145,7 +155,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
  	e_book_backend_set_is_loaded (backend, TRUE);
  	e_book_backend_set_is_writable (backend, writable);
  	return GNOME_Evolution_Addressbook_Success;
-@@ -1474,12 +1517,19 @@
+@@ -1474,6 +1522,14 @@
  	}
  	
  	G_LOCK (global_env);
@@ -160,17 +170,11 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
  	global_env.ref_count--;
  	if (global_env.ref_count == 0) {
  		global_env.env->close (global_env.env, 0);
- 		global_env.env = NULL;
- 	}
--	G_UNLOCK (global_env);
- 	
- 	if (bf->priv->summary) {
- 		g_object_unref (bf->priv->summary);
 Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ git-foo/addressbook/backends/file/e-book-backend-file-index.c	2008-05-06 15:58:11.000000000 +0100
-@@ -0,0 +1,738 @@
++++ git-foo/addressbook/backends/file/e-book-backend-file-index.c	2008-05-07 16:23:36.000000000 +0100
+@@ -0,0 +1,871 @@
 +/*
 + * Copyright (C) 2008 OpenedHand Ltd
 + *
@@ -216,12 +220,13 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +static ESExpResult *test_always_fails (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
 +static ESExpResult *test_generic_field_is_indexed (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
 +
-+static ESExpResult *index_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
++static ESExpResult *is_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
++static ESExpResult *beginswith_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
 +
 +static const EBookBackendFileIndexSExpSymbol sexp_symbols[] = {
 +  {"contains", test_always_fails, NULL},
-+  {"is", test_generic_field_is_indexed, index_query},
-+  {"beginswith", test_always_fails, NULL},
++  {"is", test_generic_field_is_indexed, is_query},
++  {"beginswith", test_generic_field_is_indexed, beginswith_query},
 +  {"endswith", test_always_fails, NULL},
 +  {"exists", test_always_fails, NULL},
 +  {"exists_vcard", test_always_fails, NULL},
@@ -245,7 +250,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +
 +static const EBookBackendFileIndexData indexes[] = {
 +  {"full-name", "full_name", E_CONTACT_FULL_NAME, INDEX_FIELD_TYPE_STRING},
-+  {"im-jabber", "im_jabber", E_CONTACT_IM_JABBER, INDEX_FIELD_TYPE_STRING_LIST}
++  {"im-jabber", "im_jabber", E_CONTACT_IM_JABBER, INDEX_FIELD_TYPE_STRING_LIST},
 +};
 +
 +typedef struct _EBookBackendFileIndexPrivate EBookBackendFileIndexPrivate;
@@ -253,6 +258,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +struct _EBookBackendFileIndexPrivate {
 +  DB *db;  /* primary database */
 +  GHashTable *sdbs; /* mapping for query->term to database used for it */
++  GList *ids_to_free; /* a list of ids to free in the _finish call */
 +};
 +
 +static gboolean index_populate (EBookBackendFileIndex *index, GList *fields);
@@ -267,7 +273,8 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +static void
 +e_book_backend_file_index_dispose (GObject *object)
 +{
-+  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (object);
++  EBookBackendFileIndex *index = (EBookBackendFileIndex *)object;
++  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
 +
 +  if (priv->sdbs)
 +  {
@@ -278,6 +285,9 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +    g_hash_table_unref (priv->sdbs);
 +    priv->sdbs = NULL;
 +  }
++
++  /* free any ids we may have left from a query */
++  e_book_backend_file_index_finish_query (index);
 +
 +  if (G_OBJECT_CLASS (e_book_backend_file_index_parent_class)->dispose)
 +    G_OBJECT_CLASS (e_book_backend_file_index_parent_class)->dispose (object);
@@ -344,7 +354,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +
 +  if (sexp_error == -1)
 +  {
-+    g_warning ("Failed to parse query %s, %s", query, e_sexp_error (sexp));
++    g_warning (G_STRLOC ": Failed to parse query %s, %s", query, e_sexp_error (sexp));
 +    e_sexp_unref (sexp);
 +    return FALSE;
 +  }
@@ -359,7 +369,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +      /* return the value of whether we can actually use the index */
 +      res = sexp_result->value.bool;
 +    } else {
-+      g_warning ("Unexpected result type");
++      g_warning (G_STRLOC ": Unexpected result type");
 +    }
 +
 +    e_sexp_result_free (sexp, sexp_result);
@@ -368,7 +378,6 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +  e_sexp_unref (sexp);
 +  return res;
 +}
-+
 +
 +GPtrArray *
 +e_book_backend_file_index_query (EBookBackendFileIndex *index, const gchar *query)
@@ -380,6 +389,8 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +  GPtrArray *res = NULL;
 +
 +  sexp = e_sexp_new ();
++
++  g_debug (G_STRLOC ": Using query %s", query);
 +
 +  /* Now add the 'test' functions, we just use these to find out whether we
 +   * can do a query. They return booleans and then ESexp logic should figure
@@ -397,7 +408,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +
 +  if (sexp_error == -1)
 +  {
-+    g_warning ("Failed to parse query %s, %s", query, e_sexp_error (sexp));
++    g_warning (G_STRLOC ": Failed to parse query %s, %s", query, e_sexp_error (sexp));
 +    e_sexp_unref (sexp);
 +    return NULL;
 +  }
@@ -421,12 +432,27 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +
 +      e_sexp_result_free (sexp, sexp_result);
 +    } else {
-+      g_warning ("Unexpected result type");
++      g_warning (G_STRLOC ": Unexpected result type");
 +    }
 +  }
 +
 +  e_sexp_unref (sexp);
 +  return res;
++}
++
++void
++e_book_backend_file_index_finish_query (EBookBackendFileIndex *index)
++{
++  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
++  GList *l = NULL;
++
++  for (l = priv->ids_to_free; l != NULL; l = l->next)
++  {
++    g_free (l->data);
++  }
++
++  g_list_free (priv->ids_to_free);
++  priv->ids_to_free = NULL;
 +}
 +
 +/* setup indicies in index_filename for the primary database db */
@@ -456,13 +482,13 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +    db_error = db_create (&sdb, env, 0);
 +
 +    if (db_error != 0) {
-+      g_warning ("db_create failed: %s", db_strerror (db_error));
++      g_warning (G_STRLOC ": db_create failed: %s", db_strerror (db_error));
 +      return FALSE;
 +    }
 +
 +    db_error = sdb->set_flags(sdb, DB_DUP | DB_DUPSORT);
 +    if (db_error != 0) {
-+      g_warning ("set_flags failed: %s", db_strerror (db_error));
++      g_warning (G_STRLOC ":set_flags failed: %s", db_strerror (db_error));
 +    }
 +
 +    db_error = sdb->open (sdb, NULL, index_filename, 
@@ -476,14 +502,14 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +
 +      if (db_error != 0)
 +      {
-+        g_warning ("open failed: %s", db_strerror (db_error));
++        g_warning (G_STRLOC ": open failed: %s", db_strerror (db_error));
 +        sdb->close (sdb, 0);
 +        return FALSE;
 +      }
 +    } else if (db_error != 0) {
 +      if (db_error != 0)
 +      {
-+        g_warning ("open failed: %s", db_strerror (db_error));
++        g_warning (G_STRLOC ": open failed: %s", db_strerror (db_error));
 +        sdb->close (sdb, 0);
 +        return FALSE;
 +      }
@@ -501,7 +527,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +  {
 +    if (!index_populate (index, dbs_to_populate))
 +    {
-+      g_warning ("Error whilst trying to populate the index");
++      g_warning (G_STRLOC ": Error whilst trying to populate the index");
 +      g_list_free (dbs_to_populate);
 +      return FALSE;
 +    }
@@ -546,8 +572,8 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +  /* for each index database try add this contact */
 +  for (i = 0; i < G_N_ELEMENTS (indexes); i++)
 +  {
-+    index_add_contact (index, contact, (EBookBackendFileIndexData *)&indexes[i]);
 +    index_remove_contact (index, uid, (EBookBackendFileIndexData *)&indexes[i]);
++    index_add_contact (index, contact, (EBookBackendFileIndexData *)&indexes[i]);
 +  }
 +
 +  g_free (uid);
@@ -599,7 +625,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +      }
 +    }
 +  } else {
-+    g_warning ("Unexpected query structure");
++    g_warning (G_STRLOC ": Unexpected query structure");
 +  }
 +
 +  return result;
@@ -639,7 +665,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +
 +  if (db_error != 0)
 +  {
-+    g_warning ("db->cursor failed: %s", db_strerror (db_error)); 
++    g_warning (G_STRLOC ": db->cursor failed: %s", db_strerror (db_error)); 
 +    return FALSE;
 +  }
 +
@@ -670,7 +696,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +
 +  if (db_error != DB_NOTFOUND)
 +  {
-+    g_warning ("dbc->c_get failed: %s", db_strerror (db_error));
++    g_warning (G_STRLOC ":dbc->c_get failed: %s", db_strerror (db_error));
 +    return FALSE;
 +  }
 +
@@ -678,7 +704,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +
 +  if (db_error != 0)
 +  {
-+    g_warning ("dbc->c_close failed: %s", db_strerror (db_error));
++    g_warning (G_STRLOC ":dbc->c_close failed: %s", db_strerror (db_error));
 +    return FALSE;
 +  }
 +
@@ -701,6 +727,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +  gchar *value; /* for the INDEX_FIELD_TYPE_STRING case */
 +  GList *l, *values; /* for the INDEX_FIELD_TYPE_STRING_LIST case */
 +  gint db_error = 0;
++  gchar *tmp = NULL;
 +
 +  /* we need the uid, this becomes the data for our index databases */
 +  uid = (gchar *)e_contact_get (contact, E_CONTACT_UID);
@@ -711,32 +738,38 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +
 +  if (data->type == INDEX_FIELD_TYPE_STRING)
 +  {
-+    value = (gchar *)e_contact_get (contact, data->vfield);
++    tmp = (gchar *)e_contact_get (contact, data->vfield);
++    value = g_utf8_casefold (tmp, -1);
++    g_free (tmp);
 +    dbt_fill_with_string (&index_dbt, value);
 +
-+    g_debug ("adding to index with key %s and data %s", index_dbt.data, id_dbt.data);
++    g_debug (G_STRLOC ": adding to index with key %s and data %s", index_dbt.data, id_dbt.data);
 +    db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
 +
 +    if (db_error != 0)
 +    {
-+      g_warning ("db->put failed: %s", db_strerror (db_error));
++      g_warning (G_STRLOC ":db->put failed: %s", db_strerror (db_error));
 +    }
 +  } else if (data->type == INDEX_FIELD_TYPE_STRING_LIST) {
 +    values = (GList *)e_contact_get (contact, E_CONTACT_IM_JABBER);
 +
 +    for  (l = values; l != NULL; l = l->next)
 +    {
-+      dbt_fill_with_string (&index_dbt, (gchar *)l->data);
-+      g_debug ("adding to index with key %s and data %s", index_dbt.data, id_dbt.data);
++      tmp = (gchar *)l->data;
++      value = g_utf8_casefold (tmp, -1);
++      g_free (tmp);
++
++      dbt_fill_with_string (&index_dbt, value);
++      g_debug (G_STRLOC ": adding to index with key %s and data %s", index_dbt.data, id_dbt.data);
 +      db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
 +
 +      if (db_error != 0)
 +      {
-+        g_warning ("db->put failed: %s", db_strerror (db_error));
++        g_warning (G_STRLOC ": db->put failed: %s", db_strerror (db_error));
 +      }
 +    }
 +  } else {
-+    g_warning ("Unexpected field type.");
++    g_warning (G_STRLOC ": Unexpected field type.");
 +  }
 +
 +  db_error = db->sync (db, 0);
@@ -772,7 +805,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +
 +  if (db_error != 0)
 +  {
-+    g_warning ("db->cursor failed: %s", db_strerror (db_error)); 
++    g_warning (G_STRLOC ": db->cursor failed: %s", db_strerror (db_error)); 
 +    return;
 +  }
 +
@@ -783,16 +816,16 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +
 +  while (db_error == 0)
 +  {
-+    g_debug ("Considering %s against %s", id_dbt.data, uid);
++    g_debug (G_STRLOC ": Considering %s against %s", id_dbt.data, uid);
 +    /* if the id is the one we're lookin for then delete! */
 +    if (g_str_equal ((gchar *)id_dbt.data, uid))
 +    {
-+      g_debug ("removing from index with id: %s", (gchar *)id_dbt.data);
++      g_debug (G_STRLOC ": removing from index with id: %s", (gchar *)id_dbt.data);
 +      db_error = dbc->c_del (dbc, 0);
 +
 +      if (db_error != 0)
 +      {
-+        g_warning ("dbc->del failed: %s", db_strerror (db_error));
++        g_warning (G_STRLOC ": dbc->del failed: %s", db_strerror (db_error));
 +        db_error = dbc->c_close (dbc);
 +        return;
 +      }
@@ -803,7 +836,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +
 +  if (db_error != DB_NOTFOUND)
 +  {
-+    g_warning ("dbc->c_get failed: %s", db_strerror (db_error));
++    g_warning (G_STRLOC ": dbc->c_get failed: %s", db_strerror (db_error));
 +    db_error = dbc->c_close (dbc);
 +    return;
 +  }
@@ -812,7 +845,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +
 +  if (db_error != 0)
 +  {
-+    g_warning ("dbc->c_close failed: %s", db_strerror (db_error));
++    g_warning (G_STRLOC ": dbc->c_close failed: %s", db_strerror (db_error));
 +    return;
 +  }
 +
@@ -820,12 +853,12 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +
 +  if (db_error != 0)
 +  {
-+    g_warning ("db->sync failed: %s", db_strerror (db_error));
++    g_warning (G_STRLOC ": db->sync failed: %s", db_strerror (db_error));
 +  }
 +}
 +
 +static ESExpResult *
-+index_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
++is_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
 +{
 +  EBookBackendFileIndex *index = (EBookBackendFileIndex *)userdata;
 +  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
@@ -845,48 +878,152 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +      argv[0]->type == ESEXP_RES_STRING &&
 +      argv[1]->type == ESEXP_RES_STRING)
 +  {
-+    query_term = argv[0]->value.string;
-+
 +    /* we need the index database too */
++    query_term = argv[0]->value.string;
 +    db = g_hash_table_lookup (priv->sdbs, query_term);
 +
-+    query_key = argv[1]->value.string;
++    /* populate a dbt for looking up in the index */
++    query_key = g_utf8_casefold (argv[1]->value.string, -1);
 +    dbt_fill_with_string (&index_dbt, query_key);
++
++    /* we want bdb to use g_malloc this memory for us */
 +    memset (&id_dbt, 0, sizeof (id_dbt));
 +    id_dbt.flags = DB_DBT_MALLOC;
 +
++    /* cursor */
 +    db_error = db->cursor (db, NULL, &dbc, 0);
 +
 +    if (db_error != 0)
 +    {
-+      g_warning ("db->cursor failed: %s", db_strerror (db_error)); 
++      g_warning (G_STRLOC ": db->cursor failed: %s", db_strerror (db_error)); 
++      goto out;
 +    } else {
 +      db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_SET);
 +
 +      while (db_error == 0)
 +      {
-+        g_debug ("index query found: %s", id_dbt.data);
++        g_debug (G_STRLOC ": index query found: %s", id_dbt.data);
 +        g_ptr_array_add (ids, id_dbt.data);
 +
++        /* we add it to the list of strings to be freed */
++        priv->ids_to_free = g_list_append (priv->ids_to_free, id_dbt.data);
++
++        /* clear the index dbt since this time bdb will push memory into it */
 +        memset (&index_dbt, 0, sizeof (index_dbt));
 +        db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_NEXT_DUP);
 +      }
 +
 +      if (db_error != DB_NOTFOUND)
 +      {
-+        g_warning ("dbc->c_get failed: %s", db_strerror (db_error));
++        g_warning (G_STRLOC ": dbc->c_get failed: %s", db_strerror (db_error));
++        goto out;
 +      }
 +
 +      db_error = dbc->c_close (dbc);
 +
 +      if (db_error != 0)
 +      {
-+        g_warning ("dbc->c_close failed: %s", db_strerror (db_error));
++        g_warning (G_STRLOC ": dbc->c_close failed: %s", db_strerror (db_error));
++        goto out;
 +      }
 +    }
 +  } else {
-+    g_warning ("Unexpected query structure");
++    g_warning (G_STRLOC ": Unexpected query structure");
 +  }
++
++out:
++
++  g_free (query_key);
++  result = e_sexp_result_new (sexp, ESEXP_RES_ARRAY_PTR);
++  result->value.ptrarray = ids;
++
++  return result;
++}
++
++static ESExpResult *
++beginswith_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
++{
++  EBookBackendFileIndex *index = (EBookBackendFileIndex *)userdata;
++  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
++  
++  ESExpResult *result = NULL;
++  DBT index_dbt, id_dbt;
++  DB *db = NULL;
++  gint db_error = 0;
++  gchar *query_term = NULL, *query_key = NULL;
++  GPtrArray *ids = NULL;
++  DBC *dbc = NULL;
++
++  ids = g_ptr_array_new ();
++
++  /* we must have two arguments and they must both be strings */
++  if (argc == 2 &&
++      argv[0]->type == ESEXP_RES_STRING &&
++      argv[1]->type == ESEXP_RES_STRING)
++  {
++    /* we need the index database too */
++    query_term = argv[0]->value.string;
++    db = g_hash_table_lookup (priv->sdbs, query_term);
++
++    /* populate a dbt for looking up in the index */
++    query_key = g_utf8_casefold (argv[1]->value.string, -1);
++    dbt_fill_with_string (&index_dbt, query_key);
++
++    /* we want bdb to use g_malloc this memory for us */
++    memset (&id_dbt, 0, sizeof (id_dbt));
++    id_dbt.flags = DB_DBT_MALLOC;
++
++    /* we want bdb to actually manage chunk of memory for returning the
++     * actual key to us
++     */
++    index_dbt.flags = 0;
++
++    /* cursor */
++    db_error = db->cursor (db, NULL, &dbc, 0);
++
++    if (db_error != 0)
++    {
++      g_warning (G_STRLOC ": db->cursor failed: %s", db_strerror (db_error)); 
++      goto out;
++    } else {
++      db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_SET_RANGE);
++
++      while (db_error == 0)
++      {
++        if (g_str_has_prefix (index_dbt.data, query_key))
++        {
++          g_debug (G_STRLOC ": index query found: %s for %s for %s", id_dbt.data, query_key, index_dbt.data);
++          g_ptr_array_add (ids, id_dbt.data);
++
++          /* we add it to the list of strings to be freed */
++          priv->ids_to_free = g_list_append (priv->ids_to_free, id_dbt.data);
++          memset (&index_dbt, 0, sizeof (index_dbt));
++          db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_NEXT);
++        } else {
++          break;
++        }
++      }
++
++      if (db_error != 0 && db_error != DB_NOTFOUND)
++      {
++        g_warning (G_STRLOC ": dbc->c_get failed: %s", db_strerror (db_error));
++        goto out;
++      }
++
++      db_error = dbc->c_close (dbc);
++
++      if (db_error != 0)
++      {
++        g_warning (G_STRLOC ": dbc->c_close failed: %s", db_strerror (db_error));
++        goto out;
++      }
++    }
++  } else {
++    g_warning (G_STRLOC ": Unexpected query structure");
++  }
++
++out:
++  g_free (query_key);
 +
 +  result = e_sexp_result_new (sexp, ESEXP_RES_ARRAY_PTR);
 +  result->value.ptrarray = ids;
@@ -904,7 +1041,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +
 +  if (db_error != 0)
 +  {
-+    g_warning ("close failed: %s", db_strerror (db_error));
++    g_warning (G_STRLOC ": close failed: %s", db_strerror (db_error));
 +  }
 +
 +  return TRUE;
@@ -912,8 +1049,8 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 Index: git-foo/addressbook/backends/file/e-book-backend-file-index.h
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ git-foo/addressbook/backends/file/e-book-backend-file-index.h	2008-05-06 12:34:14.000000000 +0100
-@@ -0,0 +1,67 @@
++++ git-foo/addressbook/backends/file/e-book-backend-file-index.h	2008-05-07 12:16:54.000000000 +0100
+@@ -0,0 +1,68 @@
 +/*
 + * Copyright (C) 2008 OpenedHand Ltd
 + *
@@ -977,6 +1114,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.h
 +void e_book_backend_file_index_remove_contact (EBookBackendFileIndex *index, const gchar *uid);
 +void e_book_backend_file_index_modify_contact (EBookBackendFileIndex *index, EContact *contact);
 +GPtrArray *e_book_backend_file_index_query (EBookBackendFileIndex *index, const gchar *query);
++void e_book_backend_file_index_finish_query (EBookBackendFileIndex *index);
 +G_END_DECLS
 +
 +#endif /* _E_BOOK_BACKEND_FILE_INDEX */
