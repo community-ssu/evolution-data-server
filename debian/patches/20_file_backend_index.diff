@@ -1,7 +1,7 @@
-Index: git-foo/addressbook/backends/file/Makefile.am
+Index: git/addressbook/backends/file/Makefile.am
 ===================================================================
---- git-foo.orig/addressbook/backends/file/Makefile.am	2008-05-08 12:37:29.000000000 +0100
-+++ git-foo/addressbook/backends/file/Makefile.am	2008-05-08 12:37:30.000000000 +0100
+--- git.orig/addressbook/backends/file/Makefile.am	2008-05-09 19:43:02.000000000 +0100
++++ git/addressbook/backends/file/Makefile.am	2008-05-09 19:43:03.000000000 +0100
 @@ -12,6 +12,8 @@
  libebookbackendfile_la_SOURCES =			\
  	e-book-backend-file.c				\
@@ -11,10 +11,10 @@ Index: git-foo/addressbook/backends/file/Makefile.am
  	e-book-backend-file-factory.c			\
  	$(top_srcdir)/libedataserver/e-db3-utils.c	\
  	$(top_srcdir)/libedataserver/e-dbhash.c
-Index: git-foo/addressbook/backends/file/e-book-backend-file.c
+Index: git/addressbook/backends/file/e-book-backend-file.c
 ===================================================================
---- git-foo.orig/addressbook/backends/file/e-book-backend-file.c	2008-05-08 12:37:29.000000000 +0100
-+++ git-foo/addressbook/backends/file/e-book-backend-file.c	2008-05-08 16:26:32.000000000 +0100
+--- git.orig/addressbook/backends/file/e-book-backend-file.c	2008-05-09 19:43:02.000000000 +0100
++++ git/addressbook/backends/file/e-book-backend-file.c	2008-05-09 19:43:03.000000000 +0100
 @@ -54,6 +54,8 @@
  
  #include "e-book-backend-file.h"
@@ -56,17 +56,18 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
  		return GNOME_Evolution_Addressbook_Success;
  	} else {
  		g_warning (G_STRLOC ": db->put failed with %s", db_strerror (db_error));
-@@ -642,11 +648,44 @@
+@@ -642,11 +648,45 @@
  	d(printf ("signalling parent thread\n"));
  	e_flag_set (closure->running);
  
 -	if (e_book_backend_summary_is_summary_query (bf->priv->summary, query)) {
-+
 +	g_debug (G_STRLOC ": Query is %s", query);
 +	if (e_book_backend_file_index_is_usable (bf->priv->index, query))
 +	{
 +		GPtrArray *ids = NULL;
 +		int i;
++
++		g_debug (G_STRLOC ": Using index for %s", query);
 +
 +		ids = e_book_backend_file_index_query (bf->priv->index, query);
 +
@@ -102,7 +103,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
  		for (i = 0; i < ids->len; i ++) {
  			char *id = g_ptr_array_index (ids, i);
  
-@@ -668,8 +707,7 @@
+@@ -668,8 +708,7 @@
  		}
  
  		g_ptr_array_free (ids, TRUE);
@@ -112,7 +113,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
  		/* iterate over the db and do the query there */
  		DBC    *dbc;
  
-@@ -709,13 +747,14 @@
+@@ -709,13 +748,14 @@
  				   bf->priv->filename);
  			abort ();
  		}
@@ -129,7 +130,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
  	/* unref the */
  	g_object_unref (book_view);
  
-@@ -1143,6 +1182,8 @@
+@@ -1143,6 +1183,8 @@
  	time_t db_mtime;
  	struct stat sb;
  	gchar *uri;
@@ -138,7 +139,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
  
  	uri = e_source_get_uri (source);
  
-@@ -1317,12 +1358,22 @@
+@@ -1317,12 +1359,22 @@
  	g_free (bf->priv->summary_filename);
  	bf->priv->summary_filename = g_strconcat (bf->priv->filename, ".summary", NULL);
  	bf->priv->summary = e_book_backend_summary_new (bf->priv->summary_filename, SUMMARY_FLUSH_TIMEOUT);
@@ -162,7 +163,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
  	e_book_backend_set_is_loaded (backend, TRUE);
  	e_book_backend_set_is_writable (backend, writable);
  	return GNOME_Evolution_Addressbook_Success;
-@@ -1474,6 +1525,14 @@
+@@ -1474,6 +1526,14 @@
  	}
  	
  	G_LOCK (global_env);
@@ -177,11 +178,11 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
  	global_env.ref_count--;
  	if (global_env.ref_count == 0) {
  		global_env.env->close (global_env.env, 0);
-Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
+Index: git/addressbook/backends/file/e-book-backend-file-index.c
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ git-foo/addressbook/backends/file/e-book-backend-file-index.c	2008-05-08 16:14:53.000000000 +0100
-@@ -0,0 +1,856 @@
++++ git/addressbook/backends/file/e-book-backend-file-index.c	2008-05-09 20:25:26.000000000 +0100
+@@ -0,0 +1,860 @@
 +/*
 + * Copyright (C) 2008 OpenedHand Ltd
 + *
@@ -343,6 +344,9 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +  gint sexp_error = 0;
 +  gboolean res = TRUE; /* whether we can actually use the index */
 +
++  if (g_getenv ("_EDS_FILE_BACKEND_NO_INDEX"))
++    return FALSE;
++
 +  sexp = e_sexp_new ();
 +
 +  /* Now add the 'test' functions, we just use these to find out whether we
@@ -372,6 +376,8 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +  /* and then ignore the result */
 +  e_sexp_result_free (sexp, sexp_result);
 +  e_sexp_unref (sexp);
++
++  g_debug (G_STRLOC ": able to use index %s", res ? "yes": "no");
 +
 +  return res;
 +}
@@ -588,6 +594,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +
 +  *(gboolean *)userdata = FALSE;
 +
++  g_debug (G_STRLOC ": failing the test");
 +  return result;
 +}
 +
@@ -618,17 +625,15 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +    {
 +      if (query_term && g_str_equal (query_term, indexes[i].query_term))
 +      {
-+        /* if we can we do nothing since the value defaults to true */
-+      } else {
-+        *(gboolean *)userdata = FALSE;
++        return result;
 +      }
 +    }
 +  } else {
 +    g_warning (G_STRLOC ": Unexpected query structure");
-+    *(gboolean *)userdata = FALSE;
 +  }
-+
-+  return result;
++  
++  *(gboolean *)userdata = FALSE;
++  g_debug (G_STRLOC ": failing the test");
 +}
 +
 +/* index operations themselves */
@@ -1038,10 +1043,10 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +
 +  return TRUE;
 +}
-Index: git-foo/addressbook/backends/file/e-book-backend-file-index.h
+Index: git/addressbook/backends/file/e-book-backend-file-index.h
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ git-foo/addressbook/backends/file/e-book-backend-file-index.h	2008-05-08 12:37:30.000000000 +0100
++++ git/addressbook/backends/file/e-book-backend-file-index.h	2008-05-09 19:43:03.000000000 +0100
 @@ -0,0 +1,68 @@
 +/*
 + * Copyright (C) 2008 OpenedHand Ltd
