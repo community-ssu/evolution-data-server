@@ -1,7 +1,7 @@
 Index: git-foo/addressbook/backends/file/Makefile.am
 ===================================================================
---- git-foo.orig/addressbook/backends/file/Makefile.am	2008-05-02 15:47:53.000000000 +0100
-+++ git-foo/addressbook/backends/file/Makefile.am	2008-05-02 15:47:53.000000000 +0100
+--- git-foo.orig/addressbook/backends/file/Makefile.am	2008-05-06 12:34:14.000000000 +0100
++++ git-foo/addressbook/backends/file/Makefile.am	2008-05-06 12:34:14.000000000 +0100
 @@ -12,6 +12,8 @@
  libebookbackendfile_la_SOURCES =			\
  	e-book-backend-file.c				\
@@ -13,8 +13,8 @@ Index: git-foo/addressbook/backends/file/Makefile.am
  	$(top_srcdir)/libedataserver/e-dbhash.c
 Index: git-foo/addressbook/backends/file/e-book-backend-file.c
 ===================================================================
---- git-foo.orig/addressbook/backends/file/e-book-backend-file.c	2008-05-02 15:47:53.000000000 +0100
-+++ git-foo/addressbook/backends/file/e-book-backend-file.c	2008-05-02 16:14:18.000000000 +0100
+--- git-foo.orig/addressbook/backends/file/e-book-backend-file.c	2008-05-06 12:34:14.000000000 +0100
++++ git-foo/addressbook/backends/file/e-book-backend-file.c	2008-05-06 15:48:55.000000000 +0100
 @@ -54,6 +54,8 @@
  
  #include "e-book-backend-file.h"
@@ -32,20 +32,88 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
  };
  
  G_LOCK_DEFINE_STATIC (global_env);
-@@ -642,6 +645,12 @@
+@@ -246,6 +249,7 @@
+ 	status = do_create (bf, vcard, contact);
+ 	if (status == GNOME_Evolution_Addressbook_Success) {
+ 		e_book_backend_summary_add_contact (bf->priv->summary, *contact);
++		e_book_backend_file_index_add_contact (bf->priv->index, *contact);
+ 	}
+ 	return status;
+ }
+@@ -293,6 +297,7 @@
+ 	for (l = removed_cards; l; l = l->next) {
+ 		char *id = l->data;
+ 		e_book_backend_summary_remove_contact (bf->priv->summary, id);
++		e_book_backend_file_index_remove_contact (bf->priv->index, id);
+ 	}
+ 
+ 	return rv;
+@@ -345,6 +350,7 @@
+ 	g_free (vcard_with_rev);
+ 	
+ 	if (db_error == 0) {
++		e_book_backend_file_index_modify_contact (bf->priv->index, *contact);
+ 		return GNOME_Evolution_Addressbook_Success;
+ 	} else {
+ 		g_warning (G_STRLOC ": db->put failed with %s", db_strerror (db_error));
+@@ -642,7 +648,36 @@
  	d(printf ("signalling parent thread\n"));
  	e_flag_set (closure->running);
  
+-	if (e_book_backend_summary_is_summary_query (bf->priv->summary, query)) {
 +
 +	if (e_book_backend_file_index_is_usable (bf->priv->index, query))
 +	{
-+		g_debug ("Able to use EBookBackendFileIndex for %s", query);
-+	}
++		GPtrArray *ids = NULL;
++		int i;
 +
- 	if (e_book_backend_summary_is_summary_query (bf->priv->summary, query)) {
++		ids = e_book_backend_file_index_query (bf->priv->index, query);
++
++		g_debug ("Able to use EBookBackendFileIndex for %s", query);
++
++		for (i = 0; i < ids->len; i ++) {
++			char *id = g_ptr_array_index (ids, i);
++
++			if (!e_flag_is_set (closure->running))
++				break;
++
++			string_to_dbt (id, &id_dbt);
++			memset (&vcard_dbt, 0, sizeof (vcard_dbt));
++			vcard_dbt.flags = DB_DBT_MALLOC;
++
++			db_error = db->get (db, NULL, &id_dbt, &vcard_dbt, 0);
++
++			if (db_error == 0) {
++				e_data_book_view_notify_update_prefiltered_vcard (book_view, id, vcard_dbt.data);
++			}
++			else {
++				g_warning (G_STRLOC ": db->get failed with %s", db_strerror (db_error));
++			}
++		}
++	} else if (e_book_backend_summary_is_summary_query (bf->priv->summary, query)) {
  		/* do a summary query */
  		GPtrArray *ids = e_book_backend_summary_search (bf->priv->summary, e_data_book_view_get_card_query (book_view));
-@@ -1143,6 +1152,7 @@
+ 		int i;
+@@ -668,8 +703,7 @@
+ 		}
+ 
+ 		g_ptr_array_free (ids, TRUE);
+-	}
+-	else {
++	} else {
+ 		/* iterate over the db and do the query there */
+ 		DBC    *dbc;
+ 
+@@ -709,8 +743,6 @@
+ 				   bf->priv->filename);
+ 			abort ();
+ 		}
+-
+-
+ 	}
+ 
+ 	if (e_flag_is_set (closure->running))
+@@ -1143,6 +1175,7 @@
  	time_t db_mtime;
  	struct stat sb;
  	gchar *uri;
@@ -53,7 +121,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
  
  	uri = e_source_get_uri (source);
  
-@@ -1317,12 +1327,22 @@
+@@ -1317,12 +1350,22 @@
  	g_free (bf->priv->summary_filename);
  	bf->priv->summary_filename = g_strconcat (bf->priv->filename, ".summary", NULL);
  	bf->priv->summary = e_book_backend_summary_new (bf->priv->summary_filename, SUMMARY_FLUSH_TIMEOUT);
@@ -77,7 +145,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
  	e_book_backend_set_is_loaded (backend, TRUE);
  	e_book_backend_set_is_writable (backend, writable);
  	return GNOME_Evolution_Addressbook_Success;
-@@ -1474,12 +1494,19 @@
+@@ -1474,12 +1517,19 @@
  	}
  	
  	G_LOCK (global_env);
@@ -101,8 +169,27 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file.c
 Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ git-foo/addressbook/backends/file/e-book-backend-file-index.c	2008-05-02 18:27:16.000000000 +0100
-@@ -0,0 +1,702 @@
++++ git-foo/addressbook/backends/file/e-book-backend-file-index.c	2008-05-06 15:58:11.000000000 +0100
+@@ -0,0 +1,738 @@
++/*
++ * Copyright (C) 2008 OpenedHand Ltd
++ *
++ * This program is free software; you can redistribute it and/or modify it under
++ * the terms of version 2 of the GNU Lesser General Public License as published
++ * by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful, but WITHOUT
++ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
++ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
++ * details.
++ *
++ * You should have received a copy of the GNU Lesser General Public License
++ * along with this program; if not, write to the Free Software Foundation, Inc.,
++ * 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
++ *
++ * Author: Rob Bradford <rob@openedhand.com>
++ */
++
 +#include "e-book-backend-file-index.h"
 +#include "libedataserver/e-sexp.h"
 +#include "libebook/e-contact.h"
@@ -587,7 +674,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +    return FALSE;
 +  }
 +
-+  db_error = dbc->c_close(dbc);
++  db_error = dbc->c_close (dbc);
 +
 +  if (db_error != 0)
 +  {
@@ -681,7 +768,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +  db = g_hash_table_lookup (priv->sdbs, data->query_term);
 +
 +  /* create the cursor for the interation */
-+  db_error = db->cursor (priv->db, NULL, &dbc, 0);
++  db_error = db->cursor (db, NULL, &dbc, 0);
 +
 +  if (db_error != 0)
 +  {
@@ -696,6 +783,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +
 +  while (db_error == 0)
 +  {
++    g_debug ("Considering %s against %s", id_dbt.data, uid);
 +    /* if the id is the one we're lookin for then delete! */
 +    if (g_str_equal ((gchar *)id_dbt.data, uid))
 +    {
@@ -739,6 +827,7 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +static ESExpResult *
 +index_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
 +{
++  EBookBackendFileIndex *index = (EBookBackendFileIndex *)userdata;
 +  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
 +  
 +  ESExpResult *result = NULL;
@@ -747,7 +836,8 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +  gint db_error = 0;
 +  gchar *query_term = NULL, *query_key = NULL;
 +  GPtrArray *ids = NULL;
-+  
++  DBC *dbc = NULL;
++
 +  ids = g_ptr_array_new ();
 +
 +  /* we must have two arguments and they must both be strings */
@@ -765,20 +855,34 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 +    memset (&id_dbt, 0, sizeof (id_dbt));
 +    id_dbt.flags = DB_DBT_MALLOC;
 +
-+    g_debug ("Found an entry in the index for %s %s",
-+        index_dbt.data, id_dbt.data);
-+    db_error = db->get (db, NULL, &index_dbt, &id_dbt, DB_SET);
++    db_error = db->cursor (db, NULL, &dbc, 0);
 +
-+    while (db_error == 0)
++    if (db_error != 0)
 +    {
-+      g_debug ("index query found: %s", id_dbt.data);
-+      g_ptr_array_add (ids, id_dbt.data);
-+      db_error = db->get (db, NULL, &index_dbt, &id_dbt, DB_NEXT_DUP);
-+    }
++      g_warning ("db->cursor failed: %s", db_strerror (db_error)); 
++    } else {
++      db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_SET);
 +
-+    if (db_error != DB_NOTFOUND)
-+    {
-+      g_warning ("dbc->c_get failed: %s", db_strerror (db_error));
++      while (db_error == 0)
++      {
++        g_debug ("index query found: %s", id_dbt.data);
++        g_ptr_array_add (ids, id_dbt.data);
++
++        memset (&index_dbt, 0, sizeof (index_dbt));
++        db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_NEXT_DUP);
++      }
++
++      if (db_error != DB_NOTFOUND)
++      {
++        g_warning ("dbc->c_get failed: %s", db_strerror (db_error));
++      }
++
++      db_error = dbc->c_close (dbc);
++
++      if (db_error != 0)
++      {
++        g_warning ("dbc->c_close failed: %s", db_strerror (db_error));
++      }
 +    }
 +  } else {
 +    g_warning ("Unexpected query structure");
@@ -808,8 +912,27 @@ Index: git-foo/addressbook/backends/file/e-book-backend-file-index.c
 Index: git-foo/addressbook/backends/file/e-book-backend-file-index.h
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ git-foo/addressbook/backends/file/e-book-backend-file-index.h	2008-05-02 17:26:36.000000000 +0100
-@@ -0,0 +1,48 @@
++++ git-foo/addressbook/backends/file/e-book-backend-file-index.h	2008-05-06 12:34:14.000000000 +0100
+@@ -0,0 +1,67 @@
++/*
++ * Copyright (C) 2008 OpenedHand Ltd
++ *
++ * This program is free software; you can redistribute it and/or modify it under
++ * the terms of version 2 of the GNU Lesser General Public License as published
++ * by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful, but WITHOUT
++ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
++ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
++ * details.
++ *
++ * You should have received a copy of the GNU Lesser General Public License
++ * along with this program; if not, write to the Free Software Foundation, Inc.,
++ * 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
++ *
++ * Author: Rob Bradford <rob@openedhand.com>
++ */
++
 +#ifndef _E_BOOK_BACKEND_FILE_INDEX
 +#define _E_BOOK_BACKEND_FILE_INDEX
 +
