@@ -1,7 +1,7 @@
 Index: git/addressbook/backends/file/Makefile.am
 ===================================================================
---- git.orig/addressbook/backends/file/Makefile.am	2008-05-09 19:43:02.000000000 +0100
-+++ git/addressbook/backends/file/Makefile.am	2008-05-09 19:43:03.000000000 +0100
+--- git.orig/addressbook/backends/file/Makefile.am	2008-05-12 11:33:41.000000000 +0100
++++ git/addressbook/backends/file/Makefile.am	2008-05-12 11:33:42.000000000 +0100
 @@ -12,6 +12,8 @@
  libebookbackendfile_la_SOURCES =			\
  	e-book-backend-file.c				\
@@ -13,8 +13,8 @@ Index: git/addressbook/backends/file/Makefile.am
  	$(top_srcdir)/libedataserver/e-dbhash.c
 Index: git/addressbook/backends/file/e-book-backend-file.c
 ===================================================================
---- git.orig/addressbook/backends/file/e-book-backend-file.c	2008-05-09 19:43:02.000000000 +0100
-+++ git/addressbook/backends/file/e-book-backend-file.c	2008-05-09 19:43:03.000000000 +0100
+--- git.orig/addressbook/backends/file/e-book-backend-file.c	2008-05-12 11:33:41.000000000 +0100
++++ git/addressbook/backends/file/e-book-backend-file.c	2008-05-12 12:11:24.000000000 +0100
 @@ -54,6 +54,8 @@
  
  #include "e-book-backend-file.h"
@@ -181,10 +181,10 @@ Index: git/addressbook/backends/file/e-book-backend-file.c
 Index: git/addressbook/backends/file/e-book-backend-file-index.c
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ git/addressbook/backends/file/e-book-backend-file-index.c	2008-05-09 20:25:26.000000000 +0100
-@@ -0,0 +1,860 @@
++++ git/addressbook/backends/file/e-book-backend-file-index.c	2008-05-12 12:12:22.000000000 +0100
+@@ -0,0 +1,861 @@
 +/*
-+ * Copyright (C) 2008 OpenedHand Ltd
++ * Copyright (C) 2008 Nokia Corporation
 + *
 + * This program is free software; you can redistribute it and/or modify it under
 + * the terms of version 2 of the GNU Lesser General Public License as published
@@ -259,6 +259,7 @@ Index: git/addressbook/backends/file/e-book-backend-file-index.c
 +  {"full-name", "full_name", EVC_FN},
 +  {"im-jabber", "im_jabber", EVC_X_JABBER},
 +  {"tel", "tel", EVC_TEL},
++  {"email", "email", EVC_EMAIL},
 +};
 +
 +typedef struct _EBookBackendFileIndexPrivate EBookBackendFileIndexPrivate;
@@ -903,7 +904,7 @@ Index: git/addressbook/backends/file/e-book-backend-file-index.c
 +        g_ptr_array_add (ids, id_dbt.data);
 +
 +        /* we add it to the list of strings to be freed */
-+        priv->ids_to_free = g_list_append (priv->ids_to_free, id_dbt.data);
++        priv->ids_to_free = g_list_prepend (priv->ids_to_free, id_dbt.data);
 +
 +        /* clear the index dbt since this time bdb will push memory into it */
 +        memset (&index_dbt, 0, sizeof (index_dbt));
@@ -1046,10 +1047,10 @@ Index: git/addressbook/backends/file/e-book-backend-file-index.c
 Index: git/addressbook/backends/file/e-book-backend-file-index.h
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ git/addressbook/backends/file/e-book-backend-file-index.h	2008-05-09 19:43:03.000000000 +0100
++++ git/addressbook/backends/file/e-book-backend-file-index.h	2008-05-12 11:33:42.000000000 +0100
 @@ -0,0 +1,68 @@
 +/*
-+ * Copyright (C) 2008 OpenedHand Ltd
++ * Copyright (C) 2008 Nokia Corporation
 + *
 + * This program is free software; you can redistribute it and/or modify it under
 + * the terms of version 2 of the GNU Lesser General Public License as published
