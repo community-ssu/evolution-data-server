@@ -14,5 +14,5 @@
 17_remove_from_dist.diff
 18_remove_from_configure.diff
 20_file_backend_index.diff
-21_perf_instrumentation.diff
+# 21_perf_instrumentation.diff
 22_remove_camel_deps.diff
