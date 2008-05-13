@@ -1,8 +1,8 @@
 Index: git/addressbook/backends/file/e-book-backend-file.c
 ===================================================================
---- git.orig/addressbook/backends/file/e-book-backend-file.c	2008-04-28 14:53:28.000000000 +0100
-+++ git/addressbook/backends/file/e-book-backend-file.c	2008-04-28 14:53:29.000000000 +0100
-@@ -64,6 +64,8 @@
+--- git.orig/addressbook/backends/file/e-book-backend-file.c	2008-05-09 20:58:28.000000000 +0100
++++ git/addressbook/backends/file/e-book-backend-file.c	2008-05-09 20:58:34.000000000 +0100
+@@ -66,6 +66,8 @@
  #define PAS_ID_PREFIX "pas-id-"
  #define SUMMARY_FLUSH_TIMEOUT 5000
  
@@ -11,7 +11,7 @@ Index: git/addressbook/backends/file/e-book-backend-file.c
  G_DEFINE_TYPE (EBookBackendFile, e_book_backend_file, E_TYPE_BOOK_BACKEND_SYNC);
  
  struct _EBookBackendFilePrivate {
-@@ -567,6 +569,7 @@
+@@ -573,6 +575,7 @@
  	EBookBackendFile *bf;
  	GThread *thread;
  	EFlag *running;
@@ -19,7 +19,7 @@ Index: git/addressbook/backends/file/e-book-backend-file.c
  } FileBackendSearchClosure;
  
  static void
-@@ -574,6 +577,7 @@
+@@ -580,6 +583,7 @@
  {
  	d(printf ("destroying search closure\n"));
  	e_flag_free (closure->running);
@@ -27,7 +27,7 @@ Index: git/addressbook/backends/file/e-book-backend-file.c
  	g_free (closure);
  }
  
-@@ -589,6 +593,7 @@
+@@ -595,6 +599,7 @@
  	g_object_set_data_full (G_OBJECT (book_view), "EBookBackendFile.BookView::closure",
  				closure, (GDestroyNotify)closure_destroy);
  
@@ -35,7 +35,7 @@ Index: git/addressbook/backends/file/e-book-backend-file.c
  	return closure;
  }
  
-@@ -627,10 +632,13 @@
+@@ -633,10 +638,13 @@
  	bf = closure->bf;
  
  	d(printf ("starting initial population of book view\n"));
@@ -49,7 +49,7 @@ Index: git/addressbook/backends/file/e-book-backend-file.c
  	if ( ! strcmp (query, "(contains \"x-evolution-any-field\" \"\")")) {
  		e_data_book_view_notify_status_message (book_view, _("Loading..."));
  		allcontacts = TRUE;
-@@ -639,6 +647,7 @@
+@@ -645,6 +653,7 @@
  		allcontacts = FALSE;
  	}
  
@@ -57,17 +57,7 @@ Index: git/addressbook/backends/file/e-book-backend-file.c
  	d(printf ("signalling parent thread\n"));
  	e_flag_set (closure->running);
  
-@@ -646,7 +655,8 @@
- 		/* do a summary query */
- 		GPtrArray *ids = e_book_backend_summary_search (bf->priv->summary, e_data_book_view_get_card_query (book_view));
- 		int i;
--
-+		
-+		p("doing a summary query");
- 		for (i = 0; i < ids->len; i ++) {
- 			char *id = g_ptr_array_index (ids, i);
- 
-@@ -673,6 +683,7 @@
+@@ -712,6 +721,7 @@
  		/* iterate over the db and do the query there */
  		DBC    *dbc;
  
@@ -75,16 +65,7 @@ Index: git/addressbook/backends/file/e-book-backend-file.c
  		memset (&id_dbt, 0, sizeof (id_dbt));
  		memset (&vcard_dbt, 0, sizeof (vcard_dbt));
  		vcard_dbt.flags = DB_DBT_MALLOC;
-@@ -709,8 +720,6 @@
- 				   bf->priv->filename);
- 			abort ();
- 		}
--
--
- 	}
- 
- 	if (e_flag_is_set (closure->running))
-@@ -721,6 +730,9 @@
+@@ -761,6 +771,9 @@
  
  	d(printf ("finished population of book view\n"));
  
@@ -96,8 +77,8 @@ Index: git/addressbook/backends/file/e-book-backend-file.c
  
 Index: git/addressbook/libebook-dbus/e-book-view.c
 ===================================================================
---- git.orig/addressbook/libebook-dbus/e-book-view.c	2008-04-28 14:47:20.000000000 +0100
-+++ git/addressbook/libebook-dbus/e-book-view.c	2008-04-28 15:07:31.000000000 +0100
+--- git.orig/addressbook/libebook-dbus/e-book-view.c	2008-05-09 19:32:21.000000000 +0100
++++ git/addressbook/libebook-dbus/e-book-view.c	2008-05-09 20:58:34.000000000 +0100
 @@ -31,10 +31,13 @@
  #define E_BOOK_VIEW_GET_PRIVATE(o) \
    (G_TYPE_INSTANCE_GET_PRIVATE ((o), E_TYPE_BOOK_VIEW, EBookViewPrivate))
