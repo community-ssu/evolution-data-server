@@ -1,3 +1,10 @@
+evolution-data-server (1.4.2.1-20080513) unstable; urgency=low
+
+  * Remove code from libedataserver that is only used by camel but which
+    can cause build problems.
+
+ -- Rob Bradford <rob@o-hand.com>  Tue, 13 May 2008 12:47:35 +0100
+
 evolution-data-server (1.4.2.1-20080425.1) unstable; urgency=low
 
   * Add a patch to remove unused things from configure.in
