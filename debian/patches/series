@@ -16,3 +16,4 @@
 20_file_backend_index.diff
 # 21_perf_instrumentation.diff
 22_remove_camel_deps.diff
+23_book_view_disposal.diff
