@@ -1,7 +1,10 @@
-evolution-data-server (1.4.2.1-20080513) unstable; urgency=low
+evolution-data-server (1.4.2.1-20080516) unstable; urgency=low
 
   * Remove code from libedataserver that is only used by camel but which
     can cause build problems.
+  * Add support for optimising queries using a set of secondary BDB indexes.
+  * Add freeze/thaw synchronisation api so that clients can maintain
+    interactivity whilst receiving large volumes of data from the server.
 
  -- Rob Bradford <rob@o-hand.com>  Tue, 13 May 2008 12:47:35 +0100
 
