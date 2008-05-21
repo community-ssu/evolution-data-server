@@ -1,0 +1,577 @@
+Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.c
+===================================================================
+--- git-test-build.orig/addressbook/backends/file/e-book-backend-file-index.c	2008-05-20 16:35:39.000000000 +0100
++++ git-test-build/addressbook/backends/file/e-book-backend-file-index.c	2008-05-20 16:35:45.000000000 +0100
+@@ -63,18 +63,36 @@
+   INDEX_FIELD_TYPE_STRING_LIST /* list of strings */
+ } EBookBackendFileIndexFieldType;
+ 
+-typedef struct 
++typedef struct _EBookBackendFileIndexData EBookBackendFileIndexData;
++
++typedef void (*EBookBackendFileIndexAddFunc) (EBookBackendFileIndex *index, EContact *contact,
++    EBookBackendFileIndexData *data, DB *db, const gchar *id);
++
++typedef int (*EBookBackendFileIndexOrderFunc) (DB *secondary, const DBT *akey, const DBT *bkey);
++
++struct _EBookBackendFileIndexData
+ {
+   gchar *query_term;                    /* what the query uses to get this */
+   gchar *index_name;                    /* name for index */
++  EBookBackendFileIndexAddFunc contact_add_func; /* function to use to derive index data */
+   gchar *vfield;                        /* the (vcard) field this an index of */
+-} EBookBackendFileIndexData;
++  EBookBackendFileIndexOrderFunc order_func; /* ordering func */
++};
++
++static void first_last_add_cb (EBookBackendFileIndex *index, EContact *contact, 
++    EBookBackendFileIndexData *data, DB *db, const gchar *uid);
++static void last_first_add_cb (EBookBackendFileIndex *index, EContact *contact, 
++    EBookBackendFileIndexData *data, DB *db, const gchar *uid);
++
++static int lexical_ordering_cb (DB *secondary, const DBT *akey, const DBT *bkey);
+ 
+ static const EBookBackendFileIndexData indexes[] = {
+-  {"full-name", "full_name", EVC_FN},
+-  {"im-jabber", "im_jabber", EVC_X_JABBER},
+-  {"tel", "tel", EVC_TEL},
+-  {"email", "email", EVC_EMAIL},
++  {"full-name", "full_name", NULL, EVC_FN, lexical_ordering_cb},
++  {"im-jabber", "im_jabber", NULL, EVC_X_JABBER, NULL},
++  {"tel", "tel", NULL, EVC_TEL, NULL},
++  {"email", "email", NULL, EVC_EMAIL, NULL},
++  {"first-last", "first_last", first_last_add_cb, NULL, lexical_ordering_cb},
++  {"last-first", "last_first", last_first_add_cb, NULL, lexical_ordering_cb},
+ };
+ 
+ typedef struct _EBookBackendFileIndexPrivate EBookBackendFileIndexPrivate;
+@@ -307,7 +325,17 @@
+ 
+     db_error = sdb->set_flags(sdb, DB_DUP | DB_DUPSORT);
+     if (db_error != 0) {
+-      g_warning (G_STRLOC ":set_flags failed: %s", db_strerror (db_error));
++      g_warning (G_STRLOC ": set_flags failed: %s", db_strerror (db_error));
++    }
++
++    if (indexes[i].order_func)
++    {
++      db_error = sdb->set_bt_compare (sdb, indexes[i].order_func);
++
++      if (db_error != 0)
++      {
++        g_warning (G_STRLOC "set_bt_compare failed: %s", db_strerror (db_error));
++      }
+     }
+ 
+     db_error = sdb->open (sdb, NULL, index_filename, 
+@@ -398,6 +426,75 @@
+   g_free (uid);
+ }
+ 
++GPtrArray *
++e_book_backend_file_index_get_ordered_ids (EBookBackendFileIndex *index, const gchar *query_term)
++{
++  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
++
++  DB *db = NULL;
++  DBC *dbc = NULL;
++  GPtrArray *ids = NULL;
++  int db_error = 0;
++  DB_BTREE_STAT *stat = NULL;
++
++  DBT index_dbt, id_dbt;
++
++  db = g_hash_table_lookup (priv->sdbs, query_term);
++
++  if (db == NULL)
++  {
++    g_warning (G_STRLOC ": invalid query term: %s", query_term);
++    return NULL;
++  }
++
++  db_error = db->stat (db, &stat, DB_FAST_STAT);
++
++  if (db_error != 0)
++  {
++    g_warning (G_STRLOC ": db->state failed: %s", db_strerrro (db_error));
++  }
++
++  if (stat->bt_ndata > 0)
++    ids = g_ptr_array_sized_new (stat->bt_ndata);
++  else
++    ids = g_ptr_array_sized_new (128);
++
++  db_error = db->cursor (db, NULL, &dbc, 0);
++
++  if (db_error != 0)
++  {
++    g_warning (G_STRLOC ": db->cursor failed: %s", db_strerror (db_error)); 
++    return NULL;
++  }
++
++  memset (&index_dbt, 0, sizeof (id_dbt));
++  memset (&id_dbt, 0, sizeof (id_dbt));
++
++  id_dbt.flags = DB_DBT_MALLOC;
++
++  db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_FIRST);
++
++  while (db_error == 0)
++  {
++    g_ptr_array_add (ids, id_dbt.data);
++    db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_NEXT);
++  }
++
++  if (db_error != DB_NOTFOUND)
++  {
++    g_warning (G_STRLOC ":dbc->c_get failed: %s", db_strerror (db_error));
++  }
++
++  db_error = dbc->c_close (dbc);
++
++  if (db_error != 0)
++  {
++    g_warning (G_STRLOC ":dbc->c_close failed: %s", db_strerror (db_error));
++  }
++
++  return ids;
++}
++
+ /* functions used for testing whether we can use the index */
+ 
+ /* always return false since we can't handle that type of query */
+@@ -532,31 +629,96 @@
+   return TRUE;
+ }
+ 
+-/* 
+- * for a given index add this contact, for the single string field case we
+- * just add a single entry to the index database. for the multiple case we add
+- * all the values for the field
+- */
++enum 
++{
++  ORDER_FIRSTLAST = 0,
++  ORDER_LASTFIRST
++};
++
+ static void
+-index_add_contact (EBookBackendFileIndex *index, EContact *contact, 
+-    EBookBackendFileIndexData *data)
++generic_name_add_cb (EBookBackendFileIndex *index, EContact *contact,
++    EBookBackendFileIndexData *data, DB *db, const gchar *uid, gint ordering)
+ {
+-  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
+-  gchar *uid = NULL;
+-  DBT index_dbt, id_dbt;
+-  DB *db = NULL;
+-  GList *attrs; 
+-  GList *values;
+-  gint db_error = 0;
++  GList *attrs = NULL;
+   gchar *tmp = NULL;
++  DBT index_dbt, id_dbt;
++  int db_error = 0;
+ 
+-  /* we need the uid, this becomes the data for our index databases */
+-  uid = (gchar *)e_contact_get (contact, E_CONTACT_UID);
+   dbt_fill_with_string (&id_dbt, uid);
+ 
+-  /* we need the index database too */
+-  db = g_hash_table_lookup (priv->sdbs, data->query_term);
++  for (attrs = e_vcard_get_attributes (E_VCARD (contact)); 
++      attrs != NULL; 
++      attrs = attrs->next)
++  {
++    EVCardAttribute *attr = (EVCardAttribute *)attrs->data;
++
++    if (g_str_equal (e_vcard_attribute_get_name (attr), EVC_N))
++    {
++      GList *values = e_vcard_attribute_get_values (attr);
++
++      GList *last = g_list_nth (values, 0);
++      GList *first = g_list_nth (values, 1);
++
++      gchar *combined = NULL;
++
++      if (ordering == ORDER_FIRSTLAST)
++      {
++        combined = g_strdup_printf ("%s %s", 
++            first->data ? first->data : "",
++            last->data ? last->data : "");
++      } else {
++        combined = g_strdup_printf ("%s %s", 
++          last->data ? last->data : "",
++          first->data ? first->data : "");
++      }
++
++      tmp = g_utf8_casefold (combined, -1);
++      g_free (combined);
++      dbt_fill_with_string (&index_dbt, tmp);
+ 
++      g_debug (G_STRLOC ": adding to index with key %s and data %s", 
++          index_dbt.data, id_dbt.data);
++
++      db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
++
++      if (db_error != 0)
++      {
++        g_warning (G_STRLOC ": db->put failed: %s", db_strerror (db_error));
++      }
++    }
++  }
++}
++
++static void 
++first_last_add_cb (EBookBackendFileIndex *index, EContact *contact, 
++    EBookBackendFileIndexData *data, DB *db, const gchar *uid)
++{
++  generic_name_add_cb (index, contact, data, db, uid, ORDER_FIRSTLAST);
++}
++
++static void
++last_first_add_cb (EBookBackendFileIndex *index, EContact *contact, 
++    EBookBackendFileIndexData *data, DB *db, const gchar *uid)
++{
++  generic_name_add_cb (index, contact, data, db, uid, ORDER_LASTFIRST);
++}
++
++/* 
++ * generic version of function to get the index key from a contact based on
++ * the VCard field
++ */
++static void
++generic_field_add (EBookBackendFileIndex *index, EContact *contact,
++    EBookBackendFileIndexData *data, DB *db, const gchar *uid)
++{
++  gchar *tmp = NULL;
++  DBT index_dbt, id_dbt;
++  int db_error = 0;
++  GList *attrs = NULL;
++  GList *values = NULL;
++
++  dbt_fill_with_string (&id_dbt, uid);
++  
+   for (attrs = e_vcard_get_attributes (E_VCARD (contact)); 
+       attrs != NULL; 
+       attrs = attrs->next)
+@@ -584,6 +746,38 @@
+       }
+     }
+   }
++}
++
++/* 
++ * for a given index add this contact, for the single string field case we
++ * just add a single entry to the index database. for the multiple case we add
++ * all the values for the field
++ */
++static void
++index_add_contact (EBookBackendFileIndex *index, EContact *contact, 
++    EBookBackendFileIndexData *data)
++{
++  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
++  gchar *uid = NULL;
++  DBT index_dbt, id_dbt;
++  DB *db = NULL;
++  GList *attrs; 
++  GList *values;
++  gint db_error = 0;
++  gchar *tmp = NULL;
++
++  /* we need the uid, this becomes the data for our index databases */
++  uid = (gchar *)e_contact_get (contact, E_CONTACT_UID);
++
++  /* we need the index database too */
++  db = g_hash_table_lookup (priv->sdbs, data->query_term);
++
++  if (data->contact_add_func)
++  {
++    data->contact_add_func (index, contact, data, db, uid);
++  } else {
++    generic_field_add (index, contact, data, db, uid);
++  }
+ 
+   db_error = db->sync (db, 0);
+ 
+@@ -859,3 +1053,12 @@
+ 
+   return TRUE;
+ }
++
++/* functions for the ordering */
++static int 
++lexical_ordering_cb (DB *secondary, const DBT *akey, const DBT *bkey)
++{
++  return g_utf8_collate (akey->data, bkey->data);
++}
++
++
+Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.h
+===================================================================
+--- git-test-build.orig/addressbook/backends/file/e-book-backend-file-index.h	2008-05-20 16:35:39.000000000 +0100
++++ git-test-build/addressbook/backends/file/e-book-backend-file-index.h	2008-05-20 16:35:45.000000000 +0100
+@@ -62,6 +62,7 @@
+ void e_book_backend_file_index_modify_contact (EBookBackendFileIndex *index, EContact *contact);
+ GPtrArray *e_book_backend_file_index_query (EBookBackendFileIndex *index, const gchar *query);
+ void e_book_backend_file_index_finish_query (EBookBackendFileIndex *index);
++GPtrArray *e_book_backend_file_index_get_ordered_ids (EBookBackendFileIndex *index, const gchar *query_term);
+ G_END_DECLS
+ 
+ #endif /* _E_BOOK_BACKEND_FILE_INDEX */
+Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
+===================================================================
+--- git-test-build.orig/addressbook/backends/file/e-book-backend-file.c	2008-05-20 16:35:40.000000000 +0100
++++ git-test-build/addressbook/backends/file/e-book-backend-file.c	2008-05-21 11:18:43.000000000 +0100
+@@ -76,6 +76,7 @@
+ 	DB_ENV   *env;
+ 	EBookBackendSummary *summary;
+ 	EBookBackendFileIndex *index;
++	char     *sort_order;
+ };
+ 
+ G_LOCK_DEFINE_STATIC (global_env);
+@@ -610,11 +611,14 @@
+ 	EDataBookView *book_view;
+ 	FileBackendSearchClosure *closure;
+ 	EBookBackendFile *bf;
++	EBookBackendFilePrivate *priv;
+ 	const char *query;
+ 	DB  *db;
+ 	DBT id_dbt, vcard_dbt;
+ 	int db_error;
+ 	gboolean allcontacts;
++	GPtrArray *ids = NULL;
++	gboolean using_index = FALSE;
+ 
+ 	g_return_val_if_fail (E_IS_DATA_BOOK_VIEW (data), NULL);
+ 
+@@ -631,6 +635,7 @@
+ 		return NULL;
+ 	}
+ 	bf = closure->bf;
++	priv = bf->priv;
+ 
+ 	d(printf ("starting initial population of book view\n"));
+ 
+@@ -651,42 +656,24 @@
+ 	g_debug (G_STRLOC ": Query is %s", query);
+ 	if (e_book_backend_file_index_is_usable (bf->priv->index, query))
+ 	{
+-		GPtrArray *ids = NULL;
+-		int i;
+-
+ 		g_debug (G_STRLOC ": Using index for %s", query);
+-
+ 		ids = e_book_backend_file_index_query (bf->priv->index, query);
+-
+-		for (i = 0; i < ids->len; i ++) {
+-			char *id = g_ptr_array_index (ids, i);
+-
+-			if (!e_flag_is_set (closure->running))
+-				break;
+-
+-			string_to_dbt (id, &id_dbt);
+-			memset (&vcard_dbt, 0, sizeof (vcard_dbt));
+-			vcard_dbt.flags = DB_DBT_MALLOC;
+-
+-			db_error = db->get (db, NULL, &id_dbt, &vcard_dbt, 0);
+-
+-			if (db_error == 0) {
+-				e_data_book_view_notify_update_prefiltered_vcard (book_view, id, vcard_dbt.data);
+-			}
+-			else {
+-				g_warning (G_STRLOC ": db->get failed with %s", db_strerror (db_error));
+-			}
++		using_index = TRUE;
++	} else if (e_book_backend_summary_is_summary_query (bf->priv->summary, query)) {
++		g_debug (G_STRLOC ": Using summmary for %s", query);
++		ids = e_book_backend_summary_search (bf->priv->summary, e_data_book_view_get_card_query (book_view));
++	} else if (allcontacts) {
++		if (priv->sort_order)
++		{
++			g_debug (G_STRLOC ": sending contacts in order sort by %s", priv->sort_order);
++			ids = e_book_backend_file_index_get_ordered_ids (bf->priv->index, priv->sort_order);
+ 		}
++	}
+ 
+-		e_book_backend_file_index_finish_query (bf->priv->index);
+-		g_ptr_array_free (ids, TRUE);
+-	} else if (e_book_backend_summary_is_summary_query (bf->priv->summary, query)) {
+-		/* do a summary query */
+-		GPtrArray *ids = e_book_backend_summary_search (bf->priv->summary, e_data_book_view_get_card_query (book_view));
++	if (ids)
++	{
+ 		int i;
+ 
+-		g_debug (G_STRLOC ": Using summmary for %s", query);
+-
+ 		for (i = 0; i < ids->len; i ++) {
+ 			char *id = g_ptr_array_index (ids, i);
+ 
+@@ -707,6 +694,9 @@
+ 			}
+ 		}
+ 
++		if (using_index)
++			e_book_backend_file_index_finish_query (bf->priv->index);
++
+ 		g_ptr_array_free (ids, TRUE);
+ 	} else {
+ 		/* iterate over the db and do the query there */
+@@ -794,6 +784,19 @@
+ 	e_flag_clear (closure->running);
+ }
+ 
++static void
++e_book_backend_file_set_book_view_sort_order (EBookBackend  *backend,
++					      EDataBookView *book_view,
++					      const gchar   *query_term)
++{
++	EBookBackendFile *bf = (EBookBackendFile *)backend;
++	EBookBackendFilePrivate *priv = bf->priv;
++
++	g_debug (G_STRLOC ": setting sort order in backend to %s", query_term);
++	g_free (priv->sort_order);
++	priv->sort_order = g_strdup (query_term);
++}
++
+ typedef struct {
+ 	DB *db;
+ 
+@@ -1627,6 +1630,7 @@
+ 	backend_class->cancel_operation        = e_book_backend_file_cancel_operation;
+ 	backend_class->set_mode                = e_book_backend_file_set_mode;
+ 	backend_class->sync                    = e_book_backend_file_sync;
++	backend_class->set_view_sort_order     = e_book_backend_file_set_book_view_sort_order;
+ 	sync_class->remove_sync                = e_book_backend_file_remove;
+ 	sync_class->create_contact_sync        = e_book_backend_file_create_contact;
+ 	sync_class->remove_contacts_sync       = e_book_backend_file_remove_contacts;
+Index: git-test-build/addressbook/libedata-book-dbus/e-data-book-view.c
+===================================================================
+--- git-test-build.orig/addressbook/libedata-book-dbus/e-data-book-view.c	2008-05-20 16:35:40.000000000 +0100
++++ git-test-build/addressbook/libedata-book-dbus/e-data-book-view.c	2008-05-20 16:35:45.000000000 +0100
+@@ -30,6 +30,7 @@
+ static gboolean impl_BookView_dispose (EDataBookView *view, GError **eror);
+ static gboolean impl_BookView_set_freezable (EDataBookView *view, gboolean freezable, GError **error);
+ static gboolean impl_BookView_thaw (EDataBookView *view, GError **error);
++static gboolean impl_BookView_set_sort_order (EDataBookView *view, gchar *query_term, GError **error);
+ 
+ #include "e-data-book-view-glue.h"
+ 
+@@ -404,7 +405,15 @@
+ 
+   return TRUE;
+ }
+- 
++
++static gboolean
++impl_BookView_set_sort_order (EDataBookView *view, gchar *query_term, GError **error)
++{
++  EDataBookViewPrivate *priv = view->priv;
++
++  e_book_backend_set_book_view_sort_order (priv->backend, view, query_term);
++  return TRUE;
++}
+ 
+ void
+ e_data_book_view_set_thresholds (EDataBookView *book_view,
+Index: git-test-build/addressbook/libedata-book-dbus/e-data-book-view.xml
+===================================================================
+--- git-test-build.orig/addressbook/libedata-book-dbus/e-data-book-view.xml	2008-05-20 16:35:40.000000000 +0100
++++ git-test-build/addressbook/libedata-book-dbus/e-data-book-view.xml	2008-05-20 16:35:45.000000000 +0100
+@@ -31,6 +31,12 @@
+       <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_BookView_thaw"/>
+     </method>
+ 
++    <method name="set_sort_order">
++      <annotation name="org.freedesktop.DBus.GLib.CSymbol"
++        value="impl_BookView_set_sort_order"/>
++      <arg name="query_term" type="s" direction="in"/>
++    </method>
++
+     <signal name="ContactsAdded">
+     	<arg name="vcards" type="as"/>
+     </signal>
+Index: git-test-build/addressbook/libebook-dbus/e-book-view.c
+===================================================================
+--- git-test-build.orig/addressbook/libebook-dbus/e-book-view.c	2008-05-20 16:35:40.000000000 +0100
++++ git-test-build/addressbook/libebook-dbus/e-book-view.c	2008-05-20 16:35:45.000000000 +0100
+@@ -333,3 +333,20 @@
+     }
+   }
+ }
++
++
++void
++e_book_view_set_sort_order (EBookView *book_view, const gchar *query_term)
++{
++  GError *error = NULL;
++
++  g_return_if_fail (E_IS_BOOK_VIEW (book_view));
++
++  if (book_view->priv->view_proxy) {
++    org_gnome_evolution_dataserver_addressbook_BookView_set_sort_order (book_view->priv->view_proxy, query_term, &error);
++    if (error) {
++      g_warning ("Unable to set query term on book view: %s\n", error->message);
++      g_error_free (error);
++    }
++  }
++}
+Index: git-test-build/addressbook/libebook-dbus/e-book-view.h
+===================================================================
+--- git-test-build.orig/addressbook/libebook-dbus/e-book-view.h	2008-05-20 16:35:40.000000000 +0100
++++ git-test-build/addressbook/libebook-dbus/e-book-view.h	2008-05-20 16:35:45.000000000 +0100
+@@ -72,6 +72,7 @@
+ void               e_book_view_stop                   (EBookView *book_view);
+ void               e_book_view_set_freezable          (EBookView *book_view, gboolean freezable);
+ void               e_book_view_thaw                   (EBookView *book_view);
++void               e_book_view_set_sort_order         (EBookView *book_view, const gchar *query_term);
+ 
+ struct _EBook     *e_book_view_get_book               (EBookView *book_view);
+ 
+Index: git-test-build/addressbook/libedata-book-dbus/e-book-backend.c
+===================================================================
+--- git-test-build.orig/addressbook/libedata-book-dbus/e-book-backend.c	2008-05-20 16:35:40.000000000 +0100
++++ git-test-build/addressbook/libedata-book-dbus/e-book-backend.c	2008-05-20 16:35:45.000000000 +0100
+@@ -1003,6 +1003,17 @@
+ 	g_mutex_unlock (priv->clients_mutex);
+ }
+ 
++void 
++e_book_backend_set_book_view_sort_order (EBookBackend  *backend,
++					 EDataBookView *book_view, 
++					 const gchar   *query_term)
++{
++	g_return_if_fail (E_IS_BOOK_BACKEND (backend));
++	
++	if (E_BOOK_BACKEND_GET_CLASS (backend)->set_view_sort_order)
++		(* E_BOOK_BACKEND_GET_CLASS (backend)->set_view_sort_order) (backend, book_view, query_term);
++}
++
+ static void
+ e_book_backend_init (EBookBackend *backend)
+ {
+Index: git-test-build/addressbook/libedata-book-dbus/e-book-backend.h
+===================================================================
+--- git-test-build.orig/addressbook/libedata-book-dbus/e-book-backend.h	2008-05-20 16:35:40.000000000 +0100
++++ git-test-build/addressbook/libedata-book-dbus/e-book-backend.h	2008-05-20 16:35:45.000000000 +0100
+@@ -76,7 +76,7 @@
+ 	void (*modify_contacts)  (EBookBackend *backend, EDataBook *book, guint32 opid, const char **vcards);
+ 
+ 	/* Padding for future expansion */
+-	void (*_pas_reserved2) (void);
++	void (*set_view_sort_order) (EBookBackend *backend, EDataBookView *book_view, const gchar *query_term);
+ 	void (*_pas_reserved3) (void);
+ 	void (*_pas_reserved4) (void);
+ };
+@@ -180,6 +180,9 @@
+ void        e_book_backend_notify_connection_status   (EBookBackend *backend, gboolean is_online);
+ void        e_book_backend_notify_auth_required       (EBookBackend *backend);    
+ void        e_book_backend_sync                       (EBookBackend *backend);
++void        e_book_backend_set_book_view_sort_order   (EBookBackend           *backend, 
++						       EDataBookView          *book_view, 
++						       const gchar 	      *query_term);
+ 
+ GType       e_book_backend_get_type                 (void);
+ 

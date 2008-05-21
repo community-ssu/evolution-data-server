@@ -18,3 +18,4 @@
 22_remove_camel_deps.diff
 23_book_view_disposal.diff
 24_freeze-thaw.diff
+25_index_for_sorting.diff
