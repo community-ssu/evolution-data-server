@@ -1,7 +1,7 @@
-Index: git/addressbook/backends/file/Makefile.am
+Index: git-test-build/addressbook/backends/file/Makefile.am
 ===================================================================
---- git.orig/addressbook/backends/file/Makefile.am	2008-05-12 11:33:41.000000000 +0100
-+++ git/addressbook/backends/file/Makefile.am	2008-05-12 11:33:42.000000000 +0100
+--- git-test-build.orig/addressbook/backends/file/Makefile.am	2008-05-21 16:24:51.000000000 +0100
++++ git-test-build/addressbook/backends/file/Makefile.am	2008-05-21 16:24:52.000000000 +0100
 @@ -12,6 +12,8 @@
  libebookbackendfile_la_SOURCES =			\
  	e-book-backend-file.c				\
@@ -11,10 +11,10 @@ Index: git/addressbook/backends/file/Makefile.am
  	e-book-backend-file-factory.c			\
  	$(top_srcdir)/libedataserver/e-db3-utils.c	\
  	$(top_srcdir)/libedataserver/e-dbhash.c
-Index: git/addressbook/backends/file/e-book-backend-file.c
+Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
 ===================================================================
---- git.orig/addressbook/backends/file/e-book-backend-file.c	2008-05-12 11:33:41.000000000 +0100
-+++ git/addressbook/backends/file/e-book-backend-file.c	2008-05-12 12:11:24.000000000 +0100
+--- git-test-build.orig/addressbook/backends/file/e-book-backend-file.c	2008-05-21 16:24:51.000000000 +0100
++++ git-test-build/addressbook/backends/file/e-book-backend-file.c	2008-05-21 16:40:22.000000000 +0100
 @@ -54,6 +54,8 @@
  
  #include "e-book-backend-file.h"
@@ -178,11 +178,11 @@ Index: git/addressbook/backends/file/e-book-backend-file.c
  	global_env.ref_count--;
  	if (global_env.ref_count == 0) {
  		global_env.env->close (global_env.env, 0);
-Index: git/addressbook/backends/file/e-book-backend-file-index.c
+Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.c
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ git/addressbook/backends/file/e-book-backend-file-index.c	2008-05-12 12:12:22.000000000 +0100
-@@ -0,0 +1,861 @@
++++ git-test-build/addressbook/backends/file/e-book-backend-file-index.c	2008-05-21 16:43:22.000000000 +0100
+@@ -0,0 +1,864 @@
 +/*
 + * Copyright (C) 2008 Nokia Corporation
 + *
@@ -635,6 +635,8 @@ Index: git/addressbook/backends/file/e-book-backend-file-index.c
 +  
 +  *(gboolean *)userdata = FALSE;
 +  g_debug (G_STRLOC ": failing the test");
++
++  return result;
 +}
 +
 +/* index operations themselves */
@@ -758,7 +760,7 @@ Index: git/addressbook/backends/file/e-book-backend-file-index.c
 +        dbt_fill_with_string (&index_dbt, tmp);
 +
 +        g_debug (G_STRLOC ": adding to index with key %s and data %s", 
-+            index_dbt.data, id_dbt.data);
++            (gchar *)index_dbt.data, (gchar *)id_dbt.data);
 +
 +        db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
 +
@@ -814,7 +816,7 @@ Index: git/addressbook/backends/file/e-book-backend-file-index.c
 +
 +  while (db_error == 0)
 +  {
-+    g_debug (G_STRLOC ": Considering %s against %s", id_dbt.data, uid);
++    g_debug (G_STRLOC ": Considering %s against %s", (gchar *)id_dbt.data, uid);
 +    /* if the id is the one we're lookin for then delete! */
 +    if (g_str_equal ((gchar *)id_dbt.data, uid))
 +    {
@@ -900,7 +902,7 @@ Index: git/addressbook/backends/file/e-book-backend-file-index.c
 +
 +      while (db_error == 0)
 +      {
-+        g_debug (G_STRLOC ": index query found: %s", id_dbt.data);
++        g_debug (G_STRLOC ": index query found: %s", (gchar *)id_dbt.data);
 +        g_ptr_array_add (ids, id_dbt.data);
 +
 +        /* we add it to the list of strings to be freed */
@@ -990,7 +992,8 @@ Index: git/addressbook/backends/file/e-book-backend-file-index.c
 +      {
 +        if (g_str_has_prefix (index_dbt.data, query_key))
 +        {
-+          g_debug (G_STRLOC ": index query found: %s for %s for %s", id_dbt.data, query_key, index_dbt.data);
++          g_debug (G_STRLOC ": index query found: %s for %s for %s", 
++              (gchar *)id_dbt.data, query_key, (gchar *)index_dbt.data);
 +          g_ptr_array_add (ids, id_dbt.data);
 +
 +          /* we add it to the list of strings to be freed */
@@ -1044,10 +1047,10 @@ Index: git/addressbook/backends/file/e-book-backend-file-index.c
 +
 +  return TRUE;
 +}
-Index: git/addressbook/backends/file/e-book-backend-file-index.h
+Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.h
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ git/addressbook/backends/file/e-book-backend-file-index.h	2008-05-12 11:33:42.000000000 +0100
++++ git-test-build/addressbook/backends/file/e-book-backend-file-index.h	2008-05-21 16:40:22.000000000 +0100
 @@ -0,0 +1,68 @@
 +/*
 + * Copyright (C) 2008 Nokia Corporation

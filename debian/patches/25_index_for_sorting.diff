@@ -1,7 +1,7 @@
 Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.c
 ===================================================================
---- git-test-build.orig/addressbook/backends/file/e-book-backend-file-index.c	2008-05-20 16:35:39.000000000 +0100
-+++ git-test-build/addressbook/backends/file/e-book-backend-file-index.c	2008-05-20 16:35:45.000000000 +0100
+--- git-test-build.orig/addressbook/backends/file/e-book-backend-file-index.c	2008-05-21 16:43:22.000000000 +0100
++++ git-test-build/addressbook/backends/file/e-book-backend-file-index.c	2008-05-21 17:12:09.000000000 +0100
 @@ -63,18 +63,36 @@
    INDEX_FIELD_TYPE_STRING_LIST /* list of strings */
  } EBookBackendFileIndexFieldType;
@@ -93,7 +93,7 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.c
 +
 +  if (db_error != 0)
 +  {
-+    g_warning (G_STRLOC ": db->state failed: %s", db_strerrro (db_error));
++    g_warning (G_STRLOC ": db->state failed: %s", db_strerror (db_error));
 +  }
 +
 +  if (stat->bt_ndata > 0)
@@ -140,7 +140,7 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.c
  /* functions used for testing whether we can use the index */
  
  /* always return false since we can't handle that type of query */
-@@ -532,31 +629,96 @@
+@@ -534,31 +631,96 @@
    return TRUE;
  }
  
@@ -175,7 +175,8 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.c
  
 -  /* we need the uid, this becomes the data for our index databases */
 -  uid = (gchar *)e_contact_get (contact, E_CONTACT_UID);
-   dbt_fill_with_string (&id_dbt, uid);
+-  dbt_fill_with_string (&id_dbt, uid);
++  dbt_fill_with_string (&id_dbt, (gchar *)uid);
  
 -  /* we need the index database too */
 -  db = g_hash_table_lookup (priv->sdbs, data->query_term);
@@ -197,20 +198,20 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.c
 +      if (ordering == ORDER_FIRSTLAST)
 +      {
 +        combined = g_strdup_printf ("%s %s", 
-+            first->data ? first->data : "",
-+            last->data ? last->data : "");
++            first->data ? (gchar *)first->data : "",
++            last->data ? (gchar *)last->data : "");
 +      } else {
 +        combined = g_strdup_printf ("%s %s", 
-+          last->data ? last->data : "",
-+          first->data ? first->data : "");
++          last->data ? (gchar *)last->data : "",
++          first->data ? (gchar *)first->data : "");
 +      }
 +
 +      tmp = g_utf8_casefold (combined, -1);
 +      g_free (combined);
 +      dbt_fill_with_string (&index_dbt, tmp);
- 
++
 +      g_debug (G_STRLOC ": adding to index with key %s and data %s", 
-+          index_dbt.data, id_dbt.data);
++          (gchar *)index_dbt.data, (gchar *)id_dbt.data);
 +
 +      db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
 +
@@ -235,7 +236,7 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.c
 +{
 +  generic_name_add_cb (index, contact, data, db, uid, ORDER_LASTFIRST);
 +}
-+
+ 
 +/* 
 + * generic version of function to get the index key from a contact based on
 + * the VCard field
@@ -250,12 +251,12 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.c
 +  GList *attrs = NULL;
 +  GList *values = NULL;
 +
-+  dbt_fill_with_string (&id_dbt, uid);
++  dbt_fill_with_string (&id_dbt, (gchar *)uid);
 +  
    for (attrs = e_vcard_get_attributes (E_VCARD (contact)); 
        attrs != NULL; 
        attrs = attrs->next)
-@@ -584,6 +746,38 @@
+@@ -586,6 +748,34 @@
        }
      }
    }
@@ -272,12 +273,8 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.c
 +{
 +  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
 +  gchar *uid = NULL;
-+  DBT index_dbt, id_dbt;
 +  DB *db = NULL;
-+  GList *attrs; 
-+  GList *values;
 +  gint db_error = 0;
-+  gchar *tmp = NULL;
 +
 +  /* we need the uid, this becomes the data for our index databases */
 +  uid = (gchar *)e_contact_get (contact, E_CONTACT_UID);
@@ -294,7 +291,7 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.c
  
    db_error = db->sync (db, 0);
  
-@@ -859,3 +1053,12 @@
+@@ -862,3 +1052,12 @@
  
    return TRUE;
  }
@@ -309,8 +306,8 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.c
 +
 Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.h
 ===================================================================
---- git-test-build.orig/addressbook/backends/file/e-book-backend-file-index.h	2008-05-20 16:35:39.000000000 +0100
-+++ git-test-build/addressbook/backends/file/e-book-backend-file-index.h	2008-05-20 16:35:45.000000000 +0100
+--- git-test-build.orig/addressbook/backends/file/e-book-backend-file-index.h	2008-05-21 16:40:22.000000000 +0100
++++ git-test-build/addressbook/backends/file/e-book-backend-file-index.h	2008-05-21 16:43:48.000000000 +0100
 @@ -62,6 +62,7 @@
  void e_book_backend_file_index_modify_contact (EBookBackendFileIndex *index, EContact *contact);
  GPtrArray *e_book_backend_file_index_query (EBookBackendFileIndex *index, const gchar *query);
@@ -321,8 +318,8 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.h
  #endif /* _E_BOOK_BACKEND_FILE_INDEX */
 Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
 ===================================================================
---- git-test-build.orig/addressbook/backends/file/e-book-backend-file.c	2008-05-20 16:35:40.000000000 +0100
-+++ git-test-build/addressbook/backends/file/e-book-backend-file.c	2008-05-21 11:18:43.000000000 +0100
+--- git-test-build.orig/addressbook/backends/file/e-book-backend-file.c	2008-05-21 16:40:22.000000000 +0100
++++ git-test-build/addressbook/backends/file/e-book-backend-file.c	2008-05-21 16:43:48.000000000 +0100
 @@ -76,6 +76,7 @@
  	DB_ENV   *env;
  	EBookBackendSummary *summary;
@@ -449,8 +446,8 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
  	sync_class->remove_contacts_sync       = e_book_backend_file_remove_contacts;
 Index: git-test-build/addressbook/libedata-book-dbus/e-data-book-view.c
 ===================================================================
---- git-test-build.orig/addressbook/libedata-book-dbus/e-data-book-view.c	2008-05-20 16:35:40.000000000 +0100
-+++ git-test-build/addressbook/libedata-book-dbus/e-data-book-view.c	2008-05-20 16:35:45.000000000 +0100
+--- git-test-build.orig/addressbook/libedata-book-dbus/e-data-book-view.c	2008-05-21 16:43:45.000000000 +0100
++++ git-test-build/addressbook/libedata-book-dbus/e-data-book-view.c	2008-05-21 16:43:48.000000000 +0100
 @@ -30,6 +30,7 @@
  static gboolean impl_BookView_dispose (EDataBookView *view, GError **eror);
  static gboolean impl_BookView_set_freezable (EDataBookView *view, gboolean freezable, GError **error);
@@ -478,8 +475,8 @@ Index: git-test-build/addressbook/libedata-book-dbus/e-data-book-view.c
  e_data_book_view_set_thresholds (EDataBookView *book_view,
 Index: git-test-build/addressbook/libedata-book-dbus/e-data-book-view.xml
 ===================================================================
---- git-test-build.orig/addressbook/libedata-book-dbus/e-data-book-view.xml	2008-05-20 16:35:40.000000000 +0100
-+++ git-test-build/addressbook/libedata-book-dbus/e-data-book-view.xml	2008-05-20 16:35:45.000000000 +0100
+--- git-test-build.orig/addressbook/libedata-book-dbus/e-data-book-view.xml	2008-05-21 16:43:45.000000000 +0100
++++ git-test-build/addressbook/libedata-book-dbus/e-data-book-view.xml	2008-05-21 16:43:48.000000000 +0100
 @@ -31,6 +31,12 @@
        <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_BookView_thaw"/>
      </method>
@@ -495,8 +492,8 @@ Index: git-test-build/addressbook/libedata-book-dbus/e-data-book-view.xml
      </signal>
 Index: git-test-build/addressbook/libebook-dbus/e-book-view.c
 ===================================================================
---- git-test-build.orig/addressbook/libebook-dbus/e-book-view.c	2008-05-20 16:35:40.000000000 +0100
-+++ git-test-build/addressbook/libebook-dbus/e-book-view.c	2008-05-20 16:35:45.000000000 +0100
+--- git-test-build.orig/addressbook/libebook-dbus/e-book-view.c	2008-05-21 16:43:45.000000000 +0100
++++ git-test-build/addressbook/libebook-dbus/e-book-view.c	2008-05-21 16:43:48.000000000 +0100
 @@ -333,3 +333,20 @@
      }
    }
@@ -520,8 +517,8 @@ Index: git-test-build/addressbook/libebook-dbus/e-book-view.c
 +}
 Index: git-test-build/addressbook/libebook-dbus/e-book-view.h
 ===================================================================
---- git-test-build.orig/addressbook/libebook-dbus/e-book-view.h	2008-05-20 16:35:40.000000000 +0100
-+++ git-test-build/addressbook/libebook-dbus/e-book-view.h	2008-05-20 16:35:45.000000000 +0100
+--- git-test-build.orig/addressbook/libebook-dbus/e-book-view.h	2008-05-21 16:43:45.000000000 +0100
++++ git-test-build/addressbook/libebook-dbus/e-book-view.h	2008-05-21 16:43:48.000000000 +0100
 @@ -72,6 +72,7 @@
  void               e_book_view_stop                   (EBookView *book_view);
  void               e_book_view_set_freezable          (EBookView *book_view, gboolean freezable);
@@ -532,8 +529,8 @@ Index: git-test-build/addressbook/libebook-dbus/e-book-view.h
  
 Index: git-test-build/addressbook/libedata-book-dbus/e-book-backend.c
 ===================================================================
---- git-test-build.orig/addressbook/libedata-book-dbus/e-book-backend.c	2008-05-20 16:35:40.000000000 +0100
-+++ git-test-build/addressbook/libedata-book-dbus/e-book-backend.c	2008-05-20 16:35:45.000000000 +0100
+--- git-test-build.orig/addressbook/libedata-book-dbus/e-book-backend.c	2008-05-21 16:40:22.000000000 +0100
++++ git-test-build/addressbook/libedata-book-dbus/e-book-backend.c	2008-05-21 16:43:48.000000000 +0100
 @@ -1003,6 +1003,17 @@
  	g_mutex_unlock (priv->clients_mutex);
  }
@@ -554,8 +551,8 @@ Index: git-test-build/addressbook/libedata-book-dbus/e-book-backend.c
  {
 Index: git-test-build/addressbook/libedata-book-dbus/e-book-backend.h
 ===================================================================
---- git-test-build.orig/addressbook/libedata-book-dbus/e-book-backend.h	2008-05-20 16:35:40.000000000 +0100
-+++ git-test-build/addressbook/libedata-book-dbus/e-book-backend.h	2008-05-20 16:35:45.000000000 +0100
+--- git-test-build.orig/addressbook/libedata-book-dbus/e-book-backend.h	2008-05-21 16:40:22.000000000 +0100
++++ git-test-build/addressbook/libedata-book-dbus/e-book-backend.h	2008-05-21 16:43:48.000000000 +0100
 @@ -76,7 +76,7 @@
  	void (*modify_contacts)  (EBookBackend *backend, EDataBook *book, guint32 opid, const char **vcards);
  
