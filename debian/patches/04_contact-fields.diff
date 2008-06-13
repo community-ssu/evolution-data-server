@@ -2,49 +2,184 @@ Add defines and accessors for the Maemo contact-state and last-used fields.
 
 Index: addressbook/libebook-dbus/e-vcard.h
 ===================================================================
---- addressbook/libebook-dbus/e-vcard.h.orig	2008-04-22 15:56:55.000000000 +0100
-+++ addressbook/libebook-dbus/e-vcard.h	2008-04-23 15:14:13.000000000 +0100
-@@ -91,6 +91,13 @@
+--- addressbook/libebook-dbus/e-vcard.h.orig	2008-06-13 21:35:53.000000000 +0200
++++ addressbook/libebook-dbus/e-vcard.h	2008-06-13 21:35:57.000000000 +0200
+@@ -91,6 +91,21 @@
  #define EVC_X_GROUPWISE     	"X-GROUPWISE"
  #define EVC_X_BOOK_URI     	"X-EVOLUTION-BOOK-URI"
  
-+#define EVC_X_OSSO_CONTACT_STATE "X-OSSO-CONTACT-STATE"
-+#define EVC_X_OSSO_LAST_USED "X-OSSO-LAST-USED"
-+ 
++#define EVC_X_OSSO_CONTACT_STATE        "X-OSSO-CONTACT-STATE"
++#define EVC_X_OSSO_LAST_USED            "X-OSSO-LAST-USED"
++#define EVC_X_OSSO_MASTER_UID           "X-OSSO-MASTER-UID"
++
++#define EVC_X_TELEPATHY_HANDLE          "X-TELEPATHY-HANDLE"
++#define EVC_X_TELEPATHY_PRESENCE        "X-TELEPATHY-PRESENCE"
++#define EVC_X_TELEPATHY_CAPABILITIES    "X-TELEPATHY-CAPABILITIES"
++#define EVC_X_TELEPATHY_SUBSCRIBED      "X-TELEPATHY-SUBSCRIBED"
++#define EVC_X_TELEPATHY_PUBLISHED       "X-TELEPATHY-PUBLISHED"
++#define EVC_X_TELEPATHY_BLOCKED         "X-TELEPATHY-BLOCKED"
++
 +/* Parameter names */
-+#define EVC_X_OSSO_BOUND "X-OSSO-BOUND"
-+#define EVC_X_OSSO_FIELD_STATE "X-OSSO-FIELD-STATE"
++#define EVC_X_OSSO_BOUND                "X-OSSO-BOUND"
++#define EVC_X_OSSO_FIELD_STATE          "X-OSSO-FIELD-STATE"
 +
  typedef enum {
  	EVC_FORMAT_VCARD_21,
  	EVC_FORMAT_VCARD_30
 Index: addressbook/libebook-dbus/e-contact.c
 ===================================================================
---- addressbook/libebook-dbus/e-contact.c.orig	2008-04-22 15:55:48.000000000 +0100
-+++ addressbook/libebook-dbus/e-contact.c	2008-04-23 15:16:15.000000000 +0100
-@@ -276,7 +276,10 @@
+--- addressbook/libebook-dbus/e-contact.c.orig	2008-06-13 21:35:53.000000000 +0200
++++ addressbook/libebook-dbus/e-contact.c	2008-06-13 21:36:21.000000000 +0200
+@@ -92,6 +92,8 @@
+ static void date_setter (EContact *contact, EVCardAttribute *attr, void *data);
+ static void* cert_getter (EContact *contact, EVCardAttribute *attr);
+ static void cert_setter (EContact *contact, EVCardAttribute *attr, void *data);
++static void* presence_getter (EContact *contact, EVCardAttribute *attr);
++static void presence_setter (EContact *contact, EVCardAttribute *attr, void *data);
+ 
+ #define STRING_FIELD(id,vc,n,pn,ro)  { E_CONTACT_FIELD_TYPE_STRING, (id), (vc), (n), (pn), (ro) }
+ #define BOOLEAN_FIELD(id,vc,n,pn,ro)  { E_CONTACT_FIELD_TYPE_BOOLEAN, (id), (vc), (n), (pn), (ro) }
+@@ -276,7 +278,19 @@
  	MULTI_LIST_FIELD (E_CONTACT_SIP, 	  EVC_X_SIP,    "sip",    N_("SIP address"),          FALSE),
  
  	/* Geo information */
 -	STRUCT_FIELD	(E_CONTACT_GEO,  EVC_GEO, "geo",  N_("Geographic Information"),  FALSE, geo_getter, geo_setter, e_contact_geo_get_type)
 +	STRUCT_FIELD	(E_CONTACT_GEO,  EVC_GEO, "geo",  N_("Geographic Information"),  FALSE, geo_getter, geo_setter, e_contact_geo_get_type),
 +
-+	STRING_FIELD (E_CONTACT_OSSO_CONTACT_STATE,       EVC_X_OSSO_CONTACT_STATE,       "osso-contact-state",       N_("Contact State"),    FALSE),
-+	STRING_FIELD (E_CONTACT_OSSO_LAST_USED,       EVC_X_OSSO_LAST_USED,       "osso-last-used",       N_("Last Used"),    FALSE),
++	STRING_FIELD (E_CONTACT_OSSO_CONTACT_STATE,     EVC_X_OSSO_CONTACT_STATE,        "osso-contact-state",           N_("Contact State"),                    FALSE),
++	STRING_FIELD (E_CONTACT_OSSO_LAST_USED,         EVC_X_OSSO_LAST_USED,            "osso-last-used",               N_("Last Used"),                        FALSE),
++	STRING_FIELD (E_CONTACT_OSSO_MASTER_UID,        EVC_X_OSSO_MASTER_UID,           "osso-master-uid",              N_("UID of Master Contact"),            FALSE),
++
++	STRING_FIELD (E_CONTACT_TELEPATHY_HANDLE,       EVC_X_TELEPATHY_HANDLE,         "telepathy-handle",             N_("Telepathy Handle"),                 FALSE),
++	STRUCT_FIELD (E_CONTACT_TELEPATHY_PRESENCE,     EVC_X_TELEPATHY_PRESENCE,       "telepathy-presence",           N_("Telepathy Presence Status"),        FALSE, presence_getter, presence_setter, e_contact_presence_get_type),
++	LIST_FIELD   (E_CONTACT_TELEPATHY_CAPABILITIES, EVC_X_TELEPATHY_CAPABILITIES,   "telepathy-capabilities",       N_("Telepathy Capabilities"),           FALSE),
++	STRING_FIELD (E_CONTACT_TELEPATHY_SUBSCRIBED,   EVC_X_TELEPATHY_SUBSCRIBED,     "telepathy-subscribed",         N_("Telepathy Subscription Status"),    FALSE),
++	STRING_FIELD (E_CONTACT_TELEPATHY_PUBLISHED,    EVC_X_TELEPATHY_PUBLISHED,      "telepathy-published",          N_("Telepathy Publication Status"),     FALSE),
++	STRING_FIELD (E_CONTACT_TELEPATHY_BLOCKED,      EVC_X_TELEPATHY_BLOCKED,        "telepathy-blocked",            N_("Telepathy Blocking Status"),        FALSE),
++
  };
  
  #undef LIST_ELEM_STR_FIELD
+@@ -729,6 +743,33 @@
+ 	e_vcard_attribute_add_value_decoded (attr, cert->data, cert->length);
+ }
+ 
++static void*
++presence_getter (EContact *contact, EVCardAttribute *attr)
++{
++	if (attr) {
++		EContactPresence *presence = g_new0 (EContactPresence, 1);
++		GList *p = e_vcard_attribute_get_values (attr);
++
++		presence->status = (p && p->data ? g_strdup (p->data) : NULL); if (p) p = p->next;
++		presence->message = (p && p->data ? g_strdup (p->data) : NULL);
++
++		return presence;
++	}
++	else
++		return NULL;
++}
++
++static void
++presence_setter (EContact *contact, EVCardAttribute *attr, void *data)
++{
++	EContactPresence *presence = data;
++
++	e_vcard_attribute_add_values (attr,
++				      presence->status,
++				      presence->message,
++				      NULL);
++}
++
+ 
+ 
+ /* Set_arg handler for the contact */
+@@ -2172,3 +2213,40 @@
+ 							(GBoxedFreeFunc) e_contact_cert_free);
+ 	return type_id;
+ }
++
++/**
++ * e_contact_presence_free:
++ * @presence: an #EContactPresence
++ *
++ * Frees the @presence struct and its contents.
++ **/
++void
++e_contact_presence_free (EContactPresence *presence)
++{
++	g_free (presence->message);
++	g_free (presence->status);
++	g_free (presence);
++}
++
++static EContactPresence *
++e_contact_presence_copy (EContactPresence *presence)
++{
++	EContactPresence *presence2 = g_new0 (EContactPresence, 1);
++	presence2->status  = presence->status  ? g_strdup (presence->status)  : NULL;
++	presence2->message = presence->message ? g_strdup (presence->message) : NULL;
++
++	return presence2;
++}
++
++GType
++e_contact_presence_get_type (void)
++{
++	static GType type_id = 0;
++
++	if (!type_id)
++		type_id = g_boxed_type_register_static ("EContactPresence",
++							(GBoxedCopyFunc) e_contact_presence_copy,
++							(GBoxedFreeFunc) e_contact_presence_free);
++	return type_id;
++}
++
 Index: addressbook/libebook-dbus/e-contact.h
 ===================================================================
---- addressbook/libebook-dbus/e-contact.h.orig	2008-04-22 15:56:22.000000000 +0100
-+++ addressbook/libebook-dbus/e-contact.h	2008-04-23 15:14:13.000000000 +0100
-@@ -201,6 +201,9 @@
+--- addressbook/libebook-dbus/e-contact.h.orig	2008-06-13 21:35:53.000000000 +0200
++++ addressbook/libebook-dbus/e-contact.h	2008-06-13 21:35:57.000000000 +0200
+@@ -201,6 +201,17 @@
  
  	E_CONTACT_GEO,	/* structured field (EContactGeo) */	
  
-+	E_CONTACT_OSSO_CONTACT_STATE, /* string */
-+	E_CONTACT_OSSO_LAST_USED, /* string */
++	E_CONTACT_OSSO_CONTACT_STATE,           /* string */
++	E_CONTACT_OSSO_LAST_USED,               /* string */
++	E_CONTACT_OSSO_MASTER_UID,              /* string */
++
++	E_CONTACT_TELEPATHY_HANDLE,             /* string */
++	E_CONTACT_TELEPATHY_PRESENCE,           /* structured field (EContactPresence) */
++	E_CONTACT_TELEPATHY_CAPABILITIES,       /* Multi-valued */
++	E_CONTACT_TELEPATHY_SUBSCRIBED,         /* string */
++	E_CONTACT_TELEPATHY_PUBLISHED,          /* string */
++	E_CONTACT_TELEPATHY_BLOCKED,            /* string */
 +
  	E_CONTACT_FIELD_LAST,
  	E_CONTACT_FIELD_FIRST        = E_CONTACT_UID,
  
+@@ -271,6 +282,11 @@
+ 	char *data;
+ } EContactCert;
+ 
++typedef struct {
++	char *status;
++	char *message;
++} EContactPresence;
++
+ struct _EContact {
+ 	EVCard parent;
+ 	/*< private >*/
+@@ -330,10 +346,12 @@
+ GType                   e_contact_cert_get_type    (void);
+ void                    e_contact_cert_free        (EContactCert *cert);
+ 
++GType                   e_contact_presence_get_type (void);
++void                    e_contact_presence_free    (EContactPresence *presence);
++
+ GType                   e_contact_address_get_type (void);
+ void                    e_contact_address_free     (EContactAddress *address);
+ 
+-
+ const char*             e_contact_field_name       (EContactField field_id);
+ const char*             e_contact_pretty_name      (EContactField field_id);
+ const char*             e_contact_vcard_attribute  (EContactField field_id);
