@@ -1,7 +1,7 @@
-Index: git-test-build/addressbook/backends/file/Makefile.am
+Index: evolution-data-server/addressbook/backends/file/Makefile.am
 ===================================================================
---- git-test-build.orig/addressbook/backends/file/Makefile.am	2008-05-21 16:24:51.000000000 +0100
-+++ git-test-build/addressbook/backends/file/Makefile.am	2008-05-21 16:24:52.000000000 +0100
+--- evolution-data-server.orig/addressbook/backends/file/Makefile.am	2008-06-19 12:38:52.000000000 +0200
++++ evolution-data-server/addressbook/backends/file/Makefile.am	2008-06-19 12:38:52.000000000 +0200
 @@ -12,6 +12,8 @@
  libebookbackendfile_la_SOURCES =			\
  	e-book-backend-file.c				\
@@ -11,10 +11,10 @@ Index: git-test-build/addressbook/backends/file/Makefile.am
  	e-book-backend-file-factory.c			\
  	$(top_srcdir)/libedataserver/e-db3-utils.c	\
  	$(top_srcdir)/libedataserver/e-dbhash.c
-Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
+Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
 ===================================================================
---- git-test-build.orig/addressbook/backends/file/e-book-backend-file.c	2008-05-21 16:24:51.000000000 +0100
-+++ git-test-build/addressbook/backends/file/e-book-backend-file.c	2008-05-21 16:40:22.000000000 +0100
+--- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file.c	2008-06-19 12:38:52.000000000 +0200
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-06-19 12:43:09.000000000 +0200
 @@ -54,6 +54,8 @@
  
  #include "e-book-backend-file.h"
@@ -24,7 +24,11 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
  #define d(x)
  
  #define CHANGES_DB_SUFFIX ".changes.db"
-@@ -73,6 +75,7 @@
+@@ -70,9 +72,11 @@
+ 	char     *dirname;
+ 	char     *filename;
+ 	char     *summary_filename;
++	char     *index_filename;
  	DB       *file_db;
  	DB_ENV   *env;
  	EBookBackendSummary *summary;
@@ -32,7 +36,7 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
  };
  
  G_LOCK_DEFINE_STATIC (global_env);
-@@ -246,6 +249,7 @@
+@@ -246,6 +250,7 @@
  	status = do_create (bf, vcard, contact);
  	if (status == GNOME_Evolution_Addressbook_Success) {
  		e_book_backend_summary_add_contact (bf->priv->summary, *contact);
@@ -40,7 +44,7 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
  	}
  	return status;
  }
-@@ -293,6 +297,7 @@
+@@ -293,6 +298,7 @@
  	for (l = removed_cards; l; l = l->next) {
  		char *id = l->data;
  		e_book_backend_summary_remove_contact (bf->priv->summary, id);
@@ -48,7 +52,7 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
  	}
  
  	return rv;
-@@ -345,6 +350,7 @@
+@@ -345,6 +351,7 @@
  	g_free (vcard_with_rev);
  	
  	if (db_error == 0) {
@@ -56,7 +60,7 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
  		return GNOME_Evolution_Addressbook_Success;
  	} else {
  		g_warning (G_STRLOC ": db->put failed with %s", db_strerror (db_error));
-@@ -642,11 +648,45 @@
+@@ -642,11 +649,45 @@
  	d(printf ("signalling parent thread\n"));
  	e_flag_set (closure->running);
  
@@ -103,7 +107,7 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
  		for (i = 0; i < ids->len; i ++) {
  			char *id = g_ptr_array_index (ids, i);
  
-@@ -668,8 +708,7 @@
+@@ -668,8 +709,7 @@
  		}
  
  		g_ptr_array_free (ids, TRUE);
@@ -113,7 +117,7 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
  		/* iterate over the db and do the query there */
  		DBC    *dbc;
  
-@@ -709,13 +748,14 @@
+@@ -709,13 +749,14 @@
  				   bf->priv->filename);
  			abort ();
  		}
@@ -130,15 +134,14 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
  	/* unref the */
  	g_object_unref (book_view);
  
-@@ -1143,6 +1183,8 @@
- 	time_t db_mtime;
+@@ -1144,6 +1185,7 @@
  	struct stat sb;
  	gchar *uri;
-+	gchar *index_filename;
-+
  
++
  	uri = e_source_get_uri (source);
  
+ 	dirname = e_book_backend_file_extract_path_from_uri (uri);
 @@ -1317,12 +1359,22 @@
  	g_free (bf->priv->summary_filename);
  	bf->priv->summary_filename = g_strconcat (bf->priv->filename, ".summary", NULL);
@@ -150,20 +153,33 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
  	}
  
 +
++	g_free (bf->priv->index_filename);
 +	bf->priv->index = e_book_backend_file_index_new ();
-+	index_filename = g_build_filename (bf->priv->dirname, "index.db", NULL);
++	bf->priv->index_filename = g_build_filename (bf->priv->dirname, "index.db", NULL);
 +
 +	G_LOCK (global_env);
 +	global_env.ref_count++;
 +	G_UNLOCK (global_env);
 +
-+	e_book_backend_file_index_setup_indicies (bf->priv->index, db, index_filename);
-+	g_free (index_filename);
++	e_book_backend_file_index_setup_indicies (bf->priv->index, db, bf->priv->index_filename);
 +
  	e_book_backend_set_is_loaded (backend, TRUE);
  	e_book_backend_set_is_writable (backend, writable);
  	return GNOME_Evolution_Addressbook_Success;
-@@ -1474,6 +1526,14 @@
+@@ -1361,6 +1413,12 @@
+ 			return GNOME_Evolution_Addressbook_OtherError;
+ 	}
+ 
++	/* unref the index before we remove the file so it's not written out again */
++	g_object_unref (bf->priv->index);
++	bf->priv->index = NULL;
++	if (-1 == g_unlink (bf->priv->index_filename))
++		g_warning ("failed to remove index file `%s`: %s", bf->priv->index_filename, strerror (errno));
++
+ 	/* unref the summary before we remove the file so it's not written out again */
+ 	g_object_unref (bf->priv->summary);
+ 	bf->priv->summary = NULL;
+@@ -1474,6 +1532,14 @@
  	}
  	
  	G_LOCK (global_env);
@@ -173,15 +189,23 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
 +		bf->priv->index = NULL;
 +	}
 +	G_UNLOCK (global_env);
-+	
++
 +	G_LOCK (global_env);
  	global_env.ref_count--;
  	if (global_env.ref_count == 0) {
  		global_env.env->close (global_env.env, 0);
-Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.c
+@@ -1499,6 +1565,7 @@
+ 	g_free (bf->priv->filename);
+ 	g_free (bf->priv->dirname);
+ 	g_free (bf->priv->summary_filename);
++	g_free (bf->priv->index_filename);
+ 	
+ 	g_free (bf->priv);
+ 
+Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index.c
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ git-test-build/addressbook/backends/file/e-book-backend-file-index.c	2008-05-21 16:43:22.000000000 +0100
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file-index.c	2008-06-19 12:43:37.000000000 +0200
 @@ -0,0 +1,864 @@
 +/*
 + * Copyright (C) 2008 Nokia Corporation

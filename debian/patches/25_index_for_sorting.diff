@@ -1,7 +1,7 @@
-Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.c
+Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index.c
 ===================================================================
---- git-test-build.orig/addressbook/backends/file/e-book-backend-file-index.c	2008-05-21 16:43:22.000000000 +0100
-+++ git-test-build/addressbook/backends/file/e-book-backend-file-index.c	2008-05-21 17:12:09.000000000 +0100
+--- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file-index.c	2008-06-19 12:54:35.000000000 +0200
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file-index.c	2008-06-19 12:54:43.000000000 +0200
 @@ -63,18 +63,36 @@
    INDEX_FIELD_TYPE_STRING_LIST /* list of strings */
  } EBookBackendFileIndexFieldType;
@@ -304,10 +304,10 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.c
 +}
 +
 +
-Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.h
+Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index.h
 ===================================================================
---- git-test-build.orig/addressbook/backends/file/e-book-backend-file-index.h	2008-05-21 16:40:22.000000000 +0100
-+++ git-test-build/addressbook/backends/file/e-book-backend-file-index.h	2008-05-21 16:43:48.000000000 +0100
+--- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file-index.h	2008-06-19 12:54:35.000000000 +0200
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file-index.h	2008-06-19 12:54:43.000000000 +0200
 @@ -62,6 +62,7 @@
  void e_book_backend_file_index_modify_contact (EBookBackendFileIndex *index, EContact *contact);
  GPtrArray *e_book_backend_file_index_query (EBookBackendFileIndex *index, const gchar *query);
@@ -316,11 +316,11 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.h
  G_END_DECLS
  
  #endif /* _E_BOOK_BACKEND_FILE_INDEX */
-Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
+Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
 ===================================================================
---- git-test-build.orig/addressbook/backends/file/e-book-backend-file.c	2008-05-21 16:40:22.000000000 +0100
-+++ git-test-build/addressbook/backends/file/e-book-backend-file.c	2008-05-21 16:43:48.000000000 +0100
-@@ -76,6 +76,7 @@
+--- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file.c	2008-06-19 12:54:35.000000000 +0200
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-06-19 12:54:43.000000000 +0200
+@@ -77,6 +77,7 @@
  	DB_ENV   *env;
  	EBookBackendSummary *summary;
  	EBookBackendFileIndex *index;
@@ -328,7 +328,7 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
  };
  
  G_LOCK_DEFINE_STATIC (global_env);
-@@ -610,11 +611,14 @@
+@@ -611,11 +612,14 @@
  	EDataBookView *book_view;
  	FileBackendSearchClosure *closure;
  	EBookBackendFile *bf;
@@ -343,7 +343,7 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
  
  	g_return_val_if_fail (E_IS_DATA_BOOK_VIEW (data), NULL);
  
-@@ -631,6 +635,7 @@
+@@ -632,6 +636,7 @@
  		return NULL;
  	}
  	bf = closure->bf;
@@ -351,7 +351,7 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
  
  	d(printf ("starting initial population of book view\n"));
  
-@@ -651,42 +656,24 @@
+@@ -652,42 +657,24 @@
  	g_debug (G_STRLOC ": Query is %s", query);
  	if (e_book_backend_file_index_is_usable (bf->priv->index, query))
  	{
@@ -406,7 +406,7 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
  		for (i = 0; i < ids->len; i ++) {
  			char *id = g_ptr_array_index (ids, i);
  
-@@ -707,6 +694,9 @@
+@@ -708,6 +695,9 @@
  			}
  		}
  
@@ -416,7 +416,7 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
  		g_ptr_array_free (ids, TRUE);
  	} else {
  		/* iterate over the db and do the query there */
-@@ -794,6 +784,19 @@
+@@ -795,6 +785,19 @@
  	e_flag_clear (closure->running);
  }
  
@@ -436,7 +436,7 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
  typedef struct {
  	DB *db;
  
-@@ -1627,6 +1630,7 @@
+@@ -1634,6 +1637,7 @@
  	backend_class->cancel_operation        = e_book_backend_file_cancel_operation;
  	backend_class->set_mode                = e_book_backend_file_set_mode;
  	backend_class->sync                    = e_book_backend_file_sync;
@@ -444,10 +444,10 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file.c
  	sync_class->remove_sync                = e_book_backend_file_remove;
  	sync_class->create_contact_sync        = e_book_backend_file_create_contact;
  	sync_class->remove_contacts_sync       = e_book_backend_file_remove_contacts;
-Index: git-test-build/addressbook/libedata-book-dbus/e-data-book-view.c
+Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c
 ===================================================================
---- git-test-build.orig/addressbook/libedata-book-dbus/e-data-book-view.c	2008-05-21 16:43:45.000000000 +0100
-+++ git-test-build/addressbook/libedata-book-dbus/e-data-book-view.c	2008-05-21 16:43:48.000000000 +0100
+--- evolution-data-server.orig/addressbook/libedata-book-dbus/e-data-book-view.c	2008-06-19 12:54:41.000000000 +0200
++++ evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c	2008-06-19 12:54:43.000000000 +0200
 @@ -30,6 +30,7 @@
  static gboolean impl_BookView_dispose (EDataBookView *view, GError **eror);
  static gboolean impl_BookView_set_freezable (EDataBookView *view, gboolean freezable, GError **error);
@@ -473,10 +473,10 @@ Index: git-test-build/addressbook/libedata-book-dbus/e-data-book-view.c
  
  void
  e_data_book_view_set_thresholds (EDataBookView *book_view,
-Index: git-test-build/addressbook/libedata-book-dbus/e-data-book-view.xml
+Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.xml
 ===================================================================
---- git-test-build.orig/addressbook/libedata-book-dbus/e-data-book-view.xml	2008-05-21 16:43:45.000000000 +0100
-+++ git-test-build/addressbook/libedata-book-dbus/e-data-book-view.xml	2008-05-21 16:43:48.000000000 +0100
+--- evolution-data-server.orig/addressbook/libedata-book-dbus/e-data-book-view.xml	2008-06-19 12:54:41.000000000 +0200
++++ evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.xml	2008-06-19 12:54:43.000000000 +0200
 @@ -31,6 +31,12 @@
        <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_BookView_thaw"/>
      </method>
@@ -490,10 +490,10 @@ Index: git-test-build/addressbook/libedata-book-dbus/e-data-book-view.xml
      <signal name="ContactsAdded">
      	<arg name="vcards" type="as"/>
      </signal>
-Index: git-test-build/addressbook/libebook-dbus/e-book-view.c
+Index: evolution-data-server/addressbook/libebook-dbus/e-book-view.c
 ===================================================================
---- git-test-build.orig/addressbook/libebook-dbus/e-book-view.c	2008-05-21 16:43:45.000000000 +0100
-+++ git-test-build/addressbook/libebook-dbus/e-book-view.c	2008-05-21 16:43:48.000000000 +0100
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-book-view.c	2008-06-19 12:54:41.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-book-view.c	2008-06-19 12:54:43.000000000 +0200
 @@ -333,3 +333,20 @@
      }
    }
@@ -515,10 +515,10 @@ Index: git-test-build/addressbook/libebook-dbus/e-book-view.c
 +    }
 +  }
 +}
-Index: git-test-build/addressbook/libebook-dbus/e-book-view.h
+Index: evolution-data-server/addressbook/libebook-dbus/e-book-view.h
 ===================================================================
---- git-test-build.orig/addressbook/libebook-dbus/e-book-view.h	2008-05-21 16:43:45.000000000 +0100
-+++ git-test-build/addressbook/libebook-dbus/e-book-view.h	2008-05-21 16:43:48.000000000 +0100
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-book-view.h	2008-06-19 12:54:41.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-book-view.h	2008-06-19 12:54:43.000000000 +0200
 @@ -72,6 +72,7 @@
  void               e_book_view_stop                   (EBookView *book_view);
  void               e_book_view_set_freezable          (EBookView *book_view, gboolean freezable);
@@ -527,10 +527,10 @@ Index: git-test-build/addressbook/libebook-dbus/e-book-view.h
  
  struct _EBook     *e_book_view_get_book               (EBookView *book_view);
  
-Index: git-test-build/addressbook/libedata-book-dbus/e-book-backend.c
+Index: evolution-data-server/addressbook/libedata-book-dbus/e-book-backend.c
 ===================================================================
---- git-test-build.orig/addressbook/libedata-book-dbus/e-book-backend.c	2008-05-21 16:40:22.000000000 +0100
-+++ git-test-build/addressbook/libedata-book-dbus/e-book-backend.c	2008-05-21 16:43:48.000000000 +0100
+--- evolution-data-server.orig/addressbook/libedata-book-dbus/e-book-backend.c	2008-06-19 12:37:58.000000000 +0200
++++ evolution-data-server/addressbook/libedata-book-dbus/e-book-backend.c	2008-06-19 12:54:43.000000000 +0200
 @@ -1003,6 +1003,17 @@
  	g_mutex_unlock (priv->clients_mutex);
  }
@@ -549,10 +549,10 @@ Index: git-test-build/addressbook/libedata-book-dbus/e-book-backend.c
  static void
  e_book_backend_init (EBookBackend *backend)
  {
-Index: git-test-build/addressbook/libedata-book-dbus/e-book-backend.h
+Index: evolution-data-server/addressbook/libedata-book-dbus/e-book-backend.h
 ===================================================================
---- git-test-build.orig/addressbook/libedata-book-dbus/e-book-backend.h	2008-05-21 16:40:22.000000000 +0100
-+++ git-test-build/addressbook/libedata-book-dbus/e-book-backend.h	2008-05-21 16:43:48.000000000 +0100
+--- evolution-data-server.orig/addressbook/libedata-book-dbus/e-book-backend.h	2008-06-19 12:37:58.000000000 +0200
++++ evolution-data-server/addressbook/libedata-book-dbus/e-book-backend.h	2008-06-19 12:54:43.000000000 +0200
 @@ -76,7 +76,7 @@
  	void (*modify_contacts)  (EBookBackend *backend, EDataBook *book, guint32 opid, const char **vcards);
  
