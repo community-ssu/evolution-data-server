@@ -1,3 +1,12 @@
+evolution-data-server (1.4.2.1-20080622) unstable; urgency=low
+
+  * 04_contact-fields.diff: change E_CONTACT_OSSO_MASTER_UID from single
+    string into a list of strings
+  * 26_delayed_vcard_parsing.diff: properly process vcard strings passed
+    to EBookView with the contacts-changed DBus signal
+
+ -- Mathias Hasselmann <mathias@openismus-secure.com>  Sun, 22 Jun 2008 20:26:48 +0200
+
 evolution-data-server (1.4.2.1-20080619) unstable; urgency=low
 
   * 20_file_backend_index.diff: Delete the index file when removing a book.

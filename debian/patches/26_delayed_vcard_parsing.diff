@@ -1,7 +1,7 @@
-Index: git-test-build/addressbook/libebook-dbus/e-book-view.c
+Index: evolution-data-server/addressbook/libebook-dbus/e-book-view.c
 ===================================================================
---- git-test-build.orig/addressbook/libebook-dbus/e-book-view.c	2008-05-21 17:24:51.000000000 +0100
-+++ git-test-build/addressbook/libebook-dbus/e-book-view.c	2008-05-21 17:48:21.000000000 +0100
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-book-view.c	2008-06-22 20:23:54.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-book-view.c	2008-06-22 20:24:21.000000000 +0200
 @@ -35,6 +35,7 @@
    EBook *book;
    DBusGProxy *view_proxy;
@@ -64,9 +64,9 @@ Index: git-test-build/addressbook/libebook-dbus/e-book-view.c
 +  if (!book_view->priv->parse_vcards) {
 +    g_signal_emit (book_view, signals[CONTACTS_CHANGED], 0, vcards);
 +  } else {
-+    for (p = vcards; *p; p+= 2) {
-+      contacts = g_list_prepend (contacts, e_contact_new_from_vcard (p[1]));
-+    }
++    for (p = vcards; *p; ++p)
++      contacts = g_list_prepend (contacts, e_contact_new_from_vcard (*p));
++
 +    contacts = g_list_reverse (contacts);
  
 -  g_signal_emit (book_view, signals[CONTACTS_CHANGED], 0, contacts);
@@ -129,10 +129,10 @@ Index: git-test-build/addressbook/libebook-dbus/e-book-view.c
 +  g_return_if_fail (E_IS_BOOK_VIEW (book_view));
 +  book_view->priv->parse_vcards = parse_vcards;
 +}
-Index: git-test-build/addressbook/libebook-dbus/e-book-view.h
+Index: evolution-data-server/addressbook/libebook-dbus/e-book-view.h
 ===================================================================
---- git-test-build.orig/addressbook/libebook-dbus/e-book-view.h	2008-05-21 17:24:51.000000000 +0100
-+++ git-test-build/addressbook/libebook-dbus/e-book-view.h	2008-05-21 17:56:00.000000000 +0100
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-book-view.h	2008-06-22 20:23:54.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-book-view.h	2008-06-22 20:23:58.000000000 +0200
 @@ -71,6 +71,7 @@
  void               e_book_view_start                  (EBookView *book_view);
  void               e_book_view_stop                   (EBookView *book_view);
@@ -141,10 +141,10 @@ Index: git-test-build/addressbook/libebook-dbus/e-book-view.h
  void               e_book_view_thaw                   (EBookView *book_view);
  void               e_book_view_set_sort_order         (EBookView *book_view, const gchar *query_term);
  
-Index: git-test-build/addressbook/libedata-book-dbus/e-data-book-view.c
+Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c
 ===================================================================
---- git-test-build.orig/addressbook/libedata-book-dbus/e-data-book-view.c	2008-05-21 17:24:51.000000000 +0100
-+++ git-test-build/addressbook/libedata-book-dbus/e-data-book-view.c	2008-05-21 17:53:07.000000000 +0100
+--- evolution-data-server.orig/addressbook/libedata-book-dbus/e-data-book-view.c	2008-06-22 20:23:54.000000000 +0200
++++ evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c	2008-06-22 20:23:58.000000000 +0200
 @@ -515,11 +515,12 @@
  notify_add (EDataBookView *view, const char *id, char *vcard)
  {
