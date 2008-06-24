@@ -1,7 +1,7 @@
 Index: evolution-data-server/addressbook/libebook-dbus/e-book-view.c
 ===================================================================
---- evolution-data-server.orig/addressbook/libebook-dbus/e-book-view.c	2008-06-23 22:02:57.000000000 +0200
-+++ evolution-data-server/addressbook/libebook-dbus/e-book-view.c	2008-06-23 22:05:50.000000000 +0200
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-book-view.c	2008-06-24 17:38:41.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-book-view.c	2008-06-24 17:39:05.000000000 +0200
 @@ -37,6 +37,7 @@
  
    gboolean running : 1;
@@ -107,7 +107,7 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-book-view.c
  }
  
  static void
-@@ -361,3 +376,29 @@
+@@ -369,3 +384,29 @@
      }
    }
  }
@@ -139,11 +139,11 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-book-view.c
 +
 Index: evolution-data-server/addressbook/libebook-dbus/e-book-view.h
 ===================================================================
---- evolution-data-server.orig/addressbook/libebook-dbus/e-book-view.h	2008-06-23 22:02:57.000000000 +0200
-+++ evolution-data-server/addressbook/libebook-dbus/e-book-view.h	2008-06-23 22:04:46.000000000 +0200
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-book-view.h	2008-06-24 17:38:41.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-book-view.h	2008-06-24 17:39:05.000000000 +0200
 @@ -77,6 +77,9 @@
  void               e_book_view_set_freezable          (EBookView *book_view, gboolean freezable);
- gboolean           e_book_view_get_freezable          (EBookView *book_view);
+ gboolean           e_book_view_is_freezable           (EBookView *book_view);
  
 +void               e_book_view_set_parse_vcards       (EBookView *book_view, gboolean emit_vcards);
 +gboolean           e_book_view_get_parse_vcards       (EBookView *book_view);
@@ -153,8 +153,8 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-book-view.h
  G_END_DECLS
 Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c
 ===================================================================
---- evolution-data-server.orig/addressbook/libedata-book-dbus/e-data-book-view.c	2008-06-23 22:02:57.000000000 +0200
-+++ evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c	2008-06-23 22:04:25.000000000 +0200
+--- evolution-data-server.orig/addressbook/libedata-book-dbus/e-data-book-view.c	2008-06-24 17:38:41.000000000 +0200
++++ evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c	2008-06-24 17:39:05.000000000 +0200
 @@ -515,11 +515,12 @@
  notify_add (EDataBookView *view, const char *id, char *vcard)
  {

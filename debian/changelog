@@ -1,3 +1,12 @@
+evolution-data-server (1.4.2.1-20080624.1) unstable; urgency=low
+
+  * 24_freeze-thaw.diff: Announce freezable capability for file backend
+    and check this capability before enabling freezable mode.
+  * 25_index_for_sorting.diff: Update chunk offsets.
+  * 26_delayed_vcard_parsing.diff: Update chunk offsets.
+
+ -- Mathias Hasselmann <mathias@openismus-secure.com>  Tue, 24 Jun 2008 17:39:51 +0200
+
 evolution-data-server (1.4.2.1-20080624) unstable; urgency=low
 
   * 04_contact-fields.diff: Add X-OSSO-SPEED-DIAL-NUMBER attribute.
