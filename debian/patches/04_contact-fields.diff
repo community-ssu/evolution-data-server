@@ -2,15 +2,16 @@ Add defines and accessors for the Maemo contact-state and last-used fields.
 
 Index: addressbook/libebook-dbus/e-vcard.h
 ===================================================================
---- addressbook/libebook-dbus/e-vcard.h.orig	2008-06-19 13:14:10.000000000 +0200
-+++ addressbook/libebook-dbus/e-vcard.h	2008-06-21 17:39:50.000000000 +0200
-@@ -91,6 +91,21 @@
+--- addressbook/libebook-dbus/e-vcard.h.orig	2008-06-24 11:41:27.000000000 +0200
++++ addressbook/libebook-dbus/e-vcard.h	2008-06-24 11:44:39.000000000 +0200
+@@ -91,6 +91,22 @@
  #define EVC_X_GROUPWISE     	"X-GROUPWISE"
  #define EVC_X_BOOK_URI     	"X-EVOLUTION-BOOK-URI"
  
 +#define EVC_X_OSSO_CONTACT_STATE        "X-OSSO-CONTACT-STATE"
 +#define EVC_X_OSSO_LAST_USED            "X-OSSO-LAST-USED"
 +#define EVC_X_OSSO_MASTER_UID           "X-OSSO-MASTER-UID"
++#define EVC_X_OSSO_SPEED_DIAL_NUMBER    "X-OSSO-SPEED-DIAL-NUMBER"
 +
 +#define EVC_X_TELEPATHY_HANDLE          "X-TELEPATHY-HANDLE"
 +#define EVC_X_TELEPATHY_PRESENCE        "X-TELEPATHY-PRESENCE"
@@ -28,8 +29,8 @@ Index: addressbook/libebook-dbus/e-vcard.h
  	EVC_FORMAT_VCARD_30
 Index: addressbook/libebook-dbus/e-contact.c
 ===================================================================
---- addressbook/libebook-dbus/e-contact.c.orig	2008-06-19 13:14:10.000000000 +0200
-+++ addressbook/libebook-dbus/e-contact.c	2008-06-21 17:41:12.000000000 +0200
+--- addressbook/libebook-dbus/e-contact.c.orig	2008-06-24 11:41:27.000000000 +0200
++++ addressbook/libebook-dbus/e-contact.c	2008-06-24 11:44:21.000000000 +0200
 @@ -92,6 +92,8 @@
  static void date_setter (EContact *contact, EVCardAttribute *attr, void *data);
  static void* cert_getter (EContact *contact, EVCardAttribute *attr);
@@ -39,7 +40,7 @@ Index: addressbook/libebook-dbus/e-contact.c
  
  #define STRING_FIELD(id,vc,n,pn,ro)  { E_CONTACT_FIELD_TYPE_STRING, (id), (vc), (n), (pn), (ro) }
  #define BOOLEAN_FIELD(id,vc,n,pn,ro)  { E_CONTACT_FIELD_TYPE_BOOLEAN, (id), (vc), (n), (pn), (ro) }
-@@ -276,7 +278,19 @@
+@@ -276,7 +278,20 @@
  	MULTI_LIST_FIELD (E_CONTACT_SIP, 	  EVC_X_SIP,    "sip",    N_("SIP address"),          FALSE),
  
  	/* Geo information */
@@ -49,6 +50,7 @@ Index: addressbook/libebook-dbus/e-contact.c
 +	STRING_FIELD (E_CONTACT_OSSO_CONTACT_STATE,     EVC_X_OSSO_CONTACT_STATE,       "osso-contact-state",           N_("Contact State"),                    FALSE),
 +	STRING_FIELD (E_CONTACT_OSSO_LAST_USED,         EVC_X_OSSO_LAST_USED,           "osso-last-used",               N_("Last Used"),                        FALSE),
 +	LIST_FIELD   (E_CONTACT_OSSO_MASTER_UID,        EVC_X_OSSO_MASTER_UID,          "osso-master-uid",              N_("UID of Master Contact"),            FALSE),
++	STRING_FIELD (E_CONTACT_OSSO_SPEED_DIAL_NUMBER, EVC_X_OSSO_SPEED_DIAL_NUMBER,   "osso-speed-dial-number",       N_("Speed dial number"),                FALSE),
 +
 +	STRING_FIELD (E_CONTACT_TELEPATHY_HANDLE,       EVC_X_TELEPATHY_HANDLE,         "telepathy-handle",             N_("Telepathy Handle"),                 FALSE),
 +	STRUCT_FIELD (E_CONTACT_TELEPATHY_PRESENCE,     EVC_X_TELEPATHY_PRESENCE,       "telepathy-presence",           N_("Telepathy Presence Status"),        FALSE, presence_getter, presence_setter, e_contact_presence_get_type),
@@ -60,7 +62,7 @@ Index: addressbook/libebook-dbus/e-contact.c
  };
  
  #undef LIST_ELEM_STR_FIELD
-@@ -729,6 +743,33 @@
+@@ -729,6 +744,33 @@
  	e_vcard_attribute_add_value_decoded (attr, cert->data, cert->length);
  }
  
@@ -94,7 +96,7 @@ Index: addressbook/libebook-dbus/e-contact.c
  
  
  /* Set_arg handler for the contact */
-@@ -2172,3 +2213,40 @@
+@@ -2172,3 +2214,40 @@
  							(GBoxedFreeFunc) e_contact_cert_free);
  	return type_id;
  }
@@ -137,15 +139,16 @@ Index: addressbook/libebook-dbus/e-contact.c
 +
 Index: addressbook/libebook-dbus/e-contact.h
 ===================================================================
---- addressbook/libebook-dbus/e-contact.h.orig	2008-06-19 13:14:10.000000000 +0200
-+++ addressbook/libebook-dbus/e-contact.h	2008-06-21 17:40:42.000000000 +0200
-@@ -201,6 +201,17 @@
+--- addressbook/libebook-dbus/e-contact.h.orig	2008-06-24 11:41:27.000000000 +0200
++++ addressbook/libebook-dbus/e-contact.h	2008-06-24 11:44:28.000000000 +0200
+@@ -201,6 +201,18 @@
  
  	E_CONTACT_GEO,	/* structured field (EContactGeo) */	
  
 +	E_CONTACT_OSSO_CONTACT_STATE,           /* string */
 +	E_CONTACT_OSSO_LAST_USED,               /* string */
 +	E_CONTACT_OSSO_MASTER_UID,              /* Multi-valued */
++	E_CONTACT_OSSO_SPEED_DIAL_NUMBER,       /* string */
 +
 +	E_CONTACT_TELEPATHY_HANDLE,             /* string */
 +	E_CONTACT_TELEPATHY_PRESENCE,           /* structured field (EContactPresence) */
@@ -157,7 +160,7 @@ Index: addressbook/libebook-dbus/e-contact.h
  	E_CONTACT_FIELD_LAST,
  	E_CONTACT_FIELD_FIRST        = E_CONTACT_UID,
  
-@@ -271,6 +282,11 @@
+@@ -271,6 +283,11 @@
  	char *data;
  } EContactCert;
  
@@ -169,7 +172,7 @@ Index: addressbook/libebook-dbus/e-contact.h
  struct _EContact {
  	EVCard parent;
  	/*< private >*/
-@@ -330,10 +346,12 @@
+@@ -330,10 +347,12 @@
  GType                   e_contact_cert_get_type    (void);
  void                    e_contact_cert_free        (EContactCert *cert);
  

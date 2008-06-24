@@ -1,10 +1,16 @@
+evolution-data-server (1.4.2.1-20080624) unstable; urgency=low
+
+  * 04_contact-fields.diff: Add X-OSSO-SPEED-DIAL-NUMBER attribute.
+
+ -- Mathias Hasselmann <mathias@openismus-secure.com>  Tue, 24 Jun 2008 11:45:34 +0200
+
 evolution-data-server (1.4.2.1-20080623) unstable; urgency=low
 
   * 24_freeze-thaw.diff: Introduce e_book_view_get_freezable().
   * 25_index_for_sorting.diff: Update patch offsets.
   * 26_delayed_vcard_parsing.diff: Add e_book_view_get_parse_vcards().
 
- -- Mathias Hasselmann <mathias@localhost>  Mon, 23 Jun 2008 22:07:17 +0200
+ -- Mathias Hasselmann <mathias@openismus-secure.com>  Mon, 23 Jun 2008 22:07:17 +0200
 
 evolution-data-server (1.4.2.1-20080622) unstable; urgency=low
 
