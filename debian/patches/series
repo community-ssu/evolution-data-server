@@ -20,3 +20,4 @@
 24_freeze-thaw.diff
 25_index_for_sorting.diff
 26_delayed_vcard_parsing.diff
+27_dbus_error_mapping.diff

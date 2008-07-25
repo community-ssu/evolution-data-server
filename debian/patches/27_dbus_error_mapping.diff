@@ -1,0 +1,92 @@
+Index: evolution-data-server/addressbook/libebook-dbus/e-book.c
+===================================================================
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-book.c	2008-07-25 13:08:02.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-book.c	2008-07-25 13:08:06.000000000 +0200
+@@ -2199,29 +2199,68 @@
+ static EBookStatus
+ get_status_from_error (GError *error)
+ {
++  static struct {
++    const char  *name;
++    EBookStatus  status;
++    GQuark       quark;
++  } error_mapping[] = {
++    { "org.gnome.evolution.dataserver.addressbook.Book.repository_offline",
++      E_BOOK_ERROR_REPOSITORY_OFFLINE, 0 },
++    { "org.gnome.evolution.dataserver.addressbook.Book.permission_denied",
++      E_BOOK_ERROR_PERMISSION_DENIED, 0 },
++    { "org.gnome.evolution.dataserver.addressbook.Book.contact_not_found",
++      E_BOOK_ERROR_CONTACT_NOT_FOUND, 0 },
++    { "org.gnome.evolution.dataserver.addressbook.Book.contact_id_already_exists",
++      E_BOOK_ERROR_CONTACT_ID_ALREADY_EXISTS, 0 },
++    { "org.gnome.evolution.dataserver.addressbook.Book.authentication_failed",
++      E_BOOK_ERROR_AUTHENTICATION_FAILED, 0 },
++    { "org.gnome.evolution.dataserver.addressbook.Book.authentication_required",
++      E_BOOK_ERROR_AUTHENTICATION_REQUIRED, 0 },
++    { "org.gnome.evolution.dataserver.addressbook.Book.tls_not_available",
++      E_BOOK_ERROR_TLS_NOT_AVAILABLE, 0 },
++    { "org.gnome.evolution.dataserver.addressbook.Book.no_such_book",
++      E_BOOK_ERROR_NO_SUCH_BOOK, 0 },
++    { "org.gnome.evolution.dataserver.addressbook.Book.offline_unavailable",
++      E_BOOK_ERROR_OFFLINE_UNAVAILABLE, 0 },
++    { "org.gnome.evolution.dataserver.addressbook.Book.could_not_cancel",
++      E_BOOK_ERROR_COULD_NOT_CANCEL, 0 },
++    { "org.gnome.evolution.dataserver.addressbook.Book.other_error",
++      E_BOOK_ERROR_OTHER_ERROR, 0 },
++    { "org.gnome.evolution.dataserver.addressbook.Book.invalid_server_version",
++      E_BOOK_ERROR_INVALID_SERVER_VERSION, 0 },
++    { "org.gnome.evolution.dataserver.addressbook.Book.no_space",
++      E_BOOK_ERROR_NO_SPACE, 0 },
++    { "org.gnome.evolution.dataserver.addressbook.Book_View.invalid_query",
++      E_BOOK_VIEW_ERROR_INVALID_QUERY, 0 },
++    { "org.gnome.evolution.dataserver.addressbook.Book_View.query_refused",
++      E_BOOK_VIEW_ERROR_QUERY_REFUSED, 0 },
++  };
++
+   if G_LIKELY (error == NULL)
+     return E_BOOK_ERROR_OK;
++
+   if (error->domain == DBUS_GERROR && error->code == DBUS_GERROR_REMOTE_EXCEPTION) {
+-    const char *name;
+-    name = dbus_g_error_get_name (error);
+-    if (strcmp (name, "org.gnome.evolution.dataserver.addressbook.Book.contactnotfound") == 0) {
+-      return E_BOOK_ERROR_CONTACT_NOT_FOUND;
+-    } else if (strcmp (name, "org.gnome.evolution.dataserver.addressbook.Book.invalidquery") == 0) {
+-      return E_BOOK_ERROR_INVALID_ARG;
+-    } else if (strcmp (name, "org.gnome.evolution.dataserver.addressbook.Book.cancelled") == 0) {
+-      return E_BOOK_ERROR_CANCELLED;
+-    } else if (strcmp (name, "org.gnome.evolution.dataserver.addressbook.Book.permissiondenied") == 0) {
+-      return E_BOOK_ERROR_PERMISSION_DENIED;
+-    } else if (strcmp (name, "org.gnome.evolution.dataserver.addressbook.Book.nospace") == 0) {
+-      return E_BOOK_ERROR_NO_SPACE;
+-    } else if (strcmp (name, "org.gnome.evolution.dataserver.addressbook.Book.repositoryoffline") == 0) {
+-      return E_BOOK_ERROR_REPOSITORY_OFFLINE;
+-    } else if (strcmp (name, "org.gnome.evolution.dataserver.addressbook.Book.othererror") == 0) {
+-      return E_BOOK_ERROR_OTHER_ERROR;
+-    } else {
+-      g_warning (G_STRLOC ": unmatched error name %s", name);
+-      return E_BOOK_ERROR_OTHER_ERROR;
++    const char *error_name;
++    GQuark error_quark;
++    int i;
++
++    if (G_UNLIKELY (!error_mapping[0].quark)) {
++      for (i = 0; i < G_N_ELEMENTS (error_mapping); ++i)
++        error_mapping[i].quark = g_quark_from_static_string (error_mapping[i].name);
+     }
++
++    error_name = dbus_g_error_get_name (error);
++    error_quark = g_quark_try_string (error_name);
++
++    if (error_quark) {
++      for (i = 0; i < G_N_ELEMENTS (error_mapping); ++i) {
++        if (error_mapping[i].quark == error_quark)
++          return error_mapping[i].status;
++      }
++    }
++
++    g_warning (G_STRLOC ": unmatched error name %s", error_name);
++    return E_BOOK_ERROR_OTHER_ERROR;
+   } else {
+     /* In this case the error was caused by DBus. Dump the message to the
+        console as otherwise we have no idea what the problem is. */
