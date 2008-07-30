@@ -1,7 +1,7 @@
 Index: evolution-data-server/addressbook/libebook-dbus/e-book-view.c
 ===================================================================
---- evolution-data-server.orig/addressbook/libebook-dbus/e-book-view.c	2008-07-29 15:17:36.000000000 +0100
-+++ evolution-data-server/addressbook/libebook-dbus/e-book-view.c	2008-07-29 15:17:36.000000000 +0100
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-book-view.c	2008-07-29 22:44:40.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-book-view.c	2008-07-29 23:00:18.000000000 +0200
 @@ -37,6 +37,7 @@
  
    gboolean running : 1;
@@ -147,8 +147,8 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-book-view.c
 +
 Index: evolution-data-server/addressbook/libebook-dbus/e-book-view.h
 ===================================================================
---- evolution-data-server.orig/addressbook/libebook-dbus/e-book-view.h	2008-07-29 15:17:36.000000000 +0100
-+++ evolution-data-server/addressbook/libebook-dbus/e-book-view.h	2008-07-29 15:17:36.000000000 +0100
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-book-view.h	2008-07-29 22:44:40.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-book-view.h	2008-07-29 23:00:18.000000000 +0200
 @@ -77,6 +77,9 @@
  void               e_book_view_set_freezable          (EBookView *book_view, gboolean freezable);
  gboolean           e_book_view_is_freezable           (EBookView *book_view);
@@ -161,114 +161,21 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-book-view.h
  G_END_DECLS
 Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c
 ===================================================================
---- evolution-data-server.orig/addressbook/libedata-book-dbus/e-data-book-view.c	2008-07-29 15:17:36.000000000 +0100
-+++ evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c	2008-07-29 15:19:27.000000000 +0100
-@@ -34,8 +34,6 @@
- 
- #include "e-data-book-view-glue.h"
- 
--static void reset_array (GArray *array);
--
- G_DEFINE_TYPE (EDataBookView, e_data_book_view, G_TYPE_OBJECT);
- #define E_DATA_BOOK_VIEW_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), E_TYPE_DATA_BOOK_VIEW, EDataBookViewPrivate))
- 
-@@ -53,9 +51,9 @@
-   gboolean running;
-   GMutex *pending_mutex;
- 
--  GArray *adds;
--  GArray *changes;
--  GArray *removes;
-+  GPtrArray *adds;
-+  GPtrArray *changes;
-+  GPtrArray *removes;
- 
-   GHashTable *ids;
-   guint idle_id;
-@@ -145,9 +143,10 @@
+--- evolution-data-server.orig/addressbook/libedata-book-dbus/e-data-book-view.c	2008-07-29 22:46:35.000000000 +0200
++++ evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c	2008-07-29 23:00:18.000000000 +0200
+@@ -143,8 +143,9 @@
    priv->running = FALSE;
    priv->pending_mutex = g_mutex_new ();
  
--  priv->adds = g_array_sized_new (TRUE, TRUE, sizeof (char*), THRESHOLD);
--  priv->changes = g_array_sized_new (TRUE, TRUE, sizeof (char*), THRESHOLD);
--  priv->removes = g_array_sized_new (TRUE, TRUE, sizeof (char*), THRESHOLD);
+-  priv->adds = g_ptr_array_sized_new (THRESHOLD);
+-  priv->changes = g_ptr_array_sized_new (THRESHOLD);
 +  /* THRESHOLD * 2: we store UID and vCard */
 +  priv->adds = g_ptr_array_sized_new (THRESHOLD * 2);
 +  priv->changes = g_ptr_array_sized_new (THRESHOLD * 2);
-+  priv->removes = g_ptr_array_sized_new (THRESHOLD);
+   priv->removes = g_ptr_array_sized_new (THRESHOLD);
  
    priv->ids = g_hash_table_new_full (g_str_hash, g_str_equal,
-                                      g_free, NULL);
-@@ -276,15 +275,20 @@
-   G_OBJECT_CLASS (e_data_book_view_parent_class)->dispose (object);
- }
- 
-+static void reset_array (GPtrArray *array);
-+
- static void
- e_data_book_view_finalize (GObject *object)
- {
-   EDataBookView *book_view = E_DATA_BOOK_VIEW (object);
-   EDataBookViewPrivate *priv = book_view->priv;
- 
--  g_strfreev ((char**)g_array_free (priv->adds, FALSE));
--  g_strfreev ((char**)g_array_free (priv->changes, FALSE));
--  g_strfreev ((char**)g_array_free (priv->removes, FALSE));
-+  reset_array (priv->adds);
-+  reset_array (priv->changes);
-+  reset_array (priv->removes);
-+  g_ptr_array_free (priv->adds, FALSE);
-+  g_ptr_array_free (priv->changes, FALSE);
-+  g_ptr_array_free (priv->removes, FALSE);
- 
-   g_free (priv->card_query);
- 
-@@ -454,6 +458,17 @@
- }
- 
- static void
-+reset_array (GPtrArray *array)
-+{
-+  int i;
-+
-+  for (i = 0; i < array->len; ++i)
-+    g_free (array->pdata[i]);
-+
-+  g_ptr_array_set_size (array, 0);
-+}
-+
-+static void
- send_pending_adds (EDataBookView *view)
- {
-   EDataBookViewPrivate *priv = view->priv;
-@@ -461,7 +476,8 @@
-   if (priv->adds->len == 0)
-     return;
- 
--  g_signal_emit (view, signals[CONTACTS_ADDED], 0, priv->adds->data);
-+  g_ptr_array_add (priv->adds, NULL);
-+  g_signal_emit (view, signals[CONTACTS_ADDED], 0, priv->adds->pdata);
-   reset_array (priv->adds);
- }
- 
-@@ -473,7 +489,8 @@
-   if (priv->changes->len == 0)
-     return;
- 
--  g_signal_emit (view, signals[CONTACTS_CHANGED], 0, priv->changes->data);
-+  g_ptr_array_add (priv->changes, NULL);
-+  g_signal_emit (view, signals[CONTACTS_CHANGED], 0, priv->changes->pdata);
-   reset_array (priv->changes);
- }
- 
-@@ -485,29 +502,31 @@
-   if (priv->removes->len == 0)
-     return;
- 
--  g_signal_emit (view, signals[CONTACTS_REMOVED], 0, priv->removes->data);
-+  g_ptr_array_add (priv->removes, NULL);
-+  g_signal_emit (view, signals[CONTACTS_REMOVED], 0, priv->removes->pdata);
-   reset_array (priv->removes);
+@@ -506,24 +507,25 @@
  }
  
  static void
@@ -278,9 +185,8 @@ Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c
    EDataBookViewPrivate *priv = view->priv;
    send_pending_adds (view);
    send_pending_removes (view);
-   
--  g_array_append_val (priv->changes, vcard);
-+  g_ptr_array_add (priv->changes, vcard);
+ 
+   g_ptr_array_add (priv->changes, vcard);
 +  g_ptr_array_add (priv->changes, g_strdup (id));
  }
  
@@ -293,12 +199,12 @@ Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c
    send_pending_adds (view);
    send_pending_changes (view);
  
--  g_array_append_val (priv->removes, id);
+-  g_ptr_array_add (priv->removes, id);
 +  g_ptr_array_add (priv->removes, g_strdup (id));
    g_hash_table_remove (priv->ids, id);
  }
  
-@@ -515,11 +534,11 @@
+@@ -531,11 +533,11 @@
  notify_add (EDataBookView *view, const char *id, char *vcard)
  {
    EDataBookViewPrivate *priv = view->priv;
@@ -312,19 +218,18 @@ Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c
      if (priv->freezable)
      {
        g_mutex_lock (priv->thaw_lock);
-@@ -531,7 +550,10 @@
+@@ -547,7 +549,10 @@
        send_pending_adds (view);
      }
    }
--  g_array_append_val (priv->adds, vcard);
 +
-+  g_ptr_array_add (priv->adds, vcard);
+   g_ptr_array_add (priv->adds, vcard);
 +  g_ptr_array_add (priv->adds, g_strdup (id));
 +
    g_hash_table_insert (priv->ids, g_strdup (id),
                         GUINT_TO_POINTER (1));
  }
-@@ -561,12 +583,12 @@
+@@ -577,12 +582,12 @@
                                 EVC_FORMAT_VCARD_30);
  
      if (currently_in_view)
@@ -339,7 +244,7 @@ Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c
      /* else nothing; we're removing a card that wasn't there */
    }
  
-@@ -595,12 +617,12 @@
+@@ -611,12 +616,12 @@
  
    if (want_in_view) {
      if (currently_in_view)
@@ -354,7 +259,7 @@ Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c
      else
        /* else nothing; we're removing a card that wasn't there */
        g_free (vcard);
-@@ -626,7 +648,7 @@
+@@ -642,7 +647,7 @@
      g_hash_table_lookup (priv->ids, id) != NULL;
  
    if (currently_in_view)
@@ -363,7 +268,7 @@ Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c
    else
      notify_add (book_view, id, vcard);
  
-@@ -644,7 +666,7 @@
+@@ -660,7 +665,7 @@
    g_mutex_lock (priv->pending_mutex);
  
    if (g_hash_table_lookup (priv->ids, id))
@@ -372,28 +277,11 @@ Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c
    
    g_mutex_unlock (priv->pending_mutex);
  }
-@@ -682,16 +704,3 @@
-   g_signal_emit (book_view, signals[STATUS_MESSAGE], 0, message);
- }
- 
--static void
--reset_array (GArray *array)
--{
--  char **l;
--  
--  /* Free the stored strings */
--  for (l = (char**)array->data; *l; l++) {
--    g_free (*l);
--  };
--
--  /* Force the array size to 0 */
--  g_array_set_size (array, 0);
--}
 Index: evolution-data-server/addressbook/libebook-dbus/e-contact.c
 ===================================================================
---- evolution-data-server.orig/addressbook/libebook-dbus/e-contact.c	2008-07-29 15:17:35.000000000 +0100
-+++ evolution-data-server/addressbook/libebook-dbus/e-contact.c	2008-07-29 15:17:36.000000000 +0100
-@@ -405,26 +405,6 @@
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-contact.c	2008-07-29 22:36:30.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-contact.c	2008-07-29 23:00:18.000000000 +0200
+@@ -390,26 +390,6 @@
  	return contact_type;
  }
  
@@ -420,7 +308,7 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-contact.c
  
  
  static void*
-@@ -554,7 +534,7 @@
+@@ -539,7 +519,7 @@
  
  	e_vcard_attribute_add_value (attr, name_str);
  
@@ -429,7 +317,7 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-contact.c
  	if (!attr) {
  		EContactName *name = e_contact_name_from_string ((char*)data);
  
-@@ -587,7 +567,7 @@
+@@ -572,7 +552,7 @@
  		name->suffixes   = g_strdup (p && p->data ? p->data : "");
  	}
  
@@ -438,7 +326,7 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-contact.c
  	if (!new_attr) {
  		new_attr = e_vcard_attribute_new (NULL, EVC_FN);
  		e_vcard_add_attribute (E_VCARD (contact), new_attr);
-@@ -611,7 +591,7 @@
+@@ -596,7 +576,7 @@
  	e_vcard_attribute_add_value (attr, name->suffixes ?: "");
  
  	/* now find the attribute for FileAs.  if it's not present, fill it in */
@@ -447,7 +335,7 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-contact.c
  	if (!attr) {
  		char *strings[3], **stringptr;
  		char *string;
-@@ -959,7 +939,7 @@
+@@ -917,7 +897,7 @@
  			}
  		}
  		else if (info->t & E_CONTACT_FIELD_TYPE_LIST_ELEM) {
@@ -456,7 +344,7 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-contact.c
  			GList *values;
  			GList *p;
  			const char *sval = g_value_get_string (value);
-@@ -994,7 +974,7 @@
+@@ -952,7 +932,7 @@
  		else {
  			switch (info->field_id) {
  			case E_CONTACT_CATEGORIES: {
@@ -465,7 +353,7 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-contact.c
  				char **split, **s;
  				const char *str;
  
-@@ -1031,7 +1011,7 @@
+@@ -989,7 +969,7 @@
  		}
  	}
  	else if (info->t & E_CONTACT_FIELD_TYPE_STRUCT || info->t & E_CONTACT_FIELD_TYPE_GETSET) {
@@ -474,7 +362,7 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-contact.c
  		void *data = info->t & E_CONTACT_FIELD_TYPE_STRUCT ? g_value_get_boxed (value) : (char*)g_value_get_string (value);
  
  		if (attr) {
-@@ -1065,7 +1045,7 @@
+@@ -1023,7 +1003,7 @@
  		EVCardAttribute *attr;
  
  		/* first we search for an attribute we can overwrite */
@@ -483,7 +371,7 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-contact.c
  		if (attr) {
  			d(printf ("setting %s to `%s'\n", info->vcard_field_name, g_value_get_string (value)));
  			e_vcard_attribute_remove_values (attr);
-@@ -1083,7 +1063,7 @@
+@@ -1041,7 +1021,7 @@
  		const char *sval = g_value_get_string (value);
  
  		/* first we search for an attribute we can overwrite */
@@ -492,7 +380,7 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-contact.c
  		if (attr) {
  			d(printf ("setting %s to `%s'\n", info->vcard_field_name, sval));
  			e_vcard_attribute_remove_values (attr);
-@@ -1110,7 +1090,7 @@
+@@ -1068,7 +1048,7 @@
  
  		values = g_value_get_pointer (value);
  
@@ -501,7 +389,7 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-contact.c
  
  		if (attr) {
  			e_vcard_attribute_remove_values (attr);
-@@ -1267,7 +1247,7 @@
+@@ -1225,7 +1205,7 @@
   * Return value: A new #EContact.
   **/
  EContact*
@@ -510,7 +398,7 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-contact.c
  {
  	EContact *contact;
  	const gchar *file_as;
-@@ -1443,7 +1423,7 @@
+@@ -1401,7 +1381,7 @@
  	info = &field_info[field_id];
  
  	if (info->t & E_CONTACT_FIELD_TYPE_BOOLEAN) {
@@ -519,7 +407,7 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-contact.c
  		gboolean rv = FALSE;
  
  		if (attr) {
-@@ -1453,7 +1433,7 @@
+@@ -1411,7 +1391,7 @@
  		}
  	}
  	else if (info->t & E_CONTACT_FIELD_TYPE_LIST) {
@@ -528,7 +416,7 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-contact.c
  
  		if (attr) {
  			GList *list = g_list_copy (e_vcard_attribute_get_values (attr));
-@@ -1465,7 +1445,7 @@
+@@ -1423,7 +1403,7 @@
  	}
  	else if (info->t & E_CONTACT_FIELD_TYPE_LIST_ELEM) {
  		if (info->t & E_CONTACT_FIELD_TYPE_STRING) {
@@ -537,7 +425,7 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-contact.c
  
  			if (attr) {
  				GList *v;
-@@ -1518,12 +1498,12 @@
+@@ -1476,12 +1456,12 @@
  
  	}
  	else if (info->t & E_CONTACT_FIELD_TYPE_STRUCT) {
@@ -552,7 +440,7 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-contact.c
  		void *rv = NULL;
  
  		if (attr)
-@@ -1556,7 +1536,7 @@
+@@ -1514,7 +1494,7 @@
  			return g_strdup (str);
  		}
  		case E_CONTACT_CATEGORIES: {
@@ -561,7 +449,7 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-contact.c
  			char *rv = NULL;
  
  			if (attr) {
-@@ -1579,6 +1559,23 @@
+@@ -1537,6 +1517,23 @@
  			break;
  		}
  	}
@@ -585,7 +473,7 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-contact.c
  	else {
  		GList *attrs, *l;
  		GList *rv = NULL; /* used for multi attribute lists */
-@@ -1592,18 +1589,12 @@
+@@ -1550,18 +1547,12 @@
  			name = e_vcard_attribute_get_name (attr);
  
  			if (!g_ascii_strcasecmp (name, info->vcard_field_name)) {
@@ -610,9 +498,9 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-contact.c
  }
 Index: evolution-data-server/addressbook/libebook-dbus/e-vcard.h
 ===================================================================
---- evolution-data-server.orig/addressbook/libebook-dbus/e-vcard.h	2008-07-29 15:17:35.000000000 +0100
-+++ evolution-data-server/addressbook/libebook-dbus/e-vcard.h	2008-07-29 15:17:36.000000000 +0100
-@@ -145,13 +145,16 @@
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-vcard.h	2008-07-29 22:36:29.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-vcard.h	2008-07-29 23:00:18.000000000 +0200
+@@ -129,13 +129,16 @@
  GType   e_vcard_get_type                     (void);
  
  void    e_vcard_construct                    (EVCard *evc, const char *str);
@@ -632,8 +520,8 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-vcard.h
  /* attributes */
 Index: evolution-data-server/addressbook/libebook-dbus/e-vcard.c
 ===================================================================
---- evolution-data-server.orig/addressbook/libebook-dbus/e-vcard.c	2008-07-29 15:17:25.000000000 +0100
-+++ evolution-data-server/addressbook/libebook-dbus/e-vcard.c	2008-07-29 15:17:36.000000000 +0100
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-vcard.c	2008-07-29 22:36:30.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-vcard.c	2008-07-29 23:00:18.000000000 +0200
 @@ -47,6 +47,7 @@
  
  struct _EVCardPrivate {

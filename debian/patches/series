@@ -2,11 +2,8 @@
 01_exists_vcard.diff
 02_abook-path.diff -p0
 03_bdb-error.diff -p0
-04_contact-fields.diff -p0
 05_contact-no-fileas.diff -p0
 07_peer-view.diff -p0
-09_query-visible.diff -p0
-12_summary-visible.diff -p0
 13_no_camel.diff -p0
 14_disable_i18n.diff
 15_remove_from_subdirs.diff
@@ -19,5 +16,6 @@
 23_book_view_disposal.diff
 24_freeze-thaw.diff
 25_index_for_sorting.diff
-26_delayed_vcard_parsing.diff
-27_dbus_error_mapping.diff
+26_ptr_arrays.diff
+27_delayed_vcard_parsing.diff
+28_dbus_error_mapping.diff
