@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20080805) unstable; urgency=low
+
+  * 27_delayed_vcard_parsing.diff: Avoid UID duplication.
+
+ -- Mathias Hasselmann <mathias@openismus.com>  Wed,  6 Aug 2008 00:26:09 +0200
+
 evolution-data-server (1.4.2.1-20080729) unstable; urgency=low
 
   * 04_contact-fields.diff, 09_query-visible.diff, 12_summary-visible.diff:
