@@ -1,5 +1,7 @@
 evolution-data-server (1.4.2.1-20080806) unstable; urgency=low
 
+  * 05_contact-no-fileas.diff: Don't add file-as attribute when setting the
+    "FN"/"N" attribute either.
   * 17_remove_from_dist.diff: Remove unused dist folder from SUBDIRS list in
     libdb/Makefile.am to repair the distclean rule, which is responsible for
     removing stuff like "config.status".
