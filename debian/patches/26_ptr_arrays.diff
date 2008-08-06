@@ -99,11 +99,12 @@ Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c
    reset_array (priv->changes);
  }
  
-@@ -485,7 +501,7 @@
+@@ -485,7 +501,8 @@
    if (priv->removes->len == 0)
      return;
  
 -  g_signal_emit (view, signals[CONTACTS_REMOVED], 0, priv->removes->data);
++  g_ptr_array_add (priv->removes, NULL);
 +  g_signal_emit (view, signals[CONTACTS_REMOVED], 0, priv->removes->pdata);
    reset_array (priv->removes);
  }
