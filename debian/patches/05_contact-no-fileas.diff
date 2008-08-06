@@ -2,9 +2,26 @@ Don't generate a file-as field, we never use it and this takes time.
 
 Index: addressbook/libebook-dbus/e-contact.c
 ===================================================================
---- addressbook/libebook-dbus/e-contact.c.orig	2008-04-23 15:16:15.000000000 +0100
-+++ addressbook/libebook-dbus/e-contact.c	2008-04-23 15:18:04.000000000 +0100
-@@ -1238,6 +1238,7 @@
+--- addressbook/libebook-dbus/e-contact.c.orig	2008-08-06 15:14:38.000000000 +0300
++++ addressbook/libebook-dbus/e-contact.c	2008-08-06 15:15:12.000000000 +0300
+@@ -595,6 +595,7 @@
+ 	e_vcard_attribute_add_value (attr, name->prefixes ?: "");
+ 	e_vcard_attribute_add_value (attr, name->suffixes ?: "");
+ 
++#if 0
+ 	/* now find the attribute for FileAs.  if it's not present, fill it in */
+ 	attr = e_contact_get_first_attr (contact, EVC_X_FILE_AS);
+ 	if (!attr) {
+@@ -614,7 +615,7 @@
+ 		e_vcard_attribute_add_value (attr, string);
+ 		g_free (string);
+ 	}
+-
++#endif
+ }
+ 
+ 
+@@ -1235,6 +1236,7 @@
  	contact = g_object_new (E_TYPE_CONTACT, NULL);
  	e_vcard_construct (E_VCARD (contact), vcard);
  
@@ -12,7 +29,7 @@ Index: addressbook/libebook-dbus/e-contact.c
  	/* Generate a FILE_AS field if needed */
  
  	file_as = e_contact_get_const (contact, E_CONTACT_FILE_AS);
-@@ -1273,6 +1274,7 @@
+@@ -1270,6 +1272,7 @@
  			g_free (file_as_new);
  		}
  	}
