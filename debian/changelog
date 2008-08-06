@@ -1,3 +1,11 @@
+evolution-data-server (1.4.2.1-20080806) unstable; urgency=low
+
+  * 17_remove_from_dist.diff: Remove unused dist folder from SUBDIRS list in
+    libdb/Makefile.am to repair the distclean rule, which is responsible for
+    removing stuff like "config.status".
+
+ -- Mathias Hasselmann <mathias@openismus.com>  Wed,  6 Aug 2008 14:55:40 +0200
+
 evolution-data-server (1.4.2.1-20080805) unstable; urgency=low
 
   * 27_delayed_vcard_parsing.diff: Avoid UID duplication.

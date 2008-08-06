@@ -1,9 +1,9 @@
 Make the dist contain only coded that we build by forcing DIST_SUBDIRS.
 
-Index: git/Makefile.am
+Index: evolution-data-server/Makefile.am
 ===================================================================
---- git.orig/Makefile.am	2008-04-30 14:07:52.000000000 +0100
-+++ git/Makefile.am	2008-04-30 14:09:22.000000000 +0100
+--- evolution-data-server.orig/Makefile.am	2008-08-06 14:45:48.000000000 +0200
++++ evolution-data-server/Makefile.am	2008-08-06 14:45:48.000000000 +0200
 @@ -15,7 +15,7 @@
  SUBDIRS = $(LIBDB) libedataserver servers camel addressbook $(CALENDAR_DIR) libedataserverui src docs art po
  endif
@@ -2140,22 +2140,29 @@ Index: git/Makefile.am
 -libdb/docs/utility/db_upgrade.html \
 -libdb/docs/utility/db_verify.html
 -
-Index: git/addressbook/Makefile.am
+Index: evolution-data-server/addressbook/Makefile.am
 ===================================================================
---- git.orig/addressbook/Makefile.am	2008-04-29 17:55:36.000000000 +0100
-+++ git/addressbook/Makefile.am	2008-04-30 14:07:52.000000000 +0100
+--- evolution-data-server.orig/addressbook/Makefile.am	2008-08-06 14:44:53.000000000 +0200
++++ evolution-data-server/addressbook/Makefile.am	2008-08-06 14:45:48.000000000 +0200
 @@ -5,3 +5,4 @@
  endif
  
  SUBDIRS = $(DIRS)
 +DIST_SUBDIRS = $(SUBDIRS)
-Index: git/addressbook/backends/Makefile.am
+Index: evolution-data-server/addressbook/backends/Makefile.am
 ===================================================================
---- git.orig/addressbook/backends/Makefile.am	2008-04-29 17:55:36.000000000 +0100
-+++ git/addressbook/backends/Makefile.am	2008-04-30 14:07:52.000000000 +0100
+--- evolution-data-server.orig/addressbook/backends/Makefile.am	2008-08-06 14:44:53.000000000 +0200
++++ evolution-data-server/addressbook/backends/Makefile.am	2008-08-06 14:45:48.000000000 +0200
 @@ -6,4 +6,4 @@
  
  # groupwise isn't ported yet.
  SUBDIRS = file $(LDAP_SUBDIR)
 -DIST_SUBDIRS = file ldap groupwise vcf
 +DIST_SUBDIRS = $(SUBDIRS)
+Index: evolution-data-server/libdb/Makefile.am
+===================================================================
+--- evolution-data-server.orig/libdb/Makefile.am	2008-08-06 14:44:52.000000000 +0200
++++ evolution-data-server/libdb/Makefile.am	2008-08-06 14:45:48.000000000 +0200
+@@ -1 +1 @@
+-SUBDIRS=dist
++#SUBDIRS=dist
