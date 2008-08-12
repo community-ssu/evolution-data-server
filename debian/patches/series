@@ -22,3 +22,5 @@
 29_avoid-book-query-crashers.diff
 30_vcard-parsing-memory-corruption-fix.diff
 31_book-view-get-query.diff
+32_limit-vcard-parsing.diff
+33_syncable-field-flag.diff
