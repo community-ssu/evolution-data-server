@@ -21,3 +21,4 @@
 28_dbus_error_mapping.diff
 29_avoid-book-query-crashers.diff
 30_vcard-parsing-memory-corruption-fix.diff
+31_book-view-get-query.diff
