@@ -1,8 +1,11 @@
 evolution-data-server (1.4.2.1-20080812) unstable; urgency=low
 
-  * 31_book-view-get-query.diff: Add e_book_view_get_query.
+  * 31_book-view-get-query.diff: Add e_book_view_get_query. 
+    (Mathias Hasselmann <mathias@openismus.com>)
+  * 32_limit-vcard-parsing.diff: Add limits on VCARD parsing to avoid DoS.
+  * 33_syncable-field-flag.diff: Add e_contact_is_syncable.
 
- -- Mathias Hasselmann <mathias@openismus.com>  Mon, 12 Aug 2008 15:09:43 +0200
+ -- Rob Bradford <rob@o-hand.com>  Tue, 12 Aug 2008 16:32:57 +0100
 
 evolution-data-server (1.4.2.1-20080811) unstable; urgency=low
 
