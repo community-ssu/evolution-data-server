@@ -1,3 +1,10 @@
+evolution-data-server (1.4.2.1-20080828) unstable; urgency=low
+
+  * 34_phones_field.diff: Remove E_CONTACT_PHONE_TELEPHONE and add
+    E_CONTACT_TEL instead. Make queries against E_CONTACT_TEL work
+
+ -- Joergen Scheibengruber <Jorgen.Scheibengruber@nokia.com>  Thu, 28 Aug 2008 21:09:59 +0300
+
 evolution-data-server (1.4.2.1-20080812) unstable; urgency=low
 
   * 31_book-view-get-query.diff: Add e_book_view_get_query. 
