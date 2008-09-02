@@ -3,7 +3,7 @@ evolution-data-server (1.4.2.1-20080902) unstable; urgency=low
   * 35_file_backend_shorter_uids.diff: Use only 8 char UIDS
   * Fix Mathias' email address
 
- -- Joergen Scheibengruber <Jorgen.Scheibengruber@nokia.com>  Tue,  2 Sep 2008 11:13:56 +0300
+ -- Joergen Scheibengruber <Jorgen.Scheibengruber@nokia.com>  Tue,  2 Sep 2008 13:26:11 +0300
 
 evolution-data-server (1.4.2.1-20080828) unstable; urgency=low
 
