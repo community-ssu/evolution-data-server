@@ -1,0 +1,38 @@
+Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
+===================================================================
+--- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file.c	2008-08-29 10:12:35.000000000 +0300
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-09-02 11:13:34.000000000 +0300
+@@ -160,6 +160,7 @@
+ 	dbc->c_close (dbc);
+ }
+ 
++#if 0
+ static char *
+ e_book_backend_file_create_unique_id (void)
+ {
+@@ -169,6 +170,25 @@
+ 	static guint c = 0;
+ 	return g_strdup_printf (PAS_ID_PREFIX "%08lX%08X", time(NULL), c++);
+ }
++#endif
++
++static char *
++e_book_backend_file_create_unique_id (void)
++{
++    guchar buffer[6];
++    guint32 ts;
++    static guint32 c;
++
++    ts = time(NULL);
++    ts = GUINT32_TO_LE(ts);
++    c = GUINT32_TO_LE(c)
++    memcpy (buffer, &ts, 4);
++    memcpy (buffer, &c, 2);
++
++    c++;
++
++    return g_base64_encode (buffer, 6);
++}
+ 
+ static void 
+ set_revision (EContact *contact)

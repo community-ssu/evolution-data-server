@@ -1,3 +1,10 @@
+evolution-data-server (1.4.2.1-20080902) unstable; urgency=low
+
+  * 35_file_backend_shorter_uids.diff: Use only 8 char UIDS
+  * Fix Mathias' email address
+
+ -- Joergen Scheibengruber <Jorgen.Scheibengruber@nokia.com>  Tue,  2 Sep 2008 11:13:56 +0300
+
 evolution-data-server (1.4.2.1-20080828) unstable; urgency=low
 
   * 34_phones_field.diff: Remove E_CONTACT_PHONE_TELEPHONE and add
@@ -8,7 +15,7 @@ evolution-data-server (1.4.2.1-20080828) unstable; urgency=low
 evolution-data-server (1.4.2.1-20080812) unstable; urgency=low
 
   * 31_book-view-get-query.diff: Add e_book_view_get_query. 
-    (Mathias Hasselmann <mathias@openismus.com>)
+    (Mathias Hasselmann <mathias.hasselmann@maemo.org>)
   * 32_limit-vcard-parsing.diff: Add limits on VCARD parsing to avoid DoS.
   * 33_syncable-field-flag.diff: Add e_contact_is_syncable.
 
@@ -33,13 +40,13 @@ evolution-data-server (1.4.2.1-20080806) unstable; urgency=low
   * 26_ptr_arrays.diff: Add NULL terminator to the UID array of the
     contacts-removed signal.
 
- -- Mathias Hasselmann <mathias@openismus.com>  Wed,  6 Aug 2008 15:13:43 +0200
+ -- Mathias Hasselmann <mathias.hasselmann@maemo.org>  Wed,  6 Aug 2008 15:13:43 +0200
 
 evolution-data-server (1.4.2.1-20080805) unstable; urgency=low
 
   * 27_delayed_vcard_parsing.diff: Avoid UID duplication.
 
- -- Mathias Hasselmann <mathias@openismus.com>  Wed,  6 Aug 2008 00:26:09 +0200
+ -- Mathias Hasselmann <mathias.hasselmann@maemo.org>  Wed,  6 Aug 2008 00:26:09 +0200
 
 evolution-data-server (1.4.2.1-20080729) unstable; urgency=low
 
@@ -50,20 +57,20 @@ evolution-data-server (1.4.2.1-20080729) unstable; urgency=low
   * 26_ptr_arrays.diff:
     Apply a fix based on http://svn.o-hand.com/view/eds-dbus?rev=680&view=rev
 
- -- Mathias Hasselmann <mathias@openismus.com>  Tue, 29 Jul 2008 23:12:22 +0200
+ -- Mathias Hasselmann <mathias.hasselmann@maemo.org>  Tue, 29 Jul 2008 23:12:22 +0200
 
 evolution-data-server (1.4.2.1-20080725) unstable; urgency=low
 
   * 27_dbus_error_mapping.diff: Support more D-BUS error codes.
 
- -- Mathias Hasselmann <mathias@openismus.com>  Fri, 25 Jul 2008 12:47:04 +0200
+ -- Mathias Hasselmann <mathias.hasselmann@maemo.org>  Fri, 25 Jul 2008 12:47:04 +0200
 
 evolution-data-server (1.4.2.1-20080722) unstable; urgency=low
 
   * 26_delayed_vcard_parsing.diff: Implement late vCard parsing within
     EVCard and EContact.
 
- -- Mathias Hasselmann <mathias@openismus.com>  Tue, 22 Jul 2008 12:59:51 +0200
+ -- Mathias Hasselmann <mathias.hasselmann@maemo.org>  Tue, 22 Jul 2008 12:59:51 +0200
 
 evolution-data-server (1.4.2.1-20080624.1) unstable; urgency=low
 
@@ -72,13 +79,13 @@ evolution-data-server (1.4.2.1-20080624.1) unstable; urgency=low
   * 25_index_for_sorting.diff: Update chunk offsets.
   * 26_delayed_vcard_parsing.diff: Update chunk offsets.
 
- -- Mathias Hasselmann <mathias@openismus.com>  Tue, 24 Jun 2008 17:39:51 +0200
+ -- Mathias Hasselmann <mathias.hasselmann@maemo.org>  Tue, 24 Jun 2008 17:39:51 +0200
 
 evolution-data-server (1.4.2.1-20080624) unstable; urgency=low
 
   * 04_contact-fields.diff: Add X-OSSO-SPEED-DIAL-NUMBER attribute.
 
- -- Mathias Hasselmann <mathias@openismus.com>  Tue, 24 Jun 2008 11:45:34 +0200
+ -- Mathias Hasselmann <mathias.hasselmann@maemo.org>  Tue, 24 Jun 2008 11:45:34 +0200
 
 evolution-data-server (1.4.2.1-20080623) unstable; urgency=low
 
@@ -86,7 +93,7 @@ evolution-data-server (1.4.2.1-20080623) unstable; urgency=low
   * 25_index_for_sorting.diff: Update patch offsets.
   * 26_delayed_vcard_parsing.diff: Add e_book_view_get_parse_vcards().
 
- -- Mathias Hasselmann <mathias@openismus.com>  Mon, 23 Jun 2008 22:07:17 +0200
+ -- Mathias Hasselmann <mathias.hasselmann@maemo.org>  Mon, 23 Jun 2008 22:07:17 +0200
 
 evolution-data-server (1.4.2.1-20080622) unstable; urgency=low
 
@@ -95,20 +102,20 @@ evolution-data-server (1.4.2.1-20080622) unstable; urgency=low
   * 26_delayed_vcard_parsing.diff: properly process vcard strings passed
     to EBookView with the contacts-changed DBus signal
 
- -- Mathias Hasselmann <mathias@openismus.com>  Sun, 22 Jun 2008 20:26:48 +0200
+ -- Mathias Hasselmann <mathias.hasselmann@maemo.org>  Sun, 22 Jun 2008 20:26:48 +0200
 
 evolution-data-server (1.4.2.1-20080619) unstable; urgency=low
 
   * 20_file_backend_index.diff: Delete the index file when removing a book.
   * 25_index_for_sorting.diff: Update chunk offsets.
 
- -- Mathias Hasselmann <mathias@openismus.com>  Thu, 19 Jun 2008 13:17:08 +0200
+ -- Mathias Hasselmann <mathias.hasselmann@maemo.org>  Thu, 19 Jun 2008 13:17:08 +0200
 
 evolution-data-server (1.4.2.1-20080613) unstable; urgency=low
 
   * 04_contact-fields.diff: Add Telepathy related contact and vCard fields.
 
- -- Mathias Hasselmann <mathias@openismus.com.com>  Tue, 13 Jun 2008 14:37:05 +0100
+ -- Mathias Hasselmann <mathias.hasselmann@maemo.org.com>  Tue, 13 Jun 2008 14:37:05 +0100
 
 evolution-data-server (1.4.2.1-20080516) unstable; urgency=low
 
