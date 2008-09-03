@@ -1,0 +1,22 @@
+Index: evolution-data-server/configure.in
+===================================================================
+--- evolution-data-server.orig/configure.in	2008-09-03 15:43:09.000000000 +0200
++++ evolution-data-server/configure.in	2008-09-03 15:43:20.000000000 +0200
+@@ -2,6 +2,7 @@
+ AC_PREREQ(2.52)
+ 
+ AC_INIT(evolution-data-server, 1.4.2.1)
++
+ AC_CONFIG_SRCDIR(README)
+ AM_INIT_AUTOMAKE([1.9 tar-pax])
+ 
+@@ -14,6 +15,9 @@
+ dnl
+ dnl This should always be the major/minor of the stable version or stable version to be
+ dnl *************************************************************************************************
++
++VERSION=`dpkg-parsechangelog  | sed -ne 's/Version:\s*//p'`
++
+ BASE_VERSION=1.4
+ API_VERSION=1.2
+ AC_SUBST(BASE_VERSION)
