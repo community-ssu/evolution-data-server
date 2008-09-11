@@ -1,0 +1,13 @@
+Index: addressbook/libedata-book-dbus/e-data-book.c
+===================================================================
+--- addressbook/libedata-book-dbus/e-data-book.c	(revision 314)
++++ addressbook/libedata-book-dbus/e-data-book.c	(revision 315)
+@@ -645,6 +645,8 @@
+       g_value_take_string (g_value_array_get_nth (vals, 1), change->vcard);
+       /* Now change->vcard is owned by the GValue */
+ 
++      g_ptr_array_add (array, vals);
++
+       g_free (change);
+       changes = g_list_remove (changes, change);
+     }
