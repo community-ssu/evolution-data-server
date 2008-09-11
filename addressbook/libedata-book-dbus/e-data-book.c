@@ -645,8 +645,6 @@ e_data_book_respond_get_changes (EDataBook *book, guint32 opid, EDataBookStatus 
       g_value_take_string (g_value_array_get_nth (vals, 1), change->vcard);
       /* Now change->vcard is owned by the GValue */
 
-      g_ptr_array_add (array, vals);
-
       g_free (change);
       changes = g_list_remove (changes, change);
     }
