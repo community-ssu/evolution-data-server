@@ -1,3 +1,11 @@
+evolution-data-server (1.4.2.1-20080923) unstable; urgency=low
+
+  * 40_skype.diff: add im-skype and X-SKYPE
+  * 41_backend_sexp_sip.diff: add sip to backend-sexp
+  * 42_vcard_queries.diff: add X_vcard queries to e-book-query
+
+ -- Joni Valtanen <joni.valtanen@maemo.org>  Tue, 23 Sep 2008 11:44:27 +0300
+
 evolution-data-server (1.4.2.1-20080911) unstable; urgency=low
 
   * 36_full_version_number.diff: gets VERSION from changelog
