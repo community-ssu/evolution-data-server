@@ -1,0 +1,53 @@
+Index: evolution-data-server/addressbook/libebook-dbus/e-vcard.c
+===================================================================
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-vcard.c	2008-09-26 16:01:57.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-vcard.c	2008-09-26 16:05:46.000000000 +0200
+@@ -1026,6 +1026,18 @@
+         return (!evc->priv->vcard && evc->priv->attributes);
+ }
+ 
++GType
++e_vcard_attribute_get_type (void)
++{
++	static GType type_id = 0;
++
++	if (!type_id)
++		type_id = g_boxed_type_register_static ("EVCardAttribute",
++							(GBoxedCopyFunc) e_vcard_attribute_copy,
++							(GBoxedFreeFunc) e_vcard_attribute_free);
++	return type_id;
++}
++
+ /**
+  * e_vcard_attribute_new:
+  * @attr_group: a group name
+Index: evolution-data-server/addressbook/libebook-dbus/e-vcard.h
+===================================================================
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-vcard.h	2008-09-26 16:01:59.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-vcard.h	2008-09-26 16:03:21.000000000 +0200
+@@ -104,6 +104,8 @@
+ #define E_IS_VCARD_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), E_TYPE_VCARD))
+ #define E_VCARD_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), E_TYPE_VCARD, EVCardClass))
+ 
++#define E_TYPE_VCARD_ATTRIBUTE  (e_vcard_attribute_get_type ())
++
+ typedef struct _EVCard EVCard;
+ typedef struct _EVCardClass EVCardClass;
+ typedef struct _EVCardPrivate EVCardPrivate;
+@@ -127,7 +129,7 @@
+ 	void (*_ebook_reserved4) (void);
+ };
+ 
+-GType   e_vcard_get_type                     (void);
++GType   e_vcard_get_type                     (void) G_GNUC_CONST;
+ 
+ void    e_vcard_construct                    (EVCard *evc, const char *str);
+ void    e_vcard_construct_with_uid           (EVCard *evc, const char *str, const char *uid);
+@@ -143,6 +145,7 @@
+ 
+ 
+ /* attributes */
++GType            e_vcard_attribute_get_type          (void) G_GNUC_CONST;
+ EVCardAttribute *e_vcard_attribute_new               (const char *attr_group, const char *attr_name);
+ void             e_vcard_attribute_free              (EVCardAttribute *attr);
+ EVCardAttribute *e_vcard_attribute_copy              (EVCardAttribute *attr);

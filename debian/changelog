@@ -1,3 +1,10 @@
+evolution-data-server (1.4.2.1-20080926) unstable; urgency=low
+
+  * 43_evcard-attribute-boxed-type.diff: add boxed type for
+    EVCardAttribute
+
+ -- Mathias Hasselmann <mathias.hasselmann@maemo.org>  Fri, 26 Sep 2008 16:08:02 +0200
+
 evolution-data-server (1.4.2.1-20080923) unstable; urgency=low
 
   * 40_skype.diff: add im-skype and X-SKYPE
