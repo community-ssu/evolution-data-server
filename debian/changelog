@@ -1,3 +1,10 @@
+evolution-data-server (1.4.2.1-20081017) unstable; urgency=low
+
+  * 44_evcard-virtual-attribute-methods.diff: Add virtual EVCard methods
+    allow EContact to update caches when attributes are removed or added.
+
+ -- Mathias Hasselmann <mathias.hasselmann@maemo.org>  Fri, 17 Oct 2008 15:29:09 +0200
+
 evolution-data-server (1.4.2.1-20080926) unstable; urgency=low
 
   * 43_evcard-attribute-boxed-type.diff: add boxed type for

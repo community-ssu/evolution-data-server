@@ -34,3 +34,4 @@
 41_backend_sexp_sip.diff
 42_vcard_queries.diff
 43_evcard-attribute-boxed-type.diff
+44_evcard-virtual-attribute-methods.diff

@@ -1,0 +1,159 @@
+Index: evolution-data-server/addressbook/libebook-dbus/e-vcard.c
+===================================================================
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-vcard.c	2008-10-17 15:11:02.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-vcard.c	2008-10-17 15:19:12.000000000 +0200
+@@ -96,6 +96,16 @@
+ }
+ 
+ static void
++e_contact_add_attribute_cb (EVCard *evc, EVCardAttribute *attr)
++{
++}
++
++static void
++e_contact_remove_attribute_cb (EVCard *evc, EVCardAttribute *attr)
++{
++}
++
++static void
+ e_vcard_class_init (EVCardClass *klass)
+ {
+ 	GObjectClass *object_class;
+@@ -106,6 +116,9 @@
+ 
+ 	object_class->dispose = e_vcard_dispose;
+ 
++	klass->add_attribute = e_contact_add_attribute_cb;
++	klass->remove_attribute = e_contact_remove_attribute_cb;
++
+ 	_evc_base64_init();
+ }
+ 
+@@ -1123,12 +1136,15 @@
+ void
+ e_vcard_remove_attributes (EVCard *evc, const char *attr_group, const char *attr_name)
+ {
++	EVCardClass *klass;
+ 	GList *attr;
+ 
+ 	g_return_if_fail (E_IS_VCARD (evc));
+ 	g_return_if_fail (attr_name != NULL);
+ 
++	klass = E_VCARD_GET_CLASS (evc);
+ 	attr = e_vcard_ensure_attributes (evc);
++
+ 	while (attr) {
+ 		GList *next_attr;
+ 		EVCardAttribute *a = attr->data;
+@@ -1141,7 +1157,7 @@
+ 
+ 			/* matches, remove/delete the attribute */
+ 			evc->priv->attributes = g_list_delete_link (evc->priv->attributes, attr);
+-
++			klass->remove_attribute (evc, a);
+ 			e_vcard_attribute_free (a);
+ 		}
+ 
+@@ -1166,6 +1182,7 @@
+  	 * called already if this is a valid call and attr is one our attributes.
+ 	 */
+ 	evc->priv->attributes = g_list_remove (evc->priv->attributes, attr);
++	E_VCARD_GET_CLASS (evc)->remove_attribute (evc, attr);
+ 	e_vcard_attribute_free (attr);
+ }
+ 
+@@ -1183,6 +1200,8 @@
+ 	g_return_if_fail (attr != NULL);
+ 
+ 	evc->priv->attributes = g_list_prepend (e_vcard_ensure_attributes (evc), attr);
++
++	E_VCARD_GET_CLASS (evc)->add_attribute (evc, attr);
+ }
+ 
+ /**
+Index: evolution-data-server/addressbook/libebook-dbus/e-vcard.h
+===================================================================
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-vcard.h	2008-10-17 15:11:04.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-vcard.h	2008-10-17 15:11:10.000000000 +0200
+@@ -122,11 +122,11 @@
+ 	GObjectClass parent_class;
+ 
+ 	/* Padding for future expansion */
+-	void (*_ebook_reserved0) (void);
+-	void (*_ebook_reserved1) (void);
+-	void (*_ebook_reserved2) (void);
+-	void (*_ebook_reserved3) (void);
+-	void (*_ebook_reserved4) (void);
++	void (*add_attribute)     (EVCard *evc, EVCardAttribute *attr);
++	void (*remove_attribute)  (EVCard *evc, EVCardAttribute *attr);
++	void (*_ebook_reserved2)  (void);
++	void (*_ebook_reserved3)  (void);
++	void (*_ebook_reserved4)  (void);
+ };
+ 
+ GType   e_vcard_get_type                     (void) G_GNUC_CONST;
+Index: evolution-data-server/addressbook/libebook-dbus/e-contact.c
+===================================================================
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-contact.c	2008-10-17 15:14:26.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-contact.c	2008-10-17 15:25:59.000000000 +0200
+@@ -321,12 +321,49 @@
+ }
+ 
+ static void
++reset_chached_attribute (EContact *contact, EVCardAttribute *attr)
++{
++	const char *vcard_field;
++	int i;
++
++	vcard_field = e_vcard_attribute_get_name (attr);
++
++	for (i = E_CONTACT_FIELD_FIRST; i < E_CONTACT_FIELD_LAST; i ++) {
++		if (field_info[i].vcard_field_name == NULL)
++			continue;
++		if (field_info[i].t & E_CONTACT_FIELD_TYPE_SYNTHETIC)
++			continue;
++		if (strcmp (field_info[i].vcard_field_name, vcard_field))
++			continue;
++
++		g_free (contact->priv->cached_strings[i]);
++		contact->priv->cached_strings[i] = NULL;
++	}
++}
++
++static void
++e_contact_add_attribute (EVCard *evc, EVCardAttribute *attr)
++{
++	reset_chached_attribute (E_CONTACT (evc), attr);
++	E_VCARD_CLASS (parent_class)->add_attribute (evc, attr);
++}
++
++static void
++e_contact_remove_attribute (EVCard *evc, EVCardAttribute *attr)
++{
++	reset_chached_attribute (E_CONTACT (evc), attr);
++	E_VCARD_CLASS (parent_class)->remove_attribute (evc, attr);
++}
++
++static void
+ e_contact_class_init (EContactClass *klass)
+ {
+ 	GObjectClass *object_class;
++	EVCardClass *vcard_class;
+ 	int i;
+ 
+-	object_class = G_OBJECT_CLASS(klass);
++	object_class = G_OBJECT_CLASS (klass);
++	vcard_class = E_VCARD_CLASS (klass);
+ 
+ 	parent_class = g_type_class_ref (E_TYPE_VCARD);
+ 
+@@ -334,6 +371,9 @@
+ 	object_class->set_property = e_contact_set_property;
+ 	object_class->get_property = e_contact_get_property;
+ 
++	vcard_class->add_attribute = e_contact_add_attribute;
++	vcard_class->remove_attribute = e_contact_remove_attribute;
++
+ 	for (i = E_CONTACT_FIELD_FIRST; i < E_CONTACT_FIELD_LAST; i++) {
+ 		GParamSpec *pspec = NULL;
+ 
