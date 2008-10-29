@@ -1,0 +1,32 @@
+diff -urNp evolution-data-server.org/addressbook/libebook-dbus/e-book-query.c evolution-data-server.modified/addressbook/libebook-dbus/e-book-query.c
+--- evolution-data-server.org/addressbook/libebook-dbus/e-book-query.c	2008-10-29 15:06:58.000000000 +0000
++++ evolution-data-server.modified/addressbook/libebook-dbus/e-book-query.c	2008-10-29 15:08:55.000000000 +0000
+@@ -726,6 +726,9 @@ e_book_query_from_string  (const char *q
+ 	GList *list = NULL;
+ 	int i;
+ 
++	if (query_string == NULL)
++		return NULL;
++
+ 	sexp = e_sexp_new();
+ 
+ 	for(i=0;i<sizeof(symbols)/sizeof(symbols[0]);i++) {
+diff -urNp evolution-data-server.org/addressbook/libebook-dbus/e-book.c evolution-data-server.modified/addressbook/libebook-dbus/e-book.c
+--- evolution-data-server.org/addressbook/libebook-dbus/e-book.c	2008-10-29 15:06:57.000000000 +0000
++++ evolution-data-server.modified/addressbook/libebook-dbus/e-book.c	2008-10-29 15:08:37.000000000 +0000
+@@ -1084,6 +1084,7 @@ e_book_get_contacts (EBook *book, EBookQ
+ 
+   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+   e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
++  e_return_error_if_fail (query, E_BOOK_ERROR_INVALID_ARG);
+ 
+   sexp = e_book_query_to_string (query);
+   org_gnome_evolution_dataserver_addressbook_Book_get_contact_list (book->priv->proxy, sexp, &list, &err);
+@@ -1720,6 +1721,7 @@ e_book_get_book_view (EBook *book, EBook
+ 
+   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+   e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
++  e_return_error_if_fail (query, E_BOOK_ERROR_INVALID_ARG);
+ 
+   sexp = e_book_query_to_string (query);
+   
