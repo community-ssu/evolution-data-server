@@ -1,0 +1,352 @@
+--- evolution-data-server.org/addressbook/backends/file/e-book-backend-file-index.c	2008-10-29 11:44:19.000000000 +0000
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file-index.c	2008-10-29 12:50:51.000000000 +0000
+@@ -476,7 +476,10 @@ e_book_backend_file_index_get_ordered_id
+ 
+   while (db_error == 0)
+   {
+-    g_ptr_array_add (ids, id_dbt.data);
++    gchar *tmp;
++    for (tmp = id_dbt.data; tmp && strlen (tmp); tmp += strlen (tmp) + 1) {
++      g_ptr_array_add (ids, tmp);
++    }
+     db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_NEXT);
+   }
+ 
+@@ -563,6 +566,24 @@ dbt_fill_with_string (DBT *dbt, gchar *s
+   dbt->flags = DB_DBT_USERMEM;
+ }
+ 
++/* another boring helper function */
++static void
++dbt_fill_with_string_array (DBT *dbt, gchar *str)
++{
++  gchar *tstr = str;
++
++  memset (dbt, 0, sizeof (DBT));
++  dbt->size += 1; /* one for NULL at the end */
++
++  for (;*tstr && strlen (tstr); tstr += strlen (tstr) + 1 ) {
++    dbt->size += strlen (tstr) + 1;
++  }
++
++  dbt->data = (void *)str;
++
++  dbt->flags = DB_DBT_USERMEM;
++}
++
+ /* when given a list of fields, walk through the primary database, walk
+  * through all contacts, parse them, then call the function to add to each
+  * index that needs updating
+@@ -596,18 +617,18 @@ index_populate (EBookBackendFileIndex *i
+ 
+   while (db_error == 0)
+   {
+-    if (!g_str_equal (id_dbt.data, E_BOOK_BACKEND_FILE_VERSION_NAME))
+-    {
+-      /* parse the vcard */
+-      contact = e_contact_new_from_vcard (vcard_dbt.data);
+-
+-      if (contact)
+-      {
+-        /* now we interate through all the indexes that need doing */
+-        for (l = fields; l != NULL; l = l->next)
+-        {
+-          index_add_contact (index, contact, (EBookBackendFileIndexData *)l->data);
+-        }
++    gchar *tmp;
++    for (tmp = id_dbt.data; tmp && strlen (tmp); tmp += strlen (tmp) + 1) {
++      if (!g_str_equal (tmp, E_BOOK_BACKEND_FILE_VERSION_NAME)) {
++	/* parse the vcard */
++	contact = e_contact_new_from_vcard (vcard_dbt.data);
++
++	if (contact) {
++	  /* now we interate through all the indexes that need doing */
++	  for (l = fields; l != NULL; l = l->next) {
++	    index_add_contact (index, contact, (EBookBackendFileIndexData *)l->data);
++	  }
++	}
+       }
+     }
+ 
+@@ -637,17 +658,58 @@ enum 
+   ORDER_LASTFIRST
+ };
+ 
++static gchar *
++get_uids (DB *db, DBT *index_dbt, const gchar *uid)
++{
++  gchar *tmp = NULL;
++  int db_error = 0;
++  DBT id_dbt;
++
++  memset (&id_dbt, 0, sizeof (id_dbt));
++  id_dbt.flags = DB_DBT_MALLOC;
++
++  db_error = db->get (db, NULL, index_dbt, &id_dbt, 0);
++  if (db_error != 0) {
++    /* not found. create new one */
++    if (db_error == DB_NOTFOUND) {
++      g_debug (G_STRLOC ": Not found. Create new one.");
++
++      tmp = g_malloc0 (strlen (uid) + 2);
++      memcpy (tmp, (gchar *)uid, strlen (uid));
++      return tmp;
++    }
++    return NULL;
++  }
++
++  g_debug (G_STRLOC ": Found. Delete old to avoid errors.");
++  /* remove old index so there will be no errors when adding new */
++  db_error = db->del (db, NULL, index_dbt, 0);
++  if (db_error != 0) {
++    return NULL;
++  }
++
++  g_debug (G_STRLOC ": Create from old ids and add new id.");
++  tmp = g_malloc (id_dbt.size + 1 + strlen (uid));
++  memcpy (tmp, id_dbt.data, id_dbt.size);
++  memcpy ( (tmp + id_dbt.size - 1), uid, strlen (uid));
++  tmp[id_dbt.size + strlen (uid) - 1] = '\0';
++  tmp[id_dbt.size + strlen (uid)] = '\0';
++
++  g_debug ("Free old.");
++  g_free (id_dbt.data);
++
++  return tmp;
++}
++
+ static void
+ generic_name_add_cb (EBookBackendFileIndex *index, EContact *contact,
+     EBookBackendFileIndexData *data, DB *db, const gchar *uid, gint ordering)
+ {
+   GList *attrs = NULL;
+-  gchar *tmp = NULL;
++  gchar *uids = NULL;
+   DBT index_dbt, id_dbt;
+   int db_error = 0;
+ 
+-  dbt_fill_with_string (&id_dbt, (gchar *)uid);
+-
+   for (attrs = e_vcard_get_attributes (E_VCARD (contact)); 
+       attrs != NULL; 
+       attrs = attrs->next)
+@@ -662,6 +724,7 @@ generic_name_add_cb (EBookBackendFileInd
+       GList *first = g_list_nth (values, 1);
+ 
+       gchar *combined = NULL;
++      gchar *tmp = NULL;
+ 
+       if (ordering == ORDER_FIRSTLAST)
+       {
+@@ -678,8 +741,21 @@ generic_name_add_cb (EBookBackendFileInd
+       g_free (combined);
+       dbt_fill_with_string (&index_dbt, tmp);
+ 
+-      g_debug (G_STRLOC ": adding to index with key %s and data %s", 
+-          (gchar *)index_dbt.data, (gchar *)id_dbt.data);
++      uids = get_uids (db, &index_dbt, uid);
++      if (uids == NULL) {
++	continue;
++      }
++
++      /* fill with "uid1\0uid2\0uid3\0..." */
++      dbt_fill_with_string_array (&id_dbt, uids);
++
++      {
++	gchar *tmp = uids;
++	for (; tmp && strlen (tmp); tmp += strlen (tmp) + 1) {
++	  g_debug (G_STRLOC ": adding to index with key %s and data %s", 
++		   (gchar *)index_dbt.data, tmp);
++	}
++      }
+ 
+       db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
+ 
+@@ -714,13 +790,12 @@ generic_field_add (EBookBackendFileIndex
+     EBookBackendFileIndexData *data, DB *db, const gchar *uid)
+ {
+   gchar *tmp = NULL;
++  gchar *uids = NULL;
+   DBT index_dbt, id_dbt;
+   int db_error = 0;
+   GList *attrs = NULL;
+   GList *values = NULL;
+ 
+-  dbt_fill_with_string (&id_dbt, (gchar *)uid);
+-  
+   for (attrs = e_vcard_get_attributes (E_VCARD (contact)); 
+       attrs != NULL; 
+       attrs = attrs->next)
+@@ -736,8 +811,21 @@ generic_field_add (EBookBackendFileIndex
+         tmp = g_utf8_casefold (values->data, -1);
+         dbt_fill_with_string (&index_dbt, tmp);
+ 
+-        g_debug (G_STRLOC ": adding to index with key %s and data %s", 
+-            (gchar *)index_dbt.data, (gchar *)id_dbt.data);
++        uids = get_uids (db, &index_dbt, uid);
++        if (uids == NULL) {
++	  continue;
++        }
++
++	{
++	  gchar *tmp = uids;
++	  for (; tmp && strlen (tmp); tmp += strlen (tmp) + 1) {
++	    g_debug (G_STRLOC ": adding to index with key %s and data %s", 
++		     (gchar *)index_dbt.data, tmp);
++	  }
++	}
++
++        /* fill with "uid1\0uid2\0uid3\0..." */
++	dbt_fill_with_string_array (&id_dbt, uids);
+ 
+         db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
+ 
+@@ -785,6 +873,37 @@ index_add_contact (EBookBackendFileIndex
+   }
+ }
+ 
++static gboolean
++remove_part_of_the_string (gchar **full, gulong size, gchar *part)
++{
++  gchar *ftmp;
++  gchar *tmp;
++  gchar *endofcut;
++
++  g_assert (part);
++  g_assert (full);
++
++  ftmp = *full;
++  endofcut = part + strlen (part) + 1;
++
++  /* Probably even simpler implementation would be reallocation */
++  tmp = g_malloc0 (((gulong)part-(gulong)ftmp)+             /* first part */
++		   (size-((gulong)endofcut-(gulong)ftmp))); /* second part */
++
++  /* Return FALSE if there is nothing to copy */
++  if (tmp == NULL) {
++    return FALSE;
++  }
++
++  memcpy (tmp, ftmp, ((gulong)part - (gulong)ftmp));
++  memcpy (tmp + (part - ftmp), endofcut, 
++	  size - ((gulong)endofcut - (gulong)ftmp));
++
++  *full = tmp;
++
++  return TRUE;
++}
++
+ /* for a given index datbase remove all entries that have a data that matches
+  * the given uid. to do this we have to iterate through all the key/data pairs
+  * in the index and remove them if the data matches
+@@ -821,18 +940,32 @@ index_remove_contact (EBookBackendFileIn
+ 
+   while (db_error == 0)
+   {
+-    g_debug (G_STRLOC ": Considering %s against %s", (gchar *)id_dbt.data, uid);
+-    /* if the id is the one we're lookin for then delete! */
+-    if (g_str_equal ((gchar *)id_dbt.data, uid))
+-    {
+-      g_debug (G_STRLOC ": removing from index with id: %s", (gchar *)id_dbt.data);
+-      db_error = dbc->c_del (dbc, 0);
+-
+-      if (db_error != 0)
+-      {
+-        g_warning (G_STRLOC ": dbc->del failed: %s", db_strerror (db_error));
+-        db_error = dbc->c_close (dbc);
+-        return;
++    gchar *tmp;
++    for (tmp = id_dbt.data; tmp && strlen (tmp); tmp += strlen (tmp) + 1) {
++      gchar *data;
++      g_debug (G_STRLOC ": Considering %s against %s", (gchar *)id_dbt.data, uid);
++      /* if the id is the one we're lookin for then delete! */
++      if (g_str_equal (tmp, uid)) {
++	g_debug (G_STRLOC ": removing from index with id: %s", (gchar *)id_dbt.data);
++
++	/* Remove current str from data */
++	db_error = dbc->c_del (dbc, 0);
++	if (db_error != 0) {
++	  g_warning (G_STRLOC ": dbc->del failed: %s", db_strerror (db_error));
++	  db_error = dbc->c_close (dbc);
++	  return;
++	}
++
++	data = (gchar *)id_dbt.data;
++	if (remove_part_of_the_string ((gchar **)&data, id_dbt.size, tmp)) {
++	  db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
++	  if (db_error != 0) {
++	    g_warning (G_STRLOC ": dbc->del failed: %s", db_strerror (db_error));
++	    db_error = dbc->c_close (dbc);
++	    return;
++	  }
++	}
++	g_free (data);
+       }
+     }
+ 
+@@ -907,15 +1040,18 @@ is_query (ESExp *sexp, gint argc, ESExpR
+ 
+       while (db_error == 0)
+       {
+-        g_debug (G_STRLOC ": index query found: %s", (gchar *)id_dbt.data);
+-        g_ptr_array_add (ids, id_dbt.data);
+-
+-        /* we add it to the list of strings to be freed */
+-        priv->ids_to_free = g_list_prepend (priv->ids_to_free, id_dbt.data);
+-
+-        /* clear the index dbt since this time bdb will push memory into it */
+-        memset (&index_dbt, 0, sizeof (index_dbt));
+-        db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_NEXT_DUP);
++	gchar *tmp;
++	for (tmp = id_dbt.data; tmp; tmp += strlen (tmp) + 1) {
++	  g_debug (G_STRLOC ": index query found: %s", (gchar *)tmp);
++	  g_ptr_array_add (ids, tmp);
++
++	  /* we add it to the list of strings to be freed */
++	  priv->ids_to_free = g_list_prepend (priv->ids_to_free, id_dbt.data);
++
++	  /* clear the index dbt since this time bdb will push memory into it */
++	  memset (&index_dbt, 0, sizeof (index_dbt));
++	  db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_NEXT_DUP);
++	}
+       }
+ 
+       if (db_error != DB_NOTFOUND)
+@@ -995,21 +1131,24 @@ beginswith_query (ESExp *sexp, gint argc
+ 
+       while (db_error == 0)
+       {
+-        if (g_str_has_prefix (index_dbt.data, query_key))
+-        {
+-          g_debug (G_STRLOC ": index query found: %s for %s for %s", 
+-              (gchar *)id_dbt.data, query_key, (gchar *)index_dbt.data);
+-          g_ptr_array_add (ids, id_dbt.data);
+-
+-          /* we add it to the list of strings to be freed */
+-          priv->ids_to_free = g_list_append (priv->ids_to_free, id_dbt.data);
+-          memset (&index_dbt, 0, sizeof (index_dbt));
+-          db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_NEXT);
+-        } else {
+-          break;
+-        }
++	gchar *tmp;
++	for (tmp = id_dbt.data; tmp && strlen (tmp); tmp += strlen (tmp) + 1) {
++	  if (g_str_has_prefix (index_dbt.data, query_key)) {
++	    g_debug (G_STRLOC ": index query found: %s for %s for %s", 
++		     (gchar *)tmp, query_key, (gchar *)index_dbt.data);
++	    g_ptr_array_add (ids, tmp);
++
++	    /* we add it to the list of strings to be freed */
++	    priv->ids_to_free = g_list_append (priv->ids_to_free, id_dbt.data);
++	    memset (&index_dbt, 0, sizeof (index_dbt));
++	    db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_NEXT);
++	  } else {
++	    goto inner_out;
++	  }
++	}
+       }
+ 
++    inner_out:
+       if (db_error != 0 && db_error != DB_NOTFOUND)
+       {
+         g_warning (G_STRLOC ": dbc->c_get failed: %s", db_strerror (db_error));
