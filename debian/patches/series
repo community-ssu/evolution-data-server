@@ -37,3 +37,5 @@
 44_evcard-virtual-attribute-methods.diff
 45_index-same-key-multiple-values.diff
 46_null-query-fixes.diff
+47_e_book_add_contacts.diff
+48_e_vcard_to_string_vcard_21.diff
