@@ -1,3 +1,12 @@
+evolution-data-server (1.4.2.1-20081113) unstable; urgency=low
+
+  * 48_e_vcard_to_string_vcard_21.diff: Add support for creating vcards in 2.1
+    format: e_vcard_to_string() accepts EVC_FORMAT_VCARD_21 as format
+    argument.
+  * 47_e_book_add_contacts.diff: patch is enabled
+
+ -- Robert Peto <robert.peto@maemo.org>  Thu, 13 Nov 2008 16:28:11 +0200
+
 evolution-data-server (1.4.2.1-20081111) unstable; urgency=low
 
   * 45_index-same-key-multiple-values.diff: Add support to file-backend
