@@ -27,7 +27,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
 +    ts = GUINT32_TO_LE(ts);
 +    c = GUINT32_TO_LE(c);
 +    memcpy (buffer, &ts, 4);
-+    memcpy (buffer, &c, 2);
++    memcpy (buffer+4, &c, 2);
 +
 +    c++;
 +

@@ -1,3 +1,11 @@
+evolution-data-server (1.4.2.1-20081114) unstable; urgency=low
+
+  * 35_file_backend_shorter_uids.diff: Fix bug when creating unique id. 
+    Fixes: NB#91901
+  * ...
+
+ -- Joni Valtanen <joni.valtanen@maemo.org>  Fri, 14 Nov 2008 12:49:29 +0300
+
 evolution-data-server (1.4.2.1-20081113) unstable; urgency=low
 
   * 48_e_vcard_to_string_vcard_21.diff: Add support for creating vcards in 2.1
