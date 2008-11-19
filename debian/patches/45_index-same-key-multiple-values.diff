@@ -1,5 +1,5 @@
---- evolution-data-server.org/addressbook/backends/file/e-book-backend-file-index.c	2008-10-29 15:07:00.000000000 +0000
-+++ evolution-data-server/addressbook/backends/file/e-book-backend-file-index.c	2008-11-03 12:36:46.000000000 +0000
+--- evolution-data-server-lp/addressbook/backends/file/e-book-backend-file-index.c	2008-11-18 17:30:31.000000000 +0200
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file-index.c	2008-11-18 17:55:52.000000000 +0200
 @@ -476,7 +476,10 @@ e_book_backend_file_index_get_ordered_id
  
    while (db_error == 0)
@@ -68,7 +68,7 @@
        }
      }
  
-@@ -637,17 +658,58 @@ enum 
+@@ -637,17 +658,55 @@ enum 
    ORDER_LASTFIRST
  };
  
@@ -95,21 +95,18 @@
 +    return NULL;
 +  }
 +
-+  g_debug (G_STRLOC ": Found. Delete old to avoid errors.");
 +  /* remove old index so there will be no errors when adding new */
 +  db_error = db->del (db, NULL, index_dbt, 0);
 +  if (db_error != 0) {
 +    return NULL;
 +  }
 +
-+  g_debug (G_STRLOC ": Create from old ids + new id.");
 +  tmp = g_malloc (id_dbt.size + 1 + strlen (uid));
 +  memcpy (tmp, id_dbt.data, id_dbt.size);
 +  memcpy ((tmp + id_dbt.size - 1), uid, strlen (uid));
 +  tmp[id_dbt.size + strlen (uid) - 1] = '\0';
 +  tmp[id_dbt.size + strlen (uid)] = '\0';
 +
-+  g_debug ("Free old.");
 +  g_free (id_dbt.data);
 +
 +  return tmp;
@@ -130,7 +127,7 @@
    for (attrs = e_vcard_get_attributes (E_VCARD (contact)); 
        attrs != NULL; 
        attrs = attrs->next)
-@@ -662,6 +724,7 @@ generic_name_add_cb (EBookBackendFileInd
+@@ -662,6 +721,7 @@ generic_name_add_cb (EBookBackendFileInd
        GList *first = g_list_nth (values, 1);
  
        gchar *combined = NULL;
@@ -138,7 +135,7 @@
  
        if (ordering == ORDER_FIRSTLAST)
        {
-@@ -678,8 +741,21 @@ generic_name_add_cb (EBookBackendFileInd
+@@ -678,8 +738,13 @@ generic_name_add_cb (EBookBackendFileInd
        g_free (combined);
        dbt_fill_with_string (&index_dbt, tmp);
  
@@ -151,18 +148,10 @@
 +
 +      /* fill with "uid1\0uid2\0uid3\0..." */
 +      dbt_fill_with_string_array (&id_dbt, uids);
-+
-+      {
-+        gchar *tmp = uids;
-+        for (; tmp && strlen (tmp); tmp += strlen (tmp) + 1) {
-+          g_debug (G_STRLOC ": adding to index with key %s and data %s", 
-+                   (gchar *)index_dbt.data, tmp);
-+        }
-+      }
  
        db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
  
-@@ -714,13 +790,12 @@ generic_field_add (EBookBackendFileIndex
+@@ -714,13 +779,12 @@ generic_field_add (EBookBackendFileIndex
      EBookBackendFileIndexData *data, DB *db, const gchar *uid)
  {
    gchar *tmp = NULL;
@@ -177,7 +166,7 @@
    for (attrs = e_vcard_get_attributes (E_VCARD (contact)); 
        attrs != NULL; 
        attrs = attrs->next)
-@@ -736,8 +811,21 @@ generic_field_add (EBookBackendFileIndex
+@@ -736,8 +800,13 @@ generic_field_add (EBookBackendFileIndex
          tmp = g_utf8_casefold (values->data, -1);
          dbt_fill_with_string (&index_dbt, tmp);
  
@@ -188,20 +177,12 @@
 +          continue;
 +        }
 +
-+        {
-+          gchar *tmp = uids;
-+          for (; tmp && strlen (tmp); tmp += strlen (tmp) + 1) {
-+            g_debug (G_STRLOC ": adding to index with key %s and data %s", 
-+                     (gchar *)index_dbt.data, tmp);
-+          }
-+        }
-+
 +        /* fill with "uid1\0uid2\0uid3\0..." */
 +        dbt_fill_with_string_array (&id_dbt, uids);
  
          db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
  
-@@ -785,6 +873,41 @@ index_add_contact (EBookBackendFileIndex
+@@ -785,6 +854,40 @@ index_add_contact (EBookBackendFileIndex
    }
  }
  
@@ -234,7 +215,6 @@
 +  memcpy (tmp + (part - ftmp), endofcut, 
 +          size - ((gulong)endofcut - (gulong)ftmp));
 +
-+  //  priv->ids_to_free = g_list_prepend (priv->ids_to_free, *full);
 +  *full = tmp;
 +
 +  return TRUE;
@@ -243,7 +223,7 @@
  /* for a given index datbase remove all entries that have a data that matches
   * the given uid. to do this we have to iterate through all the key/data pairs
   * in the index and remove them if the data matches
-@@ -821,21 +944,34 @@ index_remove_contact (EBookBackendFileIn
+@@ -821,21 +924,32 @@ index_remove_contact (EBookBackendFileIn
  
    while (db_error == 0)
    {
@@ -256,10 +236,8 @@
 +    gchar *tmp;
 +    for (tmp = id_dbt.data; tmp && strlen (tmp); tmp += strlen (tmp) + 1) {
 +      gchar *data;
-+      g_debug (G_STRLOC ": Considering %s against %s", (gchar *)id_dbt.data, uid);
 +      /* if the id is the one we're lookin for then delete! */
 +      if (g_str_equal (tmp, uid)) {
-+        g_debug (G_STRLOC ": removing from index with id: %s", (gchar *)id_dbt.data);
 +
 +        /* Remove current str from data */
 +        db_error = dbc->c_del (dbc, 0);
@@ -290,7 +268,7 @@
      db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_NEXT);
    }
  
-@@ -907,15 +1043,18 @@ is_query (ESExp *sexp, gint argc, ESExpR
+@@ -907,15 +1021,17 @@ is_query (ESExp *sexp, gint argc, ESExpR
  
        while (db_error == 0)
        {
@@ -298,7 +276,6 @@
 -        g_ptr_array_add (ids, id_dbt.data);
 +        gchar *tmp;
 +        for (tmp = id_dbt.data; tmp; tmp += strlen (tmp) + 1) {
-+          g_debug (G_STRLOC ": index query found: %s", (gchar *)tmp);
 +          g_ptr_array_add (ids, tmp);
  
 -        /* we add it to the list of strings to be freed */
@@ -316,7 +293,7 @@
        }
  
        if (db_error != DB_NOTFOUND)
-@@ -995,21 +1134,24 @@ beginswith_query (ESExp *sexp, gint argc
+@@ -995,21 +1111,22 @@ beginswith_query (ESExp *sexp, gint argc
  
        while (db_error == 0)
        {
@@ -335,8 +312,6 @@
 +        gchar *tmp;
 +        for (tmp = id_dbt.data; tmp && strlen (tmp); tmp += strlen (tmp) + 1) {
 +          if (g_str_has_prefix (index_dbt.data, query_key)) {
-+            g_debug (G_STRLOC ": index query found: %s for %s for %s", 
-+                     (gchar *)tmp, query_key, (gchar *)index_dbt.data);
 +            g_ptr_array_add (ids, tmp);
 +
 +            /* we add it to the list of strings to be freed */
