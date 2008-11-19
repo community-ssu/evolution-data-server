@@ -1,6 +1,82 @@
 --- evolution-data-server-lp/addressbook/backends/file/e-book-backend-file-index.c	2008-11-18 17:30:31.000000000 +0200
-+++ evolution-data-server/addressbook/backends/file/e-book-backend-file-index.c	2008-11-18 17:55:52.000000000 +0200
-@@ -476,7 +476,10 @@ e_book_backend_file_index_get_ordered_id
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file-index.c	2008-11-19 12:12:53.000000000 +0200
+@@ -387,32 +387,60 @@ e_book_backend_file_index_setup_indicies
+ void
+ e_book_backend_file_index_add_contact (EBookBackendFileIndex *index, EContact *contact)
+ {
++  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
++  gint db_error = 0;
+   gint i = 0;
++  DB *db;
+ 
+   /* for each index database try add this contact */
+   for (i = 0; i < G_N_ELEMENTS (indexes); i++)
+   {
+     index_add_contact (index, contact, (EBookBackendFileIndexData *)&indexes[i]);
+   }
++
++  db = priv->db;
++
++  db_error = db->sync (db, 0);
++  if (db_error != 0)
++  {
++    g_warning (G_STRLOC ": db->sync failed: %s", db_strerror (db_error));
++  }
++
+ }
+ 
+ void
+ e_book_backend_file_index_remove_contact (EBookBackendFileIndex *index, const gchar *uid)
+ {
++  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
++  gint db_error = 0;
+   gint i = 0;
++  DB *db;
+ 
+   /* for each index database try add this contact */
+   for (i = 0; i < G_N_ELEMENTS (indexes); i++)
+   {
+     index_remove_contact (index, uid, (EBookBackendFileIndexData *)&indexes[i]);
+   }
++
++  db = priv->db;
++
++  db_error = db->sync (db, 0);
++  if (db_error != 0)
++  {
++    g_warning (G_STRLOC ": db->sync failed: %s", db_strerror (db_error));
++  }
++
+ }
+ 
+ void
+ e_book_backend_file_index_modify_contact (EBookBackendFileIndex *index, EContact *contact)
+ {
++  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
++
+   gchar *uid = NULL;
+   gint i = 0;
++  gint db_error = 0;
++  DB *db;
+ 
+   uid = (gchar *)e_contact_get (contact, E_CONTACT_UID);
+ 
+@@ -423,6 +451,14 @@ e_book_backend_file_index_modify_contact
+     index_add_contact (index, contact, (EBookBackendFileIndexData *)&indexes[i]);
+   }
+ 
++  db = priv->db;
++
++  db_error = db->sync (db, 0);
++  if (db_error != 0)
++  {
++    g_warning (G_STRLOC ": db->sync failed: %s", db_strerror (db_error));
++  }
++
+   g_free (uid);
+ }
+ 
+@@ -476,7 +512,10 @@ e_book_backend_file_index_get_ordered_id
  
    while (db_error == 0)
    {
@@ -12,7 +88,7 @@
      db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_NEXT);
    }
  
-@@ -563,6 +566,24 @@ dbt_fill_with_string (DBT *dbt, gchar *s
+@@ -563,6 +602,24 @@ dbt_fill_with_string (DBT *dbt, gchar *s
    dbt->flags = DB_DBT_USERMEM;
  }
  
@@ -37,7 +113,7 @@
  /* when given a list of fields, walk through the primary database, walk
   * through all contacts, parse them, then call the function to add to each
   * index that needs updating
-@@ -596,18 +617,18 @@ index_populate (EBookBackendFileIndex *i
+@@ -596,18 +653,18 @@ index_populate (EBookBackendFileIndex *i
  
    while (db_error == 0)
    {
@@ -68,7 +144,7 @@
        }
      }
  
-@@ -637,17 +658,55 @@ enum 
+@@ -637,17 +694,55 @@ enum 
    ORDER_LASTFIRST
  };
  
@@ -127,7 +203,7 @@
    for (attrs = e_vcard_get_attributes (E_VCARD (contact)); 
        attrs != NULL; 
        attrs = attrs->next)
-@@ -662,6 +721,7 @@ generic_name_add_cb (EBookBackendFileInd
+@@ -662,6 +757,7 @@ generic_name_add_cb (EBookBackendFileInd
        GList *first = g_list_nth (values, 1);
  
        gchar *combined = NULL;
@@ -135,7 +211,7 @@
  
        if (ordering == ORDER_FIRSTLAST)
        {
-@@ -678,8 +738,13 @@ generic_name_add_cb (EBookBackendFileInd
+@@ -678,8 +774,13 @@ generic_name_add_cb (EBookBackendFileInd
        g_free (combined);
        dbt_fill_with_string (&index_dbt, tmp);
  
@@ -151,7 +227,7 @@
  
        db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
  
-@@ -714,13 +779,12 @@ generic_field_add (EBookBackendFileIndex
+@@ -714,13 +815,12 @@ generic_field_add (EBookBackendFileIndex
      EBookBackendFileIndexData *data, DB *db, const gchar *uid)
  {
    gchar *tmp = NULL;
@@ -166,7 +242,7 @@
    for (attrs = e_vcard_get_attributes (E_VCARD (contact)); 
        attrs != NULL; 
        attrs = attrs->next)
-@@ -736,8 +800,13 @@ generic_field_add (EBookBackendFileIndex
+@@ -736,8 +836,13 @@ generic_field_add (EBookBackendFileIndex
          tmp = g_utf8_casefold (values->data, -1);
          dbt_fill_with_string (&index_dbt, tmp);
  
@@ -182,10 +258,13 @@
  
          db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
  
-@@ -785,6 +854,40 @@ index_add_contact (EBookBackendFileIndex
+@@ -776,13 +881,40 @@ index_add_contact (EBookBackendFileIndex
+   } else {
+     generic_field_add (index, contact, data, db, uid);
    }
- }
++}
  
+-  db_error = db->sync (db, 0);
 +static gboolean
 +remove_part_of_the_string (EBookBackendFileIndexPrivate *priv, 
 +			   gchar **full, 
@@ -205,11 +284,14 @@
 +  /* Probably even simpler implementation would be reallocation */
 +  tmp = g_malloc0 (((gulong)part-(gulong)ftmp)+             /* first part */
 +                   (size-((gulong)endofcut-(gulong)ftmp))); /* second part */
-+
+ 
+-  if (db_error != 0)
+-  {
+-    g_warning ("db->sync failed: %s", db_strerror (db_error));
 +  /* Return FALSE if there is nothing to copy */
 +  if (tmp == NULL) {
 +    return FALSE;
-+  }
+   }
 +
 +  memcpy (tmp, ftmp, ((gulong)part - (gulong)ftmp));
 +  memcpy (tmp + (part - ftmp), endofcut, 
@@ -218,12 +300,10 @@
 +  *full = tmp;
 +
 +  return TRUE;
-+}
-+
+ }
+ 
  /* for a given index datbase remove all entries that have a data that matches
-  * the given uid. to do this we have to iterate through all the key/data pairs
-  * in the index and remove them if the data matches
-@@ -821,21 +924,32 @@ index_remove_contact (EBookBackendFileIn
+@@ -821,21 +953,32 @@ index_remove_contact (EBookBackendFileIn
  
    while (db_error == 0)
    {
@@ -268,7 +348,20 @@
      db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_NEXT);
    }
  
-@@ -907,15 +1021,17 @@ is_query (ESExp *sexp, gint argc, ESExpR
+@@ -854,12 +997,6 @@ index_remove_contact (EBookBackendFileIn
+     return;
+   }
+ 
+-  db_error = db->sync (db, 0);
+-
+-  if (db_error != 0)
+-  {
+-    g_warning (G_STRLOC ": db->sync failed: %s", db_strerror (db_error));
+-  }
+ }
+ 
+ static ESExpResult *
+@@ -907,15 +1044,17 @@ is_query (ESExp *sexp, gint argc, ESExpR
  
        while (db_error == 0)
        {
@@ -293,7 +386,7 @@
        }
  
        if (db_error != DB_NOTFOUND)
-@@ -995,21 +1111,22 @@ beginswith_query (ESExp *sexp, gint argc
+@@ -995,21 +1134,22 @@ beginswith_query (ESExp *sexp, gint argc
  
        while (db_error == 0)
        {

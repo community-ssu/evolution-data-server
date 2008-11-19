@@ -2,6 +2,8 @@ evolution-data-server (1.4.2.1-20081114) unstable; urgency=low
 
   * 35_file_backend_shorter_uids.diff: Fix bug when creating unique id. 
     Fixes: NB#91901
+  * 45_index-same-key-multiple-values.diff: Removed some unused stuff and
+    changed indexes db to sync only once when modifying it.
   * ...
 
  -- Joni Valtanen <joni.valtanen@maemo.org>  Fri, 14 Nov 2008 12:49:29 +0300
