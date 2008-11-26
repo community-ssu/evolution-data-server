@@ -1,0 +1,201 @@
+--- evolution-data-server.org/addressbook/backends/file/e-book-backend-file.c	2008-11-26 09:15:25.000000000 +0000
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-11-26 10:22:53.000000000 +0000
+@@ -59,6 +59,8 @@
+ #define d(x)
+ 
+ #define CHANGES_DB_SUFFIX ".changes.db"
++#define RUNNING_ID_DB_NAME "running_id"
++#define RUNNING_ID_LEN 8
+ 
+ #define E_BOOK_BACKEND_FILE_VERSION_NAME "PAS-DB-VERSION"
+ #define E_BOOK_BACKEND_FILE_VERSION "0.2"
+@@ -72,6 +74,7 @@ struct _EBookBackendFilePrivate {
+ 	char     *filename;
+ 	char     *index_filename;
+ 	DB       *file_db;
++	DB       *id_db;
+ 	DB_ENV   *env;
+ 	EBookBackendFileIndex *index;
+ 	char     *sort_order;
+@@ -131,7 +134,6 @@ e_book_backend_file_create_unique_id (vo
+ 	static guint c = 0;
+ 	return g_strdup_printf (PAS_ID_PREFIX "%08lX%08X", time(NULL), c++);
+ }
+-#endif
+ 
+ static char *
+ e_book_backend_file_create_unique_id (void)
+@@ -150,6 +152,74 @@ e_book_backend_file_create_unique_id (vo
+ 
+     return g_base64_encode (buffer, 6);
+ }
++#endif
++
++static char *
++e_book_backend_file_create_unique_id (EBookBackendFile *bf)
++{
++	DB *db = NULL;
++	DBC *dbc = NULL;
++	DBT rid_dbt, id_dbt;
++	int db_error;
++	char ret[RUNNING_ID_LEN+1];
++	guint id;
++	gchar *retval;
++
++	db = bf->priv->id_db;
++
++	db_error = db->cursor (db, NULL, &dbc, 0);
++	if (db_error != 0) {
++		g_warning (G_STRLOC ": db->cursor failed: %s", db_strerror (db_error)); 
++		return NULL;
++	}
++
++	memset (&rid_dbt, 0, sizeof (rid_dbt));
++	memset (&id_dbt, 0, sizeof (id_dbt));
++
++	id_dbt.flags = DB_DBT_MALLOC;
++
++	db_error = dbc->c_get (dbc, &rid_dbt, &id_dbt, DB_FIRST);
++	if (db_error == DB_NOTFOUND) {
++		id = 999;
++	} else if (db_error != 0) {
++		g_warning (G_STRLOC ": c_get failed: %s", db_strerror (db_error));
++		return NULL;
++	} else {
++		/* id from string to uint */
++		long int ret = strtol ((const char *)id_dbt.data, (char **)NULL, 10);
++		if (ret == LONG_MIN) {
++			g_warning ("String to long integer conversion failed");
++			return NULL;
++		}
++
++		/* Stored id should be smaller than uint */
++		id = (guint)ret;
++
++		db_error = dbc->c_del (dbc, 0);
++		if (db_error != 0) {
++			g_warning (G_STRLOC ": c_del failed: %s", db_strerror (db_error));	    
++		}
++	}
++
++	++id;
++	snprintf (&ret[0], RUNNING_ID_LEN+1, "%0*d", RUNNING_ID_LEN, id);
++	ret[RUNNING_ID_LEN] = '\0';
++
++	retval = g_strdup (ret); /* return value is freed by caller */
++	string_to_dbt((const char *)(retval), &id_dbt);
++
++	db_error = db->put (db, NULL, &rid_dbt, &id_dbt, 0);
++ 	if (db_error != 0) {
++		g_warning (G_STRLOC ": put failed: %s", db_strerror (db_error));	    
++	}
++
++	db_error = db->sync (db, 0);
++	if (db_error != 0) {
++		g_warning (G_STRLOC ": sync failed: %s", db_strerror (db_error));
++	}
++
++	return retval;
++}
+ 
+ static void 
+ set_revision (EContact *contact)
+@@ -182,7 +252,12 @@ insert_contact (EBookBackendFile *bf,
+         g_assert (vcard_req);
+         g_assert (contact);
+ 
+-        id = e_book_backend_file_create_unique_id ();
++        id = e_book_backend_file_create_unique_id (bf);
++	if (id == NULL) {
++		g_warnign (G_STRLOC ": Could not create unique id");
++		*contact = NULL;
++		return DB_KEYEMPTY; /* This function should not return dberror */
++	}
+ 
+         string_to_dbt (id, &id_dbt);
+ 
+@@ -1352,6 +1427,55 @@ install_pre_installed_vcards (EBookBacke
+ }
+ 
+ static GNOME_Evolution_Addressbook_CallStatus
++e_book_backend_file_setup_running_ids (EBookBackendFile *bf)
++{
++	DB *sdb;
++	DB_ENV *env;
++	int db_error;
++
++	g_debug (G_STRLOC ": %s", G_STRFUNC);
++
++	db_error = bf->priv->file_db->get_env (bf->priv->file_db, &env);
++	if (db_error != 0) {
++		g_warning ("getting env failed with %s", db_strerror (db_error));
++		goto error;
++	}
++
++	db_error = db_create (&sdb, env, 0);
++	if (db_error != 0) {
++		g_warning ("running index db_create failed with %s", db_strerror (db_error));
++		goto error;
++	}
++
++
++	db_error = sdb->open (sdb, NULL, bf->priv->index_filename, RUNNING_ID_DB_NAME /*NULL*/, 
++			      DB_HASH, DB_CREATE | DB_EXCL | DB_THREAD, 0666);
++
++	if (db_error != 0) {
++		db_error = sdb->open (sdb, NULL, bf->priv->index_filename, RUNNING_ID_DB_NAME /*NULL*/,
++				      DB_HASH, DB_CREATE | DB_THREAD, 0666);
++		if (db_error != 0) {
++			g_warning (G_STRLOC ": running index open failed with %s", db_strerror (db_error));
++			sdb->close (sdb, 0);
++			goto error;
++		}
++	}
++
++	bf->priv->id_db = sdb;
++
++	return GNOME_Evolution_Addressbook_Success;
++
++ error:
++	g_free (bf->priv->dirname);
++	g_free (bf->priv->filename);
++	bf->priv->file_db->close (bf->priv->file_db, 0);
++	bf->priv->file_db = NULL;
++
++	return db_error_to_status (db_error);
++
++}
++
++static GNOME_Evolution_Addressbook_CallStatus
+ e_book_backend_file_load_source (EBookBackend           *backend,
+ 				 ESource                *source,
+ 				 gboolean                only_if_exists)
+@@ -1458,7 +1582,6 @@ e_book_backend_file_load_source (EBookBa
+                 	return GNOME_Evolution_Addressbook_OtherError;
+         	}
+ 		db_error = (*db->open) (db, NULL, filename, NULL, DB_HASH, DB_RDONLY | DB_THREAD, 0666);
+-
+ 		if (db_error != 0 && !only_if_exists) {
+ 			int rv;
+ 
+@@ -1556,7 +1679,7 @@ e_book_backend_file_load_source (EBookBa
+ 		g_warning ("No file_db");
+ 	}
+ 
+-	return GNOME_Evolution_Addressbook_Success;
++	return e_book_backend_file_setup_running_ids (bf);
+ }
+ 
+ static gboolean
+@@ -1699,6 +1822,11 @@ e_book_backend_file_dispose (GObject *ob
+ 
+ 	bf = E_BOOK_BACKEND_FILE (object);
+ 
++	if (bf->priv->id_db) {
++		bf->priv->id_db->close (bf->priv->id_db, 0);
++		bf->priv->id_db = NULL;
++	}
++
+ 	if (bf->priv->file_db) {
+ 		bf->priv->file_db->close (bf->priv->file_db, 0);
+ 		bf->priv->file_db = NULL;
