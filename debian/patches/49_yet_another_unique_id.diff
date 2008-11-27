@@ -1,5 +1,5 @@
 --- evolution-data-server.org/addressbook/backends/file/e-book-backend-file.c	2008-11-26 09:15:25.000000000 +0000
-+++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-11-26 10:22:53.000000000 +0000
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-11-27 09:15:31.000000000 +0000
 @@ -59,6 +59,8 @@
  #define d(x)
  
@@ -25,7 +25,7 @@
  
  static char *
  e_book_backend_file_create_unique_id (void)
-@@ -150,6 +152,74 @@ e_book_backend_file_create_unique_id (vo
+@@ -150,6 +152,79 @@ e_book_backend_file_create_unique_id (vo
  
      return g_base64_encode (buffer, 6);
  }
@@ -78,6 +78,11 @@
 +		}
 +	}
 +
++	db_error = dbc->c_close (dbc);
++	if (db_error != 0) {
++		g_warning (G_STRLOC ":c_close failed: %s", db_strerror (db_error));
++	}
++
 +	++id;
 +	snprintf (&ret[0], RUNNING_ID_LEN+1, "%0*d", RUNNING_ID_LEN, id);
 +	ret[RUNNING_ID_LEN] = '\0';
@@ -100,7 +105,7 @@
  
  static void 
  set_revision (EContact *contact)
-@@ -182,7 +252,12 @@ insert_contact (EBookBackendFile *bf,
+@@ -182,7 +257,12 @@ insert_contact (EBookBackendFile *bf,
          g_assert (vcard_req);
          g_assert (contact);
  
@@ -114,7 +119,7 @@
  
          string_to_dbt (id, &id_dbt);
  
-@@ -1352,6 +1427,55 @@ install_pre_installed_vcards (EBookBacke
+@@ -1352,6 +1432,55 @@ install_pre_installed_vcards (EBookBacke
  }
  
  static GNOME_Evolution_Addressbook_CallStatus
@@ -170,15 +175,7 @@
  e_book_backend_file_load_source (EBookBackend           *backend,
  				 ESource                *source,
  				 gboolean                only_if_exists)
-@@ -1458,7 +1582,6 @@ e_book_backend_file_load_source (EBookBa
-                 	return GNOME_Evolution_Addressbook_OtherError;
-         	}
- 		db_error = (*db->open) (db, NULL, filename, NULL, DB_HASH, DB_RDONLY | DB_THREAD, 0666);
--
- 		if (db_error != 0 && !only_if_exists) {
- 			int rv;
- 
-@@ -1556,7 +1679,7 @@ e_book_backend_file_load_source (EBookBa
+@@ -1556,7 +1685,7 @@ e_book_backend_file_load_source (EBookBa
  		g_warning ("No file_db");
  	}
  
@@ -187,7 +184,7 @@
  }
  
  static gboolean
-@@ -1699,6 +1822,11 @@ e_book_backend_file_dispose (GObject *ob
+@@ -1699,6 +1828,11 @@ e_book_backend_file_dispose (GObject *ob
  
  	bf = E_BOOK_BACKEND_FILE (object);
  
