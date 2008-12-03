@@ -1,7 +1,7 @@
 Index: evolution-data-server/addressbook/backends/file/Makefile.am
 ===================================================================
---- evolution-data-server.orig/addressbook/backends/file/Makefile.am	2008-06-19 12:38:52.000000000 +0200
-+++ evolution-data-server/addressbook/backends/file/Makefile.am	2008-06-19 12:38:52.000000000 +0200
+--- evolution-data-server.orig/addressbook/backends/file/Makefile.am	2008-11-26 14:13:07.000000000 +0200
++++ evolution-data-server/addressbook/backends/file/Makefile.am	2008-11-26 14:59:36.000000000 +0200
 @@ -12,6 +12,8 @@
  libebookbackendfile_la_SOURCES =			\
  	e-book-backend-file.c				\
@@ -13,8 +13,8 @@ Index: evolution-data-server/addressbook/backends/file/Makefile.am
  	$(top_srcdir)/libedataserver/e-dbhash.c
 Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
 ===================================================================
---- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file.c	2008-06-19 12:38:52.000000000 +0200
-+++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-06-19 12:43:09.000000000 +0200
+--- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file.c	2008-11-26 14:13:07.000000000 +0200
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-11-27 17:29:48.000000000 +0200
 @@ -54,6 +54,8 @@
  
  #include "e-book-backend-file.h"
@@ -36,31 +36,123 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  };
  
  G_LOCK_DEFINE_STATIC (global_env);
-@@ -246,6 +250,7 @@
+@@ -246,6 +250,8 @@
  	status = do_create (bf, vcard, contact);
  	if (status == GNOME_Evolution_Addressbook_Success) {
  		e_book_backend_summary_add_contact (bf->priv->summary, *contact);
 +		e_book_backend_file_index_add_contact (bf->priv->index, *contact);
++		e_book_backend_file_index_sync (bf->priv->index);
  	}
  	return status;
  }
-@@ -293,6 +298,7 @@
- 	for (l = removed_cards; l; l = l->next) {
- 		char *id = l->data;
- 		e_book_backend_summary_remove_contact (bf->priv->summary, id);
-+		e_book_backend_file_index_remove_contact (bf->priv->index, id);
+@@ -260,10 +266,12 @@
+ 	EBookBackendFile *bf = E_BOOK_BACKEND_FILE (backend);
+ 	DB             *db = bf->priv->file_db;
+ 	DBT            id_dbt;
++	DBT            vcard_dbt;
+ 	int            db_error;
+ 	char          *id;
+ 	GList         *l;
+ 	GList         *removed_cards = NULL;
++	GList         *removed_contacts = NULL;
+ 	GNOME_Evolution_Addressbook_CallStatus rv = GNOME_Evolution_Addressbook_Success;
+ 
+ 	for (l = id_list; l; l = l->next) {
+@@ -271,6 +279,15 @@
+ 
+ 		string_to_dbt (id, &id_dbt);
+ 
++		memset (&vcard_dbt, 0, sizeof (vcard_dbt));
++		vcard_dbt.flags = DB_DBT_MALLOC;
++
++		db_error = db->get (db, NULL, &id_dbt, &vcard_dbt, 0);
++		if (0 != db_error) {
++			g_warning (G_STRLOC ": db->get failed with %s", db_strerror (db_error));
++			rv = db_error_to_status (db_error);
++			continue;
++		}
+ 		db_error = db->del (db, NULL, &id_dbt, 0);
+ 		if (0 != db_error) {
+ 			g_warning (G_STRLOC ": db->del failed with %s", db_strerror (db_error));
+@@ -278,7 +295,10 @@
+ 			continue;
+ 		}
+ 
++		removed_contacts = g_list_prepend (removed_contacts,
++						e_contact_new_from_vcard (vcard_dbt.data));
+ 		removed_cards = g_list_prepend (removed_cards, id);
++		g_free (vcard_dbt.data);
  	}
  
+ 	/* if we actually removed some, try to sync */
+@@ -294,6 +314,12 @@
+ 		char *id = l->data;
+ 		e_book_backend_summary_remove_contact (bf->priv->summary, id);
+ 	}
++	while (removed_contacts) {
++		EContact *contact = removed_contacts->data;
++		e_book_backend_file_index_remove_contact (bf->priv->index, contact);
++		removed_contacts = g_list_delete_link (removed_contacts, removed_contacts);
++	}
++	e_book_backend_file_index_sync (bf->priv->index);
+ 
  	return rv;
-@@ -345,6 +351,7 @@
+ }
+@@ -306,6 +332,7 @@
+ 	char *vcard_with_rev;
+ 	const char *id, *dbt_id;
+ 	DBT id_dbt, vcard_dbt;
++	EContact *old_contact;
+ 
+ 	g_assert (bf);
+ 	g_assert (vcard);
+@@ -336,6 +363,16 @@
+ 		dbt_id = id;
+ 	
+ 	string_to_dbt (dbt_id, &id_dbt);
++	memset (&vcard_dbt, 0, sizeof (vcard_dbt));
++	vcard_dbt.flags = DB_DBT_MALLOC;
++
++	db_error = db->get (db, NULL, &id_dbt, &vcard_dbt, 0);
++	if (0 != db_error) {
++		g_warning (G_STRLOC ": db->get failed with %s", db_strerror (db_error));
++		return db_error_to_status (db_error);
++	}
++	old_contact = e_contact_new_from_vcard (vcard_dbt.data);
++	g_free (vcard_dbt.data);
+ 	string_to_dbt (vcard_with_rev, &vcard_dbt);
+ 
+ 	global_env.had_error = FALSE;
+@@ -345,9 +382,12 @@
  	g_free (vcard_with_rev);
  	
  	if (db_error == 0) {
-+		e_book_backend_file_index_modify_contact (bf->priv->index, *contact);
++		e_book_backend_file_index_modify_contact (bf->priv->index, old_contact, *contact);
++		g_object_unref (old_contact);
  		return GNOME_Evolution_Addressbook_Success;
  	} else {
  		g_warning (G_STRLOC ": db->put failed with %s", db_strerror (db_error));
-@@ -642,11 +649,45 @@
++		g_object_unref (old_contact);
+ 		return db_error_to_status (db_error);
+ 	}
+ 
+@@ -375,6 +415,7 @@
+ 			e_book_backend_summary_remove_contact (bf->priv->summary,
+ 							       e_contact_get_const (*contact, E_CONTACT_UID));
+ 			e_book_backend_summary_add_contact (bf->priv->summary, *contact);
++			e_book_backend_file_index_sync (bf->priv->index);
+ 			
+ 			return GNOME_Evolution_Addressbook_Success;
+ 		} else {
+@@ -428,6 +469,7 @@
+ 	if (db_error != 0) {
+ 		return db_error_to_status (db_error);
+ 	}
++	e_book_backend_file_index_sync (bf->priv->index);
+ 
+  done:
+ 	return status;
+@@ -642,7 +684,39 @@
  	d(printf ("signalling parent thread\n"));
  	e_flag_set (closure->running);
  
@@ -95,19 +187,13 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
 +			}
 +		}
 +
-+		e_book_backend_file_index_finish_query (bf->priv->index);
++		g_ptr_array_foreach (ids, (GFunc)g_free, NULL);
 +		g_ptr_array_free (ids, TRUE);
 +	} else if (e_book_backend_summary_is_summary_query (bf->priv->summary, query)) {
  		/* do a summary query */
  		GPtrArray *ids = e_book_backend_summary_search (bf->priv->summary, e_data_book_view_get_card_query (book_view));
  		int i;
- 
-+		g_debug (G_STRLOC ": Using summmary for %s", query);
-+
- 		for (i = 0; i < ids->len; i ++) {
- 			char *id = g_ptr_array_index (ids, i);
- 
-@@ -668,8 +709,7 @@
+@@ -668,8 +742,7 @@
  		}
  
  		g_ptr_array_free (ids, TRUE);
@@ -117,7 +203,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  		/* iterate over the db and do the query there */
  		DBC    *dbc;
  
-@@ -709,13 +749,14 @@
+@@ -709,13 +782,14 @@
  				   bf->priv->filename);
  			abort ();
  		}
@@ -134,7 +220,23 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  	/* unref the */
  	g_object_unref (book_view);
  
-@@ -1144,6 +1185,7 @@
+@@ -732,6 +806,7 @@
+ 
+ 	d(printf ("starting book view thread\n"));
+ 	closure->thread = g_thread_create (book_view_thread, book_view, FALSE, NULL);
++	g_object_ref (backend);
+ 
+ 	e_flag_wait (closure->running);
+ 
+@@ -745,6 +820,7 @@
+ {
+ 	FileBackendSearchClosure *closure = get_closure (book_view);
+ 
++	g_object_unref (backend);
+ 	d(printf ("stopping query\n"));
+ 	if (!closure) {
+ 		/* TODO: find out why this happens! */
+@@ -1144,6 +1220,7 @@
  	struct stat sb;
  	gchar *uri;
  
@@ -142,7 +244,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  	uri = e_source_get_uri (source);
  
  	dirname = e_book_backend_file_extract_path_from_uri (uri);
-@@ -1317,12 +1359,22 @@
+@@ -1317,12 +1394,22 @@
  	g_free (bf->priv->summary_filename);
  	bf->priv->summary_filename = g_strconcat (bf->priv->filename, ".summary", NULL);
  	bf->priv->summary = e_book_backend_summary_new (bf->priv->summary_filename, SUMMARY_FLUSH_TIMEOUT);
@@ -166,7 +268,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  	e_book_backend_set_is_loaded (backend, TRUE);
  	e_book_backend_set_is_writable (backend, writable);
  	return GNOME_Evolution_Addressbook_Success;
-@@ -1361,6 +1413,12 @@
+@@ -1361,6 +1448,12 @@
  			return GNOME_Evolution_Addressbook_OtherError;
  	}
  
@@ -179,7 +281,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  	/* unref the summary before we remove the file so it's not written out again */
  	g_object_unref (bf->priv->summary);
  	bf->priv->summary = NULL;
-@@ -1474,6 +1532,14 @@
+@@ -1474,6 +1567,14 @@
  	}
  	
  	G_LOCK (global_env);
@@ -194,7 +296,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  	global_env.ref_count--;
  	if (global_env.ref_count == 0) {
  		global_env.env->close (global_env.env, 0);
-@@ -1499,6 +1565,7 @@
+@@ -1499,6 +1600,7 @@
  	g_free (bf->priv->filename);
  	g_free (bf->priv->dirname);
  	g_free (bf->priv->summary_filename);
@@ -205,8 +307,8 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
 Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index.c
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ evolution-data-server/addressbook/backends/file/e-book-backend-file-index.c	2008-06-19 12:43:37.000000000 +0200
-@@ -0,0 +1,864 @@
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file-index.c	2008-11-27 17:40:25.000000000 +0200
+@@ -0,0 +1,887 @@
 +/*
 + * Copyright (C) 2008 Nokia Corporation
 + *
@@ -291,15 +393,16 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 +struct _EBookBackendFileIndexPrivate {
 +  DB *db;  /* primary database */
 +  GHashTable *sdbs; /* mapping for query->term to database used for it */
-+  GList *ids_to_free; /* a list of ids to free in the _finish call */
 +};
 +
 +static gboolean index_populate (EBookBackendFileIndex *index, GList *fields);
 +static void index_add_contact (EBookBackendFileIndex *index, EContact *contact, 
 +    EBookBackendFileIndexData *data);
-+static void index_remove_contact (EBookBackendFileIndex *index, const gchar *uid, 
++static void index_remove_contact (EBookBackendFileIndex *index, EContact *contact, 
 +    EBookBackendFileIndexData *data);
++static void index_sync (EBookBackendFileIndex *index, EBookBackendFileIndexData *data);
 +static gboolean index_close_db_func (gpointer key, gpointer value, gpointer userdata);
++static void dbt_fill_with_string (DBT *dbt, gchar *str);
 +
 +#define E_BOOK_BACKEND_FILE_VERSION_NAME "PAS-DB-VERSION"
 +
@@ -318,9 +421,6 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 +    g_hash_table_unref (priv->sdbs);
 +    priv->sdbs = NULL;
 +  }
-+
-+  /* free any ids we may have left from a query */
-+  e_book_backend_file_index_finish_query (index);
 +
 +  if (G_OBJECT_CLASS (e_book_backend_file_index_parent_class)->dispose)
 +    G_OBJECT_CLASS (e_book_backend_file_index_parent_class)->dispose (object);
@@ -369,6 +469,9 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 +  gint sexp_error = 0;
 +  gboolean res = TRUE; /* whether we can actually use the index */
 +
++  g_return_val_if_fail (E_IS_BOOK_BACKEND_FILE_INDEX (index), FALSE);
++  g_return_val_if_fail (query != NULL, FALSE);
++
 +  if (g_getenv ("_EDS_FILE_BACKEND_NO_INDEX"))
 +    return FALSE;
 +
@@ -415,6 +518,9 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 +  gint i = 0;
 +  gint sexp_error = 0;
 +  GPtrArray *res = NULL;
++
++  g_return_val_if_fail (E_IS_BOOK_BACKEND_FILE_INDEX (index), FALSE);
++  g_return_val_if_fail (query != NULL, FALSE);
 +
 +  sexp = e_sexp_new ();
 +
@@ -468,27 +574,18 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 +  return res;
 +}
 +
-+void
-+e_book_backend_file_index_finish_query (EBookBackendFileIndex *index)
-+{
-+  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
-+  GList *l = NULL;
-+
-+  for (l = priv->ids_to_free; l != NULL; l = l->next)
-+  {
-+    g_free (l->data);
-+  }
-+
-+  g_list_free (priv->ids_to_free);
-+  priv->ids_to_free = NULL;
-+}
-+
 +/* setup indicies in index_filename for the primary database db */
 +gboolean
 +e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db, 
 +    const gchar *index_filename)
 +{
-+  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
++  EBookBackendFileIndexPrivate *priv;
++
++  g_return_val_if_fail (E_IS_BOOK_BACKEND_FILE_INDEX (index), FALSE);
++  g_return_val_if_fail (db != NULL, FALSE);
++  g_return_val_if_fail (index_filename != NULL, FALSE);
++
++  priv = GET_PRIVATE (index);
 +
 +  GList *dbs_to_populate = NULL; /* list of EBookBackendFileIndexData to populate */
 +  int db_error = 0;
@@ -500,7 +597,6 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 +   * that fails then we know that we don't need to populate it so we go and
 +   * create it anyway and add it for the list of databases to populate */
 +
-+  g_return_val_if_fail (db != NULL, FALSE);
 +  priv->db = db;
 +
 +  db_error = db->get_env (db, &env);
@@ -561,6 +657,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 +    }
 +    g_list_free (dbs_to_populate);
 +  }
++  e_book_backend_file_index_sync (index);
 +
 +  return TRUE;
 +}
@@ -570,6 +667,9 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 +{
 +  gint i = 0;
 +
++  g_return_if_fail (E_IS_BOOK_BACKEND_FILE_INDEX (index));
++  g_return_if_fail (E_IS_CONTACT (contact));
++
 +  /* for each index database try add this contact */
 +  for (i = 0; i < G_N_ELEMENTS (indexes); i++)
 +  {
@@ -578,33 +678,49 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 +}
 +
 +void
-+e_book_backend_file_index_remove_contact (EBookBackendFileIndex *index, const gchar *uid)
++e_book_backend_file_index_remove_contact (EBookBackendFileIndex *index, EContact *contact)
 +{
 +  gint i = 0;
++
++  g_return_if_fail (E_IS_BOOK_BACKEND_FILE_INDEX (index));
++  g_return_if_fail (E_IS_CONTACT (contact));
 +
 +  /* for each index database try add this contact */
 +  for (i = 0; i < G_N_ELEMENTS (indexes); i++)
 +  {
-+    index_remove_contact (index, uid, (EBookBackendFileIndexData *)&indexes[i]);
++    index_remove_contact (index, contact, (EBookBackendFileIndexData *)&indexes[i]);
 +  }
 +}
 +
 +void
-+e_book_backend_file_index_modify_contact (EBookBackendFileIndex *index, EContact *contact)
++e_book_backend_file_index_modify_contact (EBookBackendFileIndex *index, EContact *old_contact, EContact *new_contact)
 +{
-+  gchar *uid = NULL;
 +  gint i = 0;
 +
-+  uid = (gchar *)e_contact_get (contact, E_CONTACT_UID);
++  g_return_if_fail (E_IS_BOOK_BACKEND_FILE_INDEX (index));
++  g_return_if_fail (E_IS_CONTACT (old_contact));
++  g_return_if_fail (E_IS_CONTACT (new_contact));
 +
 +  /* for each index database try add this contact */
 +  for (i = 0; i < G_N_ELEMENTS (indexes); i++)
 +  {
-+    index_remove_contact (index, uid, (EBookBackendFileIndexData *)&indexes[i]);
-+    index_add_contact (index, contact, (EBookBackendFileIndexData *)&indexes[i]);
++    index_remove_contact (index, old_contact, (EBookBackendFileIndexData *)&indexes[i]);
++    index_add_contact (index, new_contact, (EBookBackendFileIndexData *)&indexes[i]);
 +  }
++}
 +
-+  g_free (uid);
++void
++e_book_backend_file_index_sync (EBookBackendFileIndex *index)
++{
++  gint i = 0;
++
++  g_return_if_fail (E_IS_BOOK_BACKEND_FILE_INDEX (index));
++
++  /* for each index database try add this contact */
++  for (i = 0; i < G_N_ELEMENTS (indexes); i++)
++  {
++    index_sync (index, (EBookBackendFileIndexData *)&indexes[i]);
++  }
 +}
 +
 +/* functions used for testing whether we can use the index */
@@ -787,6 +903,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 +            (gchar *)index_dbt.data, (gchar *)id_dbt.data);
 +
 +        db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
++        g_free (tmp);
 +
 +        if (db_error != 0)
 +        {
@@ -795,31 +912,29 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 +      }
 +    }
 +  }
-+
-+  db_error = db->sync (db, 0);
-+
-+  if (db_error != 0)
-+  {
-+    g_warning ("db->sync failed: %s", db_strerror (db_error));
-+  }
++  g_free (uid);
 +}
 +
-+/* for a given index datbase remove all entries that have a data that matches
-+ * the given uid. to do this we have to iterate through all the key/data pairs
-+ * in the index and remove them if the data matches
-+ *
-+ * it is expected that this function will be called by for each index
++/* 
++ * for a given index remove this contact
 + */
 +static void
-+index_remove_contact (EBookBackendFileIndex *index, const gchar *uid, 
++index_remove_contact (EBookBackendFileIndex *index, EContact *contact, 
 +    EBookBackendFileIndexData *data)
 +{
 +  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
-+  
++  gchar *uid = NULL;
 +  DBT index_dbt, id_dbt;
 +  DB *db = NULL;
++  GList *attrs; 
++  GList *values;
 +  gint db_error = 0;
++  gchar *tmp = NULL;
 +  DBC *dbc = NULL; /* cursor */
++
++  /* we need the uid, so that we can match both key and value of index-entries */
++  uid = (gchar *)e_contact_get (contact, E_CONTACT_UID);
++  dbt_fill_with_string (&id_dbt, uid);
 +
 +  /* we need the index database too */
 +  db = g_hash_table_lookup (priv->sdbs, data->query_term);
@@ -833,45 +948,58 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 +    return;
 +  }
 +
-+  memset (&index_dbt, 0, sizeof (index_dbt));
-+  memset (&id_dbt, 0, sizeof (id_dbt));
-+
-+  db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_FIRST);
-+
-+  while (db_error == 0)
++  for (attrs = e_vcard_get_attributes (E_VCARD (contact)); 
++      attrs != NULL; 
++      attrs = attrs->next)
 +  {
-+    g_debug (G_STRLOC ": Considering %s against %s", (gchar *)id_dbt.data, uid);
-+    /* if the id is the one we're lookin for then delete! */
-+    if (g_str_equal ((gchar *)id_dbt.data, uid))
-+    {
-+      g_debug (G_STRLOC ": removing from index with id: %s", (gchar *)id_dbt.data);
-+      db_error = dbc->c_del (dbc, 0);
++    EVCardAttribute *attr = (EVCardAttribute *)attrs->data;
 +
-+      if (db_error != 0)
++    if (g_str_equal (e_vcard_attribute_get_name (attr), data->vfield))
++    {
++      for (values = e_vcard_attribute_get_values (attr);
++          values != NULL; 
++          values = values->next)
 +      {
-+        g_warning (G_STRLOC ": dbc->del failed: %s", db_strerror (db_error));
-+        db_error = dbc->c_close (dbc);
-+        return;
++        tmp = g_utf8_casefold (values->data, -1);
++        dbt_fill_with_string (&index_dbt, tmp);
++
++        g_debug (G_STRLOC ": removing from index with key %s and data %s", 
++            (gchar *)index_dbt.data, (gchar *)id_dbt.data);
++
++        id_dbt.flags = 0;
++        index_dbt.flags = 0;
++        db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_GET_BOTH);
++        if (db_error != 0)
++        {
++          g_warning (G_STRLOC ": dbc->c_get failed: %s", db_strerror (db_error));
++        } else {
++          db_error = dbc->c_del (dbc, 0);
++          if (db_error != 0)
++          {
++            g_warning (G_STRLOC ": dbc->c_del failed: %s", db_strerror (db_error));
++          }
++        }
++        g_free (tmp);
 +      }
 +    }
-+
-+    db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_NEXT);
 +  }
-+
-+  if (db_error != DB_NOTFOUND)
-+  {
-+    g_warning (G_STRLOC ": dbc->c_get failed: %s", db_strerror (db_error));
-+    db_error = dbc->c_close (dbc);
-+    return;
-+  }
-+
 +  db_error = dbc->c_close (dbc);
 +
 +  if (db_error != 0)
 +  {
-+    g_warning (G_STRLOC ": dbc->c_close failed: %s", db_strerror (db_error));
-+    return;
++    g_warning (G_STRLOC ": db->c_closed failed: %s", db_strerror (db_error));
 +  }
++  g_free (uid);
++}
++
++static void
++index_sync (EBookBackendFileIndex *index, EBookBackendFileIndexData *data)
++{
++  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
++  DB *db = NULL;
++  gint db_error = 0;
++
++  db = g_hash_table_lookup (priv->sdbs, data->query_term);
 +
 +  db_error = db->sync (db, 0);
 +
@@ -927,10 +1055,8 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 +      while (db_error == 0)
 +      {
 +        g_debug (G_STRLOC ": index query found: %s", (gchar *)id_dbt.data);
-+        g_ptr_array_add (ids, id_dbt.data);
-+
-+        /* we add it to the list of strings to be freed */
-+        priv->ids_to_free = g_list_prepend (priv->ids_to_free, id_dbt.data);
++        g_ptr_array_add (ids, g_strdup (id_dbt.data));
++        g_free (id_dbt.data);
 +
 +        /* clear the index dbt since this time bdb will push memory into it */
 +        memset (&index_dbt, 0, sizeof (index_dbt));
@@ -1018,10 +1144,9 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 +        {
 +          g_debug (G_STRLOC ": index query found: %s for %s for %s", 
 +              (gchar *)id_dbt.data, query_key, (gchar *)index_dbt.data);
-+          g_ptr_array_add (ids, id_dbt.data);
++          g_ptr_array_add (ids, g_strdup (id_dbt.data));
++          g_free (id_dbt.data);
 +
-+          /* we add it to the list of strings to be freed */
-+          priv->ids_to_free = g_list_append (priv->ids_to_free, id_dbt.data);
 +          memset (&index_dbt, 0, sizeof (index_dbt));
 +          db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_NEXT);
 +        } else {
@@ -1071,10 +1196,10 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 +
 +  return TRUE;
 +}
-Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.h
+Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index.h
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ git-test-build/addressbook/backends/file/e-book-backend-file-index.h	2008-05-21 16:40:22.000000000 +0100
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file-index.h	2008-11-27 17:16:32.000000000 +0200
 @@ -0,0 +1,68 @@
 +/*
 + * Copyright (C) 2008 Nokia Corporation
@@ -1136,10 +1261,10 @@ Index: git-test-build/addressbook/backends/file/e-book-backend-file-index.h
 +gboolean e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db, 
 +    const gchar *index_filename);
 +void e_book_backend_file_index_add_contact (EBookBackendFileIndex *index, EContact *contact);
-+void e_book_backend_file_index_remove_contact (EBookBackendFileIndex *index, const gchar *uid);
-+void e_book_backend_file_index_modify_contact (EBookBackendFileIndex *index, EContact *contact);
++void e_book_backend_file_index_remove_contact (EBookBackendFileIndex *index, EContact *contact);
++void e_book_backend_file_index_modify_contact (EBookBackendFileIndex *index, EContact *old_contact, EContact *new_contact);
++void e_book_backend_file_index_sync (EBookBackendFileIndex *index);
 +GPtrArray *e_book_backend_file_index_query (EBookBackendFileIndex *index, const gchar *query);
-+void e_book_backend_file_index_finish_query (EBookBackendFileIndex *index);
 +G_END_DECLS
 +
 +#endif /* _E_BOOK_BACKEND_FILE_INDEX */

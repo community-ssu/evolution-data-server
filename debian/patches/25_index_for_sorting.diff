@@ -1,8 +1,8 @@
 Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index.c
 ===================================================================
---- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file-index.c	2008-06-24 17:38:38.000000000 +0200
-+++ evolution-data-server/addressbook/backends/file/e-book-backend-file-index.c	2008-06-24 17:38:41.000000000 +0200
-@@ -63,18 +63,36 @@
+--- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file-index.c	2008-11-27 17:40:25.000000000 +0200
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file-index.c	2008-11-27 18:20:51.000000000 +0200
+@@ -63,18 +63,44 @@
    INDEX_FIELD_TYPE_STRING_LIST /* list of strings */
  } EBookBackendFileIndexFieldType;
  
@@ -10,6 +10,8 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 +typedef struct _EBookBackendFileIndexData EBookBackendFileIndexData;
 +
 +typedef void (*EBookBackendFileIndexAddFunc) (EBookBackendFileIndex *index, EContact *contact,
++    EBookBackendFileIndexData *data, DB *db, const gchar *id);
++typedef void (*EBookBackendFileIndexRemoveFunc) (EBookBackendFileIndex *index, EContact *contact,
 +    EBookBackendFileIndexData *data, DB *db, const gchar *id);
 +
 +typedef int (*EBookBackendFileIndexOrderFunc) (DB *secondary, const DBT *akey, const DBT *bkey);
@@ -19,6 +21,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
    gchar *query_term;                    /* what the query uses to get this */
    gchar *index_name;                    /* name for index */
 +  EBookBackendFileIndexAddFunc contact_add_func; /* function to use to derive index data */
++  EBookBackendFileIndexRemoveFunc contact_remove_func; /* function to use to derive index data */
    gchar *vfield;                        /* the (vcard) field this an index of */
 -} EBookBackendFileIndexData;
 +  EBookBackendFileIndexOrderFunc order_func; /* ordering func */
@@ -29,6 +32,11 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 +static void last_first_add_cb (EBookBackendFileIndex *index, EContact *contact, 
 +    EBookBackendFileIndexData *data, DB *db, const gchar *uid);
 +
++static void first_last_remove_cb (EBookBackendFileIndex *index, EContact *contact, 
++    EBookBackendFileIndexData *data, DB *db, const gchar *uid);
++static void last_first_remove_cb (EBookBackendFileIndex *index, EContact *contact, 
++    EBookBackendFileIndexData *data, DB *db, const gchar *uid);
++
 +static int lexical_ordering_cb (DB *secondary, const DBT *akey, const DBT *bkey);
  
  static const EBookBackendFileIndexData indexes[] = {
@@ -36,16 +44,16 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 -  {"im-jabber", "im_jabber", EVC_X_JABBER},
 -  {"tel", "tel", EVC_TEL},
 -  {"email", "email", EVC_EMAIL},
-+  {"full-name", "full_name", NULL, EVC_FN, lexical_ordering_cb},
-+  {"im-jabber", "im_jabber", NULL, EVC_X_JABBER, NULL},
-+  {"tel", "tel", NULL, EVC_TEL, NULL},
-+  {"email", "email", NULL, EVC_EMAIL, NULL},
-+  {"first-last", "first_last", first_last_add_cb, NULL, lexical_ordering_cb},
-+  {"last-first", "last_first", last_first_add_cb, NULL, lexical_ordering_cb},
++  {"full-name", "full_name", NULL, NULL, EVC_FN, lexical_ordering_cb},
++  {"im-jabber", "im_jabber", NULL, NULL, EVC_X_JABBER, NULL},
++  {"tel", "tel", NULL, NULL, EVC_TEL, NULL},
++  {"email", "email", NULL, NULL, EVC_EMAIL, NULL},
++  {"first-last", "first_last", first_last_add_cb, first_last_remove_cb, NULL, lexical_ordering_cb},
++  {"last-first", "last_first", last_first_add_cb, last_first_remove_cb, NULL, lexical_ordering_cb},
  };
  
  typedef struct _EBookBackendFileIndexPrivate EBookBackendFileIndexPrivate;
-@@ -307,7 +325,17 @@
+@@ -301,7 +327,17 @@
  
      db_error = sdb->set_flags(sdb, DB_DUP | DB_DUPSORT);
      if (db_error != 0) {
@@ -64,22 +72,26 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
      }
  
      db_error = sdb->open (sdb, NULL, index_filename, 
-@@ -398,6 +426,75 @@
-   g_free (uid);
+@@ -412,6 +448,79 @@
+   }
  }
  
 +GPtrArray *
 +e_book_backend_file_index_get_ordered_ids (EBookBackendFileIndex *index, const gchar *query_term)
 +{
-+  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
++  EBookBackendFileIndexPrivate *priv;
 +
 +  DB *db = NULL;
 +  DBC *dbc = NULL;
 +  GPtrArray *ids = NULL;
 +  int db_error = 0;
 +  DB_BTREE_STAT *stat = NULL;
-+
 +  DBT index_dbt, id_dbt;
++
++  g_return_val_if_fail (E_IS_BOOK_BACKEND_FILE_INDEX (index), NULL);
++  g_return_val_if_fail (query_term != NULL, NULL);
++
++  priv = GET_PRIVATE (index);
 +
 +  db = g_hash_table_lookup (priv->sdbs, query_term);
 +
@@ -140,7 +152,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
  /* functions used for testing whether we can use the index */
  
  /* always return false since we can't handle that type of query */
-@@ -534,31 +631,96 @@
+@@ -548,31 +657,189 @@
    return TRUE;
  }
  
@@ -160,26 +172,14 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 -    EBookBackendFileIndexData *data)
 +generic_name_add_cb (EBookBackendFileIndex *index, EContact *contact,
 +    EBookBackendFileIndexData *data, DB *db, const gchar *uid, gint ordering)
- {
--  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
--  gchar *uid = NULL;
--  DBT index_dbt, id_dbt;
--  DB *db = NULL;
--  GList *attrs; 
--  GList *values;
--  gint db_error = 0;
++{
 +  GList *attrs = NULL;
-   gchar *tmp = NULL;
++  gchar *tmp = NULL;
 +  DBT index_dbt, id_dbt;
 +  int db_error = 0;
- 
--  /* we need the uid, this becomes the data for our index databases */
--  uid = (gchar *)e_contact_get (contact, E_CONTACT_UID);
--  dbt_fill_with_string (&id_dbt, uid);
++
 +  dbt_fill_with_string (&id_dbt, (gchar *)uid);
- 
--  /* we need the index database too */
--  db = g_hash_table_lookup (priv->sdbs, data->query_term);
++
 +  for (attrs = e_vcard_get_attributes (E_VCARD (contact)); 
 +      attrs != NULL; 
 +      attrs = attrs->next)
@@ -189,21 +189,21 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 +    if (g_str_equal (e_vcard_attribute_get_name (attr), EVC_N))
 +    {
 +      GList *values = e_vcard_attribute_get_values (attr);
-+
-+      GList *last = g_list_nth (values, 0);
-+      GList *first = g_list_nth (values, 1);
-+
++      const char *first, *last;
 +      gchar *combined = NULL;
++
++      if (NULL == values) {
++        continue;
++      }
++      last = values->data ? values->data : "";
++      values = values->next;
++      first = values && values->data ? values->data : "";
 +
 +      if (ordering == ORDER_FIRSTLAST)
 +      {
-+        combined = g_strdup_printf ("%s %s", 
-+            first->data ? (gchar *)first->data : "",
-+            last->data ? (gchar *)last->data : "");
++        combined = g_strdup_printf ("%s %s", first, last);
 +      } else {
-+        combined = g_strdup_printf ("%s %s", 
-+          last->data ? (gchar *)last->data : "",
-+          first->data ? (gchar *)first->data : "");
++        combined = g_strdup_printf ("%s %s", last, first);
 +      }
 +
 +      tmp = g_utf8_casefold (combined, -1);
@@ -214,12 +214,99 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 +          (gchar *)index_dbt.data, (gchar *)id_dbt.data);
 +
 +      db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
++      g_free (tmp);
 +
 +      if (db_error != 0)
 +      {
 +        g_warning (G_STRLOC ": db->put failed: %s", db_strerror (db_error));
 +      }
 +    }
++  }
++}
++
++static void
++generic_name_remove_cb (EBookBackendFileIndex *index, EContact *contact,
++    EBookBackendFileIndexData *data, DB *db, const gchar *uid, gint ordering)
+ {
+-  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
+-  gchar *uid = NULL;
+   DBT index_dbt, id_dbt;
+-  DB *db = NULL;
+   GList *attrs; 
+   GList *values;
+   gint db_error = 0;
+   gchar *tmp = NULL;
++  DBC *dbc = NULL; /* cursor */
+ 
+-  /* we need the uid, this becomes the data for our index databases */
+-  uid = (gchar *)e_contact_get (contact, E_CONTACT_UID);
+-  dbt_fill_with_string (&id_dbt, uid);
++  /* create the cursor for the interation */
++  db_error = db->cursor (db, NULL, &dbc, 0);
+ 
+-  /* we need the index database too */
+-  db = g_hash_table_lookup (priv->sdbs, data->query_term);
++  if (db_error != 0)
++  {
++    g_warning (G_STRLOC ": db->cursor failed: %s", db_strerror (db_error)); 
++    return;
++  }
+ 
++  dbt_fill_with_string (&id_dbt, (gchar*)uid);
++  for (attrs = e_vcard_get_attributes (E_VCARD (contact)); 
++      attrs != NULL; 
++      attrs = attrs->next)
++  {
++    EVCardAttribute *attr = (EVCardAttribute *)attrs->data;
++
++    if (g_str_equal (e_vcard_attribute_get_name (attr), EVC_N))
++    {
++      GList *values = e_vcard_attribute_get_values (attr);
++      const char *first, *last;
++      gchar *combined = NULL;
++
++      if (NULL == values) {
++        continue;
++      }
++      last = values->data ? values->data : "";
++      values = values->next;
++      first = values && values->data ? values->data : "";
++
++      if (ordering == ORDER_FIRSTLAST)
++      {
++        combined = g_strdup_printf ("%s %s", first, last);
++      } else {
++        combined = g_strdup_printf ("%s %s", last, first);
++      }
++
++      tmp = g_utf8_casefold (combined, -1);
++      g_free (combined);
++      dbt_fill_with_string (&index_dbt, tmp);
++
++      g_debug (G_STRLOC ": removing from index with key %s and data %s", 
++          (gchar *)index_dbt.data, (gchar *)id_dbt.data);
++
++      id_dbt.flags = 0;
++      index_dbt.flags = 0;
++      db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_GET_BOTH);
++      if (db_error != 0)
++      {
++        g_warning (G_STRLOC ": dbc->c_get failed: %s", db_strerror (db_error));
++      } else {
++        db_error = dbc->c_del (dbc, 0);
++        if (db_error != 0)
++        {
++          g_warning (G_STRLOC ": dbc->c_del failed: %s", db_strerror (db_error));
++        }
++      }
++      g_free (tmp);
++    }
++  }
++  db_error = dbc->c_close (dbc);
++
++  if (db_error != 0)
++  {
++    g_warning (G_STRLOC ": db->c_closed failed: %s", db_strerror (db_error));
 +  }
 +}
 +
@@ -230,13 +317,27 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 +  generic_name_add_cb (index, contact, data, db, uid, ORDER_FIRSTLAST);
 +}
 +
++static void 
++first_last_remove_cb (EBookBackendFileIndex *index, EContact *contact, 
++    EBookBackendFileIndexData *data, DB *db, const gchar *uid)
++{
++  generic_name_remove_cb (index, contact, data, db, uid, ORDER_FIRSTLAST);
++}
++
 +static void
 +last_first_add_cb (EBookBackendFileIndex *index, EContact *contact, 
 +    EBookBackendFileIndexData *data, DB *db, const gchar *uid)
 +{
 +  generic_name_add_cb (index, contact, data, db, uid, ORDER_LASTFIRST);
 +}
- 
++
++static void
++last_first_remove_cb (EBookBackendFileIndex *index, EContact *contact, 
++    EBookBackendFileIndexData *data, DB *db, const gchar *uid)
++{
++  generic_name_remove_cb (index, contact, data, db, uid, ORDER_LASTFIRST);
++}
++
 +/* 
 + * generic version of function to get the index key from a contact based on
 + * the VCard field
@@ -256,13 +357,84 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
    for (attrs = e_vcard_get_attributes (E_VCARD (contact)); 
        attrs != NULL; 
        attrs = attrs->next)
-@@ -586,6 +748,34 @@
+@@ -601,33 +868,19 @@
        }
      }
+   }
+-  g_free (uid);
+ }
+ 
+-/* 
+- * for a given index remove this contact
+- */
+ static void
+-index_remove_contact (EBookBackendFileIndex *index, EContact *contact, 
+-    EBookBackendFileIndexData *data)
++generic_field_remove (EBookBackendFileIndex *index, EContact *contact,
++    EBookBackendFileIndexData *data, DB *db, const gchar *uid)
+ {
+-  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
+-  gchar *uid = NULL;
+   DBT index_dbt, id_dbt;
+-  DB *db = NULL;
+   GList *attrs; 
+   GList *values;
+   gint db_error = 0;
+   gchar *tmp = NULL;
+   DBC *dbc = NULL; /* cursor */
+ 
+-  /* we need the uid, so that we can match both key and value of index-entries */
+-  uid = (gchar *)e_contact_get (contact, E_CONTACT_UID);
+-  dbt_fill_with_string (&id_dbt, uid);
+-
+-  /* we need the index database too */
+-  db = g_hash_table_lookup (priv->sdbs, data->query_term);
+-
+   /* create the cursor for the interation */
+   db_error = db->cursor (db, NULL, &dbc, 0);
+ 
+@@ -637,6 +890,7 @@
+     return;
+   }
+ 
++  dbt_fill_with_string (&id_dbt, (gchar*)uid);
+   for (attrs = e_vcard_get_attributes (E_VCARD (contact)); 
+       attrs != NULL; 
+       attrs = attrs->next)
+@@ -678,6 +932,61 @@
+   {
+     g_warning (G_STRLOC ": db->c_closed failed: %s", db_strerror (db_error));
    }
 +}
 +
 +/* 
++ * for a given index remove this contact
++ */
++static void
++index_remove_contact (EBookBackendFileIndex *index, EContact *contact, 
++    EBookBackendFileIndexData *data)
++{
++  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
++  gchar *uid = NULL;
++  DB *db = NULL;
++
++  /* we need the uid, so that we can match both key and value of index-entries */
++  uid = (gchar *)e_contact_get (contact, E_CONTACT_UID);
++
++  /* we need the index database too */
++  db = g_hash_table_lookup (priv->sdbs, data->query_term);
++
++  if (data->contact_remove_func)
++  {
++    data->contact_remove_func (index, contact, data, db, uid);
++  } else {
++    generic_field_remove (index, contact, data, db, uid);
++  }
++
++  g_free (uid);
++}
++
++/*
 + * for a given index add this contact, for the single string field case we
 + * just add a single entry to the index database. for the multiple case we add
 + * all the values for the field
@@ -288,10 +460,10 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 +  } else {
 +    generic_field_add (index, contact, data, db, uid);
 +  }
+   g_free (uid);
+ }
  
-   db_error = db->sync (db, 0);
- 
-@@ -862,3 +1052,12 @@
+@@ -885,3 +1194,12 @@
  
    return TRUE;
  }
@@ -304,22 +476,10 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index
 +}
 +
 +
-Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index.h
-===================================================================
---- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file-index.h	2008-06-24 17:38:38.000000000 +0200
-+++ evolution-data-server/addressbook/backends/file/e-book-backend-file-index.h	2008-06-24 17:38:41.000000000 +0200
-@@ -62,6 +62,7 @@
- void e_book_backend_file_index_modify_contact (EBookBackendFileIndex *index, EContact *contact);
- GPtrArray *e_book_backend_file_index_query (EBookBackendFileIndex *index, const gchar *query);
- void e_book_backend_file_index_finish_query (EBookBackendFileIndex *index);
-+GPtrArray *e_book_backend_file_index_get_ordered_ids (EBookBackendFileIndex *index, const gchar *query_term);
- G_END_DECLS
- 
- #endif /* _E_BOOK_BACKEND_FILE_INDEX */
 Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
 ===================================================================
---- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file.c	2008-06-24 17:38:38.000000000 +0200
-+++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-06-24 17:38:41.000000000 +0200
+--- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file.c	2008-11-27 17:42:07.000000000 +0200
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-11-27 17:48:22.000000000 +0200
 @@ -77,6 +77,7 @@
  	DB_ENV   *env;
  	EBookBackendSummary *summary;
@@ -328,7 +488,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  };
  
  G_LOCK_DEFINE_STATIC (global_env);
-@@ -611,11 +612,14 @@
+@@ -646,11 +647,14 @@
  	EDataBookView *book_view;
  	FileBackendSearchClosure *closure;
  	EBookBackendFile *bf;
@@ -343,7 +503,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  
  	g_return_val_if_fail (E_IS_DATA_BOOK_VIEW (data), NULL);
  
-@@ -632,6 +636,7 @@
+@@ -667,6 +671,7 @@
  		return NULL;
  	}
  	bf = closure->bf;
@@ -351,7 +511,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  
  	d(printf ("starting initial population of book view\n"));
  
-@@ -652,42 +657,24 @@
+@@ -687,40 +692,23 @@
  	g_debug (G_STRLOC ": Query is %s", query);
  	if (e_book_backend_file_index_is_usable (bf->priv->index, query))
  	{
@@ -359,7 +519,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
 -		int i;
 -
  		g_debug (G_STRLOC ": Using index for %s", query);
--
+ 
  		ids = e_book_backend_file_index_query (bf->priv->index, query);
 -
 -		for (i = 0; i < ids->len; i ++) {
@@ -380,43 +540,41 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
 -			else {
 -				g_warning (G_STRLOC ": db->get failed with %s", db_strerror (db_error));
 -			}
+-		}
+-
+-		g_ptr_array_foreach (ids, (GFunc)g_free, NULL);
+-		g_ptr_array_free (ids, TRUE);
 +		using_index = TRUE;
-+	} else if (e_book_backend_summary_is_summary_query (bf->priv->summary, query)) {
-+		g_debug (G_STRLOC ": Using summmary for %s", query);
+ 	} else if (e_book_backend_summary_is_summary_query (bf->priv->summary, query)) {
+ 		/* do a summary query */
+-		GPtrArray *ids = e_book_backend_summary_search (bf->priv->summary, e_data_book_view_get_card_query (book_view));
+-		int i;
 +		ids = e_book_backend_summary_search (bf->priv->summary, e_data_book_view_get_card_query (book_view));
 +	} else if (allcontacts) {
-+		if (priv->sort_order)
-+		{
++		if (priv->sort_order) {
 +			g_debug (G_STRLOC ": sending contacts in order sort by %s", priv->sort_order);
 +			ids = e_book_backend_file_index_get_ordered_ids (bf->priv->index, priv->sort_order);
- 		}
++		}
 +	}
  
--		e_book_backend_file_index_finish_query (bf->priv->index);
--		g_ptr_array_free (ids, TRUE);
--	} else if (e_book_backend_summary_is_summary_query (bf->priv->summary, query)) {
--		/* do a summary query */
--		GPtrArray *ids = e_book_backend_summary_search (bf->priv->summary, e_data_book_view_get_card_query (book_view));
 +	if (ids)
 +	{
- 		int i;
- 
--		g_debug (G_STRLOC ": Using summmary for %s", query);
--
++		int i;
  		for (i = 0; i < ids->len; i ++) {
  			char *id = g_ptr_array_index (ids, i);
  
-@@ -708,6 +695,9 @@
+@@ -741,6 +729,10 @@
  			}
  		}
  
-+		if (using_index)
-+			e_book_backend_file_index_finish_query (bf->priv->index);
++		if (using_index) {
++			g_ptr_array_foreach (ids, (GFunc)g_free, NULL);
++		}
 +
  		g_ptr_array_free (ids, TRUE);
  	} else {
  		/* iterate over the db and do the query there */
-@@ -795,6 +785,19 @@
+@@ -830,6 +822,19 @@
  	e_flag_clear (closure->running);
  }
  
@@ -436,7 +594,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  typedef struct {
  	DB *db;
  
-@@ -1634,6 +1637,7 @@
+@@ -1669,6 +1674,7 @@
  	backend_class->cancel_operation        = e_book_backend_file_cancel_operation;
  	backend_class->set_mode                = e_book_backend_file_set_mode;
  	backend_class->sync                    = e_book_backend_file_sync;
@@ -446,8 +604,8 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  	sync_class->remove_contacts_sync       = e_book_backend_file_remove_contacts;
 Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c
 ===================================================================
---- evolution-data-server.orig/addressbook/libedata-book-dbus/e-data-book-view.c	2008-06-24 17:38:38.000000000 +0200
-+++ evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c	2008-06-24 17:38:41.000000000 +0200
+--- evolution-data-server.orig/addressbook/libedata-book-dbus/e-data-book-view.c	2008-11-27 17:42:07.000000000 +0200
++++ evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c	2008-11-27 17:42:25.000000000 +0200
 @@ -30,6 +30,7 @@
  static gboolean impl_BookView_dispose (EDataBookView *view, GError **eror);
  static gboolean impl_BookView_set_freezable (EDataBookView *view, gboolean freezable, GError **error);
@@ -475,8 +633,8 @@ Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c
  e_data_book_view_set_thresholds (EDataBookView *book_view,
 Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.xml
 ===================================================================
---- evolution-data-server.orig/addressbook/libedata-book-dbus/e-data-book-view.xml	2008-06-24 17:38:38.000000000 +0200
-+++ evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.xml	2008-06-24 17:38:41.000000000 +0200
+--- evolution-data-server.orig/addressbook/libedata-book-dbus/e-data-book-view.xml	2008-11-27 17:42:07.000000000 +0200
++++ evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.xml	2008-11-27 17:42:25.000000000 +0200
 @@ -31,6 +31,12 @@
        <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_BookView_thaw"/>
      </method>
@@ -492,8 +650,8 @@ Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.xml
      </signal>
 Index: evolution-data-server/addressbook/libebook-dbus/e-book-view.c
 ===================================================================
---- evolution-data-server.orig/addressbook/libebook-dbus/e-book-view.c	2008-06-24 17:38:38.000000000 +0200
-+++ evolution-data-server/addressbook/libebook-dbus/e-book-view.c	2008-06-24 17:38:41.000000000 +0200
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-book-view.c	2008-11-27 17:42:07.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-book-view.c	2008-11-27 17:42:25.000000000 +0200
 @@ -352,3 +352,20 @@
      }
    }
@@ -517,8 +675,8 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-book-view.c
 +}
 Index: evolution-data-server/addressbook/libebook-dbus/e-book-view.h
 ===================================================================
---- evolution-data-server.orig/addressbook/libebook-dbus/e-book-view.h	2008-06-24 17:38:38.000000000 +0200
-+++ evolution-data-server/addressbook/libebook-dbus/e-book-view.h	2008-06-24 17:38:41.000000000 +0200
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-book-view.h	2008-11-27 17:42:07.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-book-view.h	2008-11-27 17:42:25.000000000 +0200
 @@ -77,6 +77,8 @@
  void               e_book_view_set_freezable          (EBookView *book_view, gboolean freezable);
  gboolean           e_book_view_is_freezable           (EBookView *book_view);
@@ -530,8 +688,8 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-book-view.h
  #endif /* ! __E_BOOK_VIEW_H__ */
 Index: evolution-data-server/addressbook/libedata-book-dbus/e-book-backend.c
 ===================================================================
---- evolution-data-server.orig/addressbook/libedata-book-dbus/e-book-backend.c	2008-06-24 17:38:38.000000000 +0200
-+++ evolution-data-server/addressbook/libedata-book-dbus/e-book-backend.c	2008-06-24 17:38:41.000000000 +0200
+--- evolution-data-server.orig/addressbook/libedata-book-dbus/e-book-backend.c	2008-11-26 15:02:06.000000000 +0200
++++ evolution-data-server/addressbook/libedata-book-dbus/e-book-backend.c	2008-11-27 17:42:25.000000000 +0200
 @@ -1003,6 +1003,17 @@
  	g_mutex_unlock (priv->clients_mutex);
  }
@@ -552,8 +710,8 @@ Index: evolution-data-server/addressbook/libedata-book-dbus/e-book-backend.c
  {
 Index: evolution-data-server/addressbook/libedata-book-dbus/e-book-backend.h
 ===================================================================
---- evolution-data-server.orig/addressbook/libedata-book-dbus/e-book-backend.h	2008-06-24 17:38:38.000000000 +0200
-+++ evolution-data-server/addressbook/libedata-book-dbus/e-book-backend.h	2008-06-24 17:38:41.000000000 +0200
+--- evolution-data-server.orig/addressbook/libedata-book-dbus/e-book-backend.h	2008-11-26 15:02:06.000000000 +0200
++++ evolution-data-server/addressbook/libedata-book-dbus/e-book-backend.h	2008-11-27 17:42:25.000000000 +0200
 @@ -76,7 +76,7 @@
  	void (*modify_contacts)  (EBookBackend *backend, EDataBook *book, guint32 opid, const char **vcards);
  
@@ -573,3 +731,15 @@ Index: evolution-data-server/addressbook/libedata-book-dbus/e-book-backend.h
  
  GType       e_book_backend_get_type                 (void);
  
+Index: evolution-data-server/addressbook/backends/file/e-book-backend-file-index.h
+===================================================================
+--- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file-index.h	2008-11-27 17:16:32.000000000 +0200
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file-index.h	2008-11-27 17:42:25.000000000 +0200
+@@ -62,6 +62,7 @@
+ void e_book_backend_file_index_modify_contact (EBookBackendFileIndex *index, EContact *old_contact, EContact *new_contact);
+ void e_book_backend_file_index_sync (EBookBackendFileIndex *index);
+ GPtrArray *e_book_backend_file_index_query (EBookBackendFileIndex *index, const gchar *query);
++GPtrArray *e_book_backend_file_index_get_ordered_ids (EBookBackendFileIndex *index, const gchar *query_term);
+ G_END_DECLS
+ 
+ #endif /* _E_BOOK_BACKEND_FILE_INDEX */

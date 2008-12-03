@@ -1,7 +1,7 @@
 Index: evolution-data-server/addressbook/libebook-dbus/e-book-view.h
 ===================================================================
---- evolution-data-server.orig/addressbook/libebook-dbus/e-book-view.h	2008-06-24 17:21:01.000000000 +0200
-+++ evolution-data-server/addressbook/libebook-dbus/e-book-view.h	2008-06-24 17:38:22.000000000 +0200
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-book-view.h	2008-11-24 20:01:18.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-book-view.h	2008-11-24 20:07:34.000000000 +0200
 @@ -70,9 +70,13 @@
  
  void               e_book_view_start                  (EBookView *book_view);
@@ -18,8 +18,8 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-book-view.h
  #endif /* ! __E_BOOK_VIEW_H__ */
 Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c
 ===================================================================
---- evolution-data-server.orig/addressbook/libedata-book-dbus/e-data-book-view.c	2008-06-24 17:36:47.000000000 +0200
-+++ evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c	2008-06-24 17:36:47.000000000 +0200
+--- evolution-data-server.orig/addressbook/libedata-book-dbus/e-data-book-view.c	2008-11-24 20:07:34.000000000 +0200
++++ evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c	2008-11-24 20:07:34.000000000 +0200
 @@ -28,6 +28,8 @@
  static gboolean impl_BookView_start (EDataBookView *view, GError **error);
  static gboolean impl_BookView_stop (EDataBookView *view, GError **error);
@@ -171,8 +171,8 @@ Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c
    g_hash_table_insert (priv->ids, g_strdup (id),
 Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.xml
 ===================================================================
---- evolution-data-server.orig/addressbook/libedata-book-dbus/e-data-book-view.xml	2008-06-24 17:21:01.000000000 +0200
-+++ evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.xml	2008-06-24 17:36:47.000000000 +0200
+--- evolution-data-server.orig/addressbook/libedata-book-dbus/e-data-book-view.xml	2008-11-24 20:01:18.000000000 +0200
++++ evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.xml	2008-11-24 20:07:34.000000000 +0200
 @@ -22,6 +22,15 @@
        <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_BookView_dispose"/>
      </method>
@@ -191,8 +191,8 @@ Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.xml
      </signal>
 Index: evolution-data-server/addressbook/libebook-dbus/e-book-view.c
 ===================================================================
---- evolution-data-server.orig/addressbook/libebook-dbus/e-book-view.c	2008-06-24 17:21:01.000000000 +0200
-+++ evolution-data-server/addressbook/libebook-dbus/e-book-view.c	2008-06-24 17:38:12.000000000 +0200
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-book-view.c	2008-11-24 20:01:18.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-book-view.c	2008-11-24 20:07:34.000000000 +0200
 @@ -34,7 +34,9 @@
  struct _EBookViewPrivate {
    EBook *book;
@@ -259,8 +259,8 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-book-view.c
 +}
 Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
 ===================================================================
---- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file.c	2008-06-24 17:36:47.000000000 +0200
-+++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-06-24 17:36:47.000000000 +0200
+--- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file.c	2008-11-24 20:07:16.000000000 +0200
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-11-24 20:07:34.000000000 +0200
 @@ -1456,7 +1456,7 @@
  static char *
  e_book_backend_file_get_static_capabilities (EBookBackend *backend)

@@ -1,7 +1,7 @@
 Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
 ===================================================================
---- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file.c	2008-11-18 16:18:28.000000000 +0100
-+++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-11-19 09:28:09.000000000 +0100
+--- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file.c	2008-11-25 14:09:42.000000000 +0200
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-11-25 14:11:10.000000000 +0200
 @@ -163,60 +163,82 @@
  	if (tm)
  		strftime (time_string, 100, "%Y-%m-%dT%H:%M:%SZ", tm);
@@ -124,7 +124,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  }
  
  static EBookBackendSyncStatus
-@@ -237,6 +259,53 @@
+@@ -238,6 +260,58 @@
  }
  
  static EBookBackendSyncStatus
@@ -138,6 +138,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
 +        EContact *contact;
 +        DB *db;
 +        int db_error;
++        EBookBackendSyncStatus status;
 +
 +        bf = E_BOOK_BACKEND_FILE (backend);
 +        db = bf->priv->file_db;
@@ -147,7 +148,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
 +        for (; *vcards; vcards++) {
 +                contact = NULL;
 +
-+		/* Commit the contact */
++        /* Commit the contact */
 +                db_error = insert_contact (bf, *vcards, &contact);
 +
 +                if (db_error != 0) {
@@ -171,14 +172,18 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
 +        if (global_env.had_error)
 +                db_error = ENOSPC;
 +
-+        return db_error_to_status (db_error);
++        status = db_error_to_status (db_error);
++        if (status == GNOME_Evolution_Addressbook_Success) {
++                e_book_backend_file_index_sync (bf->priv->index);
++        }
++        return status;
 +}
 +
 +static EBookBackendSyncStatus
  e_book_backend_file_remove_contacts (EBookBackendSync *backend,
  				     EDataBook *book,
  				     guint32 opid,
-@@ -1735,9 +1804,10 @@
+@@ -1744,9 +1818,10 @@
  	backend_class->set_view_sort_order     = e_book_backend_file_set_book_view_sort_order;
  	sync_class->remove_sync                = e_book_backend_file_remove;
  	sync_class->create_contact_sync        = e_book_backend_file_create_contact;
@@ -192,8 +197,8 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  	sync_class->get_changes_sync           = e_book_backend_file_get_changes;
 Index: evolution-data-server/addressbook/libebook-dbus/e-book.c
 ===================================================================
---- evolution-data-server.orig/addressbook/libebook-dbus/e-book.c	2008-11-18 16:18:28.000000000 +0100
-+++ evolution-data-server/addressbook/libebook-dbus/e-book.c	2008-11-18 16:18:28.000000000 +0100
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-book.c	2008-11-25 14:09:43.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-book.c	2008-11-25 14:09:43.000000000 +0200
 @@ -1342,7 +1342,7 @@
   *
   * Return value: %TRUE if the operation was started, %FALSE otherwise.
@@ -306,8 +311,8 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-book.c
   * @contact: an #EContact
 Index: evolution-data-server/addressbook/libebook-dbus/e-book.h
 ===================================================================
---- evolution-data-server.orig/addressbook/libebook-dbus/e-book.h	2008-11-18 16:18:01.000000000 +0100
-+++ evolution-data-server/addressbook/libebook-dbus/e-book.h	2008-11-18 16:18:28.000000000 +0100
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-book.h	2008-11-25 14:09:35.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-book.h	2008-11-25 14:09:43.000000000 +0200
 @@ -171,11 +171,20 @@
  					    EContact        *contact,
  					    GError         **error);
@@ -332,8 +337,8 @@ Index: evolution-data-server/addressbook/libebook-dbus/e-book.h
  					    EContact    *contact,
 Index: evolution-data-server/addressbook/libedata-book-dbus/e-book-backend-sync.c
 ===================================================================
---- evolution-data-server.orig/addressbook/libedata-book-dbus/e-book-backend-sync.c	2008-11-18 16:18:02.000000000 +0100
-+++ evolution-data-server/addressbook/libedata-book-dbus/e-book-backend-sync.c	2008-11-18 16:18:28.000000000 +0100
+--- evolution-data-server.orig/addressbook/libedata-book-dbus/e-book-backend-sync.c	2008-11-25 14:09:35.000000000 +0200
++++ evolution-data-server/addressbook/libedata-book-dbus/e-book-backend-sync.c	2008-11-25 14:09:43.000000000 +0200
 @@ -62,6 +62,35 @@
  }
  
@@ -405,8 +410,8 @@ Index: evolution-data-server/addressbook/libedata-book-dbus/e-book-backend-sync.
  	backend_class->modify_contacts = _e_book_backend_modify_contacts;
 Index: evolution-data-server/addressbook/libedata-book-dbus/e-book-backend-sync.h
 ===================================================================
---- evolution-data-server.orig/addressbook/libedata-book-dbus/e-book-backend-sync.h	2008-11-18 16:18:02.000000000 +0100
-+++ evolution-data-server/addressbook/libedata-book-dbus/e-book-backend-sync.h	2008-11-18 16:18:28.000000000 +0100
+--- evolution-data-server.orig/addressbook/libedata-book-dbus/e-book-backend-sync.h	2008-11-25 14:09:35.000000000 +0200
++++ evolution-data-server/addressbook/libedata-book-dbus/e-book-backend-sync.h	2008-11-25 14:09:43.000000000 +0200
 @@ -70,6 +70,10 @@
  							 guint32 opid,
  							 const char **vcards,
@@ -428,8 +433,8 @@ Index: evolution-data-server/addressbook/libedata-book-dbus/e-book-backend-sync.
  EBookBackendSyncStatus e_book_backend_sync_modify_contacts  (EBookBackendSync *backend, EDataBook *book, guint32 opid, const char **vcard, GList **contacts);
 Index: evolution-data-server/addressbook/libedata-book-dbus/e-book-backend.c
 ===================================================================
---- evolution-data-server.orig/addressbook/libedata-book-dbus/e-book-backend.c	2008-11-18 16:18:28.000000000 +0100
-+++ evolution-data-server/addressbook/libedata-book-dbus/e-book-backend.c	2008-11-18 16:18:28.000000000 +0100
+--- evolution-data-server.orig/addressbook/libedata-book-dbus/e-book-backend.c	2008-11-25 14:09:42.000000000 +0200
++++ evolution-data-server/addressbook/libedata-book-dbus/e-book-backend.c	2008-11-25 14:09:43.000000000 +0200
 @@ -183,6 +183,31 @@
  }
  
@@ -464,8 +469,8 @@ Index: evolution-data-server/addressbook/libedata-book-dbus/e-book-backend.c
   * @book: an #EDataBook
 Index: evolution-data-server/addressbook/libedata-book-dbus/e-book-backend.h
 ===================================================================
---- evolution-data-server.orig/addressbook/libedata-book-dbus/e-book-backend.h	2008-11-18 16:18:28.000000000 +0100
-+++ evolution-data-server/addressbook/libedata-book-dbus/e-book-backend.h	2008-11-18 16:18:28.000000000 +0100
+--- evolution-data-server.orig/addressbook/libedata-book-dbus/e-book-backend.h	2008-11-25 14:09:42.000000000 +0200
++++ evolution-data-server/addressbook/libedata-book-dbus/e-book-backend.h	2008-11-25 14:09:43.000000000 +0200
 @@ -74,6 +74,7 @@
  
  	void (*sync) (EBookBackend *backend);
@@ -487,8 +492,8 @@ Index: evolution-data-server/addressbook/libedata-book-dbus/e-book-backend.h
  						     guint32                   opid,
 Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book.c
 ===================================================================
---- evolution-data-server.orig/addressbook/libedata-book-dbus/e-data-book.c	2008-11-18 16:18:28.000000000 +0100
-+++ evolution-data-server/addressbook/libedata-book-dbus/e-data-book.c	2008-11-18 16:18:28.000000000 +0100
+--- evolution-data-server.orig/addressbook/libedata-book-dbus/e-data-book.c	2008-11-25 14:09:42.000000000 +0200
++++ evolution-data-server/addressbook/libedata-book-dbus/e-data-book.c	2008-11-25 14:09:43.000000000 +0200
 @@ -40,6 +40,7 @@
  static void impl_AddressBook_Book_getContactList(EDataBook *book, const char *query, DBusGMethodInvocation *context);
  static void impl_AddressBook_Book_authenticateUser(EDataBook *book, const char *IN_user, const char *IN_passwd, const char *IN_auth_method, DBusGMethodInvocation *context);
@@ -568,8 +573,8 @@ Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book.c
    OperationData *op;
 Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book.h
 ===================================================================
---- evolution-data-server.orig/addressbook/libedata-book-dbus/e-data-book.h	2008-11-18 16:18:01.000000000 +0100
-+++ evolution-data-server/addressbook/libedata-book-dbus/e-data-book.h	2008-11-18 16:18:28.000000000 +0100
+--- evolution-data-server.orig/addressbook/libedata-book-dbus/e-data-book.h	2008-11-25 14:09:35.000000000 +0200
++++ evolution-data-server/addressbook/libedata-book-dbus/e-data-book.h	2008-11-25 14:09:43.000000000 +0200
 @@ -69,6 +69,7 @@
  void e_data_book_respond_modify (EDataBook *book, guint32 opid, EDataBookStatus status, EContact *contact);
  void e_data_book_respond_modify_contacts (EDataBook *book, guint32 opid, EDataBookStatus status, GList *contacts);
@@ -580,8 +585,8 @@ Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book.h
  void e_data_book_respond_get_supported_fields (EDataBook *book, guint32 opid, EDataBookStatus status, GList *fields);
 Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book.xml
 ===================================================================
---- evolution-data-server.orig/addressbook/libedata-book-dbus/e-data-book.xml	2008-11-18 16:18:27.000000000 +0100
-+++ evolution-data-server/addressbook/libedata-book-dbus/e-data-book.xml	2008-11-18 16:18:28.000000000 +0100
+--- evolution-data-server.orig/addressbook/libedata-book-dbus/e-data-book.xml	2008-11-25 14:09:42.000000000 +0200
++++ evolution-data-server/addressbook/libedata-book-dbus/e-data-book.xml	2008-11-25 14:09:43.000000000 +0200
 @@ -58,6 +58,13 @@
        <arg name="uid" type="s" direction="out"/>
      </method>

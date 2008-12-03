@@ -1,5 +1,7 @@
---- evolution-data-server.org/addressbook/backends/file/e-book-backend-file.c	2008-11-26 09:15:25.000000000 +0000
-+++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-11-27 09:15:31.000000000 +0000
+Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
+===================================================================
+--- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file.c	2008-11-28 12:25:25.000000000 +0200
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-11-28 13:01:09.000000000 +0200
 @@ -59,6 +59,8 @@
  #define d(x)
  
@@ -9,7 +11,7 @@
  
  #define E_BOOK_BACKEND_FILE_VERSION_NAME "PAS-DB-VERSION"
  #define E_BOOK_BACKEND_FILE_VERSION "0.2"
-@@ -72,6 +74,7 @@ struct _EBookBackendFilePrivate {
+@@ -72,9 +74,11 @@
  	char     *filename;
  	char     *index_filename;
  	DB       *file_db;
@@ -17,7 +19,11 @@
  	DB_ENV   *env;
  	EBookBackendFileIndex *index;
  	char     *sort_order;
-@@ -131,7 +134,6 @@ e_book_backend_file_create_unique_id (vo
++    int       running_id;
+ };
+ 
+ G_LOCK_DEFINE_STATIC (global_env);
+@@ -131,7 +135,6 @@
  	static guint c = 0;
  	return g_strdup_printf (PAS_ID_PREFIX "%08lX%08X", time(NULL), c++);
  }
@@ -25,29 +31,26 @@
  
  static char *
  e_book_backend_file_create_unique_id (void)
-@@ -150,6 +152,79 @@ e_book_backend_file_create_unique_id (vo
+@@ -150,6 +153,110 @@
  
      return g_base64_encode (buffer, 6);
  }
 +#endif
 +
-+static char *
-+e_book_backend_file_create_unique_id (EBookBackendFile *bf)
++static void
++load_last_running_id (EBookBackendFile *bf)
 +{
 +	DB *db = NULL;
 +	DBC *dbc = NULL;
 +	DBT rid_dbt, id_dbt;
 +	int db_error;
-+	char ret[RUNNING_ID_LEN+1];
-+	guint id;
-+	gchar *retval;
 +
 +	db = bf->priv->id_db;
 +
 +	db_error = db->cursor (db, NULL, &dbc, 0);
 +	if (db_error != 0) {
 +		g_warning (G_STRLOC ": db->cursor failed: %s", db_strerror (db_error)); 
-+		return NULL;
++		g_assert_not_reached ();
 +	}
 +
 +	memset (&rid_dbt, 0, sizeof (rid_dbt));
@@ -57,24 +60,23 @@
 +
 +	db_error = dbc->c_get (dbc, &rid_dbt, &id_dbt, DB_FIRST);
 +	if (db_error == DB_NOTFOUND) {
-+		id = 999;
++		bf->priv->running_id = 0;
 +	} else if (db_error != 0) {
 +		g_warning (G_STRLOC ": c_get failed: %s", db_strerror (db_error));
-+		return NULL;
++		g_assert_not_reached ();
 +	} else {
 +		/* id from string to uint */
 +		long int ret = strtol ((const char *)id_dbt.data, (char **)NULL, 10);
 +		if (ret == LONG_MIN) {
 +			g_warning ("String to long integer conversion failed");
-+			return NULL;
++			g_assert_not_reached ();
 +		}
 +
-+		/* Stored id should be smaller than uint */
-+		id = (guint)ret;
++		bf->priv->running_id = ret;
 +
 +		db_error = dbc->c_del (dbc, 0);
 +		if (db_error != 0) {
-+			g_warning (G_STRLOC ": c_del failed: %s", db_strerror (db_error));	    
++			g_warning (G_STRLOC ": c_del failed: %s", db_strerror (db_error));
 +		}
 +	}
 +
@@ -82,44 +84,127 @@
 +	if (db_error != 0) {
 +		g_warning (G_STRLOC ":c_close failed: %s", db_strerror (db_error));
 +	}
++}
 +
-+	++id;
++static char*
++unique_id_to_string (int id)
++{
++	char ret[RUNNING_ID_LEN+1];
++
 +	snprintf (&ret[0], RUNNING_ID_LEN+1, "%0*d", RUNNING_ID_LEN, id);
 +	ret[RUNNING_ID_LEN] = '\0';
++	return g_strdup (ret);
++}
 +
-+	retval = g_strdup (ret); /* return value is freed by caller */
-+	string_to_dbt((const char *)(retval), &id_dbt);
++static gboolean
++e_book_backend_file_store_unique_id (EBookBackendFile *bf)
++{
++	DB *db = NULL;
++	DBT rid_dbt, id_dbt;
++	int db_error;
++	gchar *uid;
++
++	db = bf->priv->id_db;
++	memset (&rid_dbt, 0, sizeof (rid_dbt));
++	memset (&id_dbt, 0, sizeof (id_dbt));
++
++	g_assert (bf->priv->running_id > 0);
++	
++	uid = unique_id_to_string (bf->priv->running_id);
++	string_to_dbt((const char *)uid, &id_dbt);
 +
 +	db_error = db->put (db, NULL, &rid_dbt, &id_dbt, 0);
++	g_free (uid);
 + 	if (db_error != 0) {
-+		g_warning (G_STRLOC ": put failed: %s", db_strerror (db_error));	    
++		g_warning (G_STRLOC ": put failed: %s", db_strerror (db_error));
++		return FALSE;
 +	}
 +
 +	db_error = db->sync (db, 0);
 +	if (db_error != 0) {
 +		g_warning (G_STRLOC ": sync failed: %s", db_strerror (db_error));
++		return FALSE;
 +	}
++	return TRUE;
++}
 +
-+	return retval;
++static char *
++e_book_backend_file_create_unique_id (EBookBackendFile *bf)
++{
++	if (0 == bf->priv->running_id) {
++		load_last_running_id (bf);
++	}
++	++bf->priv->running_id;
++
++	g_assert (bf->priv->running_id > 0);
++	return unique_id_to_string (bf->priv->running_id);
 +}
  
  static void 
  set_revision (EContact *contact)
-@@ -182,7 +257,12 @@ insert_contact (EBookBackendFile *bf,
+@@ -182,7 +289,7 @@
          g_assert (vcard_req);
          g_assert (contact);
  
 -        id = e_book_backend_file_create_unique_id ();
 +        id = e_book_backend_file_create_unique_id (bf);
-+	if (id == NULL) {
-+		g_warnign (G_STRLOC ": Could not create unique id");
-+		*contact = NULL;
-+		return DB_KEYEMPTY; /* This function should not return dberror */
-+	}
  
          string_to_dbt (id, &id_dbt);
  
-@@ -1352,6 +1432,55 @@ install_pre_installed_vcards (EBookBacke
+@@ -229,14 +336,17 @@
+         db_error = insert_contact (bf, vcard_req, contact);
+ 
+ 	if (0 == db_error) {
++		/* Sync the database */
+ 		global_env.had_error = FALSE;
+-		db_error = db->sync (db, 0);
+-		if (global_env.had_error)
+-                        db_error = ENOSPC;
++		if (e_book_backend_file_store_unique_id (bf)) {
++			db_error = db->sync (db, 0);
++		}
+ 		if (db_error != 0) {
+ 			g_warning ("db->sync failed with %s", db_strerror (db_error));
+ 		}
+-        }
++		if (global_env.had_error)
++			db_error = ENOSPC;
++	}
+ 
+         return db_error_to_status (db_error);
+ }
+@@ -269,7 +379,7 @@
+         EBookBackendFile *bf;
+         EContact *contact;
+         DB *db;
+-        int db_error;
++        int db_error = 0;
+         EBookBackendSyncStatus status;
+ 
+         bf = E_BOOK_BACKEND_FILE (backend);
+@@ -298,11 +408,16 @@
+                 *contacts = g_list_prepend (*contacts, contact);
+         }
+ 
+-        /* Sync the database */
+-        global_env.had_error = FALSE;
+-        db_error = db->sync (db, 0);
+-        if (global_env.had_error)
+-                db_error = ENOSPC;
++	/* Sync the database */
++	global_env.had_error = FALSE;
++	if (e_book_backend_file_store_unique_id (bf)) {
++		db_error = db->sync (db, 0);
++	}
++	if (db_error != 0) {
++		g_warning ("db->sync failed with %s", db_strerror (db_error));
++	}
++	if (global_env.had_error)
++		db_error = ENOSPC;
+ 
+         status = db_error_to_status (db_error);
+         if (status == GNOME_Evolution_Addressbook_Success) {
+@@ -1392,6 +1507,55 @@
  }
  
  static GNOME_Evolution_Addressbook_CallStatus
@@ -175,7 +260,7 @@
  e_book_backend_file_load_source (EBookBackend           *backend,
  				 ESource                *source,
  				 gboolean                only_if_exists)
-@@ -1556,7 +1685,7 @@ e_book_backend_file_load_source (EBookBa
+@@ -1596,7 +1760,7 @@
  		g_warning ("No file_db");
  	}
  
@@ -184,7 +269,7 @@
  }
  
  static gboolean
-@@ -1699,6 +1828,11 @@ e_book_backend_file_dispose (GObject *ob
+@@ -1739,6 +1903,11 @@
  
  	bf = E_BOOK_BACKEND_FILE (object);
  

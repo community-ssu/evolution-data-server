@@ -1,3 +1,18 @@
+evolution-data-server (1.4.2.1-20081203) unstable; urgency=low
+
+  * 45_index-same-key-multiple-values.diff: Removed again, since we don't need it
+  * 20_file_backend_index.diff, 25_index_for_sorting.diff,
+    47_e_book_add_contacts.diff:
+    Make deletions efficient, make batch-operations efficient by making the
+    db-sync it's own api-call
+  * 49_yet_another_unique_id.diff: Only synch to running id to disc when we
+    synch anyways (not for each call of create_uid).
+  * 37_summary_remove.diff, 24_freeze-thaw.diff,
+    48_e_vcard_to_string_vcard_21.diff: Updates needed due to updates in the
+    patches lower in the stack
+
+ -- Joergen Scheibengruber <Jorgen.Scheibengruber@nokia.com>  Mon,  1 Dec 2008 16:30:12 +0200
+
 evolution-data-server (1.4.2.1-20081121) unstable; urgency=low
 
   * 35_file_backend_shorter_uids.diff: Fix bug when creating unique id. 
