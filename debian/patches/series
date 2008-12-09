@@ -39,3 +39,4 @@
 47_e_book_add_contacts.diff
 48_e_vcard_to_string_vcard_21.diff
 49_yet_another_unique_id.diff
+50_preserve-uid-in-file-backend.diff

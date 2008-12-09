@@ -1,0 +1,61 @@
+Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
+===================================================================
+--- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file.c	2008-12-09 12:01:50.000000000 +0100
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-12-09 12:15:52.000000000 +0100
+@@ -272,6 +272,30 @@
+ 	e_contact_set (contact, E_CONTACT_REV, time_string);
+ }
+ 
++static gboolean
++is_contact_preserved (EContact *contact)
++{
++        EVCardAttribute *attr;
++        GList *params, *l;
++
++        attr = e_vcard_get_attribute (E_VCARD (contact), EVC_UID);
++        g_assert (attr);
++
++        params = e_vcard_attribute_get_params (attr);
++        for (l = params; l; l = g_list_next (l)) {
++                const char *name;
++
++                name = e_vcard_attribute_param_get_name (l->data);
++
++                if (g_ascii_strcasecmp (name, "X-OSSO-PRESERVE") == 0) {
++                        e_vcard_attribute_remove_param (attr, "X-OSSO-PRESERVE");
++                        return TRUE;
++                }
++        }
++
++        return FALSE;
++}
++
+ /* put the vcard to db, but doesn't sync the db */
+ static int
+ insert_contact (EBookBackendFile *bf,
+@@ -289,16 +313,22 @@
+         g_assert (vcard_req);
+         g_assert (contact);
+ 
+-        id = e_book_backend_file_create_unique_id (bf);
++        *contact = e_contact_new_from_vcard (vcard_req);
++        if (is_contact_preserved (*contact)) {
++                id = (char *) e_contact_get (*contact, E_CONTACT_UID);
++        }
++        else {
++                id = e_book_backend_file_create_unique_id (bf);
++                e_contact_set (*contact, E_CONTACT_UID, id);
++        }
+ 
+         string_to_dbt (id, &id_dbt);
+ 
+-        *contact = e_contact_new_from_vcard (vcard_req);
+-        e_contact_set (*contact, E_CONTACT_UID, id);
+         rev = e_contact_get_const (*contact,  E_CONTACT_REV);
+         if (!(rev && *rev))
+                 set_revision (*contact);
+ 
++        /* recreate the vcard string with the new values */
+         vcard = e_vcard_to_string (E_VCARD (*contact), EVC_FORMAT_VCARD_30);
+ 
+         string_to_dbt (vcard, &vcard_dbt);
