@@ -1,0 +1,16 @@
+Index: evolution-data-server/addressbook/libebook-dbus/e-book.c
+===================================================================
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-book.c	2008-12-03 14:14:43.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-book.c	2008-12-10 14:53:27.000000000 +0200
+@@ -1109,6 +1109,11 @@
+   AsyncData *data = user_data;
+   GList *list = NULL;
+   EBookListCallback cb = data->callback;
++
++  if (error) {
++    vcards = NULL;
++  }
++
+   if (vcards) {
+     char **i = vcards;
+     while (*i != NULL) {

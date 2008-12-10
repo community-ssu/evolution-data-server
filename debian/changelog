@@ -1,3 +1,11 @@
+evolution-data-server (1.4.2.1-20081210) unstable; urgency=low
+
+  * 51_e_book_async_get_contacts_fix.diff: Handle GErrors properly. Fixes: NB#95205
+  * 50_preserve-uid-in-file-backend.diff: Add some infrastructure needed for backup (Robert)
+  * 49_yet_another_unique_id.diff: Don't pad the uids with zeros
+
+ -- Joergen Scheibengruber <Jorgen.Scheibengruber@nokia.com>  Wed, 10 Dec 2008 17:12:01 +0200
+
 evolution-data-server (1.4.2.1-20081203) unstable; urgency=low
 
   * 45_index-same-key-multiple-values.diff: Removed again, since we don't need it
