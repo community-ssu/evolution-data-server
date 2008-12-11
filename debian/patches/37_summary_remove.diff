@@ -1,7 +1,7 @@
 Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
 ===================================================================
---- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file.c	2008-11-27 18:33:38.000000000 +0200
-+++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-11-27 18:42:46.000000000 +0200
+--- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file.c	2008-12-11 10:41:09.000000000 +0200
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-12-11 10:42:35.000000000 +0200
 @@ -48,7 +48,6 @@
  #include "libebook/e-contact.h"
  
@@ -69,10 +69,10 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
 -	dbc->c_close (dbc);
 -}
 -
- #if 0
  static char *
  e_book_backend_file_create_unique_id (void)
-@@ -270,7 +230,6 @@
+ {
+@@ -250,7 +210,6 @@
  
  	status = do_create (bf, vcard, contact);
  	if (status == GNOME_Evolution_Addressbook_Success) {
@@ -80,7 +80,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  		e_book_backend_file_index_add_contact (bf->priv->index, *contact);
  		e_book_backend_file_index_sync (bf->priv->index);
  	}
-@@ -331,10 +290,6 @@
+@@ -311,10 +270,6 @@
  
  	*ids = removed_cards;
  
@@ -91,7 +91,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  	while (removed_contacts) {
  		EContact *contact = removed_contacts->data;
  		e_book_backend_file_index_remove_contact (bf->priv->index, contact);
-@@ -433,9 +388,6 @@
+@@ -413,9 +368,6 @@
  		db_error = db->sync (db, 0);
  		if (global_env.had_error) db_error = ENOSPC;
  		if (db_error == 0) {
@@ -101,7 +101,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  			e_book_backend_file_index_sync (bf->priv->index);
  			
  			return GNOME_Evolution_Addressbook_Success;
-@@ -474,11 +426,6 @@
+@@ -454,11 +406,6 @@
  		if (status != GNOME_Evolution_Addressbook_Success)
  			goto done;
  
@@ -113,7 +113,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  		/* Pass the contact back to the server for view updates */
  		*contacts = g_list_prepend (*contacts, contact);
  	}
-@@ -547,79 +494,55 @@
+@@ -527,79 +474,55 @@
  	
  	d(printf ("e_book_backend_file_get_contact_list (%s)\n", search));
  	status = GNOME_Evolution_Addressbook_Success;
@@ -231,7 +231,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  	}
  
  	*contacts = contact_list;
-@@ -716,9 +639,6 @@
+@@ -696,9 +619,6 @@
  
  		ids = e_book_backend_file_index_query (bf->priv->index, query);
  		using_index = TRUE;
@@ -241,7 +241,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  	} else if (allcontacts) {
  		if (priv->sort_order) {
  			g_debug (G_STRLOC ": sending contacts in order sort by %s", priv->sort_order);
-@@ -1416,15 +1336,6 @@
+@@ -1396,15 +1316,6 @@
  	}
  	db_mtime = sb.st_mtime;
  
@@ -257,7 +257,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  	g_free (bf->priv->index_filename);
  	bf->priv->index = e_book_backend_file_index_new ();
  	bf->priv->index_filename = g_build_filename (bf->priv->dirname, "index.db", NULL);
-@@ -1479,12 +1390,6 @@
+@@ -1459,12 +1370,6 @@
  	if (-1 == g_unlink (bf->priv->index_filename))
  		g_warning ("failed to remove index file `%s`: %s", bf->priv->index_filename, strerror (errno));
  
@@ -270,7 +270,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  	dir = g_dir_open (bf->priv->dirname, 0, NULL);
  	if (dir) {
  		const char *name;
-@@ -1607,11 +1512,6 @@
+@@ -1587,11 +1492,6 @@
  	}
  	G_UNLOCK (global_env);
  	
@@ -282,7 +282,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  	G_OBJECT_CLASS (e_book_backend_file_parent_class)->dispose (object);	
  }
  
-@@ -1624,7 +1524,6 @@
+@@ -1604,7 +1504,6 @@
  
  	g_free (bf->priv->filename);
  	g_free (bf->priv->dirname);

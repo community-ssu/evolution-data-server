@@ -25,7 +25,6 @@
 32_limit-vcard-parsing.diff
 33_syncable-field-flag.diff
 34_phones_field.diff
-35_file_backend_shorter_uids.diff
 36_full_version_number.diff
 37_summary_remove.diff
 38_pre-install.diff

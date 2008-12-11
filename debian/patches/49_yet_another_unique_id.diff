@@ -1,13 +1,13 @@
 Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
 ===================================================================
---- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file.c	2008-11-28 12:25:25.000000000 +0200
-+++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-11-28 13:01:09.000000000 +0200
+--- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file.c	2008-12-11 10:42:45.000000000 +0200
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-12-11 10:44:09.000000000 +0200
 @@ -59,6 +59,8 @@
  #define d(x)
  
  #define CHANGES_DB_SUFFIX ".changes.db"
 +#define RUNNING_ID_DB_NAME "running_id"
-+#define RUNNING_ID_LEN 8
++#define RUNNING_ID_MAX 99999999
  
  #define E_BOOK_BACKEND_FILE_VERSION_NAME "PAS-DB-VERSION"
  #define E_BOOK_BACKEND_FILE_VERSION "0.2"
@@ -23,20 +23,27 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  };
  
  G_LOCK_DEFINE_STATIC (global_env);
-@@ -131,7 +135,6 @@
- 	static guint c = 0;
- 	return g_strdup_printf (PAS_ID_PREFIX "%08lX%08X", time(NULL), c++);
+@@ -121,16 +125,6 @@
+ 	return contact;
  }
--#endif
  
- static char *
- e_book_backend_file_create_unique_id (void)
-@@ -150,6 +153,110 @@
- 
-     return g_base64_encode (buffer, 6);
+-static char *
+-e_book_backend_file_create_unique_id (void)
+-{
+-	/* use a 32 counter and the 32 bit timestamp to make an id.
+-	   it's doubtful 2^32 id's will be created in a second, so we
+-	   should be okay. */
+-	static guint c = 0;
+-	return g_strdup_printf (PAS_ID_PREFIX "%08lX%08X", time(NULL), c++);
+-}
+-
+ static void 
+ set_revision (EContact *contact)
+ {
+@@ -145,6 +139,109 @@
+ 	e_contact_set (contact, E_CONTACT_REV, time_string);
  }
-+#endif
-+
+ 
 +static void
 +load_last_running_id (EBookBackendFile *bf)
 +{
@@ -89,11 +96,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
 +static char*
 +unique_id_to_string (int id)
 +{
-+	char ret[RUNNING_ID_LEN+1];
-+
-+	snprintf (&ret[0], RUNNING_ID_LEN+1, "%0*d", RUNNING_ID_LEN, id);
-+	ret[RUNNING_ID_LEN] = '\0';
-+	return g_strdup (ret);
++	return g_strdup_printf ("%d", id);
 +}
 +
 +static gboolean
@@ -134,15 +137,20 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
 +	if (0 == bf->priv->running_id) {
 +		load_last_running_id (bf);
 +	}
++    if (bf->priv->running_id >= RUNNING_ID_MAX) {
++		g_warning ("Warning running id overrun");
++		bf->priv->running_id = 1;
++	}
 +	++bf->priv->running_id;
 +
 +	g_assert (bf->priv->running_id > 0);
 +	return unique_id_to_string (bf->priv->running_id);
 +}
- 
- static void 
- set_revision (EContact *contact)
-@@ -182,7 +289,7 @@
++
+ /* put the vcard to db, but doesn't sync the db */
+ static int
+ insert_contact (EBookBackendFile *bf,
+@@ -162,7 +259,7 @@
          g_assert (vcard_req);
          g_assert (contact);
  
@@ -151,7 +159,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  
          string_to_dbt (id, &id_dbt);
  
-@@ -229,14 +336,17 @@
+@@ -209,14 +306,17 @@
          db_error = insert_contact (bf, vcard_req, contact);
  
  	if (0 == db_error) {
@@ -173,7 +181,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  
          return db_error_to_status (db_error);
  }
-@@ -269,7 +379,7 @@
+@@ -249,7 +349,7 @@
          EBookBackendFile *bf;
          EContact *contact;
          DB *db;
@@ -182,7 +190,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
          EBookBackendSyncStatus status;
  
          bf = E_BOOK_BACKEND_FILE (backend);
-@@ -298,11 +408,16 @@
+@@ -278,11 +378,16 @@
                  *contacts = g_list_prepend (*contacts, contact);
          }
  
@@ -204,7 +212,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  
          status = db_error_to_status (db_error);
          if (status == GNOME_Evolution_Addressbook_Success) {
-@@ -1392,6 +1507,55 @@
+@@ -1372,6 +1477,55 @@
  }
  
  static GNOME_Evolution_Addressbook_CallStatus
@@ -260,7 +268,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  e_book_backend_file_load_source (EBookBackend           *backend,
  				 ESource                *source,
  				 gboolean                only_if_exists)
-@@ -1596,7 +1760,7 @@
+@@ -1576,7 +1730,7 @@
  		g_warning ("No file_db");
  	}
  
@@ -269,7 +277,7 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  }
  
  static gboolean
-@@ -1739,6 +1903,11 @@
+@@ -1719,6 +1873,11 @@
  
  	bf = E_BOOK_BACKEND_FILE (object);
  

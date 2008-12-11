@@ -1,3 +1,13 @@
+evolution-data-server (1.4.2.1-20081211) unstable; urgency=low
+
+  * Removed 35_file_backend_shorter_uids.diff as it is no longer needed,
+    37_summary_remove.diff needed updates as a result
+  * 50_preserve-uid-in-file-backend.diff: Hotfix: Properly handle case where a
+    commited vcard does not have a UID
+  * 49_yet_another_unique_id.diff: Forgot quilt refresh, doh
+
+ -- Joergen Scheibengruber <Jorgen.Scheibengruber@nokia.com>  Thu, 11 Dec 2008 10:49:24 +0200
+
 evolution-data-server (1.4.2.1-20081210) unstable; urgency=low
 
   * 51_e_book_async_get_contacts_fix.diff: Handle GErrors properly. Fixes: NB#95205
