@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20081215) unstable; urgency=low
+
+  * Fix debug packages
+
+ -- Joergen Scheibengruber <Jorgen.Scheibengruber@nokia.com>  Mon, 15 Dec 2008 18:48:51 +0200
+
 evolution-data-server (1.4.2.1-20081211) unstable; urgency=low
 
   * Removed 35_file_backend_shorter_uids.diff as it is no longer needed,

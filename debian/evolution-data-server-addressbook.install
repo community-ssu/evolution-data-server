@@ -1,3 +1,2 @@
 debian/tmp/usr/lib/evolution-data-server/*
 debian/tmp/usr/lib/evolution-data-server-1.2/extensions/*.so
-debian/tmp/usr/libexec/*
