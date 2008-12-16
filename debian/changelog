@@ -1,3 +1,11 @@
+evolution-data-server (1.4.2.1-20081216) unstable; urgency=low
+
+  * Let the bookview take a ref on the backend. This should be safe as long as
+    the bookview is not leaking, but i fear it is. Needs more investigation,
+    but seems to fix a nasty hang for now
+
+ -- Joergen Scheibengruber <Jorgen.Scheibengruber@nokia.com>  Tue, 16 Dec 2008 12:30:39 +0200
+
 evolution-data-server (1.4.2.1-20081215) unstable; urgency=low
 
   * Fix debug packages

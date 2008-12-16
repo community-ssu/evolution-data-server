@@ -1,0 +1,21 @@
+Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
+===================================================================
+--- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file.c	2008-12-16 12:11:45.000000000 +0200
++++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-12-16 12:18:16.000000000 +0200
+@@ -929,7 +929,7 @@
+ 
+ 	d(printf ("starting book view thread\n"));
+ 	closure->thread = g_thread_create (book_view_thread, book_view, FALSE, NULL);
+-	g_object_ref (backend);
++	g_object_set_data_full (G_OBJECT (book_view), "backend", g_object_ref (backend), g_object_unref);
+ 
+ 	e_flag_wait (closure->running);
+ 
+@@ -943,7 +943,6 @@
+ {
+ 	FileBackendSearchClosure *closure = get_closure (book_view);
+ 
+-	g_object_unref (backend);
+ 	d(printf ("stopping query\n"));
+ 	if (!closure) {
+ 		/* TODO: find out why this happens! */
