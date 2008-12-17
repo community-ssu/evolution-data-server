@@ -1,3 +1,10 @@
+evolution-data-server (1.4.2.1-20081217) unstable; urgency=low
+
+  * Revert X-mas fix and instead fix the problem at it's root
+  * Make endswith_vcard, contains_vcard and beginswith_vcard queries work
+
+ -- Joergen Scheibengruber <Jorgen.Scheibengruber@nokia.com>  Wed, 17 Dec 2008 13:51:51 +0200
+
 evolution-data-server (1.4.2.1-20081216) unstable; urgency=low
 
   * Let the bookview take a ref on the backend. This should be safe as long as

@@ -1,7 +1,8 @@
-diff -urNpb evolution-data-server.org/addressbook/libebook-dbus/e-book-query.c evolution-data-server/addressbook/libebook-dbus/e-book-query.c
---- evolution-data-server.org/addressbook/libebook-dbus/e-book-query.c	2008-09-16 19:19:55.000000000 +0300
-+++ evolution-data-server/addressbook/libebook-dbus/e-book-query.c	2008-09-16 19:34:57.000000000 +0300
-@@ -195,11 +195,6 @@ e_book_query_vcard_field_test (const cha
+Index: evolution-data-server/addressbook/libebook-dbus/e-book-query.c
+===================================================================
+--- evolution-data-server.orig/addressbook/libebook-dbus/e-book-query.c	2008-12-16 12:11:44.000000000 +0200
++++ evolution-data-server/addressbook/libebook-dbus/e-book-query.c	2008-12-17 12:08:04.000000000 +0200
+@@ -195,11 +195,6 @@
  {
  	EBookQuery *ret;
  	
@@ -13,7 +14,7 @@ diff -urNpb evolution-data-server.org/addressbook/libebook-dbus/e-book-query.c e
  	ret = g_new0 (EBookQuery, 1);
  	ret->type = E_BOOK_QUERY_TYPE_FIELD_TEST;
  	ret->query.field_test.field = 0;
-@@ -472,6 +467,36 @@ func_contains(struct _ESExp *f, int argc
+@@ -472,6 +467,36 @@
  }
  
  static ESExpResult *
@@ -50,7 +51,7 @@ diff -urNpb evolution-data-server.org/addressbook/libebook-dbus/e-book-query.c e
  func_is(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
  {
  	GList **list = data;
-@@ -547,6 +572,32 @@ func_beginswith(struct _ESExp *f, int ar
+@@ -547,6 +572,32 @@
  }
  
  static ESExpResult *
@@ -83,7 +84,7 @@ diff -urNpb evolution-data-server.org/addressbook/libebook-dbus/e-book-query.c e
  func_endswith(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
  {
  	GList **list = data;
-@@ -572,6 +623,31 @@ func_endswith(struct _ESExp *f, int argc
+@@ -572,6 +623,31 @@
  }
  
  static ESExpResult *
@@ -115,7 +116,7 @@ diff -urNpb evolution-data-server.org/addressbook/libebook-dbus/e-book-query.c e
  func_exists(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
  {
  	GList **list = data;
-@@ -622,10 +698,13 @@ static const struct {
+@@ -622,10 +698,13 @@
  	{ "or", func_or, 0 },
  	{ "not", func_not, 0 },
  	{ "contains", func_contains, 0 },
@@ -129,20 +130,86 @@ diff -urNpb evolution-data-server.org/addressbook/libebook-dbus/e-book-query.c e
  	{ "exists", func_exists, 0 },
  	{ "exists_vcard", func_exists_vcard, 0 },
  };
-diff -urNpb evolution-data-server.org/addressbook/libedata-book-dbus/e-book-backend-sexp.c evolution-data-server/addressbook/libedata-book-dbus/e-book-backend-sexp.c
---- evolution-data-server.org/addressbook/libedata-book-dbus/e-book-backend-sexp.c	2008-09-16 19:19:55.000000000 +0300
-+++ evolution-data-server/addressbook/libedata-book-dbus/e-book-backend-sexp.c	2008-09-16 19:27:42.000000000 +0300
-@@ -552,10 +552,13 @@ static struct {
+Index: evolution-data-server/addressbook/libedata-book-dbus/e-book-backend-sexp.c
+===================================================================
+--- evolution-data-server.orig/addressbook/libedata-book-dbus/e-book-backend-sexp.c	2008-12-16 12:11:45.000000000 +0200
++++ evolution-data-server/addressbook/libedata-book-dbus/e-book-backend-sexp.c	2008-12-17 12:49:26.000000000 +0200
+@@ -404,6 +404,14 @@
+ 	return entry_compare (ctx, f, argc, argv, (char *(*)(const char*, const char*)) e_util_utf8_strstrcase);
+ }
+ 
++static ESExpResult *
++func_contains_vcard(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
++{
++	SearchContext *ctx = data;
++
++	return vcard_compare (ctx, f, argc, argv, (char *(*)(const char*, const char*)) e_util_utf8_strstrcase);
++}
++
+ static char *
+ is_helper (const char *s1, const char *s2)
+ {
+@@ -433,11 +441,14 @@
+ endswith_helper (const char *s1, const char *s2)
+ {
+ 	char *p;
+-	if ((p = (char*) e_util_utf8_strstrcase(s1, s2))
+-	    && (strlen(p) == strlen(s2)))
+-		return p;
+-	else
+-		return NULL;
++
++	while((p = (char*) e_util_utf8_strstrcase(s1, s2))) {
++		if ((strlen(p) == strlen(s2)))
++			return p;
++		else
++			s1 = g_utf8_next_char (p);
++	}
++	return NULL;
+ }
+ 
+ static ESExpResult *
+@@ -448,6 +459,14 @@
+ 	return entry_compare (ctx, f, argc, argv, endswith_helper);
+ }
+ 
++static ESExpResult *
++func_endswith_vcard(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
++{
++	SearchContext *ctx = data;
++
++	return vcard_compare (ctx, f, argc, argv, endswith_helper);
++}
++
+ static char *
+ beginswith_helper (const char *s1, const char *s2)
+ {
+@@ -468,6 +487,14 @@
+ }
+ 
+ static ESExpResult *
++func_beginswith_vcard(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
++{
++	SearchContext *ctx = data;
++
++	return vcard_compare (ctx, f, argc, argv, beginswith_helper);
++}
++
++static ESExpResult *
+ func_exists(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
+ {
+ 	SearchContext *ctx = data;
+@@ -552,10 +579,13 @@
  				   doesn't execute everything, 0 otherwise */
  } symbols[] = {
  	{ "contains", func_contains, 0 },
-+	{ "contains_vcard", func_contains, 0 },
++	{ "contains_vcard", func_contains_vcard, 0 },
  	{ "is", func_is, 0 },
  	{ "is_vcard", func_is_vcard, 0 },
  	{ "beginswith", func_beginswith, 0 },
-+	{ "beginswith_vcard", func_beginswith, 0 },
++	{ "beginswith_vcard", func_beginswith_vcard, 0 },
  	{ "endswith", func_endswith, 0 },
-+	{ "endswith_vcard", func_endswith, 0 },
++	{ "endswith_vcard", func_endswith_vcard, 0 },
  	{ "exists", func_exists, 0 },
  	{ "exists_vcard", func_exists_vcard, 0 },
  };

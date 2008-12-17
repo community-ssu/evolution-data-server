@@ -1,0 +1,32 @@
+Index: evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c
+===================================================================
+--- evolution-data-server.orig/addressbook/libedata-book-dbus/e-data-book-view.c	2008-12-16 17:04:38.000000000 +0200
++++ evolution-data-server/addressbook/libedata-book-dbus/e-data-book-view.c	2008-12-17 12:06:03.000000000 +0200
+@@ -330,8 +330,10 @@
+ {
+   EDataBookView *book_view = data;
+ 
+-  e_data_book_view_thaw (book_view);
+-  e_book_backend_stop_book_view (book_view->priv->backend, book_view);
++  if (book_view->priv->running) {
++    e_data_book_view_thaw (book_view);
++    e_book_backend_stop_book_view (book_view->priv->backend, book_view);
++  }
+ 
+   book_view->priv->running = FALSE;
+   book_view->priv->idle_id = 0;
+@@ -342,9 +344,13 @@
+ static gboolean
+ impl_BookView_stop (EDataBookView *book_view, GError **error)
+ {
++  if (FALSE == book_view->priv->running) {
++    return TRUE;
++  }
++
+   if (book_view->priv->idle_id)
+     g_source_remove (book_view->priv->idle_id);
+-  
++
+   book_view->priv->idle_id = g_idle_add (bookview_idle_stop, book_view);
+   return TRUE;
+ }
