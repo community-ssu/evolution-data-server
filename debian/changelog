@@ -1,9 +1,11 @@
-evolution-data-server (1.4.2.1-20081216.99) unstable; urgency=low
+evolution-data-server (1.4.2.1-20081217) unstable; urgency=low
 
   * Revert X-mas fix and instead fix the problem at it's root
   * Make endswith_vcard, contains_vcard and beginswith_vcard queries work
+  * 54_reverse_indices.diff: Add support for "reversed" indexes, i.e. indexes that are fast
+    for suffix queries (needed for TEL)
 
- -- Joergen Scheibengruber <Jorgen.Scheibengruber@nokia.com>  Wed, 17 Dec 2008 13:51:51 +0200
+ -- Joergen Scheibengruber <Jorgen.Scheibengruber@nokia.com>  Fri,  9 Jan 2009 12:10:04 +0200
 
 evolution-data-server (1.4.2.1-20081216) unstable; urgency=low
 
