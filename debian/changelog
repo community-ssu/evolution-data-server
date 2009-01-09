@@ -1,4 +1,4 @@
-evolution-data-server (1.4.2.1-20081217) unstable; urgency=low
+evolution-data-server (1.4.2.1-20090109) unstable; urgency=low
 
   * Revert X-mas fix and instead fix the problem at it's root
   * Make endswith_vcard, contains_vcard and beginswith_vcard queries work
