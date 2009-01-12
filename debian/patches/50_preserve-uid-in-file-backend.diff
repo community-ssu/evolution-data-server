@@ -1,9 +1,9 @@
-Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
+Index: evo-my/addressbook/backends/file/e-book-backend-file.c
 ===================================================================
---- evolution-data-server.orig/addressbook/backends/file/e-book-backend-file.c	2008-12-10 18:21:48.000000000 +0200
-+++ evolution-data-server/addressbook/backends/file/e-book-backend-file.c	2008-12-10 18:31:09.000000000 +0200
-@@ -272,6 +272,31 @@
- 	e_contact_set (contact, E_CONTACT_REV, time_string);
+--- evo-my.orig/addressbook/backends/file/e-book-backend-file.c	2009-01-12 15:38:59.000000000 +0100
++++ evo-my/addressbook/backends/file/e-book-backend-file.c	2009-01-12 16:23:58.000000000 +0100
+@@ -242,6 +242,31 @@
+ 	return unique_id_to_string (bf->priv->running_id);
  }
  
 +static gboolean
@@ -34,11 +34,15 @@ Index: evolution-data-server/addressbook/backends/file/e-book-backend-file.c
  /* put the vcard to db, but doesn't sync the db */
  static int
  insert_contact (EBookBackendFile *bf,
-@@ -289,16 +314,22 @@
+@@ -259,16 +284,26 @@
          g_assert (vcard_req);
          g_assert (contact);
  
 -        id = e_book_backend_file_create_unique_id (bf);
++        if (0 == bf->priv->running_id) {
++                load_last_running_id (bf);
++        }
++
 +        *contact = e_contact_new_from_vcard (vcard_req);
 +        if (is_contact_preserved (*contact)) {
 +                id = (char *) e_contact_get (*contact, E_CONTACT_UID);

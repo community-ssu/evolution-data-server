@@ -1,3 +1,10 @@
+evolution-data-server (1.4.2.1-20090112) unstable; urgency=low
+
+  * 50_preserve-uid-in-file-backend.diff: Fix running_id issue in file
+    backend.
+
+ -- Robert Peto <robert.peto@maemo.org> Mon, 12 Jan 2009 16:38:39 +0200
+
 evolution-data-server (1.4.2.1-20090109) unstable; urgency=low
 
   * Revert X-mas fix and instead fix the problem at it's root
