@@ -242,6 +242,31 @@ e_book_backend_file_create_unique_id (EBookBackendFile *bf)
 	return unique_id_to_string (bf->priv->running_id);
 }
 
+static gboolean
+is_contact_preserved (EContact *contact)
+{
+        EVCardAttribute *attr;
+        GList *params, *l;
+
+        attr = e_vcard_get_attribute (E_VCARD (contact), EVC_UID);
+        if (NULL == attr)
+                return FALSE;
+
+        params = e_vcard_attribute_get_params (attr);
+        for (l = params; l; l = g_list_next (l)) {
+                const char *name;
+
+                name = e_vcard_attribute_param_get_name (l->data);
+
+                if (g_ascii_strcasecmp (name, "X-OSSO-PRESERVE") == 0) {
+                        e_vcard_attribute_remove_param (attr, "X-OSSO-PRESERVE");
+                        return TRUE;
+                }
+        }
+
+        return FALSE;
+}
+
 /* put the vcard to db, but doesn't sync the db */
 static int
 insert_contact (EBookBackendFile *bf,
@@ -259,16 +284,26 @@ insert_contact (EBookBackendFile *bf,
         g_assert (vcard_req);
         g_assert (contact);
 
-        id = e_book_backend_file_create_unique_id (bf);
+        if (0 == bf->priv->running_id) {
+                load_last_running_id (bf);
+        }
+
+        *contact = e_contact_new_from_vcard (vcard_req);
+        if (is_contact_preserved (*contact)) {
+                id = (char *) e_contact_get (*contact, E_CONTACT_UID);
+        }
+        else {
+                id = e_book_backend_file_create_unique_id (bf);
+                e_contact_set (*contact, E_CONTACT_UID, id);
+        }
 
         string_to_dbt (id, &id_dbt);
 
-        *contact = e_contact_new_from_vcard (vcard_req);
-        e_contact_set (*contact, E_CONTACT_UID, id);
         rev = e_contact_get_const (*contact,  E_CONTACT_REV);
         if (!(rev && *rev))
                 set_revision (*contact);
 
+        /* recreate the vcard string with the new values */
         vcard = e_vcard_to_string (E_VCARD (*contact), EVC_FORMAT_VCARD_30);
 
         string_to_dbt (vcard, &vcard_dbt);
