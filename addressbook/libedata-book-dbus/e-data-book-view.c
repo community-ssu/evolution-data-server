@@ -330,8 +330,10 @@ bookview_idle_stop (gpointer data)
 {
   EDataBookView *book_view = data;
 
-  e_data_book_view_thaw (book_view);
-  e_book_backend_stop_book_view (book_view->priv->backend, book_view);
+  if (book_view->priv->running) {
+    e_data_book_view_thaw (book_view);
+    e_book_backend_stop_book_view (book_view->priv->backend, book_view);
+  }
 
   book_view->priv->running = FALSE;
   book_view->priv->idle_id = 0;
@@ -342,9 +344,13 @@ bookview_idle_stop (gpointer data)
 static gboolean
 impl_BookView_stop (EDataBookView *book_view, GError **error)
 {
+  if (FALSE == book_view->priv->running) {
+    return TRUE;
+  }
+
   if (book_view->priv->idle_id)
     g_source_remove (book_view->priv->idle_id);
-  
+
   book_view->priv->idle_id = g_idle_add (bookview_idle_stop, book_view);
   return TRUE;
 }
