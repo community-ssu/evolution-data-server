@@ -104,6 +104,8 @@ typedef enum {
 #define E_IS_VCARD_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), E_TYPE_VCARD))
 #define E_VCARD_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), E_TYPE_VCARD, EVCardClass))
 
+#define E_TYPE_VCARD_ATTRIBUTE  (e_vcard_attribute_get_type ())
+
 typedef struct _EVCard EVCard;
 typedef struct _EVCardClass EVCardClass;
 typedef struct _EVCardPrivate EVCardPrivate;
@@ -127,7 +129,7 @@ struct _EVCardClass {
 	void (*_ebook_reserved4) (void);
 };
 
-GType   e_vcard_get_type                     (void);
+GType   e_vcard_get_type                     (void) G_GNUC_CONST;
 
 void    e_vcard_construct                    (EVCard *evc, const char *str);
 void    e_vcard_construct_with_uid           (EVCard *evc, const char *str, const char *uid);
@@ -143,6 +145,7 @@ gboolean e_vcard_is_parsed                   (EVCard *evc);
 
 
 /* attributes */
+GType            e_vcard_attribute_get_type          (void) G_GNUC_CONST;
 EVCardAttribute *e_vcard_attribute_new               (const char *attr_group, const char *attr_name);
 void             e_vcard_attribute_free              (EVCardAttribute *attr);
 EVCardAttribute *e_vcard_attribute_copy              (EVCardAttribute *attr);

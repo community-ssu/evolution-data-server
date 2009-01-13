@@ -1026,6 +1026,18 @@ e_vcard_is_parsed (EVCard *evc)
         return (!evc->priv->vcard && evc->priv->attributes);
 }
 
+GType
+e_vcard_attribute_get_type (void)
+{
+	static GType type_id = 0;
+
+	if (!type_id)
+		type_id = g_boxed_type_register_static ("EVCardAttribute",
+							(GBoxedCopyFunc) e_vcard_attribute_copy,
+							(GBoxedFreeFunc) e_vcard_attribute_free);
+	return type_id;
+}
+
 /**
  * e_vcard_attribute_new:
  * @attr_group: a group name
