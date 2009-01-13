@@ -2,7 +2,7 @@ Source: evolution-data-server
 Section: base
 Priority: optional
 Maintainer: Onne Gorter <onne.gorter@nokia.com>
-Build-Depends: debhelper (>= 5.0.0), cdbs, quilt, intltool (>= 0.28-2), flex, bison, libc6-dev (>= 2.5), libgtk2.0-dev, gnome-common, gtk-doc-tools, libgconf2-dev, libxml2-dev, libdb4.2-dev, libdbus-glib-1-dev (>= 0.73-0osso2)
+Build-Depends: debhelper (>= 5.0.0), cdbs, intltool (>= 0.28-2), flex, bison, libc6-dev (>= 2.5), libgtk2.0-dev, gnome-common, gtk-doc-tools, libgconf2-dev, libxml2-dev, libdb4.2-dev, libdbus-glib-1-dev (>= 0.73-0osso2)
 Standards-Version: 3.7
 
 Package: evolution-data-server-addressbook
