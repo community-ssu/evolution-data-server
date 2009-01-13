@@ -1712,8 +1712,9 @@ gboolean
 e_book_get_book_view (EBook *book, EBookQuery *query, GList *requested_fields, int max_results, EBookView **book_view, GError **error)
 {
   GError *err = NULL;
+  DBusGConnection *view_conn;
   DBusGProxy *view_proxy;
-  char *sexp, *view_path;
+  char *sexp, *address;
   gboolean ret = TRUE;
 
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
@@ -1721,14 +1722,20 @@ e_book_get_book_view (EBook *book, EBookQuery *query, GList *requested_fields, i
 
   sexp = e_book_query_to_string (query);
   
-  if (!org_gnome_evolution_dataserver_addressbook_Book_get_book_view (book->priv->proxy, sexp, max_results, &view_path, &err)) {
+  if (!org_gnome_evolution_dataserver_addressbook_Book_get_book_view (book->priv->proxy, sexp, max_results, &address, &err)) {
     *book_view = NULL;
     g_free (sexp);
     return unwrap_gerror (err, error);
   }
-  view_proxy = dbus_g_proxy_new_for_name_owner (connection,
-                                                E_DATA_BOOK_FACTORY_SERVICE_NAME, view_path,
-                                                "org.gnome.evolution.dataserver.addressbook.BookView", error);
+
+  view_conn = dbus_g_connection_open (address, &err);
+  g_free (address);
+  if (!view_conn) {
+   return unwrap_gerror (err, error);
+  }
+
+  view_proxy = dbus_g_proxy_new_for_peer (view_conn, "/", "org.gnome.evolution.dataserver.addressbook.BookView");
+  dbus_g_connection_unref (view_conn);
 
   if (view_proxy) {
     *book_view = e_book_view_new (book, view_proxy);
@@ -1738,34 +1745,47 @@ e_book_get_book_view (EBook *book, EBookQuery *query, GList *requested_fields, i
                  "Cannot get connection to view");
     ret = FALSE;
   }
-  
-  g_free (view_path);
+
   g_free (sexp);
 
   return ret;
 }
 
 static void
-get_book_view_reply (DBusGProxy *proxy, char *view_path, GError *error, gpointer user_data)
+get_book_view_reply (DBusGProxy *proxy, char *address, GError *error, gpointer user_data)
 {
   AsyncData *data = user_data;
   GError *err = NULL;
   EBookView *view = NULL;
   EBookBookViewCallback cb = data->callback;
+  DBusGConnection *view_conn;
   DBusGProxy *view_proxy;
   EBookStatus status;
 
-  if (view_path) {
-    view_proxy = dbus_g_proxy_new_for_name_owner (connection, E_DATA_BOOK_FACTORY_SERVICE_NAME, view_path,
-                                                  "org.gnome.evolution.dataserver.addressbook.BookView", &err);
-    if (view_proxy) {
-      view = e_book_view_new (data->book, view_proxy);
-      status = E_BOOK_ERROR_OK;
-    } else {
-      g_warning (G_STRLOC ": cannot get connection to view: %s", err->message);
+  if (address) {
+    view_conn = dbus_g_connection_open (address, &err);
+    g_free (address);
+
+    if (!view_conn)
+    {
+      g_warning (G_STRLOC ": cannot get connection: %s", err->message);
       g_error_free (err);
       status = E_BOOK_ERROR_CORBA_EXCEPTION;
+    } else {
+
+      view_proxy = dbus_g_proxy_new_for_peer (view_conn, "/", "org.gnome.evolution.dataserver.addressbook.BookView");
+      dbus_g_connection_unref (view_conn);
+
+      if (view_proxy) {
+        view = e_book_view_new (data->book, view_proxy);
+        status = E_BOOK_ERROR_OK;
+      } else {
+        g_warning (G_STRLOC ": cannot get connection to view: %s", err->message);
+        g_error_free (err);
+        status = E_BOOK_ERROR_CORBA_EXCEPTION;
+      }
     }
+
   } else {
     status = get_status_from_error (error);
   }

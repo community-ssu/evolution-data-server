@@ -577,7 +577,7 @@ construct_bookview_path (void)
 {
   static volatile guint counter = 1;
 
-  return g_strdup_printf ("/org/gnome/evolution/dataserver/addressbook/BookView/%d/%d",
+  return g_strdup_printf ("unix:abstract=/e-addressbook-view-%d-%d",
                           getpid (),
                           g_atomic_int_exchange_and_add ((int*)&counter, 1));
 }

@@ -21,10 +21,9 @@
 #include <config.h>
 #include <string.h>
 #include <dbus/dbus.h>
+#include <dbus/dbus-glib-lowlevel.h>
 #include <libebook/e-contact.h>
 #include "e-data-book-view.h"
-
-extern DBusGConnection *connection;
 
 static gboolean impl_BookView_start (EDataBookView *view, GError **error);
 static gboolean impl_BookView_stop (EDataBookView *view, GError **error);
@@ -42,6 +41,7 @@ G_DEFINE_TYPE (EDataBookView, e_data_book_view, G_TYPE_OBJECT);
 struct _EDataBookViewPrivate {
   EDataBook *book;
   EBookBackend *backend;
+  DBusConnection *conn;
 
   char* card_query;
   EBookBackendSExp *card_sexp;
@@ -152,10 +152,32 @@ book_destroyed_cb (gpointer data, GObject *dead)
   g_object_unref (view);
 }
 
+/* Oh dear god, think of the children. */
+#define _DBUS_POINTER_SHIFT(p)   ((void*) (((char*)p) + sizeof (void*)))
+#define DBUS_G_CONNECTION_FROM_CONNECTION(x)     ((DBusGConnection*) _DBUS_POINTER_SHIFT(x))
+
+static void
+new_connection_func (DBusServer *server, DBusConnection *conn, gpointer user_data)
+{
+  EDataBookView *view = user_data;
+
+  dbus_connection_ref (conn);
+  dbus_connection_setup_with_g_main (conn, NULL);
+
+  dbus_g_connection_register_g_object
+    (DBUS_G_CONNECTION_FROM_CONNECTION (conn), "/", G_OBJECT (view));
+
+  /* This is a one-shot server */
+  dbus_server_unref (server);
+  dbus_server_disconnect (server);
+
+  view->priv->conn = conn;
+}
+
 /**
  * e_data_book_view_new:
  * @book: The #EDataBook to search
- * @path: The object path that this book view should have
+ * @path: The socket path that this book view should open
  * @card_query: The query as a string
  * @card_sexp: The query as an #EBookBackendSExp
  * @max_results: The maximum number of results to return
@@ -166,9 +188,23 @@ book_destroyed_cb (gpointer data, GObject *dead)
 EDataBookView *
 e_data_book_view_new (EDataBook *book, const char *path, const char *card_query, EBookBackendSExp *card_sexp, int max_results)
 {
+  DBusError error;
+  DBusServer *server;
   EDataBookView *view;
   EDataBookViewPrivate *priv;
 
+  g_return_val_if_fail (E_IS_DATA_BOOK (book), NULL);
+  g_return_val_if_fail (path, NULL);
+
+  dbus_error_init (&error);
+  server = dbus_server_listen (path, &error);
+  if (!server) {
+    g_warning ("Cannot create server: %s", error.message);
+    dbus_error_free (&error);
+    return NULL;
+  }
+  dbus_server_setup_with_g_main (server, NULL);
+  
   view = g_object_new (E_TYPE_DATA_BOOK_VIEW, NULL);
   priv = view->priv;
 
@@ -180,7 +216,7 @@ e_data_book_view_new (EDataBook *book, const char *path, const char *card_query,
   priv->card_sexp = card_sexp;
   priv->max_results = max_results;
 
-  dbus_g_connection_register_g_object (connection, path, G_OBJECT (view));
+  dbus_server_set_new_connection_function (server, new_connection_func, view, NULL);
 
   return view;
 }
@@ -236,6 +272,10 @@ e_data_book_view_finalize (GObject *object)
   g_mutex_free (priv->pending_mutex);
 
   g_hash_table_destroy (priv->ids);
+
+  if (priv->conn) {
+    dbus_connection_close (priv->conn);
+  }
 
   G_OBJECT_CLASS (e_data_book_view_parent_class)->finalize (object);
 }
