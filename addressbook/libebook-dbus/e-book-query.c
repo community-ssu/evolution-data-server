@@ -424,11 +424,14 @@ func_not(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
 {
 	GList **list = data;
 	ESExpResult *r;
+	EBookQuery *term;
 
 	/* just replace the head of the list with the NOT of it. */
-	if (argc > 0) {
-		EBookQuery *term = (*list)->data;
-		(*list)->data = e_book_query_not (term, TRUE);
+	if (argc == 1) {
+		if (*list) {
+			term = (*list)->data;
+			(*list)->data = e_book_query_not (term, TRUE);
+		}
 	}
 
 	r = e_sexp_result_new(f, ESEXP_RES_BOOL);
