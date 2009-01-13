@@ -34,8 +34,6 @@ static gboolean impl_BookView_set_sort_order (EDataBookView *view, gchar *query_
 
 #include "e-data-book-view-glue.h"
 
-static void reset_array (GArray *array);
-
 G_DEFINE_TYPE (EDataBookView, e_data_book_view, G_TYPE_OBJECT);
 #define E_DATA_BOOK_VIEW_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), E_TYPE_DATA_BOOK_VIEW, EDataBookViewPrivate))
 
@@ -53,9 +51,9 @@ struct _EDataBookViewPrivate {
   gboolean running;
   GMutex *pending_mutex;
 
-  GArray *adds;
-  GArray *changes;
-  GArray *removes;
+  GPtrArray *adds;
+  GPtrArray *changes;
+  GPtrArray *removes;
 
   GHashTable *ids;
   guint idle_id;
@@ -145,9 +143,9 @@ e_data_book_view_init (EDataBookView *book_view)
   priv->running = FALSE;
   priv->pending_mutex = g_mutex_new ();
 
-  priv->adds = g_array_sized_new (TRUE, TRUE, sizeof (char*), THRESHOLD);
-  priv->changes = g_array_sized_new (TRUE, TRUE, sizeof (char*), THRESHOLD);
-  priv->removes = g_array_sized_new (TRUE, TRUE, sizeof (char*), THRESHOLD);
+  priv->adds = g_ptr_array_sized_new (THRESHOLD);
+  priv->changes = g_ptr_array_sized_new (THRESHOLD);
+  priv->removes = g_ptr_array_sized_new (THRESHOLD);
 
   priv->ids = g_hash_table_new_full (g_str_hash, g_str_equal,
                                      g_free, NULL);
@@ -276,15 +274,20 @@ e_data_book_view_dispose (GObject *object)
   G_OBJECT_CLASS (e_data_book_view_parent_class)->dispose (object);
 }
 
+static void reset_array (GPtrArray *array);
+
 static void
 e_data_book_view_finalize (GObject *object)
 {
   EDataBookView *book_view = E_DATA_BOOK_VIEW (object);
   EDataBookViewPrivate *priv = book_view->priv;
 
-  g_strfreev ((char**)g_array_free (priv->adds, FALSE));
-  g_strfreev ((char**)g_array_free (priv->changes, FALSE));
-  g_strfreev ((char**)g_array_free (priv->removes, FALSE));
+  reset_array (priv->adds);
+  reset_array (priv->changes);
+  reset_array (priv->removes);
+  g_ptr_array_free (priv->adds, FALSE);
+  g_ptr_array_free (priv->changes, FALSE);
+  g_ptr_array_free (priv->removes, FALSE);
 
   g_free (priv->card_query);
 
@@ -454,6 +457,17 @@ e_data_book_view_get_backend (EDataBookView *book_view)
 }
 
 static void
+reset_array (GPtrArray *array)
+{
+  int i;
+
+  for (i = 0; i < array->len; ++i)
+    g_free (array->pdata[i]);
+
+  g_ptr_array_set_size (array, 0);
+}
+
+static void
 send_pending_adds (EDataBookView *view)
 {
   EDataBookViewPrivate *priv = view->priv;
@@ -461,7 +475,8 @@ send_pending_adds (EDataBookView *view)
   if (priv->adds->len == 0)
     return;
 
-  g_signal_emit (view, signals[CONTACTS_ADDED], 0, priv->adds->data);
+  g_ptr_array_add (priv->adds, NULL);
+  g_signal_emit (view, signals[CONTACTS_ADDED], 0, priv->adds->pdata);
   reset_array (priv->adds);
 }
 
@@ -473,7 +488,8 @@ send_pending_changes (EDataBookView *view)
   if (priv->changes->len == 0)
     return;
 
-  g_signal_emit (view, signals[CONTACTS_CHANGED], 0, priv->changes->data);
+  g_ptr_array_add (priv->changes, NULL);
+  g_signal_emit (view, signals[CONTACTS_CHANGED], 0, priv->changes->pdata);
   reset_array (priv->changes);
 }
 
@@ -485,7 +501,8 @@ send_pending_removes (EDataBookView *view)
   if (priv->removes->len == 0)
     return;
 
-  g_signal_emit (view, signals[CONTACTS_REMOVED], 0, priv->removes->data);
+  g_ptr_array_add (priv->removes, NULL);
+  g_signal_emit (view, signals[CONTACTS_REMOVED], 0, priv->removes->pdata);
   reset_array (priv->removes);
 }
 
@@ -495,8 +512,8 @@ notify_change (EDataBookView *view, char *vcard)
   EDataBookViewPrivate *priv = view->priv;
   send_pending_adds (view);
   send_pending_removes (view);
-  
-  g_array_append_val (priv->changes, vcard);
+
+  g_ptr_array_add (priv->changes, vcard);
 }
 
 static void
@@ -507,7 +524,7 @@ notify_remove (EDataBookView *view, char *id)
   send_pending_adds (view);
   send_pending_changes (view);
 
-  g_array_append_val (priv->removes, id);
+  g_ptr_array_add (priv->removes, id);
   g_hash_table_remove (priv->ids, id);
 }
 
@@ -531,7 +548,7 @@ notify_add (EDataBookView *view, const char *id, char *vcard)
       send_pending_adds (view);
     }
   }
-  g_array_append_val (priv->adds, vcard);
+  g_ptr_array_add (priv->adds, vcard);
   g_hash_table_insert (priv->ids, g_strdup (id),
                        GUINT_TO_POINTER (1));
 }
@@ -682,16 +699,3 @@ e_data_book_view_notify_status_message (EDataBookView *book_view, const char *me
   g_signal_emit (book_view, signals[STATUS_MESSAGE], 0, message);
 }
 
-static void
-reset_array (GArray *array)
-{
-  char **l;
-  
-  /* Free the stored strings */
-  for (l = (char**)array->data; *l; l++) {
-    g_free (*l);
-  };
-
-  /* Force the array size to 0 */
-  g_array_set_size (array, 0);
-}
