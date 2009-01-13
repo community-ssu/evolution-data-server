@@ -12,7 +12,9 @@ extension_LTLIBRARIES = libebookbackendfile.la
 libebookbackendfile_la_SOURCES =			\
 	e-book-backend-file.c				\
 	e-book-backend-file.h				\
-	e-book-backend-file-factory.c
+	e-book-backend-file-factory.c			\
+	$(top_srcdir)/libedataserver/e-db3-utils.c	\
+	$(top_srcdir)/libedataserver/e-dbhash.c
 
 libebookbackendfile_la_LIBADD =						\
 	$(top_builddir)/addressbook/libebook/libebook-$(API_VERSION).la		\

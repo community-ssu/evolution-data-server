@@ -22,8 +22,6 @@ libedataserver_1_2_la_SOURCES =		\
 	e-account.c			\
 	e-categories.c			\
 	e-data-server-module.c		\
-	e-dbhash.c			\
-	e-db3-utils.c			\
 	e-file-cache.c			\
 	e-flag.c			\
 	e-iconv.c			\
@@ -63,8 +61,6 @@ libedataserverinclude_HEADERS =		\
 	e-categories.h			\
 	e-component-listener.h		\
 	e-data-server-module.h		\
-	e-db3-utils.h			\
-	e-dbhash.h			\
 	e-file-cache.h			\
 	e-flag.h			\
 	e-iconv.h			\
