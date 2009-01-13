@@ -129,13 +129,16 @@ struct _EVCardClass {
 GType   e_vcard_get_type                     (void);
 
 void    e_vcard_construct                    (EVCard *evc, const char *str);
+void    e_vcard_construct_with_uid           (EVCard *evc, const char *str, const char *uid);
+
 EVCard* e_vcard_new                          (void);
 EVCard* e_vcard_new_from_string              (const char *str);
 
 char*   e_vcard_to_string                    (EVCard *evc, EVCardFormat format);
 
 /* mostly for debugging */
-void    e_vcard_dump_structure               (EVCard *evc);
+void     e_vcard_dump_structure              (EVCard *evc);
+gboolean e_vcard_is_parsed                   (EVCard *evc);
 
 
 /* attributes */

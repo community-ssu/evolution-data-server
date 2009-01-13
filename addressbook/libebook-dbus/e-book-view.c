@@ -37,6 +37,7 @@ struct _EBookViewPrivate {
 
   gboolean running : 1;
   gboolean freezable : 1;
+  gboolean parse_vcards : 1;
 };
 
 enum {
@@ -122,6 +123,7 @@ e_book_view_init (EBookView *view)
   priv->running = FALSE;
 
   view->priv = priv;
+  priv->parse_vcards = TRUE;
 }
 
 static void
@@ -134,43 +136,45 @@ status_message_cb (DBusGProxy *proxy, const char *message, EBookView *book_view)
 }
 
 static void
-contacts_added_cb (DBusGProxy *proxy, const char **vcards, EBookView *book_view)
+contacts_added_or_changed (EBookView   *book_view,
+                           guint        signal_id,
+                           const char **vcards)
 {
-  const char **p;
   GList *contacts = NULL;
+  const char **p;
+  EContact *ec;
 
   if (!book_view->priv->running)
     return;
 
-  for (p = vcards; *p; p++) {
-    contacts = g_list_prepend (contacts, e_contact_new_from_vcard (*p));
+  if (!book_view->priv->parse_vcards) {
+    g_signal_emit (book_view, signal_id, 0, vcards);
+  } else {
+    for (p = vcards; *p; p+= 2) {
+      ec = e_contact_new ();
+      e_vcard_construct_with_uid (E_VCARD (ec), p[0], p[1]);
+      contacts = g_list_prepend (contacts, ec);
+    }
+
+    contacts = g_list_reverse (contacts);
+
+    g_signal_emit (book_view, signal_id, 0, contacts);
+
+    g_list_foreach (contacts, (GFunc)g_object_unref, NULL);
+    g_list_free (contacts);
   }
-  contacts = g_list_reverse (contacts);
+}
 
-  g_signal_emit (book_view, signals[CONTACTS_ADDED], 0, contacts);
-
-  g_list_foreach (contacts, (GFunc)g_object_unref, NULL);
-  g_list_free (contacts);
+static void
+contacts_added_cb (DBusGProxy *proxy, const char **vcards, EBookView *book_view)
+{
+  contacts_added_or_changed (book_view, signals[CONTACTS_ADDED], vcards);
 }
 
 static void
 contacts_changed_cb (DBusGProxy *proxy, const char **vcards, EBookView *book_view)
 {
-  const char **p;
-  GList *contacts = NULL;
-
-  if (!book_view->priv->running)
-    return;
-
-  for (p = vcards; *p; p++) {
-    contacts = g_list_prepend (contacts, e_contact_new_from_vcard (*p));
-  }
-  contacts = g_list_reverse (contacts);
-
-  g_signal_emit (book_view, signals[CONTACTS_CHANGED], 0, contacts);
-
-  g_list_foreach (contacts, (GFunc)g_object_unref, NULL);
-  g_list_free (contacts);
+  contacts_added_or_changed (book_view, signals[CONTACTS_CHANGED], vcards);
 }
 
 static void
@@ -182,15 +186,19 @@ contacts_removed_cb (DBusGProxy *proxy, const char **ids, EBookView *book_view)
   if (!book_view->priv->running)
     return;
 
-  for (p = ids; *p; p++) {
-    list = g_list_prepend (list, (char*)*p);
+  if (!book_view->priv->parse_vcards) {
+    g_signal_emit (book_view, signals[CONTACTS_REMOVED], 0, ids);
+  } else {
+    for (p = ids; *p; p++) {
+      list = g_list_prepend (list, (char*)*p);
+    }
+    list = g_list_reverse (list);
+
+    g_signal_emit (book_view, signals[CONTACTS_REMOVED], 0, list);
+
+    /* No need to free the values, our caller will */
+    g_list_free (list);
   }
-  list = g_list_reverse (list);
-
-  g_signal_emit (book_view, signals[CONTACTS_REMOVED], 0, list);
-
-  /* No need to free the values, our caller will */
-  g_list_free (list);
 }
 
 static void
@@ -369,3 +377,29 @@ e_book_view_set_sort_order (EBookView *book_view, const gchar *query_term)
     }
   }
 }
+
+/**
+ * e_book_view_set_parse_vcards:
+ * @book_view: an #EBookView
+ * @parse_vcards: whether to parse the vcards into #EContact objects
+ *
+ * Tells the @book_view how to send vCards in its signals. When
+ * @parse_vcards is %FALSE the unparsed vCards are emitted as %NULL terminated
+ * array of strings. The receiver is responsible for parsing them. When
+ * passing %TRUE a #GList of #EContact instances is emitted. This is the
+ * default behavior.
+ **/
+void
+e_book_view_set_parse_vcards (EBookView *book_view, gboolean parse_vcards)
+{
+  g_return_if_fail (E_IS_BOOK_VIEW (book_view));
+  book_view->priv->parse_vcards = parse_vcards;
+}
+
+gboolean
+e_book_view_get_parse_vcards (EBookView *book_view)
+{
+  g_return_val_if_fail (E_IS_BOOK_VIEW (book_view), TRUE);
+  return book_view->priv->parse_vcards;
+}
+

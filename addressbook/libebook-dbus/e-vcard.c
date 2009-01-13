@@ -47,6 +47,7 @@ typedef enum {
 
 struct _EVCardPrivate {
 	GList *attributes;
+	char  *vcard;
 };
 
 struct _EVCardAttribute {
@@ -80,9 +81,11 @@ e_vcard_dispose (GObject *object)
 	EVCard *evc = E_VCARD (object);
 
 	if (evc->priv) {
-
+		/* Directly access priv->attributes and don't call e_vcard_ensure_attributes(),
+ 		 * since it is pointless to start vCard parsing that late. */
 		g_list_foreach (evc->priv->attributes, (GFunc)e_vcard_attribute_free, NULL);
 		g_list_free (evc->priv->attributes);
+		g_free (evc->priv->vcard);
 
 		g_free (evc->priv);
 		evc->priv = NULL;
@@ -551,7 +554,7 @@ read_attribute (const char **p)
 }
 
 static void
-parse (EVCard *evc, const char *str)
+parse (EVCard *evc, const char *str, gboolean ignore_uid)
 {
 	EVCardAttribute *attr;
 
@@ -562,16 +565,21 @@ parse (EVCard *evc, const char *str)
 	if (!attr || attr->group || strcmp (attr->name, "BEGIN")) {
 		g_warning ("vcard began without a BEGIN:VCARD\n");
 	}
-	if (attr && !strcmp (attr->name, "BEGIN"))
-		e_vcard_attribute_free (attr);
-	else if (attr)
-		e_vcard_add_attribute (evc, attr);
+	if (attr) {
+		if (!strcmp (attr->name, "BEGIN"))
+			e_vcard_attribute_free (attr);
+		else if (!ignore_uid || strcmp (attr->name, EVC_UID))
+			e_vcard_add_attribute (evc, attr);
+	}
 	
 	while ((attr = read_attribute (&str))) {
-		if (strcmp (attr->name, "END") != 0)
-			e_vcard_add_attribute (evc, attr);
-		else
+		if (G_UNLIKELY (0 == strcmp (attr->name, "END")))
 			break;
+
+		if (G_UNLIKELY (ignore_uid && 0 == strcmp (attr->name, EVC_UID)))
+			continue;
+
+		e_vcard_add_attribute (evc, attr);
 	}
 
 	if (!attr || attr->group || strcmp (attr->name, "END"))
@@ -581,6 +589,30 @@ parse (EVCard *evc, const char *str)
 		e_vcard_attribute_free (attr);
 
 	evc->priv->attributes = g_list_reverse (evc->priv->attributes);
+}
+
+static GList*
+e_vcard_ensure_attributes (EVCard *evc)
+{
+	if (evc->priv->vcard) {
+		gboolean have_uid = (NULL != evc->priv->attributes);
+		char *vcs = evc->priv->vcard;
+
+		if (have_uid) {
+			EVCardAttribute *attr = evc->priv->attributes->data;
+
+			g_assert (NULL == evc->priv->attributes->next);
+			g_assert (0 == strcmp (attr->name, EVC_UID));
+		}
+
+		/* detach vCard to avoid loops */
+		evc->priv->vcard = NULL;
+
+		parse (evc, vcs, have_uid);
+		g_free (vcs);
+	}
+
+	return evc->priv->attributes;
 }
 
 /**
@@ -673,13 +705,31 @@ e_vcard_unescape_string (const char *s)
 }
 
 void
-e_vcard_construct (EVCard *evc, const char *str)
+e_vcard_construct_with_uid (EVCard *evc, const char *str, const char *uid)
 {
 	g_return_if_fail (E_IS_VCARD (evc));
 	g_return_if_fail (str != NULL);
 
+	g_return_if_fail (NULL == evc->priv->vcard);
+	g_return_if_fail (NULL == evc->priv->attributes);
+
 	if (*str)
-		parse (evc, str);
+		evc->priv->vcard = g_strdup (str);
+
+        if (uid) {
+                EVCardAttribute *attr;
+
+                attr = e_vcard_attribute_new (NULL, EVC_UID);
+                e_vcard_attribute_add_value (attr, uid);
+
+                evc->priv->attributes = g_list_prepend (evc->priv->attributes, attr);
+        }
+}
+
+void
+e_vcard_construct (EVCard *evc, const char *str)
+{
+        e_vcard_construct_with_uid (evc, str, NULL);
 }
 
 /**
@@ -740,7 +790,7 @@ e_vcard_to_string_vcard_30 (EVCard *evc)
 	   vcard might contain */
 	g_string_append (str, "VERSION:3.0" CRLF);
 
-	for (l = evc->priv->attributes; l; l = l->next) {
+	for (l = e_vcard_ensure_attributes (evc); l; l = l->next) {
 		GList *p;
 		EVCardAttribute *attr = l->data;
 		GString *attr_str;
@@ -890,7 +940,7 @@ e_vcard_dump_structure (EVCard *evc)
 	g_return_if_fail (E_IS_VCARD (evc));
 
 	printf ("vCard\n");
-	for (a = evc->priv->attributes; a; a = a->next) {
+	for (a = e_vcard_ensure_attributes (evc); a; a = a->next) {
 		GList *p;
 		EVCardAttribute *attr = a->data;
 		printf ("+-- %s\n", attr->name);
@@ -917,6 +967,19 @@ e_vcard_dump_structure (EVCard *evc)
 			printf ("        [%d] = `%s'\n", i, (char*)v->data);
 		}
 	}
+}
+
+/**
+ * e_vcard_dump_structure:
+ * @evc: the #EVCard to dump
+ *
+ * Check if the @evc has been parsed already. Used for debugging.
+ **/
+gboolean
+e_vcard_is_parsed (EVCard *evc)
+{
+	g_return_if_fail (E_IS_VCARD (evc));
+        return (!evc->priv->vcard && evc->priv->attributes);
 }
 
 /**
@@ -1009,7 +1072,7 @@ e_vcard_remove_attributes (EVCard *evc, const char *attr_group, const char *attr
 	g_return_if_fail (E_IS_VCARD (evc));
 	g_return_if_fail (attr_name != NULL);
 
-	attr = evc->priv->attributes;
+	attr = e_vcard_ensure_attributes (evc);
 	while (attr) {
 		GList *next_attr;
 		EVCardAttribute *a = attr->data;
@@ -1043,6 +1106,9 @@ e_vcard_remove_attribute (EVCard *evc, EVCardAttribute *attr)
 	g_return_if_fail (E_IS_VCARD (evc));
 	g_return_if_fail (attr != NULL);
 
+	/* No need to call e_vcard_ensure_attributes() here: That function has been
+ 	 * called already if this is a valid call and attr is one our attributes.
+	 */
 	evc->priv->attributes = g_list_remove (evc->priv->attributes, attr);
 	e_vcard_attribute_free (attr);
 }
@@ -1060,7 +1126,7 @@ e_vcard_add_attribute (EVCard *evc, EVCardAttribute *attr)
 	g_return_if_fail (E_IS_VCARD (evc));
 	g_return_if_fail (attr != NULL);
 
-	evc->priv->attributes = g_list_prepend (evc->priv->attributes, attr);
+	evc->priv->attributes = g_list_prepend (e_vcard_ensure_attributes (evc), attr);
 }
 
 /**
@@ -1569,7 +1635,7 @@ e_vcard_get_attributes (EVCard *evcard)
 {
 	g_return_val_if_fail (E_IS_VCARD (evcard), NULL);
 
-	return evcard->priv->attributes;
+	return e_vcard_ensure_attributes (evcard);
 }
 
 /**
@@ -1587,17 +1653,22 @@ EVCardAttribute *
 e_vcard_get_attribute (EVCard     *vcard,
 		       const char *name)
 {
+        EVCardAttribute *attr;
         GList *attrs, *l;
 
         g_return_val_if_fail (E_IS_VCARD (vcard), NULL);
         g_return_val_if_fail (name != NULL, NULL);
 
-        attrs = vcard->priv->attributes;
+        if (vcard->priv->vcard && !strcmp (name, EVC_UID)) {
+                for (l = vcard->priv->attributes; l; l = l->next) {
+                        if (strcmp ((attr = l->data)->name, name) == 0)
+                                return attr;
+                }
+        }
+
+        attrs = e_vcard_ensure_attributes (vcard);
         for (l = attrs; l; l = l->next) {
-                EVCardAttribute *attr;
-		
-                attr = (EVCardAttribute *) l->data;
-                if (strcmp (attr->name, name) == 0)
+                if (strcmp ((attr = l->data)->name, name) == 0)
                         return attr;
         }
 

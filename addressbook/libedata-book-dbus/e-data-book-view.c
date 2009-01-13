@@ -143,8 +143,9 @@ e_data_book_view_init (EDataBookView *book_view)
   priv->running = FALSE;
   priv->pending_mutex = g_mutex_new ();
 
-  priv->adds = g_ptr_array_sized_new (THRESHOLD);
-  priv->changes = g_ptr_array_sized_new (THRESHOLD);
+  /* THRESHOLD * 2: we store UID and vCard */
+  priv->adds = g_ptr_array_sized_new (THRESHOLD * 2);
+  priv->changes = g_ptr_array_sized_new (THRESHOLD * 2);
   priv->removes = g_ptr_array_sized_new (THRESHOLD);
 
   priv->ids = g_hash_table_new_full (g_str_hash, g_str_equal,
@@ -507,24 +508,25 @@ send_pending_removes (EDataBookView *view)
 }
 
 static void
-notify_change (EDataBookView *view, char *vcard)
+notify_change (EDataBookView *view, const char *id, char *vcard)
 {
   EDataBookViewPrivate *priv = view->priv;
   send_pending_adds (view);
   send_pending_removes (view);
 
   g_ptr_array_add (priv->changes, vcard);
+  g_ptr_array_add (priv->changes, g_strdup (id));
 }
 
 static void
-notify_remove (EDataBookView *view, char *id)
+notify_remove (EDataBookView *view, const char *id)
 {
   EDataBookViewPrivate *priv = view->priv;
 
   send_pending_adds (view);
   send_pending_changes (view);
 
-  g_ptr_array_add (priv->removes, id);
+  g_ptr_array_add (priv->removes, g_strdup (id));
   g_hash_table_remove (priv->ids, id);
 }
 
@@ -532,11 +534,11 @@ static void
 notify_add (EDataBookView *view, const char *id, char *vcard)
 {
   EDataBookViewPrivate *priv = view->priv;
+
   send_pending_changes (view);
   send_pending_removes (view);
 
-  if (priv->adds->len == THRESHOLD) {
-
+  if (priv->adds->len == 2 * THRESHOLD) {
     if (priv->freezable)
     {
       g_mutex_lock (priv->thaw_lock);
@@ -548,7 +550,10 @@ notify_add (EDataBookView *view, const char *id, char *vcard)
       send_pending_adds (view);
     }
   }
+
   g_ptr_array_add (priv->adds, vcard);
+  g_ptr_array_add (priv->adds, g_strdup (id));
+
   g_hash_table_insert (priv->ids, g_strdup (id),
                        GUINT_TO_POINTER (1));
 }
@@ -578,12 +583,12 @@ e_data_book_view_notify_update (EDataBookView *book_view, EContact *contact)
                                EVC_FORMAT_VCARD_30);
 
     if (currently_in_view)
-      notify_change (book_view, vcard);
+      notify_change (book_view, id, vcard);
     else
       notify_add (book_view, id, vcard);
   } else {
     if (currently_in_view)
-      notify_remove (book_view, g_strdup (id));
+      notify_remove (book_view, id);
     /* else nothing; we're removing a card that wasn't there */
   }
 
@@ -612,12 +617,12 @@ e_data_book_view_notify_update_vcard (EDataBookView *book_view, char *vcard)
 
   if (want_in_view) {
     if (currently_in_view)
-      notify_change (book_view, vcard);
+      notify_change (book_view, id, vcard);
     else
       notify_add (book_view, id, vcard);
   } else {
     if (currently_in_view)
-      notify_remove (book_view, g_strdup (id));
+      notify_remove (book_view, id);
     else
       /* else nothing; we're removing a card that wasn't there */
       g_free (vcard);
@@ -643,7 +648,7 @@ e_data_book_view_notify_update_prefiltered_vcard (EDataBookView *book_view, cons
     g_hash_table_lookup (priv->ids, id) != NULL;
 
   if (currently_in_view)
-    notify_change (book_view, vcard);
+    notify_change (book_view, id, vcard);
   else
     notify_add (book_view, id, vcard);
 
@@ -661,7 +666,7 @@ e_data_book_view_notify_remove (EDataBookView *book_view, const char *id)
   g_mutex_lock (priv->pending_mutex);
 
   if (g_hash_table_lookup (priv->ids, id))
-    notify_remove (book_view, g_strdup (id));
+    notify_remove (book_view, id);
   
   g_mutex_unlock (priv->pending_mutex);
 }

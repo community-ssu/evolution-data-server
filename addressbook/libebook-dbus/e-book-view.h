@@ -77,6 +77,9 @@ struct _EBook     *e_book_view_get_book               (EBookView *book_view);
 void               e_book_view_set_freezable          (EBookView *book_view, gboolean freezable);
 gboolean           e_book_view_is_freezable           (EBookView *book_view);
 
+void               e_book_view_set_parse_vcards       (EBookView *book_view, gboolean emit_vcards);
+gboolean           e_book_view_get_parse_vcards       (EBookView *book_view);
+
 void               e_book_view_set_sort_order         (EBookView *book_view, const gchar *query_term);
 
 G_END_DECLS
