@@ -270,13 +270,14 @@ static const EContactFieldInfo field_info[] = {
 	ATTR_TYPE_STR_FIELD (E_CONTACT_IM_GADUGADU_WORK_3,  EVC_X_GADUGADU,  "im-gadugadu-work-3",  N_("Gadu-Gadu Work Id 3"), FALSE, "WORK", 2),
 	MULTI_LIST_FIELD (E_CONTACT_IM_GADUGADU,  EVC_X_GADUGADU,  "im-gadugadu", N_("Gadu-Gadu Id List"), FALSE),
 
-	/* For TEL */
- 	STRING_FIELD (E_CONTACT_PHONE_TELEPHONE,        EVC_TEL,       "tel",         N_("Telephone"),  FALSE),
-
-	MULTI_LIST_FIELD (E_CONTACT_SIP, 	  EVC_X_SIP,    "sip",    N_("SIP address"),          FALSE),
-
 	/* Geo information */
-	STRUCT_FIELD	(E_CONTACT_GEO,  EVC_GEO, "geo",  N_("Geographic Information"),  FALSE, geo_getter, geo_setter, e_contact_geo_get_type)
+	STRUCT_FIELD	(E_CONTACT_GEO,  EVC_GEO, "geo",  N_("Geographic Information"),  FALSE, geo_getter, geo_setter, e_contact_geo_get_type),
+
+	/* For TEL */
+	MULTI_LIST_FIELD     (E_CONTACT_TEL,      EVC_TEL,        "phone",      N_("Telephone"),      FALSE),
+
+	/* For SIP */
+	MULTI_LIST_FIELD (E_CONTACT_SIP, 	  EVC_X_SIP,    "sip",    N_("SIP address"),          FALSE)
 };
 
 #undef LIST_ELEM_STR_FIELD

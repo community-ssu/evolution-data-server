@@ -131,17 +131,16 @@ static gboolean
 compare_phone (EContact *contact, const char *str,
 	       char *(*compare)(const char*, const char*))
 {
-	int i;
+	GList *phones;
 	gboolean rv = FALSE;
 
-	for (i = E_CONTACT_FIRST_PHONE_ID; i <= E_CONTACT_LAST_PHONE_ID; i ++) {
-		char *phone = e_contact_get (contact, i);
+	phones = e_contact_get (contact, E_CONTACT_TEL);
+	while (phones) {
+		char *phone = phones->data;
 
-		rv = phone && compare(phone, str);
-		g_free (phone);
-
-		if (rv)
-			break;
+		phones = g_list_delete_link(phones, phones);
+		rv = rv || (phone && compare(phone, str));
+		g_free(phone);
 	}
 
 	return rv;
