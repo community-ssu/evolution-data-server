@@ -43,11 +43,15 @@ typedef struct
 static ESExpResult *test_always_fails (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
 static ESExpResult *test_generic_field_is_indexed (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
 static ESExpResult *test_generic_field_is_indexed_vcard (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
+static ESExpResult *test_generic_field_is_suffix_indexed (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
+static ESExpResult *test_generic_field_is_suffix_indexed_vcard (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
 
 static ESExpResult *is_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
 static ESExpResult *is_vcard_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
 static ESExpResult *beginswith_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
 static ESExpResult *beginswith_vcard_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
+static ESExpResult *endswith_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
+static ESExpResult *endswith_vcard_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
 
 static const EBookBackendFileIndexSExpSymbol sexp_symbols[] = {
   {"contains", test_always_fails, NULL},
@@ -56,8 +60,8 @@ static const EBookBackendFileIndexSExpSymbol sexp_symbols[] = {
   {"is_vcard", test_generic_field_is_indexed_vcard, is_vcard_query},
   {"beginswith", test_generic_field_is_indexed, beginswith_query},
   {"beginswith_vcard", test_generic_field_is_indexed_vcard, beginswith_vcard_query},
-  {"endswith", test_always_fails, NULL},
-  {"endswith_vcard", test_always_fails, NULL},
+  {"endswith", test_generic_field_is_suffix_indexed, endswith_query},
+  {"endswith_vcard", test_generic_field_is_suffix_indexed_vcard, endswith_vcard_query},
   {"exists", test_always_fails, NULL},
   {"exists_vcard", test_always_fails, NULL},
 };
@@ -82,6 +86,7 @@ struct _EBookBackendFileIndexData
 {
   gchar *query_term;                    /* what the query uses to get this */
   gchar *index_name;                    /* name for index */
+  gboolean suffix;                      /* Index supports fast suffix querries */
   EBookBackendFileIndexAddFunc contact_add_func; /* function to use to derive index data */
   EBookBackendFileIndexRemoveFunc contact_remove_func; /* function to use to derive index data */
   gchar *vfield;                        /* the (vcard) field this an index of */
@@ -101,12 +106,12 @@ static void last_first_remove_cb (EBookBackendFileIndex *index, EContact *contac
 static int lexical_ordering_cb (DB *secondary, const DBT *akey, const DBT *bkey);
 
 static const EBookBackendFileIndexData indexes[] = {
-  {"full-name", "full_name", NULL, NULL, EVC_FN, lexical_ordering_cb},
-  {"im-jabber", "im_jabber", NULL, NULL, EVC_X_JABBER, NULL},
-  {"tel", "tel", NULL, NULL, EVC_TEL, NULL},
-  {"email", "email", NULL, NULL, EVC_EMAIL, NULL},
-  {"first-last", "first_last", first_last_add_cb, first_last_remove_cb, NULL, lexical_ordering_cb},
-  {"last-first", "last_first", last_first_add_cb, last_first_remove_cb, NULL, lexical_ordering_cb},
+  {"full-name", "full_name", FALSE, NULL, NULL, EVC_FN, lexical_ordering_cb},
+  {"im-jabber", "im_jabber", FALSE, NULL, NULL, EVC_X_JABBER, NULL},
+  {"tel", "tel", TRUE, NULL, NULL, EVC_TEL, NULL},
+  {"email", "email", FALSE, NULL, NULL, EVC_EMAIL, NULL},
+  {"first-last", "first_last", FALSE, first_last_add_cb, first_last_remove_cb, NULL, lexical_ordering_cb},
+  {"last-first", "last_first", FALSE, last_first_add_cb, last_first_remove_cb, NULL, lexical_ordering_cb},
 };
 
 typedef struct _EBookBackendFileIndexPrivate EBookBackendFileIndexPrivate;
@@ -548,7 +553,8 @@ test_always_fails (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata
  * something we have an index for or not
  */
 static ESExpResult *
-real_test_generic_field_is_indexed (gboolean vcard_query, ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
+real_test_generic_field_is_indexed (gboolean vcard_query, gboolean endswith_query,
+                                    ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
 {
   ESExpResult *result = NULL;
   gint i = 0;
@@ -566,11 +572,13 @@ real_test_generic_field_is_indexed (gboolean vcard_query, ESExp *sexp, gint argc
   {
     query_term = argv[0]->value.string;
 
+    g_return_val_if_fail (query_term != NULL, NULL);
     if (vcard_query)
     {
       for (i = 0; i < G_N_ELEMENTS (indexes); i++)
       {
-        if (query_term && g_str_equal (query_term, indexes[i].vfield))
+        if (endswith_query == indexes[i].suffix &&
+            0 == g_strcmp0 (query_term, indexes[i].vfield))
         {
           return result;
         }
@@ -578,7 +586,8 @@ real_test_generic_field_is_indexed (gboolean vcard_query, ESExp *sexp, gint argc
     } else {
       for (i = 0; i < G_N_ELEMENTS (indexes); i++)
       {
-        if (query_term && g_str_equal (query_term, indexes[i].query_term))
+        if (endswith_query == indexes[i].suffix &&
+            0 == g_strcmp0 (query_term, indexes[i].query_term))
         {
           return result;
         }
@@ -597,13 +606,25 @@ real_test_generic_field_is_indexed (gboolean vcard_query, ESExp *sexp, gint argc
 static ESExpResult *
 test_generic_field_is_indexed (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
 {
-  return real_test_generic_field_is_indexed (FALSE, sexp, argc, argv, userdata);
+  return real_test_generic_field_is_indexed (FALSE, FALSE, sexp, argc, argv, userdata);
 }
 
 static ESExpResult *
 test_generic_field_is_indexed_vcard (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
 {
-  return real_test_generic_field_is_indexed (TRUE, sexp, argc, argv, userdata);
+  return real_test_generic_field_is_indexed (TRUE, FALSE, sexp, argc, argv, userdata);
+}
+
+static ESExpResult *
+test_generic_field_is_suffix_indexed (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
+{
+  return real_test_generic_field_is_indexed (FALSE, TRUE, sexp, argc, argv, userdata);
+}
+
+static ESExpResult *
+test_generic_field_is_suffix_indexed_vcard (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
+{
+  return real_test_generic_field_is_indexed (TRUE, TRUE, sexp, argc, argv, userdata);
 }
 
 /* index operations themselves */
@@ -882,6 +903,13 @@ generic_field_add (EBookBackendFileIndex *index, EContact *contact,
           values = values->next)
       {
         tmp = g_utf8_casefold (values->data, -1);
+        if (data->suffix)
+        {
+          gchar *reversed;
+          reversed = g_utf8_strreverse (tmp, -1);
+          g_free (tmp);
+          tmp = reversed;
+        }
         dbt_fill_with_string (&index_dbt, tmp);
 
         g_debug (G_STRLOC ": adding to index with key %s and data %s", 
@@ -933,6 +961,13 @@ generic_field_remove (EBookBackendFileIndex *index, EContact *contact,
           values = values->next)
       {
         tmp = g_utf8_casefold (values->data, -1);
+        if (data->suffix)
+        {
+          gchar *reversed;
+          reversed = g_utf8_strreverse (tmp, -1);
+          g_free (tmp);
+          tmp = reversed;
+        }
         dbt_fill_with_string (&index_dbt, tmp);
 
         g_debug (G_STRLOC ": removing from index with key %s and data %s", 
@@ -1151,7 +1186,7 @@ is_vcard_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
 }
 
 static ESExpResult *
-real_beginswith_query (gboolean vcard_query, ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
+real_query (gboolean vcard_query, gboolean endswith_query, ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
 {
   EBookBackendFileIndex *index = (EBookBackendFileIndex *)userdata;
   EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
@@ -1182,6 +1217,13 @@ real_beginswith_query (gboolean vcard_query, ESExp *sexp, gint argc, ESExpResult
 
     /* populate a dbt for looking up in the index */
     query_key = g_utf8_casefold (argv[1]->value.string, -1);
+    if (endswith_query)
+    {
+      gchar *reversed;
+      reversed = g_utf8_strreverse (query_key, -1);
+      g_free (query_key);
+      query_key = reversed;
+    }
     dbt_fill_with_string (&index_dbt, query_key);
 
     /* we want bdb to use g_malloc this memory for us */
@@ -1249,14 +1291,27 @@ out:
 static ESExpResult *
 beginswith_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
 {
-  return real_beginswith_query (FALSE, sexp, argc, argv, userdata);
+  return real_query (FALSE, FALSE, sexp, argc, argv, userdata);
 }
 
 static ESExpResult *
 beginswith_vcard_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
 {
-  return real_beginswith_query (TRUE, sexp, argc, argv, userdata);
+  return real_query (TRUE, FALSE, sexp, argc, argv, userdata);
 }
+
+static ESExpResult *
+endswith_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
+{
+  return real_query (FALSE, FALSE, sexp, argc, argv, userdata);
+}
+
+static ESExpResult *
+endswith_vcard_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
+{
+  return real_query (TRUE, FALSE, sexp, argc, argv, userdata);
+}
+
 
 static gboolean
 index_close_db_func (gpointer key, gpointer value, gpointer userdata)
