@@ -59,6 +59,8 @@
 #define d(x)
 
 #define CHANGES_DB_SUFFIX ".changes.db"
+#define RUNNING_ID_DB_NAME "running_id"
+#define RUNNING_ID_MAX 99999999
 
 #define E_BOOK_BACKEND_FILE_VERSION_NAME "PAS-DB-VERSION"
 #define E_BOOK_BACKEND_FILE_VERSION "0.2"
@@ -72,9 +74,11 @@ struct _EBookBackendFilePrivate {
 	char     *filename;
 	char     *index_filename;
 	DB       *file_db;
+	DB       *id_db;
 	DB_ENV   *env;
 	EBookBackendFileIndex *index;
 	char     *sort_order;
+    int       running_id;
 };
 
 G_LOCK_DEFINE_STATIC (global_env);
@@ -121,16 +125,6 @@ create_contact (char *uid, const char *vcard)
 	return contact;
 }
 
-static char *
-e_book_backend_file_create_unique_id (void)
-{
-	/* use a 32 counter and the 32 bit timestamp to make an id.
-	   it's doubtful 2^32 id's will be created in a second, so we
-	   should be okay. */
-	static guint c = 0;
-	return g_strdup_printf (PAS_ID_PREFIX "%08lX%08X", time(NULL), c++);
-}
-
 static void 
 set_revision (EContact *contact)
 {
@@ -143,6 +137,109 @@ set_revision (EContact *contact)
 	if (tm)
 		strftime (time_string, 100, "%Y-%m-%dT%H:%M:%SZ", tm);
 	e_contact_set (contact, E_CONTACT_REV, time_string);
+}
+
+static void
+load_last_running_id (EBookBackendFile *bf)
+{
+	DB *db = NULL;
+	DBC *dbc = NULL;
+	DBT rid_dbt, id_dbt;
+	int db_error;
+
+	db = bf->priv->id_db;
+
+	db_error = db->cursor (db, NULL, &dbc, 0);
+	if (db_error != 0) {
+		g_warning (G_STRLOC ": db->cursor failed: %s", db_strerror (db_error)); 
+		g_assert_not_reached ();
+	}
+
+	memset (&rid_dbt, 0, sizeof (rid_dbt));
+	memset (&id_dbt, 0, sizeof (id_dbt));
+
+	id_dbt.flags = DB_DBT_MALLOC;
+
+	db_error = dbc->c_get (dbc, &rid_dbt, &id_dbt, DB_FIRST);
+	if (db_error == DB_NOTFOUND) {
+		bf->priv->running_id = 0;
+	} else if (db_error != 0) {
+		g_warning (G_STRLOC ": c_get failed: %s", db_strerror (db_error));
+		g_assert_not_reached ();
+	} else {
+		/* id from string to uint */
+		long int ret = strtol ((const char *)id_dbt.data, (char **)NULL, 10);
+		if (ret == LONG_MIN) {
+			g_warning ("String to long integer conversion failed");
+			g_assert_not_reached ();
+		}
+
+		bf->priv->running_id = ret;
+
+		db_error = dbc->c_del (dbc, 0);
+		if (db_error != 0) {
+			g_warning (G_STRLOC ": c_del failed: %s", db_strerror (db_error));
+		}
+	}
+
+	db_error = dbc->c_close (dbc);
+	if (db_error != 0) {
+		g_warning (G_STRLOC ":c_close failed: %s", db_strerror (db_error));
+	}
+}
+
+static char*
+unique_id_to_string (int id)
+{
+	return g_strdup_printf ("%d", id);
+}
+
+static gboolean
+e_book_backend_file_store_unique_id (EBookBackendFile *bf)
+{
+	DB *db = NULL;
+	DBT rid_dbt, id_dbt;
+	int db_error;
+	gchar *uid;
+
+	db = bf->priv->id_db;
+	memset (&rid_dbt, 0, sizeof (rid_dbt));
+	memset (&id_dbt, 0, sizeof (id_dbt));
+
+	g_assert (bf->priv->running_id > 0);
+	
+	uid = unique_id_to_string (bf->priv->running_id);
+	string_to_dbt((const char *)uid, &id_dbt);
+
+	db_error = db->put (db, NULL, &rid_dbt, &id_dbt, 0);
+	g_free (uid);
+ 	if (db_error != 0) {
+		g_warning (G_STRLOC ": put failed: %s", db_strerror (db_error));
+		return FALSE;
+	}
+
+	db_error = db->sync (db, 0);
+	if (db_error != 0) {
+		g_warning (G_STRLOC ": sync failed: %s", db_strerror (db_error));
+		return FALSE;
+	}
+	return TRUE;
+}
+
+static char *
+e_book_backend_file_create_unique_id (EBookBackendFile *bf)
+{
+	if (0 == bf->priv->running_id) {
+		load_last_running_id (bf);
+	}
+    if (bf->priv->running_id >= RUNNING_ID_MAX) {
+		g_warning ("Warning running id overrun");
+		bf->priv->running_id = 1;
+	}
+	++bf->priv->running_id;
+
+	g_assert (bf->priv->running_id > 0);
+	return unique_id_to_string (bf->priv->running_id);
 }
 
 /* put the vcard to db, but doesn't sync the db */
@@ -162,7 +259,7 @@ insert_contact (EBookBackendFile *bf,
         g_assert (vcard_req);
         g_assert (contact);
 
-        id = e_book_backend_file_create_unique_id ();
+        id = e_book_backend_file_create_unique_id (bf);
 
         string_to_dbt (id, &id_dbt);
 
@@ -209,14 +306,17 @@ do_create (EBookBackendFile *bf,
         db_error = insert_contact (bf, vcard_req, contact);
 
 	if (0 == db_error) {
+		/* Sync the database */
 		global_env.had_error = FALSE;
-		db_error = db->sync (db, 0);
-		if (global_env.had_error)
-                        db_error = ENOSPC;
+		if (e_book_backend_file_store_unique_id (bf)) {
+			db_error = db->sync (db, 0);
+		}
 		if (db_error != 0) {
 			g_warning ("db->sync failed with %s", db_strerror (db_error));
 		}
-        }
+		if (global_env.had_error)
+			db_error = ENOSPC;
+	}
 
         return db_error_to_status (db_error);
 }
@@ -249,7 +349,7 @@ e_book_backend_file_create_contacts (EBookBackendSync *backend,
         EBookBackendFile *bf;
         EContact *contact;
         DB *db;
-        int db_error;
+        int db_error = 0;
         EBookBackendSyncStatus status;
 
         bf = E_BOOK_BACKEND_FILE (backend);
@@ -278,11 +378,16 @@ e_book_backend_file_create_contacts (EBookBackendSync *backend,
                 *contacts = g_list_prepend (*contacts, contact);
         }
 
-        /* Sync the database */
-        global_env.had_error = FALSE;
-        db_error = db->sync (db, 0);
-        if (global_env.had_error)
-                db_error = ENOSPC;
+	/* Sync the database */
+	global_env.had_error = FALSE;
+	if (e_book_backend_file_store_unique_id (bf)) {
+		db_error = db->sync (db, 0);
+	}
+	if (db_error != 0) {
+		g_warning ("db->sync failed with %s", db_strerror (db_error));
+	}
+	if (global_env.had_error)
+		db_error = ENOSPC;
 
         status = db_error_to_status (db_error);
         if (status == GNOME_Evolution_Addressbook_Success) {
@@ -1372,6 +1477,55 @@ install_pre_installed_vcards (EBookBackend *backend)
 }
 
 static GNOME_Evolution_Addressbook_CallStatus
+e_book_backend_file_setup_running_ids (EBookBackendFile *bf)
+{
+	DB *sdb;
+	DB_ENV *env;
+	int db_error;
+
+	g_debug (G_STRLOC ": %s", G_STRFUNC);
+
+	db_error = bf->priv->file_db->get_env (bf->priv->file_db, &env);
+	if (db_error != 0) {
+		g_warning ("getting env failed with %s", db_strerror (db_error));
+		goto error;
+	}
+
+	db_error = db_create (&sdb, env, 0);
+	if (db_error != 0) {
+		g_warning ("running index db_create failed with %s", db_strerror (db_error));
+		goto error;
+	}
+
+
+	db_error = sdb->open (sdb, NULL, bf->priv->index_filename, RUNNING_ID_DB_NAME /*NULL*/, 
+			      DB_HASH, DB_CREATE | DB_EXCL | DB_THREAD, 0666);
+
+	if (db_error != 0) {
+		db_error = sdb->open (sdb, NULL, bf->priv->index_filename, RUNNING_ID_DB_NAME /*NULL*/,
+				      DB_HASH, DB_CREATE | DB_THREAD, 0666);
+		if (db_error != 0) {
+			g_warning (G_STRLOC ": running index open failed with %s", db_strerror (db_error));
+			sdb->close (sdb, 0);
+			goto error;
+		}
+	}
+
+	bf->priv->id_db = sdb;
+
+	return GNOME_Evolution_Addressbook_Success;
+
+ error:
+	g_free (bf->priv->dirname);
+	g_free (bf->priv->filename);
+	bf->priv->file_db->close (bf->priv->file_db, 0);
+	bf->priv->file_db = NULL;
+
+	return db_error_to_status (db_error);
+
+}
+
+static GNOME_Evolution_Addressbook_CallStatus
 e_book_backend_file_load_source (EBookBackend           *backend,
 				 ESource                *source,
 				 gboolean                only_if_exists)
@@ -1576,7 +1730,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 		g_warning ("No file_db");
 	}
 
-	return GNOME_Evolution_Addressbook_Success;
+	return e_book_backend_file_setup_running_ids (bf);
 }
 
 static gboolean
@@ -1718,6 +1872,11 @@ e_book_backend_file_dispose (GObject *object)
 	EBookBackendFile *bf;
 
 	bf = E_BOOK_BACKEND_FILE (object);
+
+	if (bf->priv->id_db) {
+		bf->priv->id_db->close (bf->priv->id_db, 0);
+		bf->priv->id_db = NULL;
+	}
 
 	if (bf->priv->file_db) {
 		bf->priv->file_db->close (bf->priv->file_db, 0);
