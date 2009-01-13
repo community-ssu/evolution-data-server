@@ -1084,6 +1084,7 @@ e_book_get_contacts (EBook *book, EBookQuery *query, GList **contacts, GError **
 
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
+  e_return_error_if_fail (query, E_BOOK_ERROR_INVALID_ARG);
 
   sexp = e_book_query_to_string (query);
   org_gnome_evolution_dataserver_addressbook_Book_get_contact_list (book->priv->proxy, sexp, &list, &err);
@@ -1720,6 +1721,7 @@ e_book_get_book_view (EBook *book, EBookQuery *query, GList *requested_fields, i
 
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
+  e_return_error_if_fail (query, E_BOOK_ERROR_INVALID_ARG);
 
   sexp = e_book_query_to_string (query);
   

@@ -726,6 +726,9 @@ e_book_query_from_string  (const char *query_string)
 	GList *list = NULL;
 	int i;
 
+	if (query_string == NULL)
+		return NULL;
+
 	sexp = e_sexp_new();
 
 	for(i=0;i<sizeof(symbols)/sizeof(symbols[0]);i++) {
