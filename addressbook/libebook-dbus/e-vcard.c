@@ -501,7 +501,7 @@ read_attribute (const char **p)
 			}
 			if (str->len != 0) {
 				attr_group = g_string_free (str, FALSE);
-				g_string_assign (str, "");
+				str = g_string_new ("");
 			}
 		}
 		else if (g_unichar_isalnum ((uc = g_utf8_get_char (lp))) ||c == '-' || c == '_') {
