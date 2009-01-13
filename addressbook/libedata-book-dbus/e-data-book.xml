@@ -58,6 +58,13 @@ Copyright (C) 2005 Opened Hand Ltd
       <arg name="uid" type="s" direction="out"/>
     </method>
 
+    <method name="addContacts">
+      <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_AddressBook_Book_addContacts"/>
+      <annotation name="org.freedesktop.DBus.GLib.Async" value=""/>
+      <arg name="vcards" type="as" direction="in"/>
+      <arg name="uids" type="as" direction="out"/>
+    </method>
+
     <method name="removeContacts">
       <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_AddressBook_Book_removeContacts"/>
       <annotation name="org.freedesktop.DBus.GLib.Async" value=""/>

@@ -171,10 +171,19 @@ gboolean e_book_add_contact                (EBook           *book,
 					    EContact        *contact,
 					    GError         **error);
 
-gboolean e_book_async_add_contact          (EBook           *book,
+guint    e_book_async_add_contact          (EBook           *book,
 					    EContact        *contact,
 					    EBookIdCallback  cb,
 					    gpointer         closure);
+
+gboolean e_book_add_contacts               (EBook           *book,
+                                            GList           *contacts,
+                                            GError         **error);
+
+guint    e_book_async_add_contacts         (EBook           *book,
+                                            GList           *contacts,
+                                            EBookCallback    cb,
+                                            gpointer         closure);
 
 /* Modifying contacts. */
 gboolean e_book_commit_contact             (EBook       *book,

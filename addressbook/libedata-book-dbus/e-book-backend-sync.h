@@ -70,6 +70,10 @@ struct _EBookBackendSyncClass {
 							 guint32 opid,
 							 const char **vcards,
 							 GList **contacts);
+	EBookBackendSyncStatus (*create_contacts_sync)  (EBookBackendSync *backend, EDataBook *book,
+							 guint32 opid,
+							 const char **vcards,
+							 GList **contacts);
 
 	/* Padding for future expansion */
 	void (*_pas_reserved1) (void);
@@ -85,6 +89,7 @@ GType       e_book_backend_sync_get_type                 (void);
 
 EBookBackendSyncStatus e_book_backend_sync_remove  (EBookBackendSync *backend, EDataBook *book, guint32 opid);
 EBookBackendSyncStatus e_book_backend_sync_create_contact  (EBookBackendSync *backend, EDataBook *book, guint32 opid, const char *vcard, EContact **contact);
+EBookBackendSyncStatus e_book_backend_sync_create_contacts  (EBookBackendSync *backend, EDataBook *book, guint32 opid, const char **vcard, GList **contacts);
 EBookBackendSyncStatus e_book_backend_sync_remove_contacts (EBookBackendSync *backend, EDataBook *book, guint32 opid, GList *id_list, GList **removed_ids);
 EBookBackendSyncStatus e_book_backend_sync_modify_contact  (EBookBackendSync *backend, EDataBook *book, guint32 opid, const char *vcard, EContact **contact);
 EBookBackendSyncStatus e_book_backend_sync_modify_contacts  (EBookBackendSync *backend, EDataBook *book, guint32 opid, const char **vcard, GList **contacts);

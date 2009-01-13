@@ -183,6 +183,31 @@ e_book_backend_create_contact (EBookBackend *backend,
 }
 
 /**
+ * e_book_backend_create_contacts:
+ * @backend: an #EBookBackend
+ * @book: an #EDataBook
+ * @opid: the ID to use for this operation
+ * @vcards: the VCards to update
+ *
+ * Executes a 'create contacts' request specified by @opid on @book
+ * using @backend.
+ **/
+void
+e_book_backend_create_contacts (EBookBackend *backend,
+				EDataBook    *book,
+				guint32       opid,
+				const char  **vcards)
+{
+	g_return_if_fail (E_IS_BOOK_BACKEND (backend));
+	g_return_if_fail (E_IS_DATA_BOOK (book));
+	g_return_if_fail (vcards);
+
+	g_assert (E_BOOK_BACKEND_GET_CLASS (backend)->create_contacts);
+
+	(* E_BOOK_BACKEND_GET_CLASS (backend)->create_contacts) (backend, book, opid, vcards);
+}
+
+/**
  * e_book_backend_remove_contacts:
  * @backend: an #EBookBackend
  * @book: an #EDataBook

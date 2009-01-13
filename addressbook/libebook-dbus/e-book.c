@@ -1342,7 +1342,7 @@ add_contact_reply (DBusGProxy *proxy, char *uid, GError *error, gpointer user_da
  *
  * Return value: %TRUE if the operation was started, %FALSE otherwise.
  **/
-gboolean
+guint
 e_book_async_add_contact (EBook *book, EContact *contact, EBookIdCallback cb, gpointer closure)
 {
   char *vcard;
@@ -1361,6 +1361,100 @@ e_book_async_add_contact (EBook *book, EContact *contact, EBookIdCallback cb, gp
 
   org_gnome_evolution_dataserver_addressbook_Book_add_contact_async (book->priv->proxy, vcard, add_contact_reply, data);
   g_free (vcard);
+  return 0;
+}
+
+/**
+ * e_book_add_contacts:
+ * @book: an #EBook
+ * @contacts: an #GList of #EContacts
+ * @error: a #GError to set on failure
+ *
+ * Adds @contacts to @book. This is always more efficient than calling
+ * e_book_add_contact if you have more than one @contacts to add, as some
+ * backends can implement it as a batch request.
+ *
+ * Return value: %TRUE if successful, %FALSE otherwise
+ **/
+gboolean
+e_book_add_contacts (EBook *book, GList *contacts, GError **error)
+{
+  GError *err = NULL;
+  GList *it;
+  char **vcards, **uids, **i;
+
+  e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
+  e_return_error_if_fail (contacts != NULL, E_BOOK_ERROR_INVALID_ARG);
+
+  vcards = g_new0 (char*, g_list_length (contacts)+1);
+  for (i = vcards, it = contacts; it; it = it->next, i++) {
+    *i = e_vcard_to_string (E_VCARD (it->data), EVC_FORMAT_VCARD_30);
+  }
+
+  org_gnome_evolution_dataserver_addressbook_Book_add_contacts (book->priv->proxy, (const char **)vcards, &uids, &err);
+  for (i = uids, it = contacts; *i && it; i++, it = it->next) {
+    e_contact_set (it->data, E_CONTACT_UID, *i);
+  }
+  if (vcards)
+    g_strfreev (vcards);
+  if (uids)
+    g_strfreev (uids);
+
+  return unwrap_gerror (err, error);
+}
+
+static void
+add_contacts_reply (DBusGProxy *proxy, char **uids, GError *error, gpointer user_data)
+{
+  AsyncData *data = user_data;
+  EBookCallback cb = data->callback;
+
+  /* TODO: what to do with uids? */
+  if (cb)
+    cb (data->book, get_status_from_error (error), data->closure);
+
+  g_strfreev (uids);
+  g_slice_free (AsyncData, data);
+}
+
+/**
+ * e_book_async_add_contacts:
+ * @book: an #EBook
+ * @contacts: a #GList of #EContacts
+ * @cb: function to call when the operation finishes
+ * @closure: data to pass to callback function
+ *
+ * Adds @contacts to @book without blocking. This is always more
+ * efficient than calling e_book_add_contact if you have more than
+ * one @contacts to add, as some backends can implement it as a
+ * batch request.
+ *
+ * Return value: %TRUE if the operation was started, %FALSE otherwise.
+ **/
+guint
+e_book_async_add_contacts (EBook *book, GList *contacts, EBookCallback cb, gpointer closure)
+{
+  char **vcards, **i;
+  AsyncData *data;
+
+  e_return_async_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
+  e_return_async_error_if_fail (contacts != NULL, E_BOOK_ERROR_INVALID_ARG);
+
+  vcards = g_new0 (char*, g_list_length (contacts)+1);
+  for (i = vcards; contacts; contacts = contacts->next, i++) {
+    *i = e_vcard_to_string (E_VCARD (contacts->data), EVC_FORMAT_VCARD_30);
+  }
+
+  data = g_slice_new0 (AsyncData);
+  data->book = book;
+  data->callback = cb;
+  data->closure = closure;
+
+  org_gnome_evolution_dataserver_addressbook_Book_add_contacts_async (book->priv->proxy, (const char**)vcards, add_contacts_reply, data);
+
+  g_strfreev (vcards);
   return 0;
 }
 

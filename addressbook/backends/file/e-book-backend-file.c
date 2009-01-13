@@ -143,60 +143,82 @@ set_revision (EContact *contact)
 	if (tm)
 		strftime (time_string, 100, "%Y-%m-%dT%H:%M:%SZ", tm);
 	e_contact_set (contact, E_CONTACT_REV, time_string);
-	
 }
 
-static EBookBackendSyncStatus
-do_create(EBookBackendFile  *bf,
-	  const char      *vcard_req,
-	  EContact **contact)
+/* put the vcard to db, but doesn't sync the db */
+static int
+insert_contact (EBookBackendFile *bf,
+                const char       *vcard_req,
+                EContact        **contact)
 {
-	DB             *db = bf->priv->file_db;
-	DBT            id_dbt, vcard_dbt;
-	int            db_error;
-	char           *id;
-	char           *vcard;
-	const char *rev;
-	
-	g_assert (bf);
-	g_assert (vcard_req);
-	g_assert (contact);
+        DB *db = bf->priv->file_db;
+        DBT id_dbt, vcard_dbt;
+        char *id;
+        char *vcard;
+        const char *rev;
+        int db_error;
 
-	id = e_book_backend_file_create_unique_id ();
+        g_assert (bf);
+        g_assert (vcard_req);
+        g_assert (contact);
 
-	string_to_dbt (id, &id_dbt);
+        id = e_book_backend_file_create_unique_id ();
 
-	*contact = e_contact_new_from_vcard (vcard_req);
-	e_contact_set (*contact, E_CONTACT_UID, id);
-	rev = e_contact_get_const (*contact,  E_CONTACT_REV);
-	if (!(rev && *rev))
-		set_revision (*contact);
+        string_to_dbt (id, &id_dbt);
 
-	vcard = e_vcard_to_string (E_VCARD (*contact), EVC_FORMAT_VCARD_30);
+        *contact = e_contact_new_from_vcard (vcard_req);
+        e_contact_set (*contact, E_CONTACT_UID, id);
+        rev = e_contact_get_const (*contact,  E_CONTACT_REV);
+        if (!(rev && *rev))
+                set_revision (*contact);
 
-	string_to_dbt (vcard, &vcard_dbt);
+        vcard = e_vcard_to_string (E_VCARD (*contact), EVC_FORMAT_VCARD_30);
 
-	global_env.had_error = FALSE;
-	db_error = db->put (db, NULL, &id_dbt, &vcard_dbt, 0);
-	if (global_env.had_error) db_error = ENOSPC;
+        string_to_dbt (vcard, &vcard_dbt);
+
+        global_env.had_error = FALSE;
+        db_error = db->put (db, NULL, &id_dbt, &vcard_dbt, 0);
+        if (global_env.had_error)
+                db_error = ENOSPC;
 
 	g_free (vcard);
+        g_free (id);
 
-	if (0 == db_error) {
-		global_env.had_error = FALSE;
-		db_error = db->sync (db, 0);
-		if (global_env.had_error) db_error = ENOSPC;
-		if (db_error != 0) {
-			g_warning ("db->sync failed with %s", db_strerror (db_error));
-		}
-	} else {
+	if (db_error) {
 		g_warning (G_STRLOC ": db->put failed with %s", db_strerror (db_error));
 		g_object_unref (*contact);
 		*contact = NULL;
 	}
 
-	g_free (id);
-	return db_error_to_status (db_error);
+        return db_error;
+}
+
+/* put the vcard to db and sync the db directly */
+static EBookBackendSyncStatus
+do_create (EBookBackendFile *bf,
+           const char       *vcard_req,
+           EContact        **contact)
+{
+        DB *db = bf->priv->file_db;
+        int db_error;
+
+        g_assert (bf);
+        g_assert (vcard_req);
+        g_assert (contact);
+
+        db_error = insert_contact (bf, vcard_req, contact);
+
+	if (0 == db_error) {
+		global_env.had_error = FALSE;
+		db_error = db->sync (db, 0);
+		if (global_env.had_error)
+                        db_error = ENOSPC;
+		if (db_error != 0) {
+			g_warning ("db->sync failed with %s", db_strerror (db_error));
+		}
+        }
+
+        return db_error_to_status (db_error);
 }
 
 static EBookBackendSyncStatus
@@ -215,6 +237,58 @@ e_book_backend_file_create_contact (EBookBackendSync *backend,
 		e_book_backend_file_index_sync (bf->priv->index);
 	}
 	return status;
+}
+
+static EBookBackendSyncStatus
+e_book_backend_file_create_contacts (EBookBackendSync *backend,
+				     EDataBook *book,
+				     guint32 opid,
+				     const char **vcards,
+				     GList **contacts)
+{
+        EBookBackendFile *bf;
+        EContact *contact;
+        DB *db;
+        int db_error;
+        EBookBackendSyncStatus status;
+
+        bf = E_BOOK_BACKEND_FILE (backend);
+        db = bf->priv->file_db;
+
+        /* Commit each of the new contacts, aborting if there was an error.
+           Really this should be in a transaction... */
+        for (; *vcards; vcards++) {
+                contact = NULL;
+
+        /* Commit the contact */
+                db_error = insert_contact (bf, *vcards, &contact);
+
+                if (db_error != 0) {
+                        /* TODO: proper error handling */
+                        /* revert transaction and clean the contacts list */
+                        /* return db_error_to_status (db_error); */
+
+                        /* try to sync the already added contacts now */
+                        break;
+                }
+
+                e_book_backend_file_index_add_contact (bf->priv->index, contact);
+
+                /* Pass the contact back to the server for view updates */
+                *contacts = g_list_prepend (*contacts, contact);
+        }
+
+        /* Sync the database */
+        global_env.had_error = FALSE;
+        db_error = db->sync (db, 0);
+        if (global_env.had_error)
+                db_error = ENOSPC;
+
+        status = db_error_to_status (db_error);
+        if (status == GNOME_Evolution_Addressbook_Success) {
+                e_book_backend_file_index_sync (bf->priv->index);
+        }
+        return status;
 }
 
 static EBookBackendSyncStatus
@@ -1750,9 +1824,10 @@ e_book_backend_file_class_init (EBookBackendFileClass *klass)
 	backend_class->set_view_sort_order     = e_book_backend_file_set_book_view_sort_order;
 	sync_class->remove_sync                = e_book_backend_file_remove;
 	sync_class->create_contact_sync        = e_book_backend_file_create_contact;
+        sync_class->create_contacts_sync       = e_book_backend_file_create_contacts;
 	sync_class->remove_contacts_sync       = e_book_backend_file_remove_contacts;
 	sync_class->modify_contact_sync        = e_book_backend_file_modify_contact;
-	sync_class->modify_contacts_sync        = e_book_backend_file_modify_contacts;
+	sync_class->modify_contacts_sync       = e_book_backend_file_modify_contacts;
 	sync_class->get_contact_sync           = e_book_backend_file_get_contact;
 	sync_class->get_contact_list_sync      = e_book_backend_file_get_contact_list;
 	sync_class->get_changes_sync           = e_book_backend_file_get_changes;

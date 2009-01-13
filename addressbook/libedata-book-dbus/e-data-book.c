@@ -40,6 +40,7 @@ static void impl_AddressBook_Book_getContact(EDataBook *book, const char *IN_uid
 static void impl_AddressBook_Book_getContactList(EDataBook *book, const char *query, DBusGMethodInvocation *context);
 static void impl_AddressBook_Book_authenticateUser(EDataBook *book, const char *IN_user, const char *IN_passwd, const char *IN_auth_method, DBusGMethodInvocation *context);
 static void impl_AddressBook_Book_addContact(EDataBook *book, const char *IN_vcard, DBusGMethodInvocation *context);
+static void impl_AddressBook_Book_addContacts(EDataBook *book, const char **IN_vcards, DBusGMethodInvocation *context);
 static void impl_AddressBook_Book_modifyContact(EDataBook *book, const char *IN_vcard, DBusGMethodInvocation *context);
 static void impl_AddressBook_Book_modifyContacts(EDataBook *book, const char **IN_vcards, DBusGMethodInvocation *context);
 static void impl_AddressBook_Book_removeContacts(EDataBook *book, const char **IN_uids, DBusGMethodInvocation *context);
@@ -70,6 +71,7 @@ typedef enum {
   OP_OPEN,
   OP_AUTHENTICATE,
   OP_ADD_CONTACT,
+  OP_ADD_CONTACTS,
   OP_GET_CONTACT,
   OP_GET_CONTACTS,
   OP_MODIFY_CONTACT,
@@ -132,6 +134,10 @@ operation_thread (gpointer data, gpointer user_data)
   case OP_ADD_CONTACT:
     e_book_backend_create_contact (backend, op->book, op->id, op->vcard);
     g_free (op->vcard);
+    break;
+  case OP_ADD_CONTACTS:
+    e_book_backend_create_contacts (backend, op->book, op->id, (const char**)op->vcards);
+    g_strfreev (op->vcards);
     break;
   case OP_GET_CONTACT:
     e_book_backend_get_contact (backend, op->book, op->id, op->uid);
@@ -426,6 +432,49 @@ e_data_book_respond_create (EDataBook *book, guint32 opid, EDataBookStatus statu
     e_book_backend_notify_complete (e_data_book_get_backend (book));
 
     dbus_g_method_return (context, e_contact_get_const (contact, E_CONTACT_UID));
+  }
+}
+
+static void
+impl_AddressBook_Book_addContacts(EDataBook *book, const char **IN_vcards, DBusGMethodInvocation *context)
+{
+  OperationData *op;
+
+  if (IN_vcards == NULL || IN_vcards[0] == NULL) {
+    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, InvalidQuery, _("Cannot add contacts")));
+    return;
+  }
+
+  op = op_new (OP_ADD_CONTACTS, book, context);
+  op->vcards = g_strdupv ((char**)IN_vcards);
+  g_thread_pool_push (op_pool, op, NULL);
+}
+
+void
+e_data_book_respond_create_contacts (EDataBook *book, guint32 opid, EDataBookStatus status, GList *contacts)
+{
+  DBusGMethodInvocation *context = opid_fetch (opid);
+
+  if (status != Success) {
+    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot add contacts")));
+  } else {
+    char **uids;
+    int i = 0;
+
+    uids = g_new0 (char *, g_list_length (contacts)+1);
+    for (; contacts; contacts = contacts->next) {
+      if (!E_IS_CONTACT (contacts->data)) {
+        g_warning ("%s: not a contact", G_STRFUNC);
+        continue;
+      }
+      uids[i++] = (char *) e_contact_get_const (contacts->data, E_CONTACT_UID);
+
+      e_book_backend_notify_update (e_data_book_get_backend (book), contacts->data);
+    }
+    e_book_backend_notify_complete (e_data_book_get_backend (book));
+
+    dbus_g_method_return (context, uids);
+    g_free (uids);
   }
 }
 
