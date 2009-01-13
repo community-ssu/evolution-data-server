@@ -146,10 +146,17 @@ static void
 book_destroyed_cb (gpointer data, GObject *dead)
 {
   EDataBookView *view = E_DATA_BOOK_VIEW (data);
+  EDataBookViewPrivate *priv = view->priv;
+
   /* The book has just died, so unset the pointer so we don't try and remove a
      dead weak reference. */
   view->priv->book = NULL;
-  g_object_unref (view);
+
+  /* If the view is running stop it here. */
+  if (priv->running) {
+    e_book_backend_stop_book_view (priv->backend, view);
+    priv->running = FALSE;
+  }
 }
 
 /* Oh dear god, think of the children. */
@@ -231,11 +238,6 @@ e_data_book_view_dispose (GObject *object)
     /* Remove the weak reference */
     g_object_weak_unref (G_OBJECT (priv->book), book_destroyed_cb, book_view);
     priv->book = NULL;
-  }
-
-  if (priv->running) {
-    e_book_backend_stop_book_view (priv->backend, book_view);
-    priv->running = FALSE;
   }
 
   if (priv->backend) {
