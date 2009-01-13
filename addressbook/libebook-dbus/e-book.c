@@ -72,6 +72,7 @@ static DBusGProxy *factory_proxy = NULL;
 
 typedef struct {
   EBook *book;
+  EBookQuery *query;
   void *callback; /* TODO union */
   gpointer closure;
   gpointer data;
@@ -1738,7 +1739,7 @@ e_book_get_book_view (EBook *book, EBookQuery *query, GList *requested_fields, i
   dbus_g_connection_unref (view_conn);
 
   if (view_proxy) {
-    *book_view = e_book_view_new (book, view_proxy);
+    *book_view = e_book_view_new (book, query, view_proxy);
   } else {
     *book_view = NULL;
     g_set_error (error, E_BOOK_ERROR, E_BOOK_ERROR_CORBA_EXCEPTION,
@@ -1777,7 +1778,7 @@ get_book_view_reply (DBusGProxy *proxy, char *address, GError *error, gpointer u
       dbus_g_connection_unref (view_conn);
 
       if (view_proxy) {
-        view = e_book_view_new (data->book, view_proxy);
+        view = e_book_view_new (data->book, data->query, view_proxy);
         status = E_BOOK_ERROR_OK;
       } else {
         g_warning (G_STRLOC ": cannot get connection to view: %s", err->message);
@@ -1792,6 +1793,9 @@ get_book_view_reply (DBusGProxy *proxy, char *address, GError *error, gpointer u
   
   if (cb)
     cb (data->book, status, view, data->closure);
+
+  e_book_query_unref (data->query);
+  g_object_unref (data->book);
 
   g_slice_free (AsyncData, data);
 }
@@ -1821,7 +1825,8 @@ e_book_async_get_book_view (EBook *book, EBookQuery *query, GList *requested_fie
   e_return_async_error_val_if_fail (query, E_BOOK_ERROR_INVALID_ARG);
 
   data = g_slice_new0 (AsyncData);
-  data->book = book;
+  data->book = g_object_ref (book);
+  data->query = e_book_query_ref (query);
   data->callback = cb;
   data->closure = closure;
 

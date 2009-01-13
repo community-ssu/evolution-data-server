@@ -33,6 +33,7 @@ G_DEFINE_TYPE(EBookView, e_book_view, G_TYPE_OBJECT);
 
 struct _EBookViewPrivate {
   EBook *book;
+  EBookQuery *query;
   DBusGProxy *view_proxy;
 
   gboolean running : 1;
@@ -59,6 +60,11 @@ e_book_view_dispose (GObject *object)
     org_gnome_evolution_dataserver_addressbook_BookView_dispose (view->priv->view_proxy, NULL);
     g_object_unref (view->priv->view_proxy);
     view->priv->view_proxy = NULL;
+  }
+
+  if (view->priv->query) {
+    e_book_query_unref (view->priv->query);
+    view->priv->query = NULL;
   }
 
   if (view->priv->book) {
@@ -222,7 +228,7 @@ complete_cb (DBusGProxy *proxy, guint status, EBookView *book_view)
  * Return value: A new #EBookView.
  **/
 EBookView*
-e_book_view_new (EBook *book, DBusGProxy *view_proxy)
+e_book_view_new (EBook *book, EBookQuery *query, DBusGProxy *view_proxy)
 {
   EBookView *view;
   EBookViewPrivate *priv;
@@ -231,6 +237,7 @@ e_book_view_new (EBook *book, DBusGProxy *view_proxy)
   priv = view->priv;
 
   priv->book = g_object_ref (book);
+  priv->query = e_book_query_ref (query);
 
   /* Take ownership of the view_proxy object */
   priv->view_proxy = view_proxy;
@@ -256,6 +263,14 @@ e_book_view_get_book (EBookView *book_view)
   g_return_val_if_fail (E_IS_BOOK_VIEW (book_view), NULL);
 
   return book_view->priv->book;
+}
+
+EBookQuery *
+e_book_view_get_query (EBookView *book_view)
+{
+  g_return_val_if_fail (E_IS_BOOK_VIEW (book_view), NULL);
+
+  return book_view->priv->query;
 }
 
 /**

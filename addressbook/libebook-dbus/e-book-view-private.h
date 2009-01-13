@@ -24,7 +24,7 @@
 #include "e-book.h"
 #include "e-book-view.h"
 
-EBookView *e_book_view_new (EBook *book, DBusGProxy *view_proxy);
+EBookView *e_book_view_new (EBook *book, EBookQuery *query, DBusGProxy *view_proxy);
 
 G_END_DECLS
 
