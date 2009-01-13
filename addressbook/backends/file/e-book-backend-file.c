@@ -54,6 +54,8 @@
 
 #include "e-book-backend-file.h"
 
+#include "e-book-backend-file-index.h"
+
 #define d(x)
 
 #define CHANGES_DB_SUFFIX ".changes.db"
@@ -70,9 +72,11 @@ struct _EBookBackendFilePrivate {
 	char     *dirname;
 	char     *filename;
 	char     *summary_filename;
+	char     *index_filename;
 	DB       *file_db;
 	DB_ENV   *env;
 	EBookBackendSummary *summary;
+	EBookBackendFileIndex *index;
 };
 
 G_LOCK_DEFINE_STATIC (global_env);
@@ -246,6 +250,8 @@ e_book_backend_file_create_contact (EBookBackendSync *backend,
 	status = do_create (bf, vcard, contact);
 	if (status == GNOME_Evolution_Addressbook_Success) {
 		e_book_backend_summary_add_contact (bf->priv->summary, *contact);
+		e_book_backend_file_index_add_contact (bf->priv->index, *contact);
+		e_book_backend_file_index_sync (bf->priv->index);
 	}
 	return status;
 }
@@ -260,10 +266,12 @@ e_book_backend_file_remove_contacts (EBookBackendSync *backend,
 	EBookBackendFile *bf = E_BOOK_BACKEND_FILE (backend);
 	DB             *db = bf->priv->file_db;
 	DBT            id_dbt;
+	DBT            vcard_dbt;
 	int            db_error;
 	char          *id;
 	GList         *l;
 	GList         *removed_cards = NULL;
+	GList         *removed_contacts = NULL;
 	GNOME_Evolution_Addressbook_CallStatus rv = GNOME_Evolution_Addressbook_Success;
 
 	for (l = id_list; l; l = l->next) {
@@ -271,6 +279,15 @@ e_book_backend_file_remove_contacts (EBookBackendSync *backend,
 
 		string_to_dbt (id, &id_dbt);
 
+		memset (&vcard_dbt, 0, sizeof (vcard_dbt));
+		vcard_dbt.flags = DB_DBT_MALLOC;
+
+		db_error = db->get (db, NULL, &id_dbt, &vcard_dbt, 0);
+		if (0 != db_error) {
+			g_warning (G_STRLOC ": db->get failed with %s", db_strerror (db_error));
+			rv = db_error_to_status (db_error);
+			continue;
+		}
 		db_error = db->del (db, NULL, &id_dbt, 0);
 		if (0 != db_error) {
 			g_warning (G_STRLOC ": db->del failed with %s", db_strerror (db_error));
@@ -278,7 +295,10 @@ e_book_backend_file_remove_contacts (EBookBackendSync *backend,
 			continue;
 		}
 
+		removed_contacts = g_list_prepend (removed_contacts,
+						e_contact_new_from_vcard (vcard_dbt.data));
 		removed_cards = g_list_prepend (removed_cards, id);
+		g_free (vcard_dbt.data);
 	}
 
 	/* if we actually removed some, try to sync */
@@ -294,6 +314,12 @@ e_book_backend_file_remove_contacts (EBookBackendSync *backend,
 		char *id = l->data;
 		e_book_backend_summary_remove_contact (bf->priv->summary, id);
 	}
+	while (removed_contacts) {
+		EContact *contact = removed_contacts->data;
+		e_book_backend_file_index_remove_contact (bf->priv->index, contact);
+		removed_contacts = g_list_delete_link (removed_contacts, removed_contacts);
+	}
+	e_book_backend_file_index_sync (bf->priv->index);
 
 	return rv;
 }
@@ -306,6 +332,7 @@ modify_contact (EBookBackendFile *bf, const char *vcard, EContact **contact)
 	char *vcard_with_rev;
 	const char *id, *dbt_id;
 	DBT id_dbt, vcard_dbt;
+	EContact *old_contact;
 
 	g_assert (bf);
 	g_assert (vcard);
@@ -336,6 +363,16 @@ modify_contact (EBookBackendFile *bf, const char *vcard, EContact **contact)
 		dbt_id = id;
 	
 	string_to_dbt (dbt_id, &id_dbt);
+	memset (&vcard_dbt, 0, sizeof (vcard_dbt));
+	vcard_dbt.flags = DB_DBT_MALLOC;
+
+	db_error = db->get (db, NULL, &id_dbt, &vcard_dbt, 0);
+	if (0 != db_error) {
+		g_warning (G_STRLOC ": db->get failed with %s", db_strerror (db_error));
+		return db_error_to_status (db_error);
+	}
+	old_contact = e_contact_new_from_vcard (vcard_dbt.data);
+	g_free (vcard_dbt.data);
 	string_to_dbt (vcard_with_rev, &vcard_dbt);
 
 	global_env.had_error = FALSE;
@@ -345,9 +382,12 @@ modify_contact (EBookBackendFile *bf, const char *vcard, EContact **contact)
 	g_free (vcard_with_rev);
 	
 	if (db_error == 0) {
+		e_book_backend_file_index_modify_contact (bf->priv->index, old_contact, *contact);
+		g_object_unref (old_contact);
 		return GNOME_Evolution_Addressbook_Success;
 	} else {
 		g_warning (G_STRLOC ": db->put failed with %s", db_strerror (db_error));
+		g_object_unref (old_contact);
 		return db_error_to_status (db_error);
 	}
 
@@ -375,6 +415,7 @@ e_book_backend_file_modify_contact (EBookBackendSync *backend,
 			e_book_backend_summary_remove_contact (bf->priv->summary,
 							       e_contact_get_const (*contact, E_CONTACT_UID));
 			e_book_backend_summary_add_contact (bf->priv->summary, *contact);
+			e_book_backend_file_index_sync (bf->priv->index);
 			
 			return GNOME_Evolution_Addressbook_Success;
 		} else {
@@ -428,6 +469,7 @@ e_book_backend_file_modify_contacts (EBookBackendSync *backend,
 	if (db_error != 0) {
 		return db_error_to_status (db_error);
 	}
+	e_book_backend_file_index_sync (bf->priv->index);
 
  done:
 	return status;
@@ -642,7 +684,39 @@ book_view_thread (gpointer data)
 	d(printf ("signalling parent thread\n"));
 	e_flag_set (closure->running);
 
-	if (e_book_backend_summary_is_summary_query (bf->priv->summary, query)) {
+	g_debug (G_STRLOC ": Query is %s", query);
+	if (e_book_backend_file_index_is_usable (bf->priv->index, query))
+	{
+		GPtrArray *ids = NULL;
+		int i;
+
+		g_debug (G_STRLOC ": Using index for %s", query);
+
+		ids = e_book_backend_file_index_query (bf->priv->index, query);
+
+		for (i = 0; i < ids->len; i ++) {
+			char *id = g_ptr_array_index (ids, i);
+
+			if (!e_flag_is_set (closure->running))
+				break;
+
+			string_to_dbt (id, &id_dbt);
+			memset (&vcard_dbt, 0, sizeof (vcard_dbt));
+			vcard_dbt.flags = DB_DBT_MALLOC;
+
+			db_error = db->get (db, NULL, &id_dbt, &vcard_dbt, 0);
+
+			if (db_error == 0) {
+				e_data_book_view_notify_update_prefiltered_vcard (book_view, id, vcard_dbt.data);
+			}
+			else {
+				g_warning (G_STRLOC ": db->get failed with %s", db_strerror (db_error));
+			}
+		}
+
+		g_ptr_array_foreach (ids, (GFunc)g_free, NULL);
+		g_ptr_array_free (ids, TRUE);
+	} else if (e_book_backend_summary_is_summary_query (bf->priv->summary, query)) {
 		/* do a summary query */
 		GPtrArray *ids = e_book_backend_summary_search (bf->priv->summary, e_data_book_view_get_card_query (book_view));
 		int i;
@@ -668,8 +742,7 @@ book_view_thread (gpointer data)
 		}
 
 		g_ptr_array_free (ids, TRUE);
-	}
-	else {
+	} else {
 		/* iterate over the db and do the query there */
 		DBC    *dbc;
 
@@ -709,12 +782,13 @@ book_view_thread (gpointer data)
 				   bf->priv->filename);
 			abort ();
 		}
-
-
 	}
 
 	if (e_flag_is_set (closure->running))
+	{
 		e_data_book_view_notify_complete (book_view, GNOME_Evolution_Addressbook_Success);
+
+	}
 
 	/* unref the */
 	g_object_unref (book_view);
@@ -732,6 +806,7 @@ e_book_backend_file_start_book_view (EBookBackend  *backend,
 
 	d(printf ("starting book view thread\n"));
 	closure->thread = g_thread_create (book_view_thread, book_view, FALSE, NULL);
+	g_object_ref (backend);
 
 	e_flag_wait (closure->running);
 
@@ -745,6 +820,7 @@ e_book_backend_file_stop_book_view (EBookBackend  *backend,
 {
 	FileBackendSearchClosure *closure = get_closure (book_view);
 
+	g_object_unref (backend);
 	d(printf ("stopping query\n"));
 	if (!closure) {
 		/* TODO: find out why this happens! */
@@ -1144,6 +1220,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 	struct stat sb;
 	gchar *uri;
 
+
 	uri = e_source_get_uri (source);
 
 	dirname = e_book_backend_file_extract_path_from_uri (uri);
@@ -1317,11 +1394,21 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 	g_free (bf->priv->summary_filename);
 	bf->priv->summary_filename = g_strconcat (bf->priv->filename, ".summary", NULL);
 	bf->priv->summary = e_book_backend_summary_new (bf->priv->summary_filename, SUMMARY_FLUSH_TIMEOUT);
-
 	if (e_book_backend_summary_is_up_to_date (bf->priv->summary, db_mtime) == FALSE
 	    || e_book_backend_summary_load (bf->priv->summary) == FALSE ) {
 		build_summary (bf->priv);
 	}
+
+
+	g_free (bf->priv->index_filename);
+	bf->priv->index = e_book_backend_file_index_new ();
+	bf->priv->index_filename = g_build_filename (bf->priv->dirname, "index.db", NULL);
+
+	G_LOCK (global_env);
+	global_env.ref_count++;
+	G_UNLOCK (global_env);
+
+	e_book_backend_file_index_setup_indicies (bf->priv->index, db, bf->priv->index_filename);
 
 	e_book_backend_set_is_loaded (backend, TRUE);
 	e_book_backend_set_is_writable (backend, writable);
@@ -1360,6 +1447,12 @@ e_book_backend_file_remove (EBookBackendSync *backend,
 		else
 			return GNOME_Evolution_Addressbook_OtherError;
 	}
+
+	/* unref the index before we remove the file so it's not written out again */
+	g_object_unref (bf->priv->index);
+	bf->priv->index = NULL;
+	if (-1 == g_unlink (bf->priv->index_filename))
+		g_warning ("failed to remove index file `%s`: %s", bf->priv->index_filename, strerror (errno));
 
 	/* unref the summary before we remove the file so it's not written out again */
 	g_object_unref (bf->priv->summary);
@@ -1474,6 +1567,14 @@ e_book_backend_file_dispose (GObject *object)
 	}
 	
 	G_LOCK (global_env);
+	if (bf->priv->index) {
+		global_env.ref_count--;
+		g_object_unref (bf->priv->index);
+		bf->priv->index = NULL;
+	}
+	G_UNLOCK (global_env);
+
+	G_LOCK (global_env);
 	global_env.ref_count--;
 	if (global_env.ref_count == 0) {
 		global_env.env->close (global_env.env, 0);
@@ -1499,6 +1600,7 @@ e_book_backend_file_finalize (GObject *object)
 	g_free (bf->priv->filename);
 	g_free (bf->priv->dirname);
 	g_free (bf->priv->summary_filename);
+	g_free (bf->priv->index_filename);
 	
 	g_free (bf->priv);
 
