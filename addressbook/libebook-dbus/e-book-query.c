@@ -589,6 +589,25 @@ func_exists(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
 	return r;
 }
 
+static ESExpResult *
+func_exists_vcard(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
+{
+	GList **list = data;
+	ESExpResult *r;
+
+	if (argc == 1
+	    && argv[0]->type == ESEXP_RES_STRING) {
+		char *field = argv[0]->value.string;
+
+		*list = g_list_prepend (*list, e_book_query_vcard_field_exists (field));
+	}
+
+	r = e_sexp_result_new(f, ESEXP_RES_BOOL);
+	r->value.bool = FALSE;
+
+	return r;
+}
+
 /* 'builtin' functions */
 static const struct {
 	char *name;
@@ -605,6 +624,7 @@ static const struct {
 	{ "beginswith", func_beginswith, 0 },
 	{ "endswith", func_endswith, 0 },
 	{ "exists", func_exists, 0 },
+	{ "exists_vcard", func_exists_vcard, 0 },
 };
 
 /**
