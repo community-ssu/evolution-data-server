@@ -79,6 +79,7 @@ G_LOCK_DEFINE_STATIC (global_env);
 static struct {
 	int ref_count;
 	DB_ENV *env;
+	gboolean had_error;
 } global_env;
 
 static EBookBackendSyncStatus
@@ -209,12 +210,16 @@ do_create(EBookBackendFile  *bf,
 
 	string_to_dbt (vcard, &vcard_dbt);
 
+	global_env.had_error = FALSE;
 	db_error = db->put (db, NULL, &id_dbt, &vcard_dbt, 0);
+	if (global_env.had_error) db_error = ENOSPC;
 
 	g_free (vcard);
 
 	if (0 == db_error) {
+		global_env.had_error = FALSE;
 		db_error = db->sync (db, 0);
+		if (global_env.had_error) db_error = ENOSPC;
 		if (db_error != 0) {
 			g_warning ("db->sync failed with %s", db_strerror (db_error));
 		}
@@ -333,7 +338,9 @@ modify_contact (EBookBackendFile *bf, const char *vcard, EContact **contact)
 	string_to_dbt (dbt_id, &id_dbt);
 	string_to_dbt (vcard_with_rev, &vcard_dbt);
 
+	global_env.had_error = FALSE;
 	db_error = db->put (db, NULL, &id_dbt, &vcard_dbt, 0);
+	if (global_env.had_error) db_error = ENOSPC;
 
 	g_free (vcard_with_rev);
 	
@@ -361,7 +368,9 @@ e_book_backend_file_modify_contact (EBookBackendSync *backend,
 	status = modify_contact (bf, vcard, contact);
 	
 	if (status == GNOME_Evolution_Addressbook_Success) {
+		global_env.had_error = FALSE;
 		db_error = db->sync (db, 0);
+		if (global_env.had_error) db_error = ENOSPC;
 		if (db_error == 0) {
 			e_book_backend_summary_remove_contact (bf->priv->summary,
 							       e_contact_get_const (*contact, E_CONTACT_UID));
@@ -413,7 +422,9 @@ e_book_backend_file_modify_contacts (EBookBackendSync *backend,
 	}
 
 	/* Sync the database */
+	global_env.had_error = FALSE;
 	db_error = db->sync (db, 0);
+	if (global_env.had_error) db_error = ENOSPC;
 	if (db_error != 0) {
 		return db_error_to_status (db_error);
 	}
@@ -1114,6 +1125,7 @@ file_errcall (const char *buf1, char *buf2)
 #endif
 {
 	g_warning ("libdb error: %s", buf2);
+	global_env.had_error = TRUE;
 }
 
 
@@ -1178,6 +1190,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 		}
 
 		global_env.env = env;
+		global_env.had_error = FALSE;
 		global_env.ref_count = 1;
 	}
 	G_UNLOCK (global_env);
