@@ -233,6 +233,13 @@ compare_category (EContact *contact, const char *str,
 	return ret_val;
 }
 
+static gboolean
+compare_sip (EContact *contact, const char *str,
+	     char *(*compare)(const char*, const char*))
+{
+	return compare_im (contact, str, compare, E_CONTACT_SIP);
+}
+
 enum prop_type {
 	PROP_TYPE_NORMAL,
 	PROP_TYPE_LIST
@@ -281,6 +288,7 @@ static struct prop_info {
 	LIST_PROP ( "phone",     compare_phone ),
 	LIST_PROP ( "address",   compare_address ),
 	LIST_PROP ( "category-list",  compare_category ),
+	LIST_PROP ( "sip",  compare_sip ),
 };
 
 static ESExpResult *
