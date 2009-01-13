@@ -1109,6 +1109,11 @@ get_contacts_reply(DBusGProxy *proxy, char **vcards, GError *error, gpointer use
   AsyncData *data = user_data;
   GList *list = NULL;
   EBookListCallback cb = data->callback;
+
+  if (error) {
+    vcards = NULL;
+  }
+
   if (vcards) {
     char **i = vcards;
     while (*i != NULL) {
