@@ -437,7 +437,8 @@ e_book_new_system_addressbook (GError **error)
 		char *uri;
 
 		filename = g_build_filename (g_get_home_dir(),
-					     ".evolution/addressbook/local/system",
+					     ".osso-abook",
+					     "db",
 					     NULL);
 		uri = g_strdup_printf ("file://%s", filename);
 
