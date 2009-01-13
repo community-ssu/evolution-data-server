@@ -321,18 +321,58 @@ e_contact_finalize (GObject *object)
 }
 
 static void
+reset_chached_attribute (EContact *contact, EVCardAttribute *attr)
+{
+	const char *vcard_field;
+	int i;
+
+	vcard_field = e_vcard_attribute_get_name (attr);
+
+	for (i = E_CONTACT_FIELD_FIRST; i < E_CONTACT_FIELD_LAST; i ++) {
+		if (field_info[i].vcard_field_name == NULL)
+			continue;
+		if (field_info[i].t & E_CONTACT_FIELD_TYPE_SYNTHETIC)
+			continue;
+		if (strcmp (field_info[i].vcard_field_name, vcard_field))
+			continue;
+
+		g_free (contact->priv->cached_strings[i]);
+		contact->priv->cached_strings[i] = NULL;
+	}
+}
+
+static void
+e_contact_add_attribute (EVCard *evc, EVCardAttribute *attr)
+{
+	reset_chached_attribute (E_CONTACT (evc), attr);
+	E_VCARD_CLASS (parent_class)->add_attribute (evc, attr);
+}
+
+static void
+e_contact_remove_attribute (EVCard *evc, EVCardAttribute *attr)
+{
+	reset_chached_attribute (E_CONTACT (evc), attr);
+	E_VCARD_CLASS (parent_class)->remove_attribute (evc, attr);
+}
+
+static void
 e_contact_class_init (EContactClass *klass)
 {
 	GObjectClass *object_class;
+	EVCardClass *vcard_class;
 	int i;
 
-	object_class = G_OBJECT_CLASS(klass);
+	object_class = G_OBJECT_CLASS (klass);
+	vcard_class = E_VCARD_CLASS (klass);
 
 	parent_class = g_type_class_ref (E_TYPE_VCARD);
 
 	object_class->finalize = e_contact_finalize;
 	object_class->set_property = e_contact_set_property;
 	object_class->get_property = e_contact_get_property;
+
+	vcard_class->add_attribute = e_contact_add_attribute;
+	vcard_class->remove_attribute = e_contact_remove_attribute;
 
 	for (i = E_CONTACT_FIELD_FIRST; i < E_CONTACT_FIELD_LAST; i++) {
 		GParamSpec *pspec = NULL;

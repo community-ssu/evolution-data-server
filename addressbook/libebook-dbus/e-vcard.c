@@ -96,6 +96,16 @@ e_vcard_dispose (GObject *object)
 }
 
 static void
+e_contact_add_attribute_cb (EVCard *evc, EVCardAttribute *attr)
+{
+}
+
+static void
+e_contact_remove_attribute_cb (EVCard *evc, EVCardAttribute *attr)
+{
+}
+
+static void
 e_vcard_class_init (EVCardClass *klass)
 {
 	GObjectClass *object_class;
@@ -105,6 +115,9 @@ e_vcard_class_init (EVCardClass *klass)
 	parent_class = g_type_class_ref (G_TYPE_OBJECT);
 
 	object_class->dispose = e_vcard_dispose;
+
+	klass->add_attribute = e_contact_add_attribute_cb;
+	klass->remove_attribute = e_contact_remove_attribute_cb;
 
 	_evc_base64_init();
 }
@@ -1123,12 +1136,15 @@ e_vcard_attribute_copy (EVCardAttribute *attr)
 void
 e_vcard_remove_attributes (EVCard *evc, const char *attr_group, const char *attr_name)
 {
+	EVCardClass *klass;
 	GList *attr;
 
 	g_return_if_fail (E_IS_VCARD (evc));
 	g_return_if_fail (attr_name != NULL);
 
+	klass = E_VCARD_GET_CLASS (evc);
 	attr = e_vcard_ensure_attributes (evc);
+
 	while (attr) {
 		GList *next_attr;
 		EVCardAttribute *a = attr->data;
@@ -1141,7 +1157,7 @@ e_vcard_remove_attributes (EVCard *evc, const char *attr_group, const char *attr
 
 			/* matches, remove/delete the attribute */
 			evc->priv->attributes = g_list_delete_link (evc->priv->attributes, attr);
-
+			klass->remove_attribute (evc, a);
 			e_vcard_attribute_free (a);
 		}
 
@@ -1166,6 +1182,7 @@ e_vcard_remove_attribute (EVCard *evc, EVCardAttribute *attr)
  	 * called already if this is a valid call and attr is one our attributes.
 	 */
 	evc->priv->attributes = g_list_remove (evc->priv->attributes, attr);
+	E_VCARD_GET_CLASS (evc)->remove_attribute (evc, attr);
 	e_vcard_attribute_free (attr);
 }
 
@@ -1183,6 +1200,8 @@ e_vcard_add_attribute (EVCard *evc, EVCardAttribute *attr)
 	g_return_if_fail (attr != NULL);
 
 	evc->priv->attributes = g_list_prepend (e_vcard_ensure_attributes (evc), attr);
+
+	E_VCARD_GET_CLASS (evc)->add_attribute (evc, attr);
 }
 
 /**

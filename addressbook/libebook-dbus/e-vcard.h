@@ -122,11 +122,11 @@ struct _EVCardClass {
 	GObjectClass parent_class;
 
 	/* Padding for future expansion */
-	void (*_ebook_reserved0) (void);
-	void (*_ebook_reserved1) (void);
-	void (*_ebook_reserved2) (void);
-	void (*_ebook_reserved3) (void);
-	void (*_ebook_reserved4) (void);
+	void (*add_attribute)     (EVCard *evc, EVCardAttribute *attr);
+	void (*remove_attribute)  (EVCard *evc, EVCardAttribute *attr);
+	void (*_ebook_reserved2)  (void);
+	void (*_ebook_reserved3)  (void);
+	void (*_ebook_reserved4)  (void);
 };
 
 GType   e_vcard_get_type                     (void) G_GNUC_CONST;
