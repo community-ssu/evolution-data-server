@@ -36,9 +36,6 @@ EXTRA_DIST = 						\
 	NEWS						\
 	marshal.mk					\
 	iconv-detect.c					\
-	intltool-merge.in				\
-	intltool-update.in				\
-	intltool-extract.in				\
 	$(pkgconfig_DATA:-$(API_VERSION).pc=.pc.in) 	\
 	autogen.sh					\
 	$(LIBDB_FILES)
