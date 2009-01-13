@@ -595,6 +595,7 @@ n_setter (EContact *contact, EVCardAttribute *attr, void *data)
 	e_vcard_attribute_add_value (attr, name->prefixes ?: "");
 	e_vcard_attribute_add_value (attr, name->suffixes ?: "");
 
+#if 0
 	/* now find the attribute for FileAs.  if it's not present, fill it in */
 	attr = e_contact_get_first_attr (contact, EVC_X_FILE_AS);
 	if (!attr) {
@@ -614,7 +615,7 @@ n_setter (EContact *contact, EVCardAttribute *attr, void *data)
 		e_vcard_attribute_add_value (attr, string);
 		g_free (string);
 	}
-
+#endif
 }
 
 
@@ -1235,6 +1236,7 @@ e_contact_new_from_vcard  (const char *vcard)
 	contact = g_object_new (E_TYPE_CONTACT, NULL);
 	e_vcard_construct (E_VCARD (contact), vcard);
 
+#if 0
 	/* Generate a FILE_AS field if needed */
 
 	file_as = e_contact_get_const (contact, E_CONTACT_FILE_AS);
@@ -1270,6 +1272,7 @@ e_contact_new_from_vcard  (const char *vcard)
 			g_free (file_as_new);
 		}
 	}
+#endif
 
 	return contact;
 }
