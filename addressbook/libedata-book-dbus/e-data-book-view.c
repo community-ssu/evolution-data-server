@@ -30,6 +30,7 @@ static gboolean impl_BookView_stop (EDataBookView *view, GError **error);
 static gboolean impl_BookView_dispose (EDataBookView *view, GError **eror);
 static gboolean impl_BookView_set_freezable (EDataBookView *view, gboolean freezable, GError **error);
 static gboolean impl_BookView_thaw (EDataBookView *view, GError **error);
+static gboolean impl_BookView_set_sort_order (EDataBookView *view, gchar *query_term, GError **error);
 
 #include "e-data-book-view-glue.h"
 
@@ -404,7 +405,15 @@ impl_BookView_set_freezable (EDataBookView *view, gboolean freezable, GError **e
 
   return TRUE;
 }
- 
+
+static gboolean
+impl_BookView_set_sort_order (EDataBookView *view, gchar *query_term, GError **error)
+{
+  EDataBookViewPrivate *priv = view->priv;
+
+  e_book_backend_set_book_view_sort_order (priv->backend, view, query_term);
+  return TRUE;
+}
 
 void
 e_data_book_view_set_thresholds (EDataBookView *book_view,

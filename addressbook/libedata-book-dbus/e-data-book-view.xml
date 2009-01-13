@@ -31,6 +31,12 @@ Copyright (C) 2005 Opened Hand Ltd
       <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_BookView_thaw"/>
     </method>
 
+    <method name="set_sort_order">
+      <annotation name="org.freedesktop.DBus.GLib.CSymbol"
+        value="impl_BookView_set_sort_order"/>
+      <arg name="query_term" type="s" direction="in"/>
+    </method>
+
     <signal name="ContactsAdded">
     	<arg name="vcards" type="as"/>
     </signal>

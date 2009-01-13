@@ -62,6 +62,7 @@ void e_book_backend_file_index_remove_contact (EBookBackendFileIndex *index, ECo
 void e_book_backend_file_index_modify_contact (EBookBackendFileIndex *index, EContact *old_contact, EContact *new_contact);
 void e_book_backend_file_index_sync (EBookBackendFileIndex *index);
 GPtrArray *e_book_backend_file_index_query (EBookBackendFileIndex *index, const gchar *query);
+GPtrArray *e_book_backend_file_index_get_ordered_ids (EBookBackendFileIndex *index, const gchar *query_term);
 G_END_DECLS
 
 #endif /* _E_BOOK_BACKEND_FILE_INDEX */

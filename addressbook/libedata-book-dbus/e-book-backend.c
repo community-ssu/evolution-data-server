@@ -1003,6 +1003,17 @@ e_book_backend_notify_auth_required (EBookBackend *backend)
 	g_mutex_unlock (priv->clients_mutex);
 }
 
+void 
+e_book_backend_set_book_view_sort_order (EBookBackend  *backend,
+					 EDataBookView *book_view, 
+					 const gchar   *query_term)
+{
+	g_return_if_fail (E_IS_BOOK_BACKEND (backend));
+	
+	if (E_BOOK_BACKEND_GET_CLASS (backend)->set_view_sort_order)
+		(* E_BOOK_BACKEND_GET_CLASS (backend)->set_view_sort_order) (backend, book_view, query_term);
+}
+
 static void
 e_book_backend_init (EBookBackend *backend)
 {

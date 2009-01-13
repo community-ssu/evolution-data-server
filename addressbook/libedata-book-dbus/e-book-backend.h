@@ -76,7 +76,7 @@ struct _EBookBackendClass {
 	void (*modify_contacts)  (EBookBackend *backend, EDataBook *book, guint32 opid, const char **vcards);
 
 	/* Padding for future expansion */
-	void (*_pas_reserved2) (void);
+	void (*set_view_sort_order) (EBookBackend *backend, EDataBookView *book_view, const gchar *query_term);
 	void (*_pas_reserved3) (void);
 	void (*_pas_reserved4) (void);
 };
@@ -180,6 +180,9 @@ void        e_book_backend_notify_writable            (EBookBackend *backend, gb
 void        e_book_backend_notify_connection_status   (EBookBackend *backend, gboolean is_online);
 void        e_book_backend_notify_auth_required       (EBookBackend *backend);    
 void        e_book_backend_sync                       (EBookBackend *backend);
+void        e_book_backend_set_book_view_sort_order   (EBookBackend           *backend, 
+						       EDataBookView          *book_view, 
+						       const gchar 	      *query_term);
 
 GType       e_book_backend_get_type                 (void);
 

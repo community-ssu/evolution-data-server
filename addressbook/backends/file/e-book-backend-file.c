@@ -77,6 +77,7 @@ struct _EBookBackendFilePrivate {
 	DB_ENV   *env;
 	EBookBackendSummary *summary;
 	EBookBackendFileIndex *index;
+	char     *sort_order;
 };
 
 G_LOCK_DEFINE_STATIC (global_env);
@@ -646,11 +647,14 @@ book_view_thread (gpointer data)
 	EDataBookView *book_view;
 	FileBackendSearchClosure *closure;
 	EBookBackendFile *bf;
+	EBookBackendFilePrivate *priv;
 	const char *query;
 	DB  *db;
 	DBT id_dbt, vcard_dbt;
 	int db_error;
 	gboolean allcontacts;
+	GPtrArray *ids = NULL;
+	gboolean using_index = FALSE;
 
 	g_return_val_if_fail (E_IS_DATA_BOOK_VIEW (data), NULL);
 
@@ -667,6 +671,7 @@ book_view_thread (gpointer data)
 		return NULL;
 	}
 	bf = closure->bf;
+	priv = bf->priv;
 
 	d(printf ("starting initial population of book view\n"));
 
@@ -687,13 +692,23 @@ book_view_thread (gpointer data)
 	g_debug (G_STRLOC ": Query is %s", query);
 	if (e_book_backend_file_index_is_usable (bf->priv->index, query))
 	{
-		GPtrArray *ids = NULL;
-		int i;
-
 		g_debug (G_STRLOC ": Using index for %s", query);
 
 		ids = e_book_backend_file_index_query (bf->priv->index, query);
+		using_index = TRUE;
+	} else if (e_book_backend_summary_is_summary_query (bf->priv->summary, query)) {
+		/* do a summary query */
+		ids = e_book_backend_summary_search (bf->priv->summary, e_data_book_view_get_card_query (book_view));
+	} else if (allcontacts) {
+		if (priv->sort_order) {
+			g_debug (G_STRLOC ": sending contacts in order sort by %s", priv->sort_order);
+			ids = e_book_backend_file_index_get_ordered_ids (bf->priv->index, priv->sort_order);
+		}
+	}
 
+	if (ids)
+	{
+		int i;
 		for (i = 0; i < ids->len; i ++) {
 			char *id = g_ptr_array_index (ids, i);
 
@@ -714,31 +729,8 @@ book_view_thread (gpointer data)
 			}
 		}
 
-		g_ptr_array_foreach (ids, (GFunc)g_free, NULL);
-		g_ptr_array_free (ids, TRUE);
-	} else if (e_book_backend_summary_is_summary_query (bf->priv->summary, query)) {
-		/* do a summary query */
-		GPtrArray *ids = e_book_backend_summary_search (bf->priv->summary, e_data_book_view_get_card_query (book_view));
-		int i;
-
-		for (i = 0; i < ids->len; i ++) {
-			char *id = g_ptr_array_index (ids, i);
-
-			if (!e_flag_is_set (closure->running))
-				break;
-
-			string_to_dbt (id, &id_dbt);
-			memset (&vcard_dbt, 0, sizeof (vcard_dbt));
-			vcard_dbt.flags = DB_DBT_MALLOC;
-
-			db_error = db->get (db, NULL, &id_dbt, &vcard_dbt, 0);
-
-			if (db_error == 0) {
-				e_data_book_view_notify_update_prefiltered_vcard (book_view, id, vcard_dbt.data);
-			}
-			else {
-				g_warning (G_STRLOC ": db->get failed with %s", db_strerror (db_error));
-			}
+		if (using_index) {
+			g_ptr_array_foreach (ids, (GFunc)g_free, NULL);
 		}
 
 		g_ptr_array_free (ids, TRUE);
@@ -828,6 +820,19 @@ e_book_backend_file_stop_book_view (EBookBackend  *backend,
 		return;
 	}
 	e_flag_clear (closure->running);
+}
+
+static void
+e_book_backend_file_set_book_view_sort_order (EBookBackend  *backend,
+					      EDataBookView *book_view,
+					      const gchar   *query_term)
+{
+	EBookBackendFile *bf = (EBookBackendFile *)backend;
+	EBookBackendFilePrivate *priv = bf->priv;
+
+	g_debug (G_STRLOC ": setting sort order in backend to %s", query_term);
+	g_free (priv->sort_order);
+	priv->sort_order = g_strdup (query_term);
 }
 
 typedef struct {
@@ -1669,6 +1674,7 @@ e_book_backend_file_class_init (EBookBackendFileClass *klass)
 	backend_class->cancel_operation        = e_book_backend_file_cancel_operation;
 	backend_class->set_mode                = e_book_backend_file_set_mode;
 	backend_class->sync                    = e_book_backend_file_sync;
+	backend_class->set_view_sort_order     = e_book_backend_file_set_book_view_sort_order;
 	sync_class->remove_sync                = e_book_backend_file_remove;
 	sync_class->create_contact_sync        = e_book_backend_file_create_contact;
 	sync_class->remove_contacts_sync       = e_book_backend_file_remove_contacts;

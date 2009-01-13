@@ -352,3 +352,20 @@ e_book_view_thaw (EBookView *book_view)
     }
   }
 }
+
+
+void
+e_book_view_set_sort_order (EBookView *book_view, const gchar *query_term)
+{
+  GError *error = NULL;
+
+  g_return_if_fail (E_IS_BOOK_VIEW (book_view));
+
+  if (book_view->priv->view_proxy) {
+    org_gnome_evolution_dataserver_addressbook_BookView_set_sort_order (book_view->priv->view_proxy, query_term, &error);
+    if (error) {
+      g_warning ("Unable to set query term on book view: %s\n", error->message);
+      g_error_free (error);
+    }
+  }
+}

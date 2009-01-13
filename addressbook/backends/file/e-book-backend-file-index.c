@@ -63,18 +63,44 @@ typedef enum
   INDEX_FIELD_TYPE_STRING_LIST /* list of strings */
 } EBookBackendFileIndexFieldType;
 
-typedef struct 
+typedef struct _EBookBackendFileIndexData EBookBackendFileIndexData;
+
+typedef void (*EBookBackendFileIndexAddFunc) (EBookBackendFileIndex *index, EContact *contact,
+    EBookBackendFileIndexData *data, DB *db, const gchar *id);
+typedef void (*EBookBackendFileIndexRemoveFunc) (EBookBackendFileIndex *index, EContact *contact,
+    EBookBackendFileIndexData *data, DB *db, const gchar *id);
+
+typedef int (*EBookBackendFileIndexOrderFunc) (DB *secondary, const DBT *akey, const DBT *bkey);
+
+struct _EBookBackendFileIndexData
 {
   gchar *query_term;                    /* what the query uses to get this */
   gchar *index_name;                    /* name for index */
+  EBookBackendFileIndexAddFunc contact_add_func; /* function to use to derive index data */
+  EBookBackendFileIndexRemoveFunc contact_remove_func; /* function to use to derive index data */
   gchar *vfield;                        /* the (vcard) field this an index of */
-} EBookBackendFileIndexData;
+  EBookBackendFileIndexOrderFunc order_func; /* ordering func */
+};
+
+static void first_last_add_cb (EBookBackendFileIndex *index, EContact *contact, 
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid);
+static void last_first_add_cb (EBookBackendFileIndex *index, EContact *contact, 
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid);
+
+static void first_last_remove_cb (EBookBackendFileIndex *index, EContact *contact, 
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid);
+static void last_first_remove_cb (EBookBackendFileIndex *index, EContact *contact, 
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid);
+
+static int lexical_ordering_cb (DB *secondary, const DBT *akey, const DBT *bkey);
 
 static const EBookBackendFileIndexData indexes[] = {
-  {"full-name", "full_name", EVC_FN},
-  {"im-jabber", "im_jabber", EVC_X_JABBER},
-  {"tel", "tel", EVC_TEL},
-  {"email", "email", EVC_EMAIL},
+  {"full-name", "full_name", NULL, NULL, EVC_FN, lexical_ordering_cb},
+  {"im-jabber", "im_jabber", NULL, NULL, EVC_X_JABBER, NULL},
+  {"tel", "tel", NULL, NULL, EVC_TEL, NULL},
+  {"email", "email", NULL, NULL, EVC_EMAIL, NULL},
+  {"first-last", "first_last", first_last_add_cb, first_last_remove_cb, NULL, lexical_ordering_cb},
+  {"last-first", "last_first", last_first_add_cb, last_first_remove_cb, NULL, lexical_ordering_cb},
 };
 
 typedef struct _EBookBackendFileIndexPrivate EBookBackendFileIndexPrivate;
@@ -301,7 +327,17 @@ e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db,
 
     db_error = sdb->set_flags(sdb, DB_DUP | DB_DUPSORT);
     if (db_error != 0) {
-      g_warning (G_STRLOC ":set_flags failed: %s", db_strerror (db_error));
+      g_warning (G_STRLOC ": set_flags failed: %s", db_strerror (db_error));
+    }
+
+    if (indexes[i].order_func)
+    {
+      db_error = sdb->set_bt_compare (sdb, indexes[i].order_func);
+
+      if (db_error != 0)
+      {
+        g_warning (G_STRLOC "set_bt_compare failed: %s", db_strerror (db_error));
+      }
     }
 
     db_error = sdb->open (sdb, NULL, index_filename, 
@@ -410,6 +446,79 @@ e_book_backend_file_index_sync (EBookBackendFileIndex *index)
   {
     index_sync (index, (EBookBackendFileIndexData *)&indexes[i]);
   }
+}
+
+GPtrArray *
+e_book_backend_file_index_get_ordered_ids (EBookBackendFileIndex *index, const gchar *query_term)
+{
+  EBookBackendFileIndexPrivate *priv;
+
+  DB *db = NULL;
+  DBC *dbc = NULL;
+  GPtrArray *ids = NULL;
+  int db_error = 0;
+  DB_BTREE_STAT *stat = NULL;
+  DBT index_dbt, id_dbt;
+
+  g_return_val_if_fail (E_IS_BOOK_BACKEND_FILE_INDEX (index), NULL);
+  g_return_val_if_fail (query_term != NULL, NULL);
+
+  priv = GET_PRIVATE (index);
+
+  db = g_hash_table_lookup (priv->sdbs, query_term);
+
+  if (db == NULL)
+  {
+    g_warning (G_STRLOC ": invalid query term: %s", query_term);
+    return NULL;
+  }
+
+  db_error = db->stat (db, &stat, DB_FAST_STAT);
+
+  if (db_error != 0)
+  {
+    g_warning (G_STRLOC ": db->state failed: %s", db_strerror (db_error));
+  }
+
+  if (stat->bt_ndata > 0)
+    ids = g_ptr_array_sized_new (stat->bt_ndata);
+  else
+    ids = g_ptr_array_sized_new (128);
+
+  db_error = db->cursor (db, NULL, &dbc, 0);
+
+  if (db_error != 0)
+  {
+    g_warning (G_STRLOC ": db->cursor failed: %s", db_strerror (db_error)); 
+    return NULL;
+  }
+
+  memset (&index_dbt, 0, sizeof (id_dbt));
+  memset (&id_dbt, 0, sizeof (id_dbt));
+
+  id_dbt.flags = DB_DBT_MALLOC;
+
+  db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_FIRST);
+
+  while (db_error == 0)
+  {
+    g_ptr_array_add (ids, id_dbt.data);
+    db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_NEXT);
+  }
+
+  if (db_error != DB_NOTFOUND)
+  {
+    g_warning (G_STRLOC ":dbc->c_get failed: %s", db_strerror (db_error));
+  }
+
+  db_error = dbc->c_close (dbc);
+
+  if (db_error != 0)
+  {
+    g_warning (G_STRLOC ":dbc->c_close failed: %s", db_strerror (db_error));
+  }
+
+  return ids;
 }
 
 /* functions used for testing whether we can use the index */
@@ -548,31 +657,189 @@ index_populate (EBookBackendFileIndex *index, GList *fields)
   return TRUE;
 }
 
-/* 
- * for a given index add this contact, for the single string field case we
- * just add a single entry to the index database. for the multiple case we add
- * all the values for the field
- */
-static void
-index_add_contact (EBookBackendFileIndex *index, EContact *contact, 
-    EBookBackendFileIndexData *data)
+enum 
 {
-  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
-  gchar *uid = NULL;
+  ORDER_FIRSTLAST = 0,
+  ORDER_LASTFIRST
+};
+
+static void
+generic_name_add_cb (EBookBackendFileIndex *index, EContact *contact,
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid, gint ordering)
+{
+  GList *attrs = NULL;
+  gchar *tmp = NULL;
   DBT index_dbt, id_dbt;
-  DB *db = NULL;
+  int db_error = 0;
+
+  dbt_fill_with_string (&id_dbt, (gchar *)uid);
+
+  for (attrs = e_vcard_get_attributes (E_VCARD (contact)); 
+      attrs != NULL; 
+      attrs = attrs->next)
+  {
+    EVCardAttribute *attr = (EVCardAttribute *)attrs->data;
+
+    if (g_str_equal (e_vcard_attribute_get_name (attr), EVC_N))
+    {
+      GList *values = e_vcard_attribute_get_values (attr);
+      const char *first, *last;
+      gchar *combined = NULL;
+
+      if (NULL == values) {
+        continue;
+      }
+      last = values->data ? values->data : "";
+      values = values->next;
+      first = values && values->data ? values->data : "";
+
+      if (ordering == ORDER_FIRSTLAST)
+      {
+        combined = g_strdup_printf ("%s %s", first, last);
+      } else {
+        combined = g_strdup_printf ("%s %s", last, first);
+      }
+
+      tmp = g_utf8_casefold (combined, -1);
+      g_free (combined);
+      dbt_fill_with_string (&index_dbt, tmp);
+
+      g_debug (G_STRLOC ": adding to index with key %s and data %s", 
+          (gchar *)index_dbt.data, (gchar *)id_dbt.data);
+
+      db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
+      g_free (tmp);
+
+      if (db_error != 0)
+      {
+        g_warning (G_STRLOC ": db->put failed: %s", db_strerror (db_error));
+      }
+    }
+  }
+}
+
+static void
+generic_name_remove_cb (EBookBackendFileIndex *index, EContact *contact,
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid, gint ordering)
+{
+  DBT index_dbt, id_dbt;
   GList *attrs; 
   GList *values;
   gint db_error = 0;
   gchar *tmp = NULL;
+  DBC *dbc = NULL; /* cursor */
 
-  /* we need the uid, this becomes the data for our index databases */
-  uid = (gchar *)e_contact_get (contact, E_CONTACT_UID);
-  dbt_fill_with_string (&id_dbt, uid);
+  /* create the cursor for the interation */
+  db_error = db->cursor (db, NULL, &dbc, 0);
 
-  /* we need the index database too */
-  db = g_hash_table_lookup (priv->sdbs, data->query_term);
+  if (db_error != 0)
+  {
+    g_warning (G_STRLOC ": db->cursor failed: %s", db_strerror (db_error)); 
+    return;
+  }
 
+  dbt_fill_with_string (&id_dbt, (gchar*)uid);
+  for (attrs = e_vcard_get_attributes (E_VCARD (contact)); 
+      attrs != NULL; 
+      attrs = attrs->next)
+  {
+    EVCardAttribute *attr = (EVCardAttribute *)attrs->data;
+
+    if (g_str_equal (e_vcard_attribute_get_name (attr), EVC_N))
+    {
+      GList *values = e_vcard_attribute_get_values (attr);
+      const char *first, *last;
+      gchar *combined = NULL;
+
+      if (NULL == values) {
+        continue;
+      }
+      last = values->data ? values->data : "";
+      values = values->next;
+      first = values && values->data ? values->data : "";
+
+      if (ordering == ORDER_FIRSTLAST)
+      {
+        combined = g_strdup_printf ("%s %s", first, last);
+      } else {
+        combined = g_strdup_printf ("%s %s", last, first);
+      }
+
+      tmp = g_utf8_casefold (combined, -1);
+      g_free (combined);
+      dbt_fill_with_string (&index_dbt, tmp);
+
+      g_debug (G_STRLOC ": removing from index with key %s and data %s", 
+          (gchar *)index_dbt.data, (gchar *)id_dbt.data);
+
+      id_dbt.flags = 0;
+      index_dbt.flags = 0;
+      db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_GET_BOTH);
+      if (db_error != 0)
+      {
+        g_warning (G_STRLOC ": dbc->c_get failed: %s", db_strerror (db_error));
+      } else {
+        db_error = dbc->c_del (dbc, 0);
+        if (db_error != 0)
+        {
+          g_warning (G_STRLOC ": dbc->c_del failed: %s", db_strerror (db_error));
+        }
+      }
+      g_free (tmp);
+    }
+  }
+  db_error = dbc->c_close (dbc);
+
+  if (db_error != 0)
+  {
+    g_warning (G_STRLOC ": db->c_closed failed: %s", db_strerror (db_error));
+  }
+}
+
+static void 
+first_last_add_cb (EBookBackendFileIndex *index, EContact *contact, 
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid)
+{
+  generic_name_add_cb (index, contact, data, db, uid, ORDER_FIRSTLAST);
+}
+
+static void 
+first_last_remove_cb (EBookBackendFileIndex *index, EContact *contact, 
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid)
+{
+  generic_name_remove_cb (index, contact, data, db, uid, ORDER_FIRSTLAST);
+}
+
+static void
+last_first_add_cb (EBookBackendFileIndex *index, EContact *contact, 
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid)
+{
+  generic_name_add_cb (index, contact, data, db, uid, ORDER_LASTFIRST);
+}
+
+static void
+last_first_remove_cb (EBookBackendFileIndex *index, EContact *contact, 
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid)
+{
+  generic_name_remove_cb (index, contact, data, db, uid, ORDER_LASTFIRST);
+}
+
+/* 
+ * generic version of function to get the index key from a contact based on
+ * the VCard field
+ */
+static void
+generic_field_add (EBookBackendFileIndex *index, EContact *contact,
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid)
+{
+  gchar *tmp = NULL;
+  DBT index_dbt, id_dbt;
+  int db_error = 0;
+  GList *attrs = NULL;
+  GList *values = NULL;
+
+  dbt_fill_with_string (&id_dbt, (gchar *)uid);
+  
   for (attrs = e_vcard_get_attributes (E_VCARD (contact)); 
       attrs != NULL; 
       attrs = attrs->next)
@@ -601,32 +868,18 @@ index_add_contact (EBookBackendFileIndex *index, EContact *contact,
       }
     }
   }
-  g_free (uid);
 }
 
-/* 
- * for a given index remove this contact
- */
 static void
-index_remove_contact (EBookBackendFileIndex *index, EContact *contact, 
-    EBookBackendFileIndexData *data)
+generic_field_remove (EBookBackendFileIndex *index, EContact *contact,
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid)
 {
-  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
-  gchar *uid = NULL;
   DBT index_dbt, id_dbt;
-  DB *db = NULL;
   GList *attrs; 
   GList *values;
   gint db_error = 0;
   gchar *tmp = NULL;
   DBC *dbc = NULL; /* cursor */
-
-  /* we need the uid, so that we can match both key and value of index-entries */
-  uid = (gchar *)e_contact_get (contact, E_CONTACT_UID);
-  dbt_fill_with_string (&id_dbt, uid);
-
-  /* we need the index database too */
-  db = g_hash_table_lookup (priv->sdbs, data->query_term);
 
   /* create the cursor for the interation */
   db_error = db->cursor (db, NULL, &dbc, 0);
@@ -637,6 +890,7 @@ index_remove_contact (EBookBackendFileIndex *index, EContact *contact,
     return;
   }
 
+  dbt_fill_with_string (&id_dbt, (gchar*)uid);
   for (attrs = e_vcard_get_attributes (E_VCARD (contact)); 
       attrs != NULL; 
       attrs = attrs->next)
@@ -677,6 +931,61 @@ index_remove_contact (EBookBackendFileIndex *index, EContact *contact,
   if (db_error != 0)
   {
     g_warning (G_STRLOC ": db->c_closed failed: %s", db_strerror (db_error));
+  }
+}
+
+/* 
+ * for a given index remove this contact
+ */
+static void
+index_remove_contact (EBookBackendFileIndex *index, EContact *contact, 
+    EBookBackendFileIndexData *data)
+{
+  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
+  gchar *uid = NULL;
+  DB *db = NULL;
+
+  /* we need the uid, so that we can match both key and value of index-entries */
+  uid = (gchar *)e_contact_get (contact, E_CONTACT_UID);
+
+  /* we need the index database too */
+  db = g_hash_table_lookup (priv->sdbs, data->query_term);
+
+  if (data->contact_remove_func)
+  {
+    data->contact_remove_func (index, contact, data, db, uid);
+  } else {
+    generic_field_remove (index, contact, data, db, uid);
+  }
+
+  g_free (uid);
+}
+
+/*
+ * for a given index add this contact, for the single string field case we
+ * just add a single entry to the index database. for the multiple case we add
+ * all the values for the field
+ */
+static void
+index_add_contact (EBookBackendFileIndex *index, EContact *contact, 
+    EBookBackendFileIndexData *data)
+{
+  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
+  gchar *uid = NULL;
+  DB *db = NULL;
+  gint db_error = 0;
+
+  /* we need the uid, this becomes the data for our index databases */
+  uid = (gchar *)e_contact_get (contact, E_CONTACT_UID);
+
+  /* we need the index database too */
+  db = g_hash_table_lookup (priv->sdbs, data->query_term);
+
+  if (data->contact_add_func)
+  {
+    data->contact_add_func (index, contact, data, db, uid);
+  } else {
+    generic_field_add (index, contact, data, db, uid);
   }
   g_free (uid);
 }
@@ -885,3 +1194,12 @@ index_close_db_func (gpointer key, gpointer value, gpointer userdata)
 
   return TRUE;
 }
+
+/* functions for the ordering */
+static int 
+lexical_ordering_cb (DB *secondary, const DBT *akey, const DBT *bkey)
+{
+  return g_utf8_collate (akey->data, bkey->data);
+}
+
+
