@@ -1,3 +1,3 @@
-SUBDIRS = addressbook calendar libedataserver
+SUBDIRS = addressbook libedataserver
 MKDB_OPTIONS=--output-format=xml
 
