@@ -277,7 +277,15 @@ static const EContactFieldInfo field_info[] = {
 	MULTI_LIST_FIELD     (E_CONTACT_TEL,      EVC_TEL,        "phone",      N_("Telephone"),      FALSE),
 
 	/* For SIP */
-	MULTI_LIST_FIELD (E_CONTACT_SIP, 	  EVC_X_SIP,    "sip",    N_("SIP address"),          FALSE)
+	MULTI_LIST_FIELD (E_CONTACT_SIP, 	  EVC_X_SIP,    "sip",    N_("SIP address"),          FALSE),
+
+	ATTR_TYPE_STR_FIELD (E_CONTACT_IM_SKYPE_HOME_1,    EVC_X_SKYPE,    "im-skype-home-1",    N_("Skype Home Id 1"),             FALSE, "HOME", 0),
+	ATTR_TYPE_STR_FIELD (E_CONTACT_IM_SKYPE_HOME_2,    EVC_X_SKYPE,    "im-skype-home-2",    N_("Skype Home Id 2"),             FALSE, "HOME", 1),
+	ATTR_TYPE_STR_FIELD (E_CONTACT_IM_SKYPE_HOME_3,    EVC_X_SKYPE,    "im-skype-home-3",    N_("Skype Home Id 3"),             FALSE, "HOME", 2),
+	ATTR_TYPE_STR_FIELD (E_CONTACT_IM_SKYPE_WORK_1,    EVC_X_SKYPE,    "im-skype-work-1",    N_("Skype Work Id 1"),             FALSE, "WORK", 0),
+	ATTR_TYPE_STR_FIELD (E_CONTACT_IM_SKYPE_WORK_2,    EVC_X_SKYPE,    "im-skype-work-2",    N_("Skype Work Id 2"),             FALSE, "WORK", 1),
+	ATTR_TYPE_STR_FIELD (E_CONTACT_IM_SKYPE_WORK_3,    EVC_X_SKYPE,    "im-skype-work-3",    N_("Skype Work Id 3"),             FALSE, "WORK", 2),
+	MULTI_LIST_FIELD (E_CONTACT_IM_SKYPE,  	  EVC_X_SKYPE,     "im-skype",     N_("Skype Id List"),             FALSE)
 };
 
 #undef LIST_ELEM_STR_FIELD

@@ -90,6 +90,7 @@ G_BEGIN_DECLS
 #define EVC_X_GADUGADU        "X-GADUGADU"
 #define EVC_X_GROUPWISE     	"X-GROUPWISE"
 #define EVC_X_BOOK_URI     	"X-EVOLUTION-BOOK-URI"
+#define EVC_X_SKYPE           "X-SKYPE"
 
 typedef enum {
 	EVC_FORMAT_VCARD_21,
