@@ -16,7 +16,8 @@ libebookbackendfile_la_SOURCES =			\
 	e-book-backend-file-index.h				\
 	e-book-backend-file-factory.c			\
 	$(top_srcdir)/libedataserver/e-db3-utils.c	\
-	$(top_srcdir)/libedataserver/e-dbhash.c
+	$(top_srcdir)/libedataserver/e-dbhash.c		\
+	$(top_srcdir)/libedataserver/md5-utils.c
 
 libebookbackendfile_la_LIBADD =						\
 	$(top_builddir)/addressbook/libebook/libebook-$(API_VERSION).la		\
