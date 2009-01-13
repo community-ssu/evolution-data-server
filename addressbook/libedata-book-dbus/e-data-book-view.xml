@@ -22,6 +22,15 @@ Copyright (C) 2005 Opened Hand Ltd
       <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_BookView_dispose"/>
     </method>
 
+    <method name="set_freezable">
+      <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_BookView_set_freezable"/>
+      <arg name="freezable" type="b" direction="in"/>
+    </method>
+
+    <method name="thaw">
+      <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_BookView_thaw"/>
+    </method>
+
     <signal name="ContactsAdded">
     	<arg name="vcards" type="as"/>
     </signal>

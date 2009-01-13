@@ -28,6 +28,8 @@
 static gboolean impl_BookView_start (EDataBookView *view, GError **error);
 static gboolean impl_BookView_stop (EDataBookView *view, GError **error);
 static gboolean impl_BookView_dispose (EDataBookView *view, GError **eror);
+static gboolean impl_BookView_set_freezable (EDataBookView *view, gboolean freezable, GError **error);
+static gboolean impl_BookView_thaw (EDataBookView *view, GError **error);
 
 #include "e-data-book-view-glue.h"
 
@@ -56,6 +58,12 @@ struct _EDataBookViewPrivate {
 
   GHashTable *ids;
   guint idle_id;
+
+   guint thaw_idle_id;
+   GMutex *thaw_lock;
+   GCond *thaw_cond;
+   gboolean frozen;
+   gboolean freezable;
 };
 
 enum {
@@ -71,6 +79,8 @@ static guint signals[LAST_SIGNAL] = { 0 };
 
 static void e_data_book_view_dispose (GObject *object);
 static void e_data_book_view_finalize (GObject *object);
+
+static void e_data_book_view_thaw (EDataBookView *view);
 
 static void
 e_data_book_view_class_init (EDataBookViewClass *klass)
@@ -140,6 +150,11 @@ e_data_book_view_init (EDataBookView *book_view)
 
   priv->ids = g_hash_table_new_full (g_str_hash, g_str_equal,
                                      g_free, NULL);
+
+  priv->freezable = FALSE;
+  priv->frozen = FALSE;
+  priv->thaw_lock = g_mutex_new ();
+  priv->thaw_cond = g_cond_new ();
 }
 
 static void
@@ -154,6 +169,7 @@ book_destroyed_cb (gpointer data, GObject *dead)
 
   /* If the view is running stop it here. */
   if (priv->running) {
+    e_data_book_view_thaw (view);
     e_book_backend_stop_book_view (priv->backend, view);
     priv->running = FALSE;
   }
@@ -273,6 +289,9 @@ e_data_book_view_finalize (GObject *object)
 
   g_mutex_free (priv->pending_mutex);
 
+  g_mutex_free (priv->thaw_lock);
+  g_cond_free (priv->thaw_cond);
+
   g_hash_table_destroy (priv->ids);
 
   if (priv->conn) {
@@ -306,6 +325,7 @@ bookview_idle_stop (gpointer data)
 {
   EDataBookView *book_view = data;
 
+  e_data_book_view_thaw (book_view);
   e_book_backend_stop_book_view (book_view->priv->backend, book_view);
 
   book_view->priv->running = FALSE;
@@ -331,6 +351,60 @@ impl_BookView_dispose (EDataBookView *book_view, GError **eror)
   
   return TRUE;
 }
+
+static void
+e_data_book_view_thaw (EDataBookView *view)
+{
+  EDataBookViewPrivate *priv = view->priv;
+
+  g_mutex_lock (priv->thaw_lock);
+  if (priv->frozen)
+  {
+    priv->frozen = FALSE;
+    g_cond_signal (priv->thaw_cond);
+  }
+  g_mutex_unlock (priv->thaw_lock);
+}
+
+static gboolean
+bookview_idle_thaw (gpointer data)
+{
+  EDataBookView *book_view = data;
+  EDataBookViewPrivate *priv = book_view->priv;
+
+  priv->thaw_idle_id = 0;
+  e_data_book_view_thaw (book_view);
+
+  return FALSE;
+}
+
+static gboolean
+impl_BookView_thaw (EDataBookView *book_view, GError **error)
+{
+  if (book_view->priv->thaw_idle_id)
+    g_source_remove (book_view->priv->thaw_idle_id);
+ 
+  book_view->priv->thaw_idle_id = g_idle_add (bookview_idle_thaw, book_view);
+  return TRUE;
+}
+
+static gboolean 
+impl_BookView_set_freezable (EDataBookView *view, gboolean freezable, GError **error)
+{
+  EDataBookViewPrivate *priv = view->priv;
+
+  priv->freezable = freezable;
+
+  g_debug (G_STRLOC ": setting freezable");
+
+  if (!freezable)
+  {
+    e_data_book_view_thaw (view);
+  }
+
+  return TRUE;
+}
+ 
 
 void
 e_data_book_view_set_thresholds (EDataBookView *book_view,
@@ -436,7 +510,17 @@ notify_add (EDataBookView *view, const char *id, char *vcard)
   send_pending_removes (view);
 
   if (priv->adds->len == THRESHOLD) {
-    send_pending_adds (view);
+
+    if (priv->freezable)
+    {
+      g_mutex_lock (priv->thaw_lock);
+      send_pending_adds (view);
+      priv->frozen = TRUE;
+      g_cond_wait (priv->thaw_cond, priv->thaw_lock);
+      g_mutex_unlock (priv->thaw_lock);
+    } else {
+      send_pending_adds (view);
+    }
   }
   g_array_append_val (priv->adds, vcard);
   g_hash_table_insert (priv->ids, g_strdup (id),

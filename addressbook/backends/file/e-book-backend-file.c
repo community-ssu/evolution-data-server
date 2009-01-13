@@ -1491,7 +1491,7 @@ e_book_backend_file_remove (EBookBackendSync *backend,
 static char *
 e_book_backend_file_get_static_capabilities (EBookBackend *backend)
 {
-	return g_strdup("local,do-initial-query,bulk-removes,contact-lists");
+	return g_strdup("local,do-initial-query,bulk-removes,contact-lists,freezable");
 }
 
 static GNOME_Evolution_Addressbook_CallStatus

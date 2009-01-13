@@ -34,7 +34,9 @@ G_DEFINE_TYPE(EBookView, e_book_view, G_TYPE_OBJECT);
 struct _EBookViewPrivate {
   EBook *book;
   DBusGProxy *view_proxy;
-  gboolean running;
+
+  gboolean running : 1;
+  gboolean freezable : 1;
 };
 
 enum {
@@ -297,6 +299,55 @@ e_book_view_stop (EBookView *book_view)
     org_gnome_evolution_dataserver_addressbook_BookView_stop (book_view->priv->view_proxy, &error);
     if (error) {
       g_warning ("Cannot stop book view: %s\n", error->message);
+      g_error_free (error);
+    }
+  }
+}
+
+void
+e_book_view_set_freezable (EBookView *book_view, gboolean freezable)
+{
+  GError *error = NULL;
+
+  g_return_if_fail (E_IS_BOOK_VIEW (book_view));
+
+  if (freezable && !e_book_check_static_capability (e_book_view_get_book (book_view), "freezable")) {
+    g_warning ("Underlying address book is not freezable");
+    book_view->priv->freezable = FALSE;
+    return;
+  }
+
+  if (book_view->priv->view_proxy) {
+    org_gnome_evolution_dataserver_addressbook_BookView_set_freezable (book_view->priv->view_proxy, freezable, &error);
+
+    if (error) {
+      g_warning ("Cannot set freezable state: %s\n", error->message);
+      g_error_free (error);
+    } else {
+      book_view->priv->freezable = freezable;
+    }
+  }
+}
+
+gboolean
+e_book_view_is_freezable (EBookView *book_view)
+{
+  g_return_val_if_fail (E_IS_BOOK_VIEW (book_view), FALSE);
+  return book_view->priv->freezable;
+}
+
+void
+e_book_view_thaw (EBookView *book_view)
+{
+  GError *error = NULL;
+
+  g_return_if_fail (E_IS_BOOK_VIEW (book_view));
+  g_return_if_fail (e_book_view_is_freezable (book_view));
+
+  if (book_view->priv->view_proxy) {
+    org_gnome_evolution_dataserver_addressbook_BookView_thaw (book_view->priv->view_proxy, &error);
+    if (error) {
+      g_warning ("Unable to thaw book view: %s\n", error->message);
       g_error_free (error);
     }
   }
