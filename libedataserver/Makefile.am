@@ -24,12 +24,10 @@ libedataserver_1_2_la_SOURCES =		\
 	e-data-server-module.c		\
 	e-file-cache.c			\
 	e-flag.c			\
-	e-iconv.c			\
 	e-iterator.c			\
 	e-list.c			\
 	e-list-iterator.c		\
 	e-memory.c			\
-	e-msgport.c			\
 	e-sexp.c			\
 	e-source-group.c		\
 	e-source-list.c			\
@@ -38,7 +36,6 @@ libedataserver_1_2_la_SOURCES =		\
 	e-uid.c				\
 	e-url.c				\
 	e-data-server-util.c		\
-	e-trie.c			\
 	e-xml-utils.c			\
 	e-xml-hash-utils.c		\
 	libedataserver-private.h	\
@@ -63,18 +60,15 @@ libedataserverinclude_HEADERS =		\
 	e-data-server-module.h		\
 	e-file-cache.h			\
 	e-flag.h			\
-	e-iconv.h			\
 	e-iterator.h			\
 	e-list.h			\
 	e-list-iterator.h		\
 	e-memory.h			\
-	e-msgport.h			\
 	e-sexp.h			\
 	e-source-group.h		\
 	e-source-list.h			\
 	e-source.h			\
 	e-time-utils.h			\
-	e-trie.h			\
 	e-uid.h				\
 	e-url.h				\
 	e-data-server-util.h		\
