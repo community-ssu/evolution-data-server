@@ -2166,3 +2166,46 @@ e_contact_cert_get_type (void)
 							(GBoxedFreeFunc) e_contact_cert_free);
 	return type_id;
 }
+
+/**
+ * e_contact_is_syncable:
+ * @contact: an #Econtact
+ *
+ * Retrieves whether a contact should be included in synchronisation process.
+ **/
+gboolean
+e_contact_is_syncable (EContact *contact)
+{
+  GList *attrs;
+  GList *l;
+  EVCardAttribute *attr;
+  const gchar *attr_name;
+  gchar *tmp;
+  gboolean res = TRUE;
+
+  g_return_val_if_fail (contact != NULL, TRUE);
+  g_return_val_if_fail (E_IS_CONTACT (contact), TRUE);
+
+  attrs = e_vcard_get_attributes (E_VCARD (contact));
+
+  for (l = attrs; l; l = l->next)
+  {
+    attr = (EVCardAttribute *)l->data;
+    attr_name = e_vcard_attribute_get_name (attr);
+
+    if (attr_name && g_str_equal (attr_name, "X-OSSO-EXCLUDE-FROM-SYNC"))
+    {
+      tmp = e_vcard_attribute_get_value (attr);
+
+      if (tmp && (g_ascii_strcasecmp (tmp, "true") == 0))
+      {
+        res = FALSE;
+      }
+
+      g_free (tmp);
+      break;
+    }
+  }
+
+  return res;
+}
