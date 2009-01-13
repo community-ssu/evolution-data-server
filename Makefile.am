@@ -10,7 +10,7 @@ CALENDAR_DIR = calendar
 endif
 
 if ENABLE_DBUS
-SUBDIRS = $(LIBDB) libedataserver camel addressbook $(CALENDAR_DIR) libedataserverui docs art po
+SUBDIRS = $(LIBDB) libedataserver addressbook docs
 else
 SUBDIRS = $(LIBDB) libedataserver servers camel addressbook $(CALENDAR_DIR) libedataserverui src docs art po
 endif
