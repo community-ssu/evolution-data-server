@@ -5,3 +5,4 @@ DIRS=idl libedata-book-orbit libebook-orbit tests backends
 endif
 
 SUBDIRS = $(DIRS)
+DIST_SUBDIRS = $(SUBDIRS)

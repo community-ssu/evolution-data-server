@@ -6,4 +6,4 @@ endif
 
 # groupwise isn't ported yet.
 SUBDIRS = file $(LDAP_SUBDIR)
-DIST_SUBDIRS = file ldap groupwise vcf
+DIST_SUBDIRS = $(SUBDIRS)

@@ -1,1 +1,1 @@
-SUBDIRS=dist
+#SUBDIRS=dist
