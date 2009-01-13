@@ -23,7 +23,6 @@ libebook_1_2_la_SOURCES =					\
 	e-book-view-private.h				\
 	e-book.c					\
 	e-contact.c					\
-	e-destination.c					\
 	e-name-western.c				\
 	e-name-western-tables.h				\
 	e-vcard.c					\
@@ -31,7 +30,6 @@ libebook_1_2_la_SOURCES =					\
 
 libebook_1_2_la_LIBADD =					\
 	$(EVOLUTION_ADDRESSBOOK_LIBS)				\
-	$(top_builddir)/camel/libcamel-$(API_VERSION).la \
 	$(top_builddir)/libedataserver/libedataserver-$(API_VERSION).la
 
 libebook_1_2_la_LDFLAGS = 							\
@@ -46,7 +44,6 @@ libebookinclude_HEADERS =				\
 	e-book-types.h					\
 	e-book.h					\
 	e-contact.h					\
-	e-destination.h					\
 	e-name-western.h				\
 	e-vcard.h
 
