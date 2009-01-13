@@ -195,11 +195,6 @@ e_book_query_vcard_field_test (const char *field,
 {
 	EBookQuery *ret;
 	
-	if (test != E_BOOK_QUERY_IS) {
-		g_warning ("Can only use IS with %s", G_STRFUNC);
-		return NULL;
-	}
-	
 	ret = g_new0 (EBookQuery, 1);
 	ret->type = E_BOOK_QUERY_TYPE_FIELD_TEST;
 	ret->query.field_test.field = 0;
@@ -472,6 +467,36 @@ func_contains(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data
 }
 
 static ESExpResult *
+func_contains_vcard(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
+{
+	GList **list = data;
+	ESExpResult *r;
+
+	if (argc == 2
+	    && argv[0]->type == ESEXP_RES_STRING
+	    && argv[1]->type == ESEXP_RES_STRING) {
+		char *propname = argv[0]->value.string;
+		char *str = argv[1]->value.string;
+
+		if (!strcmp (propname, "x-evolution-any-field")) {
+			*list = g_list_prepend (*list, e_book_query_any_field_contains (str));
+		}
+		else {
+			if (propname)
+				*list = g_list_prepend (*list,
+							e_book_query_vcard_field_test (propname,
+										       E_BOOK_QUERY_CONTAINS,
+										       str));
+		}
+	}
+
+	r = e_sexp_result_new(f, ESEXP_RES_BOOL);
+	r->value.bool = FALSE;
+
+	return r;
+}
+
+static ESExpResult *
 func_is(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
 {
 	GList **list = data;
@@ -547,6 +572,32 @@ func_beginswith(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *da
 }
 
 static ESExpResult *
+func_beginswith_vcard(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
+{
+	GList **list = data;
+	ESExpResult *r;
+
+	if (argc == 2
+	    && argv[0]->type == ESEXP_RES_STRING
+	    && argv[1]->type == ESEXP_RES_STRING) {
+		char *propname = argv[0]->value.string;
+		char *str = argv[1]->value.string;
+
+		if (propname)
+			*list = g_list_prepend (*list,
+						e_book_query_vcard_field_test (propname,
+									       E_BOOK_QUERY_BEGINS_WITH,
+									       str));
+
+	}
+
+	r = e_sexp_result_new(f, ESEXP_RES_BOOL);
+	r->value.bool = FALSE;
+
+	return r;
+}
+
+static ESExpResult *
 func_endswith(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
 {
 	GList **list = data;
@@ -563,6 +614,31 @@ func_endswith(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data
 			*list = g_list_prepend (*list, e_book_query_field_test (field,
 										E_BOOK_QUERY_ENDS_WITH,
 										str));
+	}
+
+	r = e_sexp_result_new(f, ESEXP_RES_BOOL);
+	r->value.bool = FALSE;
+
+	return r;
+}
+
+static ESExpResult *
+func_endswith_vcard(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
+{
+	GList **list = data;
+	ESExpResult *r;
+
+	if (argc == 2
+	    && argv[0]->type == ESEXP_RES_STRING
+	    && argv[1]->type == ESEXP_RES_STRING) {
+		char *propname = argv[0]->value.string;
+		char *str = argv[1]->value.string;
+
+		if (propname)
+			*list = g_list_prepend (*list,
+						e_book_query_vcard_field_test (propname,
+									       E_BOOK_QUERY_ENDS_WITH,
+									       str));
 	}
 
 	r = e_sexp_result_new(f, ESEXP_RES_BOOL);
@@ -622,10 +698,13 @@ static const struct {
 	{ "or", func_or, 0 },
 	{ "not", func_not, 0 },
 	{ "contains", func_contains, 0 },
+	{ "contains_vcard", func_contains_vcard, 0 },
 	{ "is", func_is, 0 },
 	{ "is_vcard", func_is_vcard, 0 },
 	{ "beginswith", func_beginswith, 0 },
+	{ "beginswith_vcard", func_beginswith_vcard, 0 },	
 	{ "endswith", func_endswith, 0 },
+	{ "endswith_vcard", func_endswith_vcard, 0 },
 	{ "exists", func_exists, 0 },
 	{ "exists_vcard", func_exists_vcard, 0 },
 };

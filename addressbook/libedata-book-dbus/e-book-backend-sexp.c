@@ -404,6 +404,14 @@ func_contains(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data
 	return entry_compare (ctx, f, argc, argv, (char *(*)(const char*, const char*)) e_util_utf8_strstrcase);
 }
 
+static ESExpResult *
+func_contains_vcard(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
+{
+	SearchContext *ctx = data;
+
+	return vcard_compare (ctx, f, argc, argv, (char *(*)(const char*, const char*)) e_util_utf8_strstrcase);
+}
+
 static char *
 is_helper (const char *s1, const char *s2)
 {
@@ -433,11 +441,14 @@ static char *
 endswith_helper (const char *s1, const char *s2)
 {
 	char *p;
-	if ((p = (char*) e_util_utf8_strstrcase(s1, s2))
-	    && (strlen(p) == strlen(s2)))
-		return p;
-	else
-		return NULL;
+
+	while((p = (char*) e_util_utf8_strstrcase(s1, s2))) {
+		if ((strlen(p) == strlen(s2)))
+			return p;
+		else
+			s1 = g_utf8_next_char (p);
+	}
+	return NULL;
 }
 
 static ESExpResult *
@@ -446,6 +457,14 @@ func_endswith(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data
 	SearchContext *ctx = data;
 
 	return entry_compare (ctx, f, argc, argv, endswith_helper);
+}
+
+static ESExpResult *
+func_endswith_vcard(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
+{
+	SearchContext *ctx = data;
+
+	return vcard_compare (ctx, f, argc, argv, endswith_helper);
 }
 
 static char *
@@ -465,6 +484,14 @@ func_beginswith(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *da
 	SearchContext *ctx = data;
 
 	return entry_compare (ctx, f, argc, argv, beginswith_helper);
+}
+
+static ESExpResult *
+func_beginswith_vcard(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data)
+{
+	SearchContext *ctx = data;
+
+	return vcard_compare (ctx, f, argc, argv, beginswith_helper);
 }
 
 static ESExpResult *
@@ -552,10 +579,13 @@ static struct {
 				   doesn't execute everything, 0 otherwise */
 } symbols[] = {
 	{ "contains", func_contains, 0 },
+	{ "contains_vcard", func_contains_vcard, 0 },
 	{ "is", func_is, 0 },
 	{ "is_vcard", func_is_vcard, 0 },
 	{ "beginswith", func_beginswith, 0 },
+	{ "beginswith_vcard", func_beginswith_vcard, 0 },
 	{ "endswith", func_endswith, 0 },
+	{ "endswith_vcard", func_endswith_vcard, 0 },
 	{ "exists", func_exists, 0 },
 	{ "exists_vcard", func_exists_vcard, 0 },
 };

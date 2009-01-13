@@ -42,18 +42,24 @@ typedef struct
 
 static ESExpResult *test_always_fails (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
 static ESExpResult *test_generic_field_is_indexed (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
+static ESExpResult *test_generic_field_is_indexed_vcard (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
 
 static ESExpResult *is_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
+static ESExpResult *is_vcard_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
 static ESExpResult *beginswith_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
+static ESExpResult *beginswith_vcard_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata);
 
 static const EBookBackendFileIndexSExpSymbol sexp_symbols[] = {
   {"contains", test_always_fails, NULL},
+  {"contains_vcard", test_always_fails, NULL},
   {"is", test_generic_field_is_indexed, is_query},
+  {"is_vcard", test_generic_field_is_indexed_vcard, is_vcard_query},
   {"beginswith", test_generic_field_is_indexed, beginswith_query},
+  {"beginswith_vcard", test_generic_field_is_indexed_vcard, beginswith_vcard_query},
   {"endswith", test_always_fails, NULL},
+  {"endswith_vcard", test_always_fails, NULL},
   {"exists", test_always_fails, NULL},
   {"exists_vcard", test_always_fails, NULL},
-  {"is_vcard", test_always_fails, NULL},
 };
 
 /* structures used for maintaining the indexes */
@@ -542,7 +548,7 @@ test_always_fails (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata
  * something we have an index for or not
  */
 static ESExpResult *
-test_generic_field_is_indexed (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
+real_test_generic_field_is_indexed (gboolean vcard_query, ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
 {
   ESExpResult *result = NULL;
   gint i = 0;
@@ -560,21 +566,44 @@ test_generic_field_is_indexed (ESExp *sexp, gint argc, ESExpResult **argv, gpoin
   {
     query_term = argv[0]->value.string;
 
-    for (i = 0; i < G_N_ELEMENTS (indexes); i++)
+    if (vcard_query)
     {
-      if (query_term && g_str_equal (query_term, indexes[i].query_term))
+      for (i = 0; i < G_N_ELEMENTS (indexes); i++)
       {
-        return result;
+        if (query_term && g_str_equal (query_term, indexes[i].vfield))
+        {
+          return result;
+        }
+      }
+    } else {
+      for (i = 0; i < G_N_ELEMENTS (indexes); i++)
+      {
+        if (query_term && g_str_equal (query_term, indexes[i].query_term))
+        {
+          return result;
+        }
       }
     }
+
   } else {
     g_warning (G_STRLOC ": Unexpected query structure");
   }
-  
+
   *(gboolean *)userdata = FALSE;
   g_debug (G_STRLOC ": failing the test");
 
   return result;
+}
+static ESExpResult *
+test_generic_field_is_indexed (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
+{
+  return real_test_generic_field_is_indexed (FALSE, sexp, argc, argv, userdata);
+}
+
+static ESExpResult *
+test_generic_field_is_indexed_vcard (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
+{
+  return real_test_generic_field_is_indexed (TRUE, sexp, argc, argv, userdata);
 }
 
 /* index operations themselves */
@@ -1007,8 +1036,24 @@ index_sync (EBookBackendFileIndex *index, EBookBackendFileIndexData *data)
   }
 }
 
+static const char*
+find_query_term_for_vfield (const char *vfield)
+{
+  int i;
+  for (i = 0; i < G_N_ELEMENTS (indexes); i++)
+  {
+    if (0 == g_str_equal (vfield, indexes[i].vfield))
+    {
+      return indexes[i].query_term;
+    }
+  }
+  g_critical ("vcard-attribute %s is not indexed", vfield);
+
+  return NULL;
+}
+
 static ESExpResult *
-is_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
+real_is_query (gboolean vcard_query, ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
 {
   EBookBackendFileIndex *index = (EBookBackendFileIndex *)userdata;
   EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
@@ -1017,7 +1062,8 @@ is_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
   DBT index_dbt, id_dbt;
   DB *db = NULL;
   gint db_error = 0;
-  gchar *query_term = NULL, *query_key = NULL;
+  const gchar *query_term = NULL;
+  gchar *query_key = NULL;
   GPtrArray *ids = NULL;
   DBC *dbc = NULL;
 
@@ -1030,6 +1076,10 @@ is_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
   {
     /* we need the index database too */
     query_term = argv[0]->value.string;
+    if (vcard_query)
+    {
+      query_term = find_query_term_for_vfield (query_term);
+    }
     db = g_hash_table_lookup (priv->sdbs, query_term);
 
     /* populate a dbt for looking up in the index */
@@ -1089,7 +1139,19 @@ out:
 }
 
 static ESExpResult *
-beginswith_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
+is_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
+{
+  return real_is_query (FALSE, sexp, argc, argv, userdata);
+}
+
+static ESExpResult *
+is_vcard_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
+{
+  return real_is_query (TRUE, sexp, argc, argv, userdata);
+}
+
+static ESExpResult *
+real_beginswith_query (gboolean vcard_query, ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
 {
   EBookBackendFileIndex *index = (EBookBackendFileIndex *)userdata;
   EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
@@ -1098,7 +1160,8 @@ beginswith_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
   DBT index_dbt, id_dbt;
   DB *db = NULL;
   gint db_error = 0;
-  gchar *query_term = NULL, *query_key = NULL;
+  const gchar *query_term = NULL;
+  gchar *query_key = NULL;
   GPtrArray *ids = NULL;
   DBC *dbc = NULL;
 
@@ -1111,6 +1174,10 @@ beginswith_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
   {
     /* we need the index database too */
     query_term = argv[0]->value.string;
+    if (vcard_query)
+    {
+      query_term = find_query_term_for_vfield (query_term);
+    }
     db = g_hash_table_lookup (priv->sdbs, query_term);
 
     /* populate a dbt for looking up in the index */
@@ -1177,6 +1244,18 @@ out:
   result->value.ptrarray = ids;
 
   return result;
+}
+
+static ESExpResult *
+beginswith_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
+{
+  return real_beginswith_query (FALSE, sexp, argc, argv, userdata);
+}
+
+static ESExpResult *
+beginswith_vcard_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
+{
+  return real_beginswith_query (TRUE, sexp, argc, argv, userdata);
 }
 
 static gboolean
