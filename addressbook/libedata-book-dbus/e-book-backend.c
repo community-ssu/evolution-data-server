@@ -10,6 +10,7 @@
 #include "e-data-book-view.h"
 #include "e-data-book.h"
 #include "e-book-backend.h"
+#include "libedataserver/e-flag.h"
 
 struct _EBookBackendPrivate {
 	GMutex *open_mutex;
@@ -22,6 +23,8 @@ struct _EBookBackendPrivate {
 
 	GMutex *views_mutex;
 	EList *views;
+
+        EFlag *opened_flag;
 };
 
 /* Signal IDs */
@@ -116,6 +119,8 @@ e_book_backend_open (EBookBackend *backend,
 	g_return_if_fail (E_IS_BOOK_BACKEND (backend));
 	g_return_if_fail (E_IS_DATA_BOOK (book));
 
+        e_flag_clear (backend->priv->opened_flag);
+
 	g_mutex_lock (backend->priv->open_mutex);
 
 	if (backend->priv->loaded) {
@@ -128,11 +133,13 @@ e_book_backend_open (EBookBackend *backend,
 
 		e_data_book_respond_open (book, opid, status);
 
-				if (status == Success || status == InvalidServerVersion)
-					e_data_book_report_writable (book, backend->priv->writable);
+		if (status == Success || status == InvalidServerVersion)
+			e_data_book_report_writable (book, backend->priv->writable);
 	}
 
 	g_mutex_unlock (backend->priv->open_mutex);
+
+        e_flag_set (backend->priv->opened_flag);
 }
 
 /**
@@ -179,6 +186,9 @@ e_book_backend_create_contact (EBookBackend *backend,
 
 	g_assert (E_BOOK_BACKEND_GET_CLASS (backend)->create_contact);
 
+        /* wait till book is opened */
+        e_flag_wait (backend->priv->opened_flag);
+
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->create_contact) (backend, book, opid, vcard);
 }
 
@@ -203,6 +213,8 @@ e_book_backend_create_contacts (EBookBackend *backend,
 	g_return_if_fail (vcards);
 
 	g_assert (E_BOOK_BACKEND_GET_CLASS (backend)->create_contacts);
+
+        e_flag_wait (backend->priv->opened_flag);
 
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->create_contacts) (backend, book, opid, vcards);
 }
@@ -229,6 +241,8 @@ e_book_backend_remove_contacts (EBookBackend *backend,
 
 	g_assert (E_BOOK_BACKEND_GET_CLASS (backend)->remove_contacts);
 
+        e_flag_wait (backend->priv->opened_flag);
+
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->remove_contacts) (backend, book, opid, id_list);
 }
 
@@ -253,6 +267,8 @@ e_book_backend_modify_contact (EBookBackend *backend,
 	g_return_if_fail (vcard);
 
 	g_assert (E_BOOK_BACKEND_GET_CLASS (backend)->modify_contact);
+
+        e_flag_wait (backend->priv->opened_flag);
 
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->modify_contact) (backend, book, opid, vcard);
 }
@@ -279,6 +295,8 @@ e_book_backend_modify_contacts (EBookBackend *backend,
 
 	g_assert (E_BOOK_BACKEND_GET_CLASS (backend)->modify_contacts);
 
+        e_flag_wait (backend->priv->opened_flag);
+
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->modify_contacts) (backend, book, opid, vcards);
 }
 
@@ -304,6 +322,8 @@ e_book_backend_get_contact (EBookBackend *backend,
 
 	g_assert (E_BOOK_BACKEND_GET_CLASS (backend)->get_contact);
 
+        e_flag_wait (backend->priv->opened_flag);
+
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->get_contact) (backend, book, opid, id);
 }
 
@@ -328,6 +348,8 @@ e_book_backend_get_contact_list (EBookBackend *backend,
 	g_return_if_fail (query);
 
 	g_assert (E_BOOK_BACKEND_GET_CLASS (backend)->get_contact_list);
+
+        e_flag_wait (backend->priv->opened_flag);
 
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->get_contact_list) (backend, book, opid, query);
 }
@@ -394,6 +416,8 @@ e_book_backend_get_changes (EBookBackend *backend,
 
 	g_assert (E_BOOK_BACKEND_GET_CLASS (backend)->get_changes);
 
+        e_flag_wait (backend->priv->opened_flag);
+
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->get_changes) (backend, book, opid, change_id);
 }
 
@@ -422,6 +446,8 @@ e_book_backend_authenticate_user (EBookBackend *backend,
 	g_return_if_fail (user && passwd && auth_method);
 
 	g_assert (E_BOOK_BACKEND_GET_CLASS (backend)->authenticate_user);
+
+        e_flag_wait (backend->priv->opened_flag);
 
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->authenticate_user) (backend, book, opid, user, passwd, auth_method);
 }
@@ -812,7 +838,7 @@ e_book_backend_sync (EBookBackend *backend)
 EDataBookChange *
 e_book_backend_change_add_new     (const char *vcard)
 {
-  EDataBookChange *new_change = g_new (EDataBookChange, 1);
+        EDataBookChange *new_change = g_new (EDataBookChange, 1);
 
 	new_change->change_type = E_BOOK_BACKEND_CHANGE_ADDED;
 	new_change->vcard = g_strdup (vcard);
@@ -832,7 +858,7 @@ e_book_backend_change_add_new     (const char *vcard)
 EDataBookChange *
 e_book_backend_change_modify_new  (const char *vcard)
 {
-  EDataBookChange *new_change = g_new (EDataBookChange, 1);
+        EDataBookChange *new_change = g_new (EDataBookChange, 1);
 
 	new_change->change_type = E_BOOK_BACKEND_CHANGE_MODIFIED;
 	new_change->vcard = g_strdup (vcard);
@@ -852,7 +878,7 @@ e_book_backend_change_modify_new  (const char *vcard)
 EDataBookChange *
 e_book_backend_change_delete_new  (const char *vcard)
 {
-  EDataBookChange *new_change = g_new (EDataBookChange, 1);
+        EDataBookChange *new_change = g_new (EDataBookChange, 1);
 
 	new_change->change_type = E_BOOK_BACKEND_CHANGE_DELETED;
 	new_change->vcard = g_strdup (vcard);
@@ -1046,11 +1072,12 @@ e_book_backend_init (EBookBackend *backend)
 
 	priv          = g_new0 (EBookBackendPrivate, 1);
 	priv->clients = NULL;
-	priv->source = NULL;
+	priv->source  = NULL;
 	priv->views   = e_list_new((EListCopyFunc) NULL, (EListFreeFunc) NULL, NULL);
 	priv->open_mutex = g_mutex_new ();
 	priv->clients_mutex = g_mutex_new ();
 	priv->views_mutex = g_mutex_new ();
+        priv->opened_flag = e_flag_new ();
 
 	backend->priv = priv;
 }
@@ -1078,6 +1105,8 @@ e_book_backend_dispose (GObject *object)
 		g_mutex_free (backend->priv->open_mutex);
 		g_mutex_free (backend->priv->clients_mutex);
 		g_mutex_free (backend->priv->views_mutex);
+
+                e_flag_free (backend->priv->opened_flag);
 
 		g_free (backend->priv);
 		backend->priv = NULL;

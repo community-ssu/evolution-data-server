@@ -1,0 +1,13 @@
+2009-01-16  Robert Peto  <robert.peto@maemo.org>
+
+	Use EFlag in threaded operations of EBookBackend class to prevent them
+	running before OPEN has finished.
+
+	* addressbook/libedata-book-dbus/e-book-backend.c
+	 (e_book_backend_open(), e_book_backend_create_contact(),
+	  e_book_backend_create_contacts(), e_book_backend_remove_contacts(),
+	  e_book_backend_modify_contact(), e_book_backend_modify_contacts(),
+	  e_book_backend_get_contact(), e_book_backend_get_contact_list(),
+	  e_book_backend_get_changes(), e_book_backend_authenticate_user(),
+	  e_book_backend_init(), e_book_backend_dispose())
+
