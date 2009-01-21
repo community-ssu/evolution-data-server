@@ -350,6 +350,10 @@ EContactField           e_contact_field_id_from_vcard (const char *vcard_field);
 
 gboolean                e_contact_is_syncable      (EContact *);
 
+gboolean                e_contact_persist_data     (EContact *contact,
+                                                    const char *dir);
+gboolean                e_contact_inline_data      (EContact *contact);
+
 G_END_DECLS
 
 #endif /* __E_CONTACT_H__ */

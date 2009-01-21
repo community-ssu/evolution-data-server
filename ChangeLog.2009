@@ -1,3 +1,14 @@
+2009-01-21  Robert Peto  <robert.peto@maemo.org>
+
+	New API functions for persist / inline data in addressbook. (Currently only
+	for PHOTO and LOGO properties.)
+
+	* addressbook/libebook-dbus/e-contact.c
+	 (e_contact_photo_convert_to_inlined(),
+	  e_contact_photo_convert_to_uri(),
+	  e_contact_inline_data(), e_contact_persist_data()): See above.
+	* configure.in: linking addressbook to gio.
+
 2009-01-16  Robert Peto  <robert.peto@maemo.org>
 
 	Use EFlag in threaded operations of EBookBackend class to prevent them

@@ -33,6 +33,11 @@
 #include "e-book.h"
 #include "e-name-western.h"
 
+#include <errno.h>
+#include <glib/gstdio.h>
+#include <unistd.h>
+#include <gio/gio.h>
+
 #ifdef G_OS_WIN32
 #include "libedataserver/e-data-server-util.h"
 #undef EVOLUTION_LOCALEDIR
@@ -1258,7 +1263,6 @@ EContact*
 e_contact_new_from_vcard (const char *vcard)
 {
 	EContact *contact;
-	const gchar *file_as;
 
 	g_return_val_if_fail (vcard != NULL, NULL);
 
@@ -1266,6 +1270,7 @@ e_contact_new_from_vcard (const char *vcard)
 	e_vcard_construct (E_VCARD (contact), vcard);
 
 #if 0
+	const gchar *file_as;
 	/* Generate a FILE_AS field if needed */
 
 	file_as = e_contact_get_const (contact, E_CONTACT_FILE_AS);
@@ -2089,6 +2094,112 @@ e_contact_photo_get_type (void)
 	return type_id;
 }
 
+/*
+ * Returns TRUE if @photo is changed, FALSE otherwise.
+ */
+static gboolean
+e_contact_photo_convert_to_inlined (EContactPhoto *photo)
+{
+        char *contents;
+        char *content_type;
+        char *mime_type = NULL;
+        gsize length;
+        GError *err = NULL;
+
+        g_return_val_if_fail (photo, FALSE);
+
+        if (photo->type == E_CONTACT_PHOTO_TYPE_INLINED)
+                return FALSE;
+
+        /* check if the url is a local file */
+        if (strncmp (photo->data.uri, "file:///", 8))
+                return FALSE;
+
+        /* try to read file's contents */
+        if (!g_file_get_contents (photo->data.uri + 7, &contents, &length,
+                                  &err)) {
+                g_warning ("Cannot read file '%s': %s", photo->data.uri,
+                           err->message);
+                g_error_free (err);
+                return FALSE;
+        }
+
+        /* guess the mime-type
+         * NOTE: if it's NULL X-EVOLUTION-UNKNOWN will be used in photo_setter */
+        content_type = g_content_type_guess (photo->data.uri, contents, length,
+                                             NULL);
+        if (content_type) {
+                mime_type = g_content_type_get_mime_type (content_type);
+                g_free (content_type);
+        }
+
+        photo->type = E_CONTACT_PHOTO_TYPE_INLINED;
+        photo->data.inlined.data = (guchar *) contents;
+        photo->data.inlined.length = length;
+        photo->data.inlined.mime_type = mime_type;
+
+        return TRUE;
+}
+
+/*
+ * Returns TRUE if @photo is changed, FALSE otherwise.
+ */
+static gboolean
+e_contact_photo_convert_to_uri (EContactPhoto *photo, const char *dir)
+{
+        GError *err = NULL;
+        char *path;
+        char *filename;
+        char *suffix;
+        int fd;
+
+        g_return_val_if_fail (photo, FALSE);
+        g_return_val_if_fail (dir, FALSE);
+
+        if (photo->type == E_CONTACT_PHOTO_TYPE_URI)
+                return FALSE;
+
+        if (!g_file_test (dir, G_FILE_TEST_IS_DIR)) {
+                if (g_mkdir_with_parents (dir, 0755)) {
+                        g_warning ("Cannot create directory '%s': %s",
+                                   dir, g_strerror (errno));
+                        return FALSE;
+                }
+        }
+
+        /* guess the suffix */
+        if (photo->data.inlined.mime_type && (suffix = strchr (photo->data.inlined.mime_type, '/')))
+                filename = g_strdup_printf ("XXXXXX.%s", suffix + 1);
+        else
+                filename = g_strdup ("XXXXXX");
+
+        path = g_build_filename (dir, filename, NULL);
+        g_free (filename);
+        fd = g_mkstemp (path);
+        if (fd == -1) {
+                g_warning ("Cannot save file: %s", g_strerror (errno));
+                g_free (path);
+                return FALSE;
+        }
+
+        if (!g_file_set_contents (path, (gchar *) photo->data.inlined.data,
+                                  photo->data.inlined.length, &err)) {
+                g_warning ("Cannot save file '%s': %s", path, err->message);
+                g_error_free (err);
+                g_free (path);
+                close (fd);
+
+                return FALSE;
+        }
+
+        photo->type = E_CONTACT_PHOTO_TYPE_URI;
+        photo->data.uri = g_strdup_printf ("file://%s", path);
+        close (fd);
+        g_free (path);
+
+        return TRUE;
+}
+
 /**
  * e_contact_geo_free:
  * @geo: an #EContactGeo
@@ -2258,3 +2369,90 @@ e_contact_is_syncable (EContact *contact)
 
   return res;
 }
+
+/**
+ * e_contact_inline_data:
+ * @contact: an #EContact
+ *
+ * Inlines the locally referred data, currently only works with #EContactPhoto
+ * (E_CONTACT_PHOTO and E_CONTACT_LOGO)
+ *
+ * Return value: TRUE if the @contact is changed during the operation, FASLE
+ * otherwise.
+ */
+gboolean
+e_contact_inline_data (EContact *contact)
+{
+        EContactPhoto *photo, *logo;
+        gboolean photo_changed = FALSE, logo_changed = FALSE;
+
+        g_return_val_if_fail (contact && E_IS_CONTACT (contact), FALSE);
+
+        photo = e_contact_get (contact, E_CONTACT_PHOTO);
+        if (photo) {
+                photo_changed = e_contact_photo_convert_to_inlined (photo);
+                if (photo_changed) {
+                        e_contact_set (contact, E_CONTACT_PHOTO, photo);
+                }
+                e_contact_photo_free (photo);
+        }
+
+        logo = e_contact_get (contact, E_CONTACT_LOGO);
+        if (logo) {
+                logo_changed = e_contact_photo_convert_to_inlined (logo);
+                if (logo_changed) {
+                        e_contact_set (contact, E_CONTACT_LOGO, logo);
+                }
+                e_contact_photo_free (logo);
+        }
+
+        return photo_changed || logo_changed;
+}
+
+#define OSSO_ABOOK_PHOTO_DIR "~/.osso-abook/photos"
+
+/**
+ * e_contact_persist_data:
+ * @contact: an #EContact
+ * @dir: the directory where the inlined data should be saved.
+ *
+ * Persist the inlined data from @contact in @dir. Creates @dir if it does not
+ * exists.
+ *
+ * Return value: TRUE if the @contact is changed during the operation, FALSE
+ * otherwise.
+ */
+gboolean
+e_contact_persist_data (EContact *contact, const char *dir)
+{
+        EContactPhoto *photo;
+        EContactPhoto *logo;
+        gboolean photo_changed = FALSE, logo_changed = FALSE;
+
+        g_return_val_if_fail (contact && E_IS_CONTACT (contact), FALSE);
+
+        if (!dir)
+                dir = OSSO_ABOOK_PHOTO_DIR;
+
+        photo = e_contact_get (contact, E_CONTACT_PHOTO);
+        if (photo) {
+                photo_changed = e_contact_photo_convert_to_uri (photo, dir);
+                if (photo_changed) {
+                        e_contact_set (contact, E_CONTACT_PHOTO, photo);
+                }
+                e_contact_photo_free (photo);
+        }
+
+        logo = e_contact_get (contact, E_CONTACT_LOGO);
+        if (logo) {
+                logo_changed = e_contact_photo_convert_to_uri (logo, dir);
+                if (logo_changed) {
+                        e_contact_set (contact, E_CONTACT_LOGO, logo);
+                }
+                e_contact_photo_free (logo);
+        }
+
+        return photo_changed || logo_changed;
+}
+
+
