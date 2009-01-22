@@ -1,5 +1,12 @@
 2009-01-22  Robert Peto  <robert.peto@maemo.org>
 
+	Fix loading of preinstalled vcards in addressbook's file backend.
+
+	* addressbook/backends/file/e-book-backend-file.c
+	 (e_book_backend_file_load_source()): See above.
+
+2009-01-22  Robert Peto  <robert.peto@maemo.org>
+
 	New util functions for prevent duplications in addressbook.
 
 	* addressbook/libebook-dbus/e-book-util.c,

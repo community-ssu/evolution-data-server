@@ -1574,7 +1574,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 	time_t db_mtime;
 	struct stat sb;
 	gchar *uri;
-
+        GNOME_Evolution_Addressbook_CallStatus retval;
 
 	uri = e_source_get_uri (source);
 
@@ -1759,13 +1759,17 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 	e_book_backend_set_is_loaded (backend, TRUE);
 	e_book_backend_set_is_writable (backend, writable);
 
+        retval = e_book_backend_file_setup_running_ids (bf);
+        if (retval != GNOME_Evolution_Addressbook_Success)
+                return retval;
+
 	if (bf->priv->file_db) {
 		install_pre_installed_vcards (backend);
 	} else {
 		g_warning ("No file_db");
 	}
 
-	return e_book_backend_file_setup_running_ids (bf);
+	return GNOME_Evolution_Addressbook_Success;
 }
 
 static gboolean
