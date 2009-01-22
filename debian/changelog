@@ -1,3 +1,13 @@
+evolution-data-server (1.4.2.1-20090122) unstable; urgency=low
+
+  * Use EFlag in threaded operations of EBookBackend class to prevent them
+    running before OPEN has finished.
+  * New API functions for persist / inline data in addressbook, currently
+    only for PHOTO and LOGO properties.
+  * New utility functions for prevent duplications in addressbook. (Jorgen)
+
+ -- Robert Peto <robert.peto@maemo.org>  Thu, 22 Jan 2009 10:29:55 +0200
+
 evolution-data-server (1.4.2.1-20090112) unstable; urgency=low
 
   * 50_preserve-uid-in-file-backend.diff: Fix running_id issue in file
