@@ -1,3 +1,12 @@
+2009-01-22  Robert Peto  <robert.peto@maemo.org>
+
+	New util functions for prevent duplications in addressbook.
+
+	* addressbook/libebook-dbus/e-book-util.c,
+	  addressbook/libebook-dbus/e-book-util.h:
+	 (e_book_util_remove_duplicates(),
+	  e_book_util_remove_duplicates_using_book()): See above
+
 2009-01-21  Robert Peto  <robert.peto@maemo.org>
 
 	New API functions for persist / inline data in addressbook. (Currently only

@@ -26,7 +26,8 @@ libebook_1_2_la_SOURCES =					\
 	e-name-western.c				\
 	e-name-western-tables.h				\
 	e-vcard.c					\
-	e-error.h
+	e-error.h					\
+	e-book-util.c
 
 libebook_1_2_la_LIBADD =					\
 	$(EVOLUTION_ADDRESSBOOK_LIBS)				\
@@ -45,7 +46,8 @@ libebookinclude_HEADERS =				\
 	e-book.h					\
 	e-contact.h					\
 	e-name-western.h				\
-	e-vcard.h
+	e-vcard.h					\
+	e-book-util.h
 
 %-$(API_VERSION).pc: %.pc
 	 cp $< $@
