@@ -31,6 +31,8 @@
 #include "e-book-backend-sexp.h"
 #include "opid.h"
 
+#define GET_PRIV(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), E_TYPE_DATA_BOOK, EDataBookPrivate))
+
 extern DBusGConnection *connection;
 
 /* DBus glue */
@@ -109,6 +111,9 @@ typedef struct {
   };
 } OperationData;
 
+typedef struct {
+  EDataBookClosedCallback closed_cb;
+} EDataBookPrivate;
 
 static void
 operation_thread (gpointer data, gpointer user_data)
@@ -117,7 +122,7 @@ operation_thread (gpointer data, gpointer user_data)
   EBookBackend *backend;
 
   backend = e_data_book_get_backend (op->book);
-  
+
   switch (op->op) {
   case OP_OPEN:
     e_book_backend_open (backend, op->book, op->id, op->only_if_exists);
@@ -166,7 +171,7 @@ operation_thread (gpointer data, gpointer user_data)
     g_free (op->change_id);
     break;
   }
-  
+
   g_object_unref (op->book);
   g_slice_free (OperationData, op);
 }
@@ -203,7 +208,7 @@ static void
 e_data_book_dispose (GObject *object)
 {
   EDataBook *book = E_DATA_BOOK (object);
-  
+
   if (book->backend) {
     g_object_unref (book->backend);
     book->backend = NULL;
@@ -213,13 +218,13 @@ e_data_book_dispose (GObject *object)
     g_object_unref (book->source);
     book->source = NULL;
   }
-  
-  G_OBJECT_CLASS (e_data_book_parent_class)->dispose (object);	
+
+  G_OBJECT_CLASS (e_data_book_parent_class)->dispose (object);
 }
 
 static void
 e_data_book_class_init (EDataBookClass *e_data_book_class)
-{ 
+{
   GObjectClass *object_class = G_OBJECT_CLASS (e_data_book_class);
 
   object_class->dispose = e_data_book_dispose;
@@ -251,8 +256,10 @@ e_data_book_class_init (EDataBookClass *e_data_book_class)
                   g_cclosure_marshal_VOID__VOID,
                   G_TYPE_NONE, 0);
 
+  g_type_class_add_private (e_data_book_class, sizeof (EDataBookPrivate));
+
   dbus_g_object_type_install_info (G_TYPE_FROM_CLASS (e_data_book_class), &dbus_glib_e_data_book_object_info);
-  
+
   dbus_g_error_domain_register (E_DATA_BOOK_ERROR, NULL, E_TYPE_DATA_BOOK_STATUS);
 
   op_pool = g_thread_pool_new (operation_thread, NULL, 10, FALSE, NULL);
@@ -269,11 +276,16 @@ e_data_book_init (EDataBook *ebook)
 EDataBook *
 e_data_book_new (EBookBackend *backend, ESource *source, EDataBookClosedCallback closed_cb)
 {
+  EDataBookPrivate *priv;
   EDataBook *book;
+
   book = g_object_new (E_TYPE_DATA_BOOK, NULL);
+  priv = GET_PRIV (book);
+
   book->backend = g_object_ref (backend);
   book->source = g_object_ref (source);
-  book->closed_cb = closed_cb;
+  priv->closed_cb = closed_cb;
+
   return book;
 }
 
@@ -297,7 +309,7 @@ static void
 impl_AddressBook_Book_open(EDataBook *book, gboolean only_if_exists, DBusGMethodInvocation *context)
 {
   OperationData *op;
-  
+
   op = op_new (OP_OPEN, book, context);
   op->only_if_exists = only_if_exists;
   g_thread_pool_push (op_pool, op, NULL);
@@ -342,7 +354,7 @@ impl_AddressBook_Book_getContact (EDataBook *book, const char *IN_uid, DBusGMeth
     dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, ContactNotFound, _("Cannot get contact")));
     return;
   }
-  
+
   op = op_new (OP_GET_CONTACT, book, context);
   op->uid = g_strdup (IN_uid);
   g_thread_pool_push (op_pool, op, NULL);
@@ -552,11 +564,11 @@ impl_AddressBook_Book_removeContacts(EDataBook *book, const char **IN_uids, DBus
   }
 
   op = op_new (OP_REMOVE_CONTACTS, book, context);
-  
+
   for (; *IN_uids; IN_uids++) {
     op->ids = g_list_prepend (op->ids, g_strdup (*IN_uids));
   }
-  
+
   g_thread_pool_push (op_pool, op, NULL);
 }
 
@@ -569,7 +581,7 @@ e_data_book_respond_remove_contacts (EDataBook *book, guint32 opid, EDataBookSta
     dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot remove contacts")));
   } else {
     GList *i;
-    
+
     for (i = ids; i; i = i->next)
       e_book_backend_notify_remove (e_data_book_get_backend (book), i->data);
     e_book_backend_notify_complete (e_data_book_get_backend (book));
@@ -658,7 +670,7 @@ static void
 impl_AddressBook_Book_getChanges(EDataBook *book, const char *IN_change_id, DBusGMethodInvocation *context)
 {
   OperationData *op;
-  
+
   op = op_new (OP_GET_CHANGES, book, context);
   op->change_id = g_strdup (IN_change_id);
   g_thread_pool_push (op_pool, op, NULL);
@@ -668,7 +680,7 @@ void
 e_data_book_respond_get_changes (EDataBook *book, guint32 opid, EDataBookStatus status, GList *changes)
 {
   DBusGMethodInvocation *context = opid_fetch (opid);
-  
+
   if (status != Success) {
     dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot get changes")));
   } else {
@@ -684,7 +696,7 @@ e_data_book_respond_get_changes (EDataBook *book, guint32 opid, EDataBookStatus 
       GValueArray *vals;
 
       vals = g_value_array_new (2);
-      
+
       g_value_array_append (vals, NULL);
       g_value_init (g_value_array_get_nth (vals, 0), G_TYPE_UINT);
       g_value_set_uint (g_value_array_get_nth (vals, 0), change->change_type);
@@ -699,7 +711,7 @@ e_data_book_respond_get_changes (EDataBook *book, guint32 opid, EDataBookStatus 
       g_free (change);
       changes = g_list_remove (changes, change);
     }
-    
+
     dbus_g_method_return (context, array);
     g_ptr_array_foreach (array, (GFunc)g_value_array_free, NULL);
     g_ptr_array_free (array, TRUE);
@@ -720,11 +732,12 @@ impl_AddressBook_Book_cancelOperation(EDataBook *book, GError **error)
 static void
 impl_AddressBook_Book_close(EDataBook *book, DBusGMethodInvocation *context)
 {
+  EDataBookPrivate *priv = GET_PRIV (book);
   char *sender;
 
   sender = dbus_g_method_get_sender (context);
 
-  book->closed_cb (book, sender);
+  priv->closed_cb (book, sender);
 
   g_free (sender);
 
@@ -766,14 +779,14 @@ return_status_and_list (guint32 opid, EDataBookStatus status, GList *list, gbool
     char **array;
     GList *l;
     int i = 0;
-    
+
     array = g_new0 (char*, g_list_length (list) + 1);
     for (l = list; l != NULL; l = l->next) {
       array[i++] = l->data;
     }
-    
+
     dbus_g_method_return (context, array);
-    
+
     if (free_data) {
       g_strfreev (array);
     } else {

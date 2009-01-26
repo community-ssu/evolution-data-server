@@ -31,11 +31,9 @@ typedef void (* EDataBookClosedCallback) (EDataBook *book, const char *client);
 
 struct _EDataBook
 {
-  GObject parent;
+  GObject       parent;
   EBookBackend *backend;
-  ESource *source;
-  /* TODO: move to private data */
-  EDataBookClosedCallback closed_cb;
+  ESource      *source;
 };
 
 struct _EDataBookClass
