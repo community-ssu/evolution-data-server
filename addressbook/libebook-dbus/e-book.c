@@ -159,7 +159,7 @@ e_book_class_init (EBookClass *e_book_class)
 			      e_book_marshal_NONE__BOOL,
 			      G_TYPE_NONE, 1,
 			      G_TYPE_BOOLEAN);
-  
+
   e_book_signals [CONNECTION_STATUS] =
     g_signal_new ("connection_status",
                   G_OBJECT_CLASS_TYPE (gobject_class),
@@ -169,7 +169,7 @@ e_book_class_init (EBookClass *e_book_class)
                   e_book_marshal_NONE__BOOL,
                   G_TYPE_NONE, 1,
                   G_TYPE_BOOLEAN);
-  
+
   e_book_signals [AUTH_REQUIRED] =
     g_signal_new ("auth_required",
                   G_OBJECT_CLASS_TYPE (gobject_class),
@@ -187,7 +187,7 @@ e_book_class_init (EBookClass *e_book_class)
                   NULL, NULL,
                   e_book_marshal_NONE__NONE,
                   G_TYPE_NONE, 0);
-  
+
   gobject_class->dispose = e_book_dispose;
   gobject_class->finalize = e_book_finalize;
 
@@ -291,7 +291,7 @@ gboolean
 e_book_get_addressbooks (ESourceList **addressbook_sources, GError **error)
 {
 	GConfClient *gconf;
-	
+
 	e_return_error_if_fail (addressbook_sources, E_BOOK_ERROR_INVALID_ARG);
 
 	gconf = gconf_client_get_default();
@@ -318,9 +318,9 @@ e_book_new (ESource *source, GError **error)
   GError *err = NULL;
   EBook *book;
   char *path;
-  
+
   e_return_error_if_fail (E_IS_SOURCE (source), E_BOOK_ERROR_INVALID_ARG);
-  
+
   if (!e_book_activate (&err)) {
     g_warning (G_STRLOC ": cannot activate book: %s\n", err->message);
     g_propagate_error (error, err);
@@ -331,14 +331,14 @@ e_book_new (ESource *source, GError **error)
 
   book->priv->source = g_object_ref (source);
   book->priv->uri = e_source_get_uri (source);
-  
+
   if (!org_gnome_evolution_dataserver_addressbook_BookFactory_get_book (factory_proxy, book->priv->uri, &path, &err)) {
     g_warning (G_STRLOC ": cannot get book from factory: %s", err ? err->message : "[no error]");
     g_propagate_error (error, err);
     g_object_unref (book);
     return NULL;
   }
-  
+
   book->priv->proxy = dbus_g_proxy_new_for_name_owner (connection,
                                                        E_DATA_BOOK_FACTORY_SERVICE_NAME, path,
                                                        "org.gnome.evolution.dataserver.addressbook.Book",
@@ -379,15 +379,15 @@ e_book_new_from_uri (const char *uri, GError **error)
 {
   ESource *source;
   EBook *book;
-  
+
   e_return_error_if_fail (uri, E_BOOK_ERROR_INVALID_ARG);
-  
+
   source = e_source_new_with_absolute_uri ("", uri);
-  
+
   book = e_book_new (source, error);
-  
+
   g_object_unref (source);
-  
+
   return book;
 }
 
@@ -444,7 +444,7 @@ e_book_new_system_addressbook (GError **error)
 		uri = g_strdup_printf ("file://%s", filename);
 
 		g_free (filename);
-	
+
 		book = e_book_new_from_uri (uri, error);
 
 		g_free (uri);
@@ -538,14 +538,14 @@ e_book_open (EBook *book, gboolean only_if_exists, GError **error)
 
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
-  
+
   if (!org_gnome_evolution_dataserver_addressbook_Book_open (book->priv->proxy, only_if_exists, &err)) {
     g_propagate_error (error, err);
     return FALSE;
   }
 
   status = get_status_from_error (err);
-  
+
   if (status == E_BOOK_ERROR_OK) {
     book->priv->loaded = TRUE;
     return TRUE;
@@ -617,7 +617,7 @@ e_book_remove (EBook *book, GError **error)
 
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
-  
+
   org_gnome_evolution_dataserver_addressbook_Book_remove (book->priv->proxy, &err);
   return unwrap_gerror (err, error);
 }
@@ -697,14 +697,14 @@ get_required_fields_reply(DBusGProxy *proxy, char **fields, GError *error, gpoin
   AsyncData *data = user_data;
   EBookEListCallback cb = data->callback;
   char **i = fields;
-  EList *efields = e_list_new (NULL, 
+  EList *efields = e_list_new (NULL,
                                (EListFreeFunc) g_free,
                                NULL);
-  
+
   while (*i != NULL) {
     e_list_append (efields, (*i++));
   }
-  
+
   if (cb)
     cb (data->book, get_status_from_error (error), efields, data->closure);
 
@@ -780,11 +780,11 @@ get_supported_fields_reply(DBusGProxy *proxy, char **fields, GError *error, gpoi
   EBookEListCallback cb = data->callback;
   char **i = fields;
   EList *efields = e_list_new (NULL,  (EListFreeFunc) g_free, NULL);
-  
+
   while (*i != NULL) {
     e_list_append (efields, (*i++));
   }
-  
+
   if (cb)
     cb (data->book, get_status_from_error (error), efields, data->closure);
 
@@ -859,14 +859,14 @@ get_supported_auth_methods_reply(DBusGProxy *proxy, char **methods, GError *erro
   AsyncData *data = user_data;
   EBookEListCallback cb = data->callback;
   char **i = methods;
-  EList *emethods = e_list_new (NULL, 
+  EList *emethods = e_list_new (NULL,
                                 (EListFreeFunc) g_free,
                                 NULL);
 
   while (*i != NULL) {
     e_list_append (emethods, (*i++));
   }
-  
+
   if (cb)
     cb (data->book, get_status_from_error (error), emethods, data->closure);
 
@@ -997,7 +997,7 @@ e_book_get_contact (EBook *book, const char  *id, EContact **contact, GError **e
 
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
-  
+
   org_gnome_evolution_dataserver_addressbook_Book_get_contact (book->priv->proxy, id, &vcard, &err);
   if (vcard) {
     *contact = e_contact_new_from_vcard (vcard);
@@ -1167,7 +1167,7 @@ parse_changes_array (GPtrArray *array)
 {
   GList *l = NULL;
   int i;
-  
+
   if (array == NULL)
     return NULL;
 
@@ -1184,7 +1184,7 @@ parse_changes_array (GPtrArray *array)
 
     l = g_list_prepend (l, change);
   }
-  
+
   g_ptr_array_foreach (array, (GFunc)g_value_array_free, NULL);
   g_ptr_array_free (array, TRUE);
 
@@ -1227,13 +1227,13 @@ get_changes_reply (DBusGProxy *proxy, GPtrArray *changes, GError *error, gpointe
   AsyncData *data = user_data;
   EBookListCallback cb = data->callback;
   GList *list = NULL;
-  
+
   if (changes)
     list = parse_changes_array (changes);
 
   if (cb)
     cb (data->book, get_status_from_error (error), list, data->closure);
-  
+
   g_slice_free (AsyncData, data);
 }
 
@@ -1343,7 +1343,7 @@ add_contact_reply (DBusGProxy *proxy, char *uid, GError *error, gpointer user_da
  * @cb: function to call when the operation finishes
  * @closure: data to pass to callback function
  *
- * Adds @contact to @book without blocking. 
+ * Adds @contact to @book without blocking.
  *
  * Return value: %TRUE if the operation was started, %FALSE otherwise.
  **/
@@ -1823,7 +1823,7 @@ e_book_get_book_view (EBook *book, EBookQuery *query, GList *requested_fields, i
   e_return_error_if_fail (query, E_BOOK_ERROR_INVALID_ARG);
 
   sexp = e_book_query_to_string (query);
-  
+
   if (!org_gnome_evolution_dataserver_addressbook_Book_get_book_view (book->priv->proxy, sexp, max_results, &address, &err)) {
     *book_view = NULL;
     g_free (sexp);
@@ -1891,7 +1891,7 @@ get_book_view_reply (DBusGProxy *proxy, char *address, GError *error, gpointer u
   } else {
     status = get_status_from_error (error);
   }
-  
+
   if (cb)
     cb (data->book, status, view, data->closure);
 
@@ -1958,9 +1958,9 @@ e_book_is_opened (EBook *book)
 /**
  * e_book_is_writable:
  * @book: an #EBook
- * 
+ *
  * Check if this book is writable.
- * 
+ *
  * Return value: %TRUE if this book is writable, otherwise %FALSE.
  */
 gboolean
@@ -1978,11 +1978,11 @@ e_book_is_writable (EBook *book)
  *
  * Return value: %TRUE if this book is connected, otherwise %FALSE.
  **/
-gboolean 
+gboolean
 e_book_is_online (EBook *book)
 {
   g_return_val_if_fail (E_IS_BOOK (book), FALSE);
-  
+
   return book->priv->connected;
 }
 
@@ -2043,10 +2043,10 @@ e_book_get_static_capabilities (EBook *book, GError **error)
 {
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
-  
+
   if (!book->priv->cap_queried) {
     char *cap = NULL;
-    
+
     if (!org_gnome_evolution_dataserver_addressbook_Book_get_static_capabilities (book->priv->proxy, &cap, error)) {
       return NULL;
     }
@@ -2054,7 +2054,7 @@ e_book_get_static_capabilities (EBook *book, GError **error)
     book->priv->cap = cap;
     book->priv->cap_queried = TRUE;
   }
-  
+
   return book->priv->cap;
 }
 
@@ -2170,22 +2170,22 @@ e_book_is_self (EContact *contact)
  * e_book_set_default_addressbook:
  * @book: An #EBook pointer
  * @error: A #GError pointer
- * 
+ *
  * sets the #ESource of the #EBook as the "default" addressbook.  This is the source
  * that will be loaded in the e_book_get_default_addressbook call.
- * 
+ *
  * Return value: %TRUE if the setting was stored in libebook's ESourceList, otherwise %FALSE.
  */
 gboolean
 e_book_set_default_addressbook (EBook *book, GError **error)
 {
   ESource *source;
-  
+
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_error_if_fail (book->priv->loaded == FALSE, E_BOOK_ERROR_SOURCE_ALREADY_LOADED);
-  
+
   source = e_book_get_source (book);
-  
+
   return e_book_set_default_source (source, error);
 }
 
@@ -2194,10 +2194,10 @@ e_book_set_default_addressbook (EBook *book, GError **error)
  * e_book_set_default_source:
  * @source: An #ESource pointer
  * @error: A #GError pointer
- * 
+ *
  * sets @source as the "default" addressbook.  This is the source that
  * will be loaded in the e_book_get_default_addressbook call.
- * 
+ *
  * Return value: %TRUE if the setting was stored in libebook's ESourceList, otherwise %FALSE.
  */
 gboolean
@@ -2281,7 +2281,7 @@ unwrap_gerror (GError *error, GError **client_error)
 {
   if (error == NULL)
     return TRUE;
-  
+
   if (error->domain == DBUS_GERROR && error->code == DBUS_GERROR_REMOTE_EXCEPTION) {
     GError *new;
     gint code;
