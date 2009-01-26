@@ -173,3 +173,5 @@ dist-hook: dist-check-gtkdoc dist-hook-local
 
 .PHONY : dist-hook-local
 
+tmpl/*.sgml:
+	@true
