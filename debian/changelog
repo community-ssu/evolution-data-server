@@ -1,3 +1,10 @@
+evolution-data-server (1.4.2.1-20090128) unstable; urgency=low
+
+  * Fix loading of preinstalled vcards in addressbook's file backend.
+    Fixes: NB#96177
+
+ -- Robert Peto <robert.peto@maemo.org>  Wed, 28 Jan 2009 09:53:46 +0100
+
 evolution-data-server (1.4.2.1-20090122) unstable; urgency=low
 
   * Use EFlag in threaded operations of EBookBackend class to prevent them
