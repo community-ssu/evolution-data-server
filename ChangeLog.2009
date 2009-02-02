@@ -1,3 +1,11 @@
+2009-02-02  Robert Peto  <robert.peto@maemo.org>
+
+	Fix indexing problem in addressbook's file backend. (When starting
+	BookView contacts without name doesn't get back.)
+
+	* addressbook/backends/file/e-book-backend-file.c
+	* addressbook/backends/file/e-book-backend-file-index.c
+
 2009-01-22  Robert Peto  <robert.peto@maemo.org>
 
 	Fix loading of preinstalled vcards in addressbook's file backend.

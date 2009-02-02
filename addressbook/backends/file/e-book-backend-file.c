@@ -839,7 +839,9 @@ book_view_thread (gpointer data)
 			g_debug (G_STRLOC ": sending contacts in order sort by %s", priv->sort_order);
 			ids = e_book_backend_file_index_get_ordered_ids (bf->priv->index, priv->sort_order);
 		}
-	}
+                else
+                        g_debug (G_STRLOC ": priv->sort_order is not set");
+        }
 
 	if (ids)
 	{
@@ -850,7 +852,7 @@ book_view_thread (gpointer data)
 			if (!e_flag_is_set (closure->running))
 				break;
 
-			string_to_dbt (id, &id_dbt);
+                        string_to_dbt (id, &id_dbt);
 			memset (&vcard_dbt, 0, sizeof (vcard_dbt));
 			vcard_dbt.flags = DB_DBT_MALLOC;
 
