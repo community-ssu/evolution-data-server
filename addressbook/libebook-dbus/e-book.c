@@ -1386,7 +1386,7 @@ e_book_add_contacts (EBook *book, GList *contacts, GError **error)
 {
   GError *err = NULL;
   GList *it;
-  char **vcards, **uids, **i;
+  char **vcards, **i, **uids = NULL;
 
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
@@ -1398,8 +1398,10 @@ e_book_add_contacts (EBook *book, GList *contacts, GError **error)
   }
 
   org_gnome_evolution_dataserver_addressbook_Book_add_contacts (book->priv->proxy, (const char **)vcards, &uids, &err);
-  for (i = uids, it = contacts; *i && it; i++, it = it->next) {
-    e_contact_set (it->data, E_CONTACT_UID, *i);
+  if (!err) {
+    for (i = uids, it = contacts; *i && it; i++, it = it->next) {
+      e_contact_set (it->data, E_CONTACT_UID, *i);
+    }
   }
   if (vcards)
     g_strfreev (vcards);

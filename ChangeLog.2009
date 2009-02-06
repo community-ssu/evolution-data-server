@@ -1,5 +1,14 @@
 2009-02-06  Robert Peto  <robert.peto@maemo.org>
 
+	Fix error handling in e_book_add_contacts().
+
+	* addressbook/libebook-dbus/e-book.c: see above.
+	* addressbook/libedata-book-dbus/e-data-book.c
+	 (e_data_book_respond_create_contacts()): Use g_strfreev() for
+	allocated char **
+
+2009-02-06  Robert Peto  <robert.peto@maemo.org>
+
 	Fix running id issue in addressbook's file backend.
 
 	* addressbook/backends/file/e-book-backend-file.c

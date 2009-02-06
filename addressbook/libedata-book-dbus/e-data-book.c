@@ -486,7 +486,7 @@ e_data_book_respond_create_contacts (EDataBook *book, guint32 opid, EDataBookSta
     e_book_backend_notify_complete (e_data_book_get_backend (book));
 
     dbus_g_method_return (context, uids);
-    g_free (uids);
+    g_strfreev (uids);
   }
 }
 
