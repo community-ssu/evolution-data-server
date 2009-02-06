@@ -78,7 +78,7 @@ struct _EBookBackendFilePrivate {
 	DB_ENV   *env;
 	EBookBackendFileIndex *index;
 	char     *sort_order;
-    int       running_id;
+	int       running_id;
 };
 
 G_LOCK_DEFINE_STATIC (global_env);
@@ -232,7 +232,7 @@ e_book_backend_file_create_unique_id (EBookBackendFile *bf)
 	if (0 == bf->priv->running_id) {
 		load_last_running_id (bf);
 	}
-    if (bf->priv->running_id >= RUNNING_ID_MAX) {
+	if (bf->priv->running_id >= RUNNING_ID_MAX) {
 		g_warning ("Warning running id overrun");
 		bf->priv->running_id = 1;
 	}
@@ -279,6 +279,7 @@ insert_contact (EBookBackendFile *bf,
         char *vcard;
         const char *rev;
         int db_error;
+        int id_new = 0;
 
         g_assert (bf);
         g_assert (vcard_req);
@@ -291,8 +292,24 @@ insert_contact (EBookBackendFile *bf,
         *contact = e_contact_new_from_vcard (vcard_req);
         if (is_contact_preserved (*contact)) {
                 id = (char *) e_contact_get (*contact, E_CONTACT_UID);
+
+                /* convert uid to running_id */
+                errno = 0;
+                id_new = strtol ((const char *)id, (char **)NULL, 10);
+
+                if ((errno == ERANGE && (id_new == LONG_MAX || id_new == LONG_MIN))
+                                || (errno != 0 && id_new == 0)) {
+			g_warning ("unable to preserve id, ceating new one");
+                        if (id)
+                                g_free (id);
+                        id_new = 0;
+                }
+                /* update running id */
+                if (id_new > bf->priv->running_id)
+                        bf->priv->running_id = id_new;
+
         }
-        else {
+        if (!id_new) {
                 id = e_book_backend_file_create_unique_id (bf);
                 e_contact_set (*contact, E_CONTACT_UID, id);
         }

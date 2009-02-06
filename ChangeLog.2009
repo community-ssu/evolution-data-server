@@ -1,3 +1,10 @@
+2009-02-06  Robert Peto  <robert.peto@maemo.org>
+
+	Fix running id issue in addressbook's file backend.
+
+	* addressbook/backends/file/e-book-backend-file.c
+	 (insert_contact())
+
 2009-02-02  Robert Peto  <robert.peto@maemo.org>
 
 	Fix indexing problem in addressbook's file backend. (When starting
