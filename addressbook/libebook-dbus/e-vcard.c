@@ -1172,15 +1172,15 @@ e_vcard_dump_structure (EVCard *evc)
 }
 
 /**
- * e_vcard_dump_structure:
- * @evc: the #EVCard to dump
+ * e_vcard_is_parsed:
+ * @evc: an #EVCard
  *
  * Check if the @evc has been parsed already. Used for debugging.
  **/
 gboolean
 e_vcard_is_parsed (EVCard *evc)
 {
-	g_return_if_fail (E_IS_VCARD (evc));
+	g_return_val_if_fail (E_IS_VCARD (evc), FALSE);
         return (!evc->priv->vcard && evc->priv->attributes);
 }
 
@@ -1445,10 +1445,21 @@ e_vcard_attribute_add_value_decoded (EVCardAttribute *attr, const char *value, i
 		attr->decoded_values = g_list_append (attr->decoded_values, decoded);
 		break;
 	}
-	case EVC_ENCODING_QP:
-		g_warning ("need to implement quoted printable decoding");
+	case EVC_ENCODING_QP: {
+                char *escaped = _evc_escape_string_21 (value);
+                char *qp_data = _evc_quoted_printable_encode (escaped, strlen (escaped), NULL);
+                GString *decoded = g_string_new_len (value, len);
+                g_free (escaped);
+
+                /* make sure the decoded list is up to date */
+                e_vcard_attribute_get_values_decoded (attr);
+
+                attr->values = g_list_append (attr->values, qp_data);
+                attr->decoded_values = g_list_append (attr->decoded_values, decoded);
+
 		break;
 	}
+        }
 }
 
 /**
@@ -1976,7 +1987,12 @@ e_vcard_attribute_get_values_decoded (EVCardAttribute *attr)
 			attr->decoded_values = g_list_reverse (attr->decoded_values);
 			break;
 		case EVC_ENCODING_QP:
-			g_warning ("need to implement quoted printable decoding");
+                        for (l = attr->values; l; l = l->next) {
+                                char *decoded = _evc_quoted_printable_decode ((char *)l->data);
+                                attr->decoded_values = g_list_prepend (attr->decoded_values, g_string_new (decoded));
+                                g_free (decoded);
+                        }
+                        attr->decoded_values = g_list_reverse (attr->decoded_values);
 			break;
 		}
 	}

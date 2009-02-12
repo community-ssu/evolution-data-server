@@ -1,5 +1,14 @@
 2009-02-12  Robert Peto  <robert.peto@maemo.org>
 
+	Add Quoted Printable support for EVCardAttribute.
+
+	* addressbook/libebook-dbus/e-vcard.c
+	 (e_vcard_attribute_add_value_decoded(),
+	  e_vcard_attribute_get_values_decoded()): see above
+	* e_vcard_is_parsed(): fix return value if fail
+
+2009-02-12  Robert Peto  <robert.peto@maemo.org>
+
 	Fix "base64" encoding problem with PHOTO attribute.
 	Fixes: NB#98290.
 
