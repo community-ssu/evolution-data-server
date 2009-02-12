@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20090212) unstable; urgency=low
+
+  * Fix error handling in e_book_add_contacts(); Fixes: NB#100249
+
+ -- Robert Peto <robert.peto@maemo.org>  Thu, 12 Feb 2009 10:56:34 +0100
+
 evolution-data-server (1.4.2.1-20090129) unstable; urgency=low
 
   * Fix indexing problem (contacts without name) in addressbook's file backend.
