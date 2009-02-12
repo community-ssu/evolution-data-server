@@ -1,3 +1,10 @@
+2009-02-12  Robert Peto  <robert.peto@maemo.org>
+
+	Fix "base64" encoding problem with PHOTO attribute.
+	Fixes: NB#98290.
+
+	* addressbook/libebook-dbus/e-contact.c (photo_getter())
+
 2009-02-06  Robert Peto  <robert.peto@maemo.org>
 
 	Fix error handling in e_book_add_contacts().
