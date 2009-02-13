@@ -1,3 +1,10 @@
+2009-02-13  Robert Peto  <robert.peto@maemo.org>
+
+	Fix decoding of QUOTED-PRINTABLE encoded attributes in EVCard.
+	Fixes: NB#99991.
+
+	* addressbook/libebook-dbus/e-vcard.c (read_attribute_value())
+
 2009-02-12  Robert Peto  <robert.peto@maemo.org>
 
 	Add Quoted Printable support for EVCardAttribute.

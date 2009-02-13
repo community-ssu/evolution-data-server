@@ -259,15 +259,15 @@ read_attribute_value (EVCardAttribute *attr, const char **p, gboolean quoted_pri
 			if ((a = *(++lp)) == '\0') break;
 			if ((b = *(++lp)) == '\0') break;
 			else if (isxdigit(a) && isxdigit (b)) {
-				gunichar c;
+                                char c;
 
 				a = tolower (a);
 				b = tolower (b);
 
 				c = (((a>='a'?a-'a'+10:a-'0')&0x0f) << 4)
 					| ((b>='a'?b-'a'+10:b-'0')&0x0f);
-				
-				g_string_insert_unichar (str, -1, c);
+
+                                g_string_append_c (str, c);
 			}
 			else 
 				{
