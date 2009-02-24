@@ -1072,6 +1072,9 @@ free_symbol(void *key, void *value, void *data)
 {
 	struct _ESExpSymbol *s = value;
 
+        if (!s)
+                return;
+
 	g_free(s->name);
 	g_free(s);
 }
