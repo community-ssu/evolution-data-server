@@ -1,3 +1,13 @@
+evolution-data-server (1.4.2.1-20090225) unstable; urgency=low
+
+  * Fix "base64" encoding problem with PHOTO attribute.	Fixes: NB#98290
+  * Add Quoted Printable support for EVCardAttribute.
+  * Fix decoding of QUOTED-PRINTABLE encoded attributes in EVCard.
+    Fixes: NB#99991
+  * Prevent crashes while disposing EDataBookView. Fixes: NB#101832
+
+ -- Robert Peto <robert.peto@maemo.org>  Wed, 25 Feb 2009 10:52:32 +0100
+
 evolution-data-server (1.4.2.1-20090212) unstable; urgency=low
 
   * Fix error handling in e_book_add_contacts(); Fixes: NB#100249
