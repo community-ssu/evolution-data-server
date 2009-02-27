@@ -334,9 +334,9 @@ reset_chached_attribute (EContact *contact, EVCardAttribute *attr)
 	vcard_field = e_vcard_attribute_get_name (attr);
 
 	for (i = E_CONTACT_FIELD_FIRST; i < E_CONTACT_FIELD_LAST; i ++) {
-		if (field_info[i].vcard_field_name == NULL)
+		if (!(field_info [i].t & E_CONTACT_FIELD_TYPE_STRING))
 			continue;
-		if (field_info[i].t & E_CONTACT_FIELD_TYPE_SYNTHETIC)
+		if (field_info[i].vcard_field_name == NULL)
 			continue;
 		if (strcmp (field_info[i].vcard_field_name, vcard_field))
 			continue;
@@ -1690,6 +1690,7 @@ e_contact_set (EContact *contact, EContactField field_id, const gpointer value)
 
 	/* set the cached slot to NULL so we'll re-get the new string
 	   if e_contact_get_const is called again */
+	g_free (contact->priv->cached_strings[field_id]);
 	contact->priv->cached_strings[field_id] = NULL;
 
 	g_object_set (contact,
