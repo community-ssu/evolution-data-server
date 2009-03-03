@@ -1630,7 +1630,19 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 				(void *(*)(void *, size_t))g_try_realloc,
 				g_free);
 
-		db_error = (*env->open) (env, NULL, DB_CREATE | DB_INIT_MPOOL | DB_PRIVATE | DB_THREAD, 0);
+                /* TODO: refactor this whole function... */
+                /* Do deadlock detection internally. */
+                if ((db_error = env->set_lk_detect(env, DB_LOCK_DEFAULT)) != 0) {
+                        env_close (env, 0);
+                        g_warning ("set_lk_detect failed with %s", db_strerror (db_error));
+                        G_UNLOCK (global_env);
+                        g_free (dirname);
+                        g_free (filename);
+                        return db_error_to_status (db_error);
+	        }
+
+		db_error = (*env->open) (env, NULL, DB_CREATE | DB_INIT_MPOOL | DB_PRIVATE
+                                         | DB_THREAD | DB_INIT_LOCK, 0);
 		if (db_error != 0) {
 			env->close(env, 0);
 			g_warning ("db_env_open failed with %s", db_strerror (db_error));
