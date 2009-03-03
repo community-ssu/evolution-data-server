@@ -883,9 +883,16 @@ e_vcard_to_string_vcard_21 (EVCard *evc)
 
                         g_string_append_c (attr_str, ';');
 
-			g_string_append (attr_str, param->name);
+                        /* only append type parameter's name iff it's PHOTO or LOGO */
+                        if (!g_ascii_strcasecmp (param->name, EVC_TYPE) &&
+                                        (!g_ascii_strcasecmp (attr->name, EVC_PHOTO) ||
+                                         !g_ascii_strcasecmp (attr->name, EVC_LOGO))) {
+                                g_string_append (attr_str, param->name);
+                                if (param->values)
+                                        g_string_append_c (attr_str, '=');
+                        }
+
 			if (param->values) {
-				g_string_append_c (attr_str, '=');
 				for (v = param->values; v; v = v->next) {
 					char *value = v->data;
 					char *p = value;

@@ -1,5 +1,11 @@
 2009-03-03  Robert Peto  <robert.peto@maemo.org>
 
+	Do not insert TYPE string while converting to string.
+
+	* addressbook/libebook-dbus/e-vcard.c (e_vcard_to_string_vcard_21())
+
+2009-03-03  Robert Peto  <robert.peto@maemo.org>
+
 	* addressbook/backends/file/e-book-backend-file.c: protect
 	  priv->running_id with a G_LOCK, open DB_ENV with DB_INIT_LOCK flag
 	* addressbook/libebook-dbus/e-book-query.c (e_book_query_to_string()):
