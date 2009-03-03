@@ -88,6 +88,8 @@ static struct {
 	gboolean had_error;
 } global_env;
 
+G_LOCK_DEFINE_STATIC (running_id);
+
 static EBookBackendSyncStatus
 db_error_to_status (const int db_error)
 {
@@ -229,7 +231,8 @@ e_book_backend_file_store_unique_id (EBookBackendFile *bf)
 static char *
 e_book_backend_file_create_unique_id (EBookBackendFile *bf)
 {
-	if (0 == bf->priv->running_id) {
+        G_LOCK (running_id);
+        if (0 == bf->priv->running_id) {
 		load_last_running_id (bf);
 	}
 	if (bf->priv->running_id >= RUNNING_ID_MAX) {
@@ -237,6 +240,7 @@ e_book_backend_file_create_unique_id (EBookBackendFile *bf)
 		bf->priv->running_id = 1;
 	}
 	++bf->priv->running_id;
+        G_UNLOCK (running_id);
 
 	g_assert (bf->priv->running_id > 0);
 	return unique_id_to_string (bf->priv->running_id);
@@ -286,7 +290,9 @@ insert_contact (EBookBackendFile *bf,
         g_assert (contact);
 
         if (0 == bf->priv->running_id) {
+                G_LOCK (running_id);
                 load_last_running_id (bf);
+                G_UNLOCK (running_id);
         }
 
         *contact = e_contact_new_from_vcard (vcard_req);
@@ -1576,7 +1582,6 @@ e_book_backend_file_setup_running_ids (EBookBackendFile *bf)
 	bf->priv->file_db = NULL;
 
 	return db_error_to_status (db_error);
-
 }
 
 static GNOME_Evolution_Addressbook_CallStatus
@@ -1959,9 +1964,6 @@ e_book_backend_file_dispose (GObject *object)
 		g_object_unref (bf->priv->index);
 		bf->priv->index = NULL;
 	}
-	G_UNLOCK (global_env);
-
-	G_LOCK (global_env);
 	global_env.ref_count--;
 	if (global_env.ref_count == 0) {
 		global_env.env->close (global_env.env, 0);
