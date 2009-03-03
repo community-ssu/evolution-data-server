@@ -778,36 +778,47 @@ e_book_query_from_string  (const char *query_string)
  * finished with.
  **/
 char*
-e_book_query_to_string    (EBookQuery *q)
+e_book_query_to_string (EBookQuery *q)
 {
-	GString *str = g_string_new ("(");
-	GString *encoded = g_string_new ("");
+	GString *str;
+	GString *encoded;
 	int i;
 	char *s = NULL;
+
+        g_return_val_if_fail (q, NULL);
+
+        str = g_string_new ("(");
+        encoded = g_string_new ("");
 
 	switch (q->type) {
 	case E_BOOK_QUERY_TYPE_AND:
 		g_string_append (str, "and ");
 		for (i = 0; i < q->query.andor.nqs; i ++) {
 			s = e_book_query_to_string (q->query.andor.qs[i]);
-			g_string_append (str, s);
-			g_free (s);
-			g_string_append_c (str, ' ');
+                        if (s) {
+			        g_string_append (str, s);
+			        g_free (s);
+			        g_string_append_c (str, ' ');
+                        }
 		}
 		break;
 	case E_BOOK_QUERY_TYPE_OR:
 		g_string_append (str, "or ");
 		for (i = 0; i < q->query.andor.nqs; i ++) {
 			s = e_book_query_to_string (q->query.andor.qs[i]);
-			g_string_append (str, s);
-			g_free (s);
-			g_string_append_c (str, ' ');
+                        if (s) {
+        			g_string_append (str, s);
+	        		g_free (s);
+		        	g_string_append_c (str, ' ');
+                        }
 		}
 		break;
 	case E_BOOK_QUERY_TYPE_NOT:
 		s = e_book_query_to_string (q->query.not.q);
-		g_string_append_printf (str, "not %s", s);
-		g_free (s);
+                if (s) {
+        		g_string_append_printf (str, "not %s", s);
+	        	g_free (s);
+                }
 		break;
 	case E_BOOK_QUERY_TYPE_FIELD_EXISTS:
 		if (q->query.exist.vcard_field) {
