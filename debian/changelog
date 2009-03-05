@@ -9,7 +9,7 @@ evolution-data-server (1.4.2.1-20090304) unstable; urgency=low
 
 evolution-data-server (1.4.2.1-20090225) unstable; urgency=low
 
-  * Fix "base64" encoding problem with PHOTO attribute.	Fixes: NB#98290
+  * Fix "base64" encoding problem with PHOTO attribute.	
   * Add Quoted Printable support for EVCardAttribute.
   * Fix decoding of QUOTED-PRINTABLE encoded attributes in EVCard.
     Fixes: NB#99991
