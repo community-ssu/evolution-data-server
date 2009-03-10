@@ -952,7 +952,7 @@ e_vcard_to_string_vcard_21 (EVCard *evc)
                 g_string_free (value_str, TRUE);
 
 		/* lines longer than 75 characters SHOULD be folded */
-                if (qp_set && attr_str->len > 75) {
+                if (attr_str->len > 75) {
                         int l = 0;
 
                         do {
@@ -960,14 +960,20 @@ e_vcard_to_string_vcard_21 (EVCard *evc)
                                 if ((attr_str->len - l) > 75) {
                                         l += 75;
 
-                                        /* we don't want to break line inside an encoded value */
-                                        if (*(attr_str->str + l-1) == '=')
-                                                l -= 1;
-                                        else if (*(attr_str->str + l-2) == '=')
-                                                l -= 2;
+                                        if (qp_set) {
+                                                /* we don't want to break line inside an encoded value */
+                                                if (*(attr_str->str + l-1) == '=')
+                                                        l -= 1;
+                                                else if (*(attr_str->str + l-2) == '=')
+                                                        l -= 2;
 
-                                        g_string_insert_len (attr_str, l, "="CRLF, sizeof ("="CRLF) - 1);
-                                        l += 3; /* because of the inserted characters */
+                                                g_string_insert_len (attr_str, l, "="CRLF, sizeof ("="CRLF) - 1);
+                                                l += sizeof ("="CRLF); /* because of the inserted characters */
+                                        }
+                                        else {
+                                                g_string_insert_len (attr_str, l, CRLF, sizeof (CRLF) - 1);
+                                                l += sizeof (CRLF);
+                                        }
                                 }
                                 else {
                                         break;
