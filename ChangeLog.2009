@@ -1,3 +1,12 @@
+2009-03-12  Robert Peto  <robert.peto@maemo.org>
+
+	API change in e-book-util, extra out parameter added for duplicate
+	ids.
+
+	* addressbook/libebook-dbus/e-book-util.c
+	 (e_book_util_remove_duplicates(),
+	  e_book_util_remove_duplicates_using_book())
+
 2009-03-10  Robert Peto  <robert.peto@maemo.org>
 
 	Apply line folding when importing to vCard 2.1 format and ENCODING is

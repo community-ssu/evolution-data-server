@@ -1,3 +1,11 @@
+evolution-data-server (1.4.2.1-20090311.99) unstable; urgency=low
+
+  * Fixes: NB#104509 - API change request: get local UIDs of duplicate entries
+  * Fixes: NB#99331 - Apply line folding when converting to string in vCard 2.1
+    format.
+
+ -- Robert Peto <robert.peto@maemo.org>  Thu, 12 Mar 2009 17:59:48 +0100
+
 evolution-data-server (1.4.2.1-20090304) unstable; urgency=low
 
   * protect priv->running_id with a G_LOCK, open DB_ENV with DB_INIT_LOCK

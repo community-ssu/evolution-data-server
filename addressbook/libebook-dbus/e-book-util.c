@@ -142,16 +142,21 @@ contact_compare (EContact *a, EContact *b)
  * e_book_util_remove_duplicates:
  * @haystack: #GList of #EContacts
  * @needles: #GList of #EContacts
+ * @duplicate_ids: #GList of ids which are removed from @needles
  *
  * Searches duplicates of contacts from needles in haystack. Duplicates are
- * removed from needles.
+ * removed from needles, they uids are put to duplicate_ids.
  */
 void
-e_book_util_remove_duplicates (GList *haystack, GList **needles)
+e_book_util_remove_duplicates (GList  *haystack,
+                               GList **needles,
+                               GList **duplicate_ids)
 {
         GHashTable *local_names;
         GList *contacts;
+
         g_return_if_fail (needles != NULL);
+        g_return_if_fail (duplicate_ids != NULL && *duplicate_ids == NULL);
 
         local_names = ht_new ();
 
@@ -183,6 +188,13 @@ e_book_util_remove_duplicates (GList *haystack, GList **needles)
                 }
         
                 if (remove) {
+                        /* get uid of duplicate contact */
+                        const char *uid = e_contact_get_const (contact,
+                                                               E_CONTACT_UID);
+                        *duplicate_ids = g_list_prepend (*duplicate_ids,
+                                                         g_strdup (uid));
+
+                        /* remove duplicate from needles */
                         g_object_unref (contact);
                         contacts = *needles = g_list_delete_link (*needles, contacts);
                 } else {
@@ -198,6 +210,7 @@ e_book_util_remove_duplicates (GList *haystack, GList **needles)
  *
  * @book: an #EBook
  * @contacts: a #GList of #EContacts
+ * @duplicate_ids: a #GList of ids which are removed from @contacts
  * @error: #GError to set on failure
  * 
  * Removes duplicated contacts from @contacts list, so the resulting @contacts
@@ -210,6 +223,7 @@ e_book_util_remove_duplicates (GList *haystack, GList **needles)
 gboolean
 e_book_util_remove_duplicates_using_book (EBook   *book,
                                           GList  **contacts,
+                                          GList  **duplicate_ids,
                                           GError **error)
 {
         EBookQuery *query;
@@ -217,6 +231,7 @@ e_book_util_remove_duplicates_using_book (EBook   *book,
 
         g_return_val_if_fail (book != NULL, FALSE);
         g_return_val_if_fail (e_book_is_opened (book), FALSE);
+        g_return_val_if_fail ((duplicate_ids != NULL && *duplicate_ids == NULL), FALSE);
         g_return_val_if_fail (*error == NULL, FALSE);
 
         query = e_book_query_any_field_contains ("");
@@ -226,7 +241,7 @@ e_book_util_remove_duplicates_using_book (EBook   *book,
                 return FALSE;
         }
 
-        e_book_util_remove_duplicates (local_contacts, contacts);
+        e_book_util_remove_duplicates (local_contacts, contacts, duplicate_ids);
         while (local_contacts) {
                 EContact *contact = local_contacts->data;
                 g_object_unref (contact);
