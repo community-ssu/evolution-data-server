@@ -1,4 +1,4 @@
-evolution-data-server (1.4.2.1-20090311.99) unstable; urgency=low
+evolution-data-server (1.4.2.1-20090312) unstable; urgency=low
 
   * Fixes: NB#104509 - API change request: get local UIDs of duplicate entries
   * Fixes: NB#99331 - Apply line folding when converting to string in vCard 2.1
