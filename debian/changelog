@@ -1,3 +1,10 @@
+evolution-data-server (1.4.2.1-20090312.99) unstable; urgency=low
+
+  * Convert contact to string in format 2.1: replace comma to semicolon for
+    type attributes.
+
+ -- Robert Peto <robert.peto@maemo.org>  Fri, 13 Mar 2009 10:50:55 +0100
+
 evolution-data-server (1.4.2.1-20090312) unstable; urgency=low
 
   * Fixes: NB#104509 - API change request: get local UIDs of duplicate entries

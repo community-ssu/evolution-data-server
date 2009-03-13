@@ -910,7 +910,7 @@ e_vcard_to_string_vcard_21 (EVCard *evc)
 					if (quotes)
 						g_string_append_c (attr_str, '"');
 					if (v->next)
-						g_string_append_c (attr_str, ',');
+						g_string_append_c (attr_str, ';');
 				}
 			}
 		}

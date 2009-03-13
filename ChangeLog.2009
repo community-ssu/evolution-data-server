@@ -1,3 +1,10 @@
+2009-03-13  Robert Peto  <robert.peto@maemo.org>
+
+	Convert contact to string in format 2.1: replace comma to semicolon
+	for type attributes.
+
+	* addressbook/libebook-dbus/e-vcard.c (e_vcard_to_string_vcard_21())
+
 2009-03-12  Robert Peto  <robert.peto@maemo.org>
 
 	API change in e-book-util, extra out parameter added for duplicate
