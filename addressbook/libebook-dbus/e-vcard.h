@@ -143,6 +143,9 @@ char*   e_vcard_to_string                    (EVCard *evc, EVCardFormat format);
 void     e_vcard_dump_structure              (EVCard *evc);
 gboolean e_vcard_is_parsed                   (EVCard *evc);
 
+/* mostly for derived classes */
+gboolean e_vcard_is_parsing                  (EVCard *evc);
+
 
 /* attributes */
 GType            e_vcard_attribute_get_type          (void) G_GNUC_CONST;

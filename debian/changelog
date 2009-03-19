@@ -2,6 +2,8 @@ evolution-data-server (1.4.2.1-20090312.99) unstable; urgency=low
 
   * Convert contact to string in format 2.1: replace comma to semicolon for
     type attributes.
+  * Introduce e_vcard_is_parsing() to allow derived classes to correctly
+    interpret add_attribute() invokations.
 
  -- Robert Peto <robert.peto@maemo.org>  Fri, 13 Mar 2009 10:50:55 +0100
 
@@ -15,7 +17,7 @@ evolution-data-server (1.4.2.1-20090312) unstable; urgency=low
 
 evolution-data-server (1.4.2.1-20090304) unstable; urgency=low
 
-  * protect priv->running_id with a G_LOCK, open DB_ENV with DB_INIT_LOCK
+  * Protect priv->running_id with a G_LOCK, open DB_ENV with DB_INIT_LOCK
     flag; Fixes: NB#101869
   * escape gently if EBookQuery is NULL; Fixes: NB#88165
   * do not insert TYPE string while converting to string; Fixes: NB#100422
@@ -26,9 +28,9 @@ evolution-data-server (1.4.2.1-20090225) unstable; urgency=low
 
   * Fix "base64" encoding problem with PHOTO attribute.	
   * Add Quoted Printable support for EVCardAttribute.
-  * Fix decoding of QUOTED-PRINTABLE encoded attributes in EVCard.
+  * Fix decoding of QUOTED-PRINTABLE encoded attributes in EVCard;
     Fixes: NB#99991
-  * Prevent crashes while disposing EDataBookView. Fixes: NB#101832
+  * Prevent crashes while disposing EDataBookView; Fixes: NB#101832
 
  -- Robert Peto <robert.peto@maemo.org>  Wed, 25 Feb 2009 10:52:32 +0100
 

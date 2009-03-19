@@ -46,8 +46,9 @@ typedef enum {
 } EVCardEncoding;
 
 struct _EVCardPrivate {
-	GList *attributes;
-	char  *vcard;
+	GList    *attributes;
+	char     *vcard;
+	unsigned  parsing : 1;
 };
 
 struct _EVCardAttribute {
@@ -667,10 +668,13 @@ e_vcard_ensure_attributes (EVCard *evc)
 		}
 
 		/* detach vCard to avoid loops */
+		evc->priv->parsing = TRUE;
 		evc->priv->vcard = NULL;
 
 		parse (evc, vcs, have_uid);
 		g_free (vcs);
+
+		evc->priv->parsing = FALSE;
 	}
 
 	return evc->priv->attributes;
@@ -1189,12 +1193,31 @@ e_vcard_dump_structure (EVCard *evc)
  * @evc: an #EVCard
  *
  * Check if the @evc has been parsed already. Used for debugging.
+ *
+ * Return: %TRUE if @evc has been parsed, %FALSE otherwise.
  **/
 gboolean
 e_vcard_is_parsed (EVCard *evc)
 {
 	g_return_val_if_fail (E_IS_VCARD (evc), FALSE);
-        return (!evc->priv->vcard && evc->priv->attributes);
+	return (!evc->priv->vcard && evc->priv->attributes);
+}
+
+/**
+ * e_vcard_is_parsing:
+ * @evc: an #EVCard
+ *
+ * Check if the @evc is currently beening parsed. Used in derived classes to
+ * distinguish between parser caused attribute additions and real attribute
+ * additions.
+ *
+ * Return: %TRUE if @evc is currently beening parsed, %FALSE otherwise.
+ **/
+gboolean
+e_vcard_is_parsing (EVCard *evc)
+{
+	g_return_val_if_fail (E_IS_VCARD (evc), FALSE);
+	return (!evc->priv->vcard && evc->priv->attributes);
 }
 
 GType
