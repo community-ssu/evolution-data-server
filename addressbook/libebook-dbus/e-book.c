@@ -1014,8 +1014,10 @@ get_contact_reply(DBusGProxy *proxy, char *vcard, GError *error, gpointer user_d
   EBookStatus status = get_status_from_error (error);
 
   /* Protect against garbage return values on error */
-  if (error)
-	  vcard = NULL;
+  if (error) {
+    vcard = NULL;
+    g_warning (G_STRLOC ": cannot get contact: %s", error->message);
+  }
 
   if (cb) {
     if (error == NULL) {
@@ -1024,11 +1026,11 @@ get_contact_reply(DBusGProxy *proxy, char *vcard, GError *error, gpointer user_d
       cb (data->book, status, NULL, data->closure);
     }
   } else {
-    g_warning (G_STRLOC ": cannot get contact: %s", error->message);
+    g_warning (G_STRLOC ": No callback provided for get_contact()");
   }
 
   if (error)
-	  g_error_free (error);
+    g_error_free (error);
   g_free (vcard);
 
   g_slice_free (AsyncData, data);
