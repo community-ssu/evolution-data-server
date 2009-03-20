@@ -334,11 +334,10 @@ e_source_update_from_xml_node (ESource *source,
 	if (color_spec != NULL && color != NULL)
 		goto done;
 
-	if (source->priv->name == NULL
-	    || strcmp ((char*)name, source->priv->name) != 0
-	    || source->priv->relative_uri == NULL
-	    || relative_uri != NULL
-	    || strcmp ((char*)relative_uri, source->priv->relative_uri) != 0) {
+	if ((!source->priv->name || strcmp ((char*)name, source->priv->name) != 0)
+		|| (!source->priv->relative_uri
+			|| (relative_uri &&
+				strcmp ((char*)relative_uri, source->priv->relative_uri) != 0))) {
 		g_free (source->priv->name);
 		source->priv->name = g_strdup ((char*)name);
 
