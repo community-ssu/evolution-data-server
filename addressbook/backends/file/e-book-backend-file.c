@@ -298,16 +298,17 @@ insert_contact (EBookBackendFile *bf,
         *contact = e_contact_new_from_vcard (vcard_req);
         if (is_contact_preserved (*contact)) {
                 id = (char *) e_contact_get (*contact, E_CONTACT_UID);
-
+                g_warn_if_fail (id);
                 /* convert uid to running_id */
                 errno = 0;
-                id_new = strtol ((const char *)id, (char **)NULL, 10);
+                if (id) {
+                        id_new = strtol ((const char *)id, (char **)NULL, 10);
+                }
 
                 if ((errno == ERANGE && (id_new == LONG_MAX || id_new == LONG_MIN))
-                                || (errno != 0 && id_new == 0)) {
-			g_warning ("unable to preserve id, ceating new one");
-                        if (id)
-                                g_free (id);
+                    || (errno != 0 && id_new == 0)) {
+                        g_warning ("unable to preserve id, ceating new one");
+                        g_free (id);
                         id_new = 0;
                 }
                 /* update running id */
