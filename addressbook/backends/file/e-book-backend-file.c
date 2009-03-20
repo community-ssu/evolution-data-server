@@ -1371,8 +1371,7 @@ file_errcall (const char *buf1, char *buf2)
 }
 
 #define PREINSTALL_MD5FILE "md5sums"
-#define PREINSTALL_MD5DIRP1 ".config"
-#define PREINSTALL_MD5DIRP2 "evolution-data-server"
+#define PREINSTALL_MD5DIR "evolution-data-server"
 #define PREINSTALL_DIR "/usr/share/evolution-data-server"
 #define MD5LEN 32
 #define MD5RAWLEN 16
@@ -1418,38 +1417,21 @@ check_md5sum (const gchar *name)
 		return FALSE;
 	}
 
-	home = getenv ("HOME");
-	if (!home) {
-		return FALSE;
+	gchar *md5dir = g_build_filename (g_get_user_config_dir (),
+					   PREINSTALL_MD5DIR, NULL);
+	if (!g_file_test (md5dir, G_FILE_TEST_IS_DIR)) {
+		g_mkdir_with_parents (md5dir, S_IRUSR|S_IWUSR|S_IXUSR);
 	}
 
-	md5file = g_build_filename (home, PREINSTALL_MD5DIRP1,
-				    PREINSTALL_MD5DIRP2,  
+	md5file = g_build_filename (md5dir,
 				    PREINSTALL_MD5FILE, NULL);
-	if (!md5file) {
-		return FALSE;
-	}
+	fd = g_open (md5file, O_RDWR|O_APPEND|O_CREAT, S_IRUSR|S_IWUSR);
 
-	/* Tests if md5-dir and file exists */
-	if ((fd = g_open (md5file, O_RDWR|O_APPEND|O_CREAT, S_IRUSR|S_IWUSR)) < 0) {
-		gchar *dir;
-
-		/* do not care about errors */
-		dir = g_build_filename (home, PREINSTALL_MD5DIRP1, NULL);
-		g_mkdir (dir, S_IRUSR|S_IWUSR|S_IXUSR);
-		g_free (dir);
-
-		dir = g_build_filename (home, PREINSTALL_MD5DIRP1, 
-					PREINSTALL_MD5DIRP2, NULL);
-		g_mkdir (dir, S_IRUSR|S_IWUSR|S_IXUSR);
-		g_free (dir);
-
-		if ((fd = g_open (md5file, O_RDWR|O_APPEND|O_CREAT, S_IRUSR|S_IWUSR)) < 0) {
-			g_free (md5file);
-			return FALSE;
-		}
-	}
+	g_free (md5dir);
 	g_free (md5file);
+
+	if (fd < 0)
+		return FALSE;
 
 	/* get md5 of the string (file) */
 	md5_get_digest_from_file (name, md5raw);
