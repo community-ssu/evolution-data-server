@@ -478,7 +478,7 @@ func_contains_vcard(struct _ESExp *f, int argc, struct _ESExpResult **argv, void
 		char *propname = argv[0]->value.string;
 		char *str = argv[1]->value.string;
 
-		if (!strcmp (propname, "x-evolution-any-field")) {
+		if (propname && !strcmp (propname, "x-evolution-any-field")) {
 			*list = g_list_prepend (*list, e_book_query_any_field_contains (str));
 		}
 		else {
