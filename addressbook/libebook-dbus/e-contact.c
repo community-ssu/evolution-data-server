@@ -1346,7 +1346,7 @@ e_contact_duplicate (EContact *contact)
 const char *
 e_contact_field_name (EContactField field_id)
 {
-	g_return_val_if_fail (field_id >= 1 && field_id <= E_CONTACT_FIELD_LAST, "");
+	g_return_val_if_fail (field_id >= 1 && field_id < E_CONTACT_FIELD_LAST, "");
 
 	return field_info[field_id].field_name;
 }
@@ -1363,7 +1363,7 @@ e_contact_field_name (EContactField field_id)
 const char *
 e_contact_pretty_name (EContactField field_id)
 {
-	g_return_val_if_fail (field_id >= 1 && field_id <= E_CONTACT_FIELD_LAST, "");
+	g_return_val_if_fail (field_id >= 1 && field_id < E_CONTACT_FIELD_LAST, "");
 
 #ifdef ENABLE_NLS
 	bindtextdomain (GETTEXT_PACKAGE, EVOLUTION_LOCALEDIR);
@@ -1384,7 +1384,7 @@ e_contact_pretty_name (EContactField field_id)
 const char*
 e_contact_vcard_attribute  (EContactField field_id)
 {
-	g_return_val_if_fail (field_id >= 1 && field_id <= E_CONTACT_FIELD_LAST, "");
+	g_return_val_if_fail (field_id >= 1 && field_id < E_CONTACT_FIELD_LAST, "");
 
 	return field_info[field_id].vcard_field_name;
 }
@@ -1626,7 +1626,7 @@ gpointer
 e_contact_get (EContact *contact, EContactField field_id)
 {
 	g_return_val_if_fail (contact && E_IS_CONTACT (contact), NULL);
-	g_return_val_if_fail (field_id >= 1 && field_id <= E_CONTACT_FIELD_LAST, NULL);
+	g_return_val_if_fail (field_id >= 1 && field_id < E_CONTACT_FIELD_LAST, NULL);
 
 	return contact_get_safe (contact, field_id);
 }
@@ -1666,7 +1666,7 @@ gconstpointer
 e_contact_get_const (EContact *contact, EContactField field_id)
 {
 	g_return_val_if_fail (E_IS_CONTACT (contact), NULL);
-	g_return_val_if_fail (field_id >= 1 && field_id <= E_CONTACT_FIELD_LAST, NULL);
+	g_return_val_if_fail (field_id >= 1 && field_id < E_CONTACT_FIELD_LAST, NULL);
 	g_return_val_if_fail (field_info[field_id].t & E_CONTACT_FIELD_TYPE_STRING, NULL);
 	
 	return get_const_safe (contact, field_id);
@@ -1686,7 +1686,7 @@ e_contact_set (EContact *contact, EContactField field_id, const gpointer value)
 	d(printf ("e_contact_set (%p, %d, %p)\n", contact, field_id, value));
 
 	g_return_if_fail (contact && E_IS_CONTACT (contact));
-	g_return_if_fail (field_id >= 1 && field_id <= E_CONTACT_FIELD_LAST);
+	g_return_if_fail (field_id >= 1 && field_id < E_CONTACT_FIELD_LAST);
 
 	/* set the cached slot to NULL so we'll re-get the new string
 	   if e_contact_get_const is called again */
@@ -1715,7 +1715,7 @@ e_contact_get_attributes (EContact *contact, EContactField field_id)
 	const EContactFieldInfo *info = NULL;
 
 	g_return_val_if_fail (contact && E_IS_CONTACT (contact), NULL);
-	g_return_val_if_fail (field_id >= 1 && field_id <= E_CONTACT_FIELD_LAST, NULL);
+	g_return_val_if_fail (field_id >= 1 && field_id < E_CONTACT_FIELD_LAST, NULL);
 
 	info = &field_info[field_id];
 
@@ -1750,7 +1750,7 @@ e_contact_set_attributes (EContact *contact, EContactField field_id, GList *attr
 	GList *l;
 
 	g_return_if_fail (contact && E_IS_CONTACT (contact));
-	g_return_if_fail (field_id >= 1 && field_id <= E_CONTACT_FIELD_LAST);
+	g_return_if_fail (field_id >= 1 && field_id < E_CONTACT_FIELD_LAST);
 
 	info = &field_info[field_id];
 
