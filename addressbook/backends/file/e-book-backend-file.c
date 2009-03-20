@@ -1406,7 +1406,7 @@ check_md5sum (const gchar *name)
 	gint i = 0;
 	gint fd = -1;
 	gchar *md5file;
-	gchar buffer[17];
+	gchar buffer[MD5LEN];
 	ssize_t readed;
 	gboolean retval = TRUE;
 	guchar md5raw[MD5RAWLEN] = { '\0', };
