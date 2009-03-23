@@ -1,5 +1,11 @@
 2009-03-23  Robert Peto  <robert.peto@maemo.org>
 
+	Fold lines properly while exporting to vCard 2.1.
+
+	* addressbook/libebook-dbus/e-vcard.c (e_vcard_to_string_vcard_21())
+
+2009-03-23  Robert Peto  <robert.peto@maemo.org>
+
 	Return with duplicated ids from haystack instead of needles.
 
 	* addressbook/libebook-dbus/e-book-util.c

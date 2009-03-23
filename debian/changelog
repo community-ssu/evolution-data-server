@@ -1,5 +1,7 @@
 evolution-data-server (1.4.2.1-20090319.99) unstable; urgency=low
 
+  * Fixes: NB#97156 - Avatar is not shown on importing contacts that are exported.
+  * Fixes: NB#99034 - Synch. does not extract/include avatars
   * Fixes: NB#104509 - API change request: get local UIDs of duplicate entries
 
  -- Robert Peto <robert.peto@maemo.org>  Mon, 23 Mar 2009 11:27:00 +0100

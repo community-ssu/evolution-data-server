@@ -971,12 +971,12 @@ e_vcard_to_string_vcard_21 (EVCard *evc)
                                                 else if (*(attr_str->str + l-2) == '=')
                                                         l -= 2;
 
-                                                g_string_insert_len (attr_str, l, "="CRLF, sizeof ("="CRLF) - 1);
-                                                l += sizeof ("="CRLF); /* because of the inserted characters */
+                                                g_string_insert_len (attr_str, l, "="CRLF" ", sizeof ("="CRLF" ") - 1);
+                                                l += sizeof ("="CRLF" "); /* because of the inserted characters */
                                         }
                                         else {
-                                                g_string_insert_len (attr_str, l, CRLF, sizeof (CRLF) - 1);
-                                                l += sizeof (CRLF);
+                                                g_string_insert_len (attr_str, l, CRLF" ", sizeof (CRLF" ") - 1);
+                                                l += sizeof (CRLF" ");
                                         }
                                 }
                                 else {
