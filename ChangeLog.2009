@@ -1,3 +1,10 @@
+2009-03-23  Robert Peto  <robert.peto@maemo.org>
+
+	Return with duplicated ids from haystack instead of needles.
+
+	* addressbook/libebook-dbus/e-book-util.c
+	 (e_book_util_remove_duplicates())
+
 2009-03-13  Robert Peto  <robert.peto@maemo.org>
 
 	Convert contact to string in format 2.1: replace comma to semicolon

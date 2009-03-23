@@ -182,18 +182,17 @@ e_book_util_remove_duplicates (GList  *haystack,
                 for (;local_matches; local_matches = local_matches->next) {
                         EContact *match = local_matches->data;
                         if (contact != match && contact_compare (contact, match)) {
+                                /* get uid of duplicate contact from haystack */
+                                const char *uid = e_contact_get_const (match,
+                                                E_CONTACT_UID);
+                                *duplicate_ids = g_list_prepend (*duplicate_ids,
+                                                g_strdup (uid));
                                 remove = TRUE;
                                 break;
                         }
                 }
-        
-                if (remove) {
-                        /* get uid of duplicate contact */
-                        const char *uid = e_contact_get_const (contact,
-                                                               E_CONTACT_UID);
-                        *duplicate_ids = g_list_prepend (*duplicate_ids,
-                                                         g_strdup (uid));
 
+                if (remove) {
                         /* remove duplicate from needles */
                         g_object_unref (contact);
                         contacts = *needles = g_list_delete_link (*needles, contacts);
