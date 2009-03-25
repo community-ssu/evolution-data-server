@@ -1217,7 +1217,7 @@ gboolean
 e_vcard_is_parsing (EVCard *evc)
 {
 	g_return_val_if_fail (E_IS_VCARD (evc), FALSE);
-	return (!evc->priv->vcard && evc->priv->attributes);
+	return evc->priv->parsing;
 }
 
 GType

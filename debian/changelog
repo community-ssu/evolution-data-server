@@ -1,3 +1,12 @@
+evolution-data-server (1.4.2.1-20090325) unstable; urgency=low
+
+  * Fixes: NB#107422 - Server side changes of an IM contact are not reflecting
+    in contact home shortcut applet
+  * NB#107544 - Change in avatar not reflected in home link
+  * Fixes: NB#107928 - Avatar of few IM contacts not updating properly
+
+ -- Mathias Hasselmann <mathias.hasselmann@maemo.org>  Wed, 25 Mar 2009 14:17:00 +0100
+
 evolution-data-server (1.4.2.1-20090323) unstable; urgency=low
 
   * Fixes: NB#97156 - Avatar is not shown on importing contacts that are exported.
