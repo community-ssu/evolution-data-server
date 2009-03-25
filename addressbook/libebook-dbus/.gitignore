@@ -1,0 +1,6 @@
+.libs
+e-book-marshal.c
+e-book-marshal.h
+e-data-book-bindings.h
+e-data-book-factory-bindings.h
+e-data-book-view-bindings.h

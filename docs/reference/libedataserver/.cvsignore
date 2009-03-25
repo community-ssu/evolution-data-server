@@ -1,4 +1,5 @@
 *-unused.txt
+*-undeclared.txt
 *-undocumented.txt
 *.bak
 *.lo
@@ -16,4 +17,4 @@ libedataserver.signals
 libedataserver.interfaces
 libedataserver.prerequisites
 xml
-
+tmpl

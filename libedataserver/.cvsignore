@@ -5,3 +5,4 @@ libedataserver-1.2.pc
 test-source-list
 e-data-server-marshal.c
 e-data-server-marshal.h
+.libs

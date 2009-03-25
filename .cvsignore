@@ -31,4 +31,5 @@ intltool-*
 *.pc
 INSTALL
 gtk-doc.make
-
+iconv-detect.h
+depcomp
