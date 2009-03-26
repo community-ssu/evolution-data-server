@@ -1,3 +1,15 @@
+2009-03-26  Robert Peto  <robert.peto@maemo.org>
+
+	Fixes: NB#105292. Apply THRESHOLD macro for breaking the chunks at
+	client side itself to avoid the mutex locking & unlocking issues at
+	server side. (by Chittibabu Theegala)
+
+	* configure.in: define THRESHOLD to 32.
+	* addressbook/libedata-book-dbus/e-data-book-view.c: remove THRESHOLD
+	  definition from here.
+	* addressbook/libebook-dbus/e-book.c
+	 (e_book_add_contacts_by_threshold_limit(), e_book_add_contacts())
+
 2009-03-25  Mathias Hasselmann  <hasselmm@gnome.org>
 
 	Fix NB#107422, NB#107544, NB#107928 and hopefully many other

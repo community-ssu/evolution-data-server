@@ -37,8 +37,6 @@ static gboolean impl_BookView_set_sort_order (EDataBookView *view, gchar *query_
 G_DEFINE_TYPE (EDataBookView, e_data_book_view, G_TYPE_OBJECT);
 #define E_DATA_BOOK_VIEW_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), E_TYPE_DATA_BOOK_VIEW, EDataBookViewPrivate))
 
-#define THRESHOLD 32
-
 struct _EDataBookViewPrivate {
   EDataBook *book;
   EBookBackend *backend;

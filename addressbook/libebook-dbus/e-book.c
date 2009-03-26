@@ -1371,6 +1371,38 @@ e_book_async_add_contact (EBook *book, EContact *contact, EBookIdCallback cb, gp
   return 0;
 }
 
+/* Contacts-list is grouped to chunks of 32 entries.
+ * Just as server is sending 32 entries at a time, we ensure that Client also sends in the same way.
+ * This should avoid the mutex issues at the server side (book_view notification) as well. 
+ */
+static gboolean
+e_book_add_contacts_by_threshold_limit (EBook *book, GList *contacts_list_threshold, GError **error)
+{
+  GError *err = NULL;
+  GList *it;
+  char **vcards, **i, **uids = NULL;
+
+  g_debug ("%s: %d", G_STRFUNC, g_list_length (contacts_list_threshold));
+
+  vcards = g_new0 (char*, g_list_length (contacts_list_threshold)+1);
+  for (i = vcards, it = contacts_list_threshold; it; it = it->next, i++) {
+    *i = e_vcard_to_string (E_VCARD (it->data), EVC_FORMAT_VCARD_30);
+  }
+
+  org_gnome_evolution_dataserver_addressbook_Book_add_contacts (book->priv->proxy, (const char **)vcards, &uids, &err);
+  if (!err) {
+    for (i = uids, it = contacts_list_threshold; *i && it; i++, it = it->next) {
+      e_contact_set (it->data, E_CONTACT_UID, *i);
+    }
+  }
+  if (vcards)
+    g_strfreev (vcards);
+  if (uids)
+    g_strfreev (uids);
+
+  return unwrap_gerror (err, error);
+}
+
 /**
  * e_book_add_contacts:
  * @book: an #EBook
@@ -1386,31 +1418,40 @@ e_book_async_add_contact (EBook *book, EContact *contact, EBookIdCallback cb, gp
 gboolean
 e_book_add_contacts (EBook *book, GList *contacts, GError **error)
 {
-  GError *err = NULL;
-  GList *it;
-  char **vcards, **i, **uids = NULL;
+  int list_count = 0;
+  GList *list_threshold = NULL;
+  GList *node = contacts;
 
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_error_if_fail (contacts != NULL, E_BOOK_ERROR_INVALID_ARG);
 
-  vcards = g_new0 (char*, g_list_length (contacts)+1);
-  for (i = vcards, it = contacts; it; it = it->next, i++) {
-    *i = e_vcard_to_string (E_VCARD (it->data), EVC_FORMAT_VCARD_30);
-  }
+  g_debug ("%s: %d", G_STRFUNC, g_list_length (contacts));
 
-  org_gnome_evolution_dataserver_addressbook_Book_add_contacts (book->priv->proxy, (const char **)vcards, &uids, &err);
-  if (!err) {
-    for (i = uids, it = contacts; *i && it; i++, it = it->next) {
-      e_contact_set (it->data, E_CONTACT_UID, *i);
+  while (node) {
+    if (list_count < THRESHOLD) {
+      list_count++;
+      list_threshold = g_list_append (list_threshold, node->data);
+      node = g_list_next (node);
+    }
+    else {
+      if (FALSE == e_book_add_contacts_by_threshold_limit (book, list_threshold, error)) {
+        g_list_free (list_threshold);
+        return FALSE;
+      }
+
+      list_count = 0;
+      list_threshold = NULL;
+      g_list_free (list_threshold);
     }
   }
-  if (vcards)
-    g_strfreev (vcards);
-  if (uids)
-    g_strfreev (uids);
 
-  return unwrap_gerror (err, error);
+  if (FALSE == e_book_add_contacts_by_threshold_limit (book, list_threshold, error)) {
+    g_list_free (list_threshold);
+    return FALSE;
+  }
+
+  return TRUE;
 }
 
 static void

@@ -1192,6 +1192,9 @@ if test "x${with_libgnome}" != "xno"; then
         AC_DEFINE_UNQUOTED(GNOMEUI_SERVERDIR, "$GNOMEUI_SERVERDIR", [Path where we can find gnome_segv2])
 fi
 
+dnl -- THRESHOLD for batch operations, like add_contacts
+AC_DEFINE(THRESHOLD, 32, [threshold value for batch operations, like add_contacts])
+
 dnl Utility macro to set compiler flags for a specific lib.
 dnl  EVO_SET_COMPILE_FLAGS(VAR-PREFIX, DEPS, EXTRA-CFLAGS, EXTRA-LIBS)
 AC_DEFUN([EVO_SET_COMPILE_FLAGS], [
