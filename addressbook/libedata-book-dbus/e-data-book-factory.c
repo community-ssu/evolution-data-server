@@ -220,7 +220,9 @@ impl_BookFactory_getBook(EDataBookFactory *factory, const char *IN_uri, DBusGMet
   GList *list;
   
   if (IN_uri == NULL || IN_uri[0] == '\0') {
-    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, NoSuchBook, _("Empty URI")));
+    GError *error = g_error_new (E_DATA_BOOK_ERROR, NoSuchBook, _("Empty URI"));
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
     return;
   }
 
@@ -260,6 +262,8 @@ impl_BookFactory_getBook(EDataBookFactory *factory, const char *IN_uri, DBusGMet
   g_mutex_unlock (priv->books_lock);
 
   dbus_g_method_return (context, path);
+
+  g_free (path);
 }
 
 static void

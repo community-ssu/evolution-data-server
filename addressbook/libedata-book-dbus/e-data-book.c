@@ -321,7 +321,9 @@ e_data_book_respond_open (EDataBook *book, guint opid, EDataBookStatus status)
   DBusGMethodInvocation *context = opid_fetch (opid);
 
   if (status != Success) {
-    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot open book")));
+    GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot open book"));
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
   } else {
     dbus_g_method_return (context);
   }
@@ -339,7 +341,9 @@ e_data_book_respond_remove (EDataBook *book, guint opid, EDataBookStatus status)
   DBusGMethodInvocation *context = opid_fetch (opid);
 
   if (status != Success) {
-    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot remove book")));
+    GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot remove book"));
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
   } else {
     dbus_g_method_return (context);
   }
@@ -351,7 +355,9 @@ impl_AddressBook_Book_getContact (EDataBook *book, const char *IN_uid, DBusGMeth
   OperationData *op;
 
   if (IN_uid == NULL) {
-    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, ContactNotFound, _("Cannot get contact")));
+    GError *error = g_error_new (E_DATA_BOOK_ERROR, ContactNotFound, _("Cannot get contact"));
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
     return;
   }
 
@@ -366,7 +372,9 @@ e_data_book_respond_get_contact (EDataBook *book, guint32 opid, EDataBookStatus 
   DBusGMethodInvocation *context = opid_fetch (opid);
 
   if (status != Success) {
-    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot get contact")));
+    GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot get contact"));
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
   } else {
     dbus_g_method_return (context, vcard);
   }
@@ -378,7 +386,9 @@ impl_AddressBook_Book_getContactList (EDataBook *book, const char *query, DBusGM
   OperationData *op;
 
   if (query == NULL || query[0] == '\0') {
-    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, InvalidQuery, _("Empty query")));
+    GError *error = g_error_new (E_DATA_BOOK_ERROR, InvalidQuery, _("Empty query"));
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
     return;
   }
 
@@ -411,7 +421,9 @@ e_data_book_respond_authenticate_user (EDataBook *book, guint32 opid, EDataBookS
   DBusGMethodInvocation *context = opid_fetch (opid);
 
   if (status != Success) {
-    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot authenticate user")));
+    GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot authenticate user"));
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
   } else {
     dbus_g_method_return (context);
   }
@@ -423,7 +435,9 @@ impl_AddressBook_Book_addContact (EDataBook *book, const char *IN_vcard, DBusGMe
   OperationData *op;
 
   if (IN_vcard == NULL || IN_vcard[0] == '\0') {
-    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, InvalidQuery, _("Cannot add contact")));
+    GError *error = g_error_new (E_DATA_BOOK_ERROR, InvalidQuery, _("Cannot add contact"));
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
     return;
   }
 
@@ -438,7 +452,9 @@ e_data_book_respond_create (EDataBook *book, guint32 opid, EDataBookStatus statu
   DBusGMethodInvocation *context = opid_fetch (opid);
 
   if (status != Success) {
-    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot add contact")));
+    GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot add contact"));
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
   } else {
     e_book_backend_notify_update (e_data_book_get_backend (book), contact);
     e_book_backend_notify_complete (e_data_book_get_backend (book));
@@ -453,7 +469,9 @@ impl_AddressBook_Book_addContacts(EDataBook *book, const char **IN_vcards, DBusG
   OperationData *op;
 
   if (IN_vcards == NULL || IN_vcards[0] == NULL) {
-    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, InvalidQuery, _("Cannot add contacts")));
+    GError *error = g_error_new (E_DATA_BOOK_ERROR, InvalidQuery, _("Cannot add contacts"));
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
     return;
   }
 
@@ -468,7 +486,9 @@ e_data_book_respond_create_contacts (EDataBook *book, guint32 opid, EDataBookSta
   DBusGMethodInvocation *context = opid_fetch (opid);
 
   if (status != Success) {
-    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot add contacts")));
+    GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot add contacts"));
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
   } else {
     char **uids;
     int i = 0;
@@ -496,7 +516,9 @@ impl_AddressBook_Book_modifyContact (EDataBook *book, const char *IN_vcard, DBus
   OperationData *op;
 
   if (IN_vcard == NULL) {
-    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, InvalidQuery, _("Cannot modify contact")));
+    GError *error = g_error_new (E_DATA_BOOK_ERROR, InvalidQuery, _("Cannot modify contact"));
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
     return;
   }
 
@@ -511,7 +533,9 @@ e_data_book_respond_modify (EDataBook *book, guint32 opid, EDataBookStatus statu
   DBusGMethodInvocation *context = opid_fetch (opid);
 
   if (status != Success) {
-    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot modify contact")));
+    GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot modify contact"));
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
   } else {
     e_book_backend_notify_update (e_data_book_get_backend (book), contact);
     e_book_backend_notify_complete (e_data_book_get_backend (book));
@@ -526,7 +550,9 @@ impl_AddressBook_Book_modifyContacts(EDataBook *book, const char **IN_vcards, DB
   OperationData *op;
 
   if (IN_vcards == NULL || IN_vcards[0] == NULL) {
-    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, InvalidQuery, _("Cannot modify contacts")));
+    GError *error = g_error_new (E_DATA_BOOK_ERROR, InvalidQuery, _("Cannot modify contacts"));
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
     return;
   }
 
@@ -541,7 +567,9 @@ e_data_book_respond_modify_contacts (EDataBook *book, guint32 opid, EDataBookSta
   DBusGMethodInvocation *context = opid_fetch (opid);
 
   if (status != Success) {
-    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot modify contacts")));
+    GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot modify contacts"));
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
   } else {
     for (; contacts; contacts = contacts->next) {
       e_book_backend_notify_update (e_data_book_get_backend (book), contacts->data);
@@ -578,7 +606,9 @@ e_data_book_respond_remove_contacts (EDataBook *book, guint32 opid, EDataBookSta
   DBusGMethodInvocation *context = opid_fetch (opid);
 
   if (status != Success) {
-    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot remove contacts")));
+    GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot remove contacts"));
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
   } else {
     GList *i;
 
@@ -653,7 +683,9 @@ impl_AddressBook_Book_getBookView (EDataBook *book, const char *search, const gu
 
   card_sexp = e_book_backend_sexp_new (search);
   if (!card_sexp) {
-    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, InvalidQuery, _("Invalid query")));
+    GError *error = g_error_new (E_DATA_BOOK_ERROR, InvalidQuery, _("Invalid query"));
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
     return;
   }
 
@@ -682,7 +714,9 @@ e_data_book_respond_get_changes (EDataBook *book, guint32 opid, EDataBookStatus 
   DBusGMethodInvocation *context = opid_fetch (opid);
 
   if (status != Success) {
-    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot get changes")));
+    GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot get changes"));
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
   } else {
     /* The DBus interface to this is a(us), an array of structs of unsigned ints
        and strings.  In dbus-glib this is a GPtrArray of GValueArray of unsigned
@@ -793,6 +827,8 @@ return_status_and_list (guint32 opid, EDataBookStatus status, GList *list, gbool
       g_free (array);
     }
   } else {
-    dbus_g_method_return_error (context, g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot complete operation")));
+    GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot complete operation"));
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
   }
 }
