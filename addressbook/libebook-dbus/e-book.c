@@ -563,6 +563,8 @@ open_reply(DBusGProxy *proxy, GError *error, gpointer user_data)
   EDataBookStatus status;
 
   status = get_status_from_error (error);
+  if (error)
+    g_error_free (error);
 
   data->book->priv->loaded = (status == E_BOOK_ERROR_OK);
 
@@ -629,6 +631,8 @@ remove_reply(DBusGProxy *proxy, GError *error, gpointer user_data)
   EBookCallback cb = data->callback;
   if (cb)
     cb (data->book, get_status_from_error (error), data->closure);
+  if (error)
+    g_error_free (error);
   g_slice_free (AsyncData, data);
 }
 
@@ -707,6 +711,9 @@ get_required_fields_reply(DBusGProxy *proxy, char **fields, GError *error, gpoin
 
   if (cb)
     cb (data->book, get_status_from_error (error), efields, data->closure);
+
+  if (error)
+    g_error_free (error);
 
   g_object_unref (efields);
   g_free (fields);
@@ -787,6 +794,9 @@ get_supported_fields_reply(DBusGProxy *proxy, char **fields, GError *error, gpoi
 
   if (cb)
     cb (data->book, get_status_from_error (error), efields, data->closure);
+
+  if (error)
+    g_error_free (error);
 
   g_object_unref (efields);
   g_free (fields);
@@ -870,6 +880,9 @@ get_supported_auth_methods_reply(DBusGProxy *proxy, char **methods, GError *erro
   if (cb)
     cb (data->book, get_status_from_error (error), emethods, data->closure);
 
+  if (error)
+    g_error_free (error);
+
   g_object_unref (emethods);
   g_free (methods);
 
@@ -937,6 +950,9 @@ authenticate_user_reply(DBusGProxy *proxy, GError *error, gpointer user_data)
 
   if (cb)
     cb (data->book, get_status_from_error (error), data->closure);
+
+  if (error)
+    g_error_free (error);
 
   g_slice_free (AsyncData, data);
 }
@@ -1128,6 +1144,9 @@ get_contacts_reply(DBusGProxy *proxy, char **vcards, GError *error, gpointer use
     cb (data->book, get_status_from_error (error), list, data->closure);
   g_strfreev (vcards);
 
+  if (error)
+    g_error_free (error);
+
   g_slice_free (AsyncData, data);
 }
 
@@ -1236,6 +1255,9 @@ get_changes_reply (DBusGProxy *proxy, GPtrArray *changes, GError *error, gpointe
   if (cb)
     cb (data->book, get_status_from_error (error), list, data->closure);
 
+  if (error)
+    g_error_free (error);
+
   g_slice_free (AsyncData, data);
 }
 
@@ -1334,6 +1356,9 @@ add_contact_reply (DBusGProxy *proxy, char *uid, GError *error, gpointer user_da
 
   if (uid)
     g_free (uid);
+
+  if (error)
+    g_error_free (error);
 
   g_slice_free (AsyncData, data);
 }
@@ -1464,6 +1489,9 @@ add_contacts_reply (DBusGProxy *proxy, char **uids, GError *error, gpointer user
   if (cb)
     cb (data->book, get_status_from_error (error), data->closure);
 
+  if (error)
+    g_error_free (error);
+
   g_strfreev (uids);
   g_slice_free (AsyncData, data);
 }
@@ -1544,6 +1572,9 @@ modify_contact_reply (DBusGProxy *proxy, GError *error, gpointer user_data)
   if (cb)
     cb (data->book, get_status_from_error (error), data->closure);
 
+  if (error)
+    g_error_free (error);
+
   g_slice_free (AsyncData, data);
 }
 
@@ -1612,6 +1643,9 @@ modify_contacts_reply (DBusGProxy *proxy, GError *error, gpointer user_data)
   if (cb)
     cb (data->book, get_status_from_error (error), data->closure);
 
+  if (error)
+    g_error_free (error);
+
   g_slice_free (AsyncData, data);
 }
 
@@ -1676,6 +1710,9 @@ remove_contact_reply (DBusGProxy *proxy, GError *error, gpointer user_data)
   if (cb)
     cb (data->book, get_status_from_error (error), data->closure);
 
+  if (error)
+    g_error_free (error);
+
   g_slice_free (AsyncData, data);
 }
 
@@ -1719,6 +1756,9 @@ remove_contact_by_id_reply (DBusGProxy *proxy, GError *error, gpointer user_data
 
   if (cb)
     cb (data->book, get_status_from_error (error), data->closure);
+
+  if (error)
+    g_error_free (error);
 
   g_slice_free (AsyncData, data);
 }
@@ -1794,6 +1834,9 @@ remove_contacts_reply (DBusGProxy *proxy, GError *error, gpointer user_data)
 
   if (cb)
     cb (data->book, get_status_from_error (error), data->closure);
+
+  if (error)
+    g_error_free (error);
 
   g_slice_free (AsyncData, data);
 }
@@ -1939,6 +1982,9 @@ get_book_view_reply (DBusGProxy *proxy, char *address, GError *error, gpointer u
 
   if (cb)
     cb (data->book, status, view, data->closure);
+
+  if (error)
+    g_error_free (error);
 
   e_book_query_unref (data->query);
   g_object_unref (data->book);

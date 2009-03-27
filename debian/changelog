@@ -1,6 +1,8 @@
 evolution-data-server (1.4.2.1-20090325.99) unstable; urgency=low
 
   * Fixes: NB#105292 - Importing 100 contacts vcf file consumes lot of time.
+  * Fixes: NB#107686 - Memory leak found in evolution-data-server while
+    configuring IM-account from UI
 
  -- Robert Peto <robert.peto@maemo.org>  Mon, 26 Mar 2009 20:07:02 +0100
 

@@ -1,3 +1,11 @@
+2009-03-27  Robert Peto  <robert.peto@maemo.org>
+
+	Fix various memleaks in addressbook.
+
+	* addressbook/libedata-book-dbus/e-data-book-factory.c
+	* addressbook/libedata-book-dbus/e-data-book.c
+	* addressbook/libebook-dbus/e-book.c
+
 2009-03-26  Robert Peto  <robert.peto@maemo.org>
 
 	Fixes: NB#105292. Apply THRESHOLD macro for breaking the chunks at
