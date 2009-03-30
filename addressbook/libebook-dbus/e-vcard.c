@@ -615,39 +615,41 @@ parse (EVCard *evc, const char *str, gboolean ignore_uid)
 
 	if (str == NULL)
 		return;
-	
+
 	attr = read_attribute (&str);
 	if (!attr || attr->group || strcmp (attr->name, "BEGIN")) {
 		g_warning ("vcard began without a BEGIN:VCARD\n");
 	}
 	if (attr) {
-		if (!strcmp (attr->name, "BEGIN"))
+		if (!strcmp (attr->name, "BEGIN") ||
+                    (ignore_uid && !strcmp (attr->name, EVC_UID)))
 			e_vcard_attribute_free (attr);
-		else if (!ignore_uid || strcmp (attr->name, EVC_UID))
+		else
 			e_vcard_add_attribute (evc, attr);
 	}
-	
+
 	while ((attr = read_attribute (&str)) && (count < 50)) {
 		if (G_UNLIKELY (0 == strcmp (attr->name, "END")))
 			break;
 
-		if (G_UNLIKELY (ignore_uid && 0 == strcmp (attr->name, EVC_UID)))
+		if (G_UNLIKELY (ignore_uid && 0 == strcmp (attr->name, EVC_UID))) {
+                        e_vcard_attribute_free (attr);
 			continue;
+                }
 
 		e_vcard_add_attribute (evc, attr);
 		count++;
 	}
 
-	if (count == 50)
-	{
+	if (count == 50) {
 		 g_warning (G_STRLOC ": Excessive VCARD detected. "
 		     "More than 50 attributes detected");
 	}
 
 	if (!attr || attr->group || strcmp (attr->name, "END"))
 		g_warning ("vcard ended without END:VCARD\n");
-	
-	if (attr && !strcmp (attr->name, "END"))
+
+	if (attr)
 		e_vcard_attribute_free (attr);
 
 	evc->priv->attributes = g_list_reverse (evc->priv->attributes);
