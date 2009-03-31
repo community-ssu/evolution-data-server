@@ -1,5 +1,11 @@
 2009-03-31  Robert Peto  <robert.peto@maemo.org>
 
+	Assemble change list in e_book_get_changes() in a more robust way.
+
+	* addressbook/libebook-dbus/e-book.c
+
+2009-03-31  Robert Peto  <robert.peto@maemo.org>
+
 	Handle default directory in e_contact_persist_data()
 
 	* addressbook/libebook-dbus/e-contact.c

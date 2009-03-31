@@ -1183,6 +1183,34 @@ e_book_async_get_contacts (EBook *book, EBookQuery *query, EBookListCallback cb,
   return 0;
 }
 
+static EBookChange *
+create_change (GValueArray *vals)
+{
+  EBookChange *change;
+  EBookChangeType change_type;
+  EContact *contact;
+  GValue *val;
+
+  g_return_val_if_fail (vals, NULL);
+
+  val = g_value_array_get_nth (vals, 0);
+  g_return_val_if_fail (val, NULL);
+
+  change_type = g_value_get_uint (val);
+
+  val = g_value_array_get_nth (vals, 1);
+  g_return_val_if_fail (val, NULL);
+
+  contact = e_contact_new_from_vcard (g_value_get_string (val));
+  g_return_val_if_fail (contact, NULL);
+
+  change = g_slice_new (EBookChange);
+  change->change_type = change_type;
+  change->contact = contact;
+
+  return change;
+}
+
 static GList *
 parse_changes_array (GPtrArray *array)
 {
@@ -1197,16 +1225,16 @@ parse_changes_array (GPtrArray *array)
     GValueArray *vals;
 
     vals = g_ptr_array_index (array, i);
+    if (!vals)
+      continue;
 
-    change = g_slice_new (EBookChange);
-    change->change_type = g_value_get_uint (g_value_array_get_nth (vals, 0));
-    change->contact = e_contact_new_from_vcard
-      (g_value_get_string (g_value_array_get_nth (vals, 1)));
+    change = create_change (vals);
+    if (change)
+      l = g_list_prepend (l, change);
 
-    l = g_list_prepend (l, change);
+    g_value_array_free (vals);
   }
 
-  g_ptr_array_foreach (array, (GFunc)g_value_array_free, NULL);
   g_ptr_array_free (array, TRUE);
 
   return g_list_reverse (l);
