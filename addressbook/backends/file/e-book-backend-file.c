@@ -419,7 +419,7 @@ e_book_backend_file_create_contacts (EBookBackendSync *backend,
         for (; *vcards; vcards++) {
                 contact = NULL;
 
-        /* Commit the contact */
+                /* Commit the contact */
                 db_error = insert_contact (bf, *vcards, &contact);
 
                 if (db_error != 0) {
@@ -436,6 +436,8 @@ e_book_backend_file_create_contacts (EBookBackendSync *backend,
                 /* Pass the contact back to the server for view updates */
                 *contacts = g_list_prepend (*contacts, contact);
         }
+        /* reverse contacts list, to keep order */
+        *contacts = g_list_reverse (*contacts);
 
 	/* Sync the database */
 	global_env.had_error = FALSE;

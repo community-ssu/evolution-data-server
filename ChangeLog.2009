@@ -1,3 +1,9 @@
+2009-03-31  Robert Peto  <robert.peto@maemo.org>
+
+	Fix returned uids in e_book_add_contacts in file backend.
+
+	* addressbook/backends/file/e-book-backend-file.c
+
 2009-03-30  Robert Peto  <robert.peto@maemo.org>
 
 	Fix memory leaks in vcard parsing in addressbook. (by Xavier Claessens)
