@@ -1,5 +1,11 @@
 2009-03-31  Robert Peto  <robert.peto@maemo.org>
 
+	Handle default directory in e_contact_persist_data()
+
+	* addressbook/libebook-dbus/e-contact.c
+
+2009-03-31  Robert Peto  <robert.peto@maemo.org>
+
 	Fix returned uids in e_book_add_contacts in file backend.
 
 	* addressbook/backends/file/e-book-backend-file.c

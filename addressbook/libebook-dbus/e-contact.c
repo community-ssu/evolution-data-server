@@ -2412,7 +2412,7 @@ e_contact_inline_data (EContact *contact)
         return photo_changed || logo_changed;
 }
 
-#define OSSO_ABOOK_PHOTO_DIR "~/.osso-abook/photos"
+#define OSSO_ABOOK_PHOTO_DIR ".osso-abook/photos"
 
 /**
  * e_contact_persist_data:
@@ -2431,15 +2431,21 @@ e_contact_persist_data (EContact *contact, const char *dir)
         EContactPhoto *photo;
         EContactPhoto *logo;
         gboolean photo_changed = FALSE, logo_changed = FALSE;
+        char *photo_dir;
 
         g_return_val_if_fail (contact && E_IS_CONTACT (contact), FALSE);
 
-        if (!dir)
-                dir = OSSO_ABOOK_PHOTO_DIR;
+        if (!dir) {
+                photo_dir = g_strdup_printf ("%s/%s", g_get_home_dir (),
+                                OSSO_ABOOK_PHOTO_DIR);
+        }
+        else {
+                photo_dir = g_strdup (dir);
+        }
 
         photo = e_contact_get (contact, E_CONTACT_PHOTO);
         if (photo) {
-                photo_changed = e_contact_photo_convert_to_uri (photo, dir);
+                photo_changed = e_contact_photo_convert_to_uri (photo, photo_dir);
                 if (photo_changed) {
                         e_contact_set (contact, E_CONTACT_PHOTO, photo);
                 }
@@ -2448,12 +2454,14 @@ e_contact_persist_data (EContact *contact, const char *dir)
 
         logo = e_contact_get (contact, E_CONTACT_LOGO);
         if (logo) {
-                logo_changed = e_contact_photo_convert_to_uri (logo, dir);
+                logo_changed = e_contact_photo_convert_to_uri (logo, photo_dir);
                 if (logo_changed) {
                         e_contact_set (contact, E_CONTACT_LOGO, logo);
                 }
                 e_contact_photo_free (logo);
         }
+
+        g_free (photo_dir);
 
         return photo_changed || logo_changed;
 }
