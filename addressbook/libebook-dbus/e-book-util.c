@@ -231,12 +231,12 @@ e_book_util_remove_duplicates_using_book (EBook   *book,
         g_return_val_if_fail (book != NULL, FALSE);
         g_return_val_if_fail (e_book_is_opened (book), FALSE);
         g_return_val_if_fail ((duplicate_ids != NULL && *duplicate_ids == NULL), FALSE);
-        g_return_val_if_fail (error || !*error, FALSE);
+        g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
         query = e_book_query_any_field_contains ("");
         e_book_get_contacts (book, query, &local_contacts, error);
         e_book_query_unref (query);
-        if (error) {
+        if (error && *error) {
                 return FALSE;
         }
 
