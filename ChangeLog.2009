@@ -1,5 +1,13 @@
 2009-04-01  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
 
+	* addressbook/libebook-dbus/e-vcard.c (parse()):
+	Fix a couple segfaults reported by arifa when running the vcard
+	parsing test suite.  These segfaults happened because in some
+	cases attributes were getting freed when they shouldn't have been
+	and we crashed when we attempted to use them later.
+
+2009-04-01  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
 	* addressbook/libedata-book-dbus/e-data-book.c:
 	Do dbus method response (and error response) calls from an idle handler so
 	that they are executed from the main thread since these responses could be

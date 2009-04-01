@@ -635,16 +635,23 @@ parse (EVCard *evc, const char *str, gboolean ignore_uid)
 			e_vcard_add_attribute (evc, attr);
 	}
 
+	gboolean seen_end = FALSE;
 	for (; (*str) && count < 50; count++) {
 		attr = read_attribute (&str);
 		if (G_UNLIKELY (!attr)) {
 			g_warning ("Couldn't parse attribute, ignoring line.");
 			continue;
 		}
-		/* stop parsing if we reach an END or another BEGIN attribute */
-		if (G_UNLIKELY (0 == strcmp (attr->name, "END") ||
-				0 == strcmp (attr->name, "BEGIN")))
+		if (G_UNLIKELY (0 == strcmp (attr->name, "END"))) {
+			seen_end = TRUE;
+			e_vcard_attribute_free (attr);
 			break;
+		}
+		/* start of a new vcard, stop parsing this one */
+		if (G_UNLIKELY (0 == strcmp (attr->name, "BEGIN"))) {
+			e_vcard_attribute_free (attr);
+			break;
+		}
 
 		if (G_UNLIKELY (ignore_uid && 0 == strcmp (attr->name, EVC_UID))) {
 			e_vcard_attribute_free (attr);
@@ -658,11 +665,8 @@ parse (EVCard *evc, const char *str, gboolean ignore_uid)
 		     "More than 50 attributes detected");
 	}
 
-	if (!attr || attr->group || strcmp (attr->name, "END"))
+	if (!seen_end)
 		g_warning ("vcard ended without END:VCARD\n");
-
-	if (attr)
-		e_vcard_attribute_free (attr);
 
 	evc->priv->attributes = g_list_reverse (evc->priv->attributes);
 }
