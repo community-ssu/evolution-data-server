@@ -12,6 +12,7 @@ evolution-data-server (1.4.2.1-20090401) unstable; urgency=low
     org_gnome_evolution_dataserver_addressbook_Book_get_changes_async_callback
     function.
   * Fixes: NB#106483 - Importing a vcf file exported from device showing 'no name' contact
+  * do dbus method responses in idle handlers to avoid dbus thread-safety issues
 
  -- Robert Peto <robert.peto@maemo.org>  Wed,  1 Apr 2009 09:52:00 +0100
 

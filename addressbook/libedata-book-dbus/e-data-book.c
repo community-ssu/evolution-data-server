@@ -58,6 +58,162 @@ static void impl_AddressBook_Book_close(EDataBook *book, DBusGMethodInvocation *
 
 static void return_status_and_list (guint32 opid, EDataBookStatus status, GList *list, gboolean free_data);
 
+#define g_idle_add(_func, _user_data) g_idle_add_full(G_PRIORITY_HIGH_IDLE, _func, _user_data, NULL)
+
+/* Infrastructure for returning an error in an idle handler via DBus */
+typedef struct
+{
+    DBusGMethodInvocation *context;
+    GError *error;
+} DBusErrorReturnData;
+
+static DBusErrorReturnData*
+dbus_error_return_data_new (DBusGMethodInvocation *context,
+                            GError *error)
+{
+    DBusErrorReturnData* d = g_new0 (DBusErrorReturnData, 1);
+    d->context = context;
+    d->error = error;
+    return d;
+}
+
+static void
+dbus_error_return_data_free (DBusErrorReturnData *data)
+{
+    g_error_free (data->error);
+    g_free (data);
+}
+
+static gboolean
+idle_dbus_return_error (gpointer user_data)
+{
+    DBusErrorReturnData *data = (DBusErrorReturnData*) user_data;
+    dbus_g_method_return_error (data->context, data->error);
+    dbus_error_return_data_free (data);
+
+    return FALSE;
+}
+
+/* Infrastructure for returning a void in an idle handler via DBus */
+static gboolean
+idle_dbus_method_return (gpointer user_data)
+{
+    DBusGMethodInvocation *context = (DBusGMethodInvocation*) user_data;
+    dbus_g_method_return (context);
+
+    return FALSE;
+}
+
+/* Infrastructure for returning a string in an idle handler via DBus */
+typedef struct {
+    DBusGMethodInvocation *context;
+    char *str;
+} DBusMethodReturnStrData;
+
+static DBusMethodReturnStrData*
+dbus_method_return_str_data_new (DBusGMethodInvocation *context,
+                                 char *str)
+{
+    DBusMethodReturnStrData* d = g_new0 (DBusMethodReturnStrData, 1);
+    d->context = context;
+    d->str = str;
+
+    return d;
+}
+
+static void
+dbus_method_return_str_data_free (DBusMethodReturnStrData *data)
+{
+    g_free (data->str);
+    g_free (data);
+}
+
+static gboolean
+idle_dbus_method_return_str (gpointer user_data)
+{
+    DBusMethodReturnStrData *data = (DBusMethodReturnStrData*) user_data;
+    dbus_g_method_return (data->context, data->str);
+    dbus_method_return_str_data_free (data);
+
+    return FALSE;
+}
+
+/* Infrastructure for returning a char** in an idle handler via DBus */
+typedef struct {
+    DBusGMethodInvocation *context;
+    char **array;
+} DBusMethodReturnStrarrayData;
+
+static DBusMethodReturnStrarrayData*
+dbus_method_return_strarray_data_new (DBusGMethodInvocation *context,
+                                      char **array)
+{
+    DBusMethodReturnStrarrayData* d =
+        g_new0 (DBusMethodReturnStrarrayData, 1);
+    d->context = context;
+    d->array = array;
+
+    return d;
+}
+
+static void
+dbus_method_return_strarray_data_free (DBusMethodReturnStrarrayData *data)
+{
+    g_strfreev (data->array);
+    g_free (data);
+}
+
+static gboolean
+idle_dbus_method_return_strarray (gpointer user_data)
+{
+    DBusMethodReturnStrarrayData *data = (DBusMethodReturnStrarrayData*) user_data;
+    dbus_g_method_return (data->context, data->array);
+    dbus_method_return_strarray_data_free (data);
+
+    return FALSE;
+}
+
+/* Infrastructure for returning a GPtrArray in an idle handler via DBus */
+typedef struct {
+    DBusGMethodInvocation *context;
+    GPtrArray *array;
+} DBusMethodReturnPtrarrayData;
+
+static DBusMethodReturnPtrarrayData*
+dbus_method_return_ptrarray_data_new (DBusGMethodInvocation *context,
+                                      GPtrArray *array)
+{
+    DBusMethodReturnPtrarrayData* d =
+        g_new0 (DBusMethodReturnPtrarrayData, 1);
+    d->context = context;
+    d->array = array;
+
+    return d;
+}
+
+static void
+dbus_method_return_ptrarray_data_free (DBusMethodReturnPtrarrayData *data)
+{
+    g_ptr_array_foreach (data->array, (GFunc)g_value_array_free, NULL);
+    g_ptr_array_free (data->array, TRUE);
+
+    g_free (data);
+}
+
+static gboolean
+idle_dbus_method_return_ptrarray (gpointer user_data)
+{
+    DBusMethodReturnPtrarrayData *data = (DBusMethodReturnPtrarrayData*) user_data;
+    dbus_g_method_return (data->context, data->array);
+    dbus_method_return_ptrarray_data_free (data);
+
+    return FALSE;
+}
+
+typedef struct {
+    DBusGMethodInvocation *context;
+} DBusReturnData;
+
 enum {
   WRITABLE,
   CONNECTION,
@@ -321,11 +477,13 @@ e_data_book_respond_open (EDataBook *book, guint opid, EDataBookStatus status)
   DBusGMethodInvocation *context = opid_fetch (opid);
 
   if (status != Success) {
-    GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot open book"));
-    dbus_g_method_return_error (context, error);
-    g_error_free (error);
+    DBusErrorReturnData *data =
+        dbus_error_return_data_new (context,
+                                    g_error_new (E_DATA_BOOK_ERROR, status,
+                                                 _("Cannot open book")));
+    g_idle_add (idle_dbus_return_error, data);
   } else {
-    dbus_g_method_return (context);
+    g_idle_add (idle_dbus_method_return, context);
   }
 }
 
@@ -342,10 +500,10 @@ e_data_book_respond_remove (EDataBook *book, guint opid, EDataBookStatus status)
 
   if (status != Success) {
     GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot remove book"));
-    dbus_g_method_return_error (context, error);
-    g_error_free (error);
+    DBusErrorReturnData *data = dbus_error_return_data_new (context, error);
+    g_idle_add (idle_dbus_return_error, data);
   } else {
-    dbus_g_method_return (context);
+    g_idle_add (idle_dbus_method_return, context);
   }
 }
 
@@ -356,8 +514,8 @@ impl_AddressBook_Book_getContact (EDataBook *book, const char *IN_uid, DBusGMeth
 
   if (IN_uid == NULL) {
     GError *error = g_error_new (E_DATA_BOOK_ERROR, ContactNotFound, _("Cannot get contact"));
-    dbus_g_method_return_error (context, error);
-    g_error_free (error);
+    DBusErrorReturnData *data = dbus_error_return_data_new (context, error);
+    g_idle_add (idle_dbus_return_error, data);
     return;
   }
 
@@ -373,10 +531,11 @@ e_data_book_respond_get_contact (EDataBook *book, guint32 opid, EDataBookStatus 
 
   if (status != Success) {
     GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot get contact"));
-    dbus_g_method_return_error (context, error);
-    g_error_free (error);
+    DBusErrorReturnData *data = dbus_error_return_data_new (context, error);
+    g_idle_add (idle_dbus_return_error, data);
   } else {
-    dbus_g_method_return (context, vcard);
+    g_idle_add (idle_dbus_method_return_str,
+                dbus_method_return_str_data_new (context, g_strdup (vcard)));
   }
 }
 
@@ -387,8 +546,8 @@ impl_AddressBook_Book_getContactList (EDataBook *book, const char *query, DBusGM
 
   if (query == NULL || query[0] == '\0') {
     GError *error = g_error_new (E_DATA_BOOK_ERROR, InvalidQuery, _("Empty query"));
-    dbus_g_method_return_error (context, error);
-    g_error_free (error);
+    DBusErrorReturnData *data = dbus_error_return_data_new (context, error);
+    g_idle_add (idle_dbus_return_error, data);
     return;
   }
 
@@ -422,10 +581,10 @@ e_data_book_respond_authenticate_user (EDataBook *book, guint32 opid, EDataBookS
 
   if (status != Success) {
     GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot authenticate user"));
-    dbus_g_method_return_error (context, error);
-    g_error_free (error);
+    DBusErrorReturnData *data = dbus_error_return_data_new (context, error);
+    g_idle_add (idle_dbus_return_error, data);
   } else {
-    dbus_g_method_return (context);
+    g_idle_add (idle_dbus_method_return, context);
   }
 }
 
@@ -436,8 +595,8 @@ impl_AddressBook_Book_addContact (EDataBook *book, const char *IN_vcard, DBusGMe
 
   if (IN_vcard == NULL || IN_vcard[0] == '\0') {
     GError *error = g_error_new (E_DATA_BOOK_ERROR, InvalidQuery, _("Cannot add contact"));
-    dbus_g_method_return_error (context, error);
-    g_error_free (error);
+    DBusErrorReturnData *data = dbus_error_return_data_new (context, error);
+    g_idle_add (idle_dbus_return_error, data);
     return;
   }
 
@@ -453,13 +612,16 @@ e_data_book_respond_create (EDataBook *book, guint32 opid, EDataBookStatus statu
 
   if (status != Success) {
     GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot add contact"));
-    dbus_g_method_return_error (context, error);
-    g_error_free (error);
+    DBusErrorReturnData *data = dbus_error_return_data_new (context, error);
+    g_idle_add (idle_dbus_return_error, data);
   } else {
     e_book_backend_notify_update (e_data_book_get_backend (book), contact);
     e_book_backend_notify_complete (e_data_book_get_backend (book));
 
-    dbus_g_method_return (context, e_contact_get_const (contact, E_CONTACT_UID));
+    g_idle_add (idle_dbus_method_return_str,
+                dbus_method_return_str_data_new (context,
+                                                 e_contact_get (contact,
+                                                                E_CONTACT_UID)));
   }
 }
 
@@ -470,8 +632,8 @@ impl_AddressBook_Book_addContacts(EDataBook *book, const char **IN_vcards, DBusG
 
   if (IN_vcards == NULL || IN_vcards[0] == NULL) {
     GError *error = g_error_new (E_DATA_BOOK_ERROR, InvalidQuery, _("Cannot add contacts"));
-    dbus_g_method_return_error (context, error);
-    g_error_free (error);
+    DBusErrorReturnData *data = dbus_error_return_data_new (context, error);
+    g_idle_add (idle_dbus_return_error, data);
     return;
   }
 
@@ -487,8 +649,8 @@ e_data_book_respond_create_contacts (EDataBook *book, guint32 opid, EDataBookSta
 
   if (status != Success) {
     GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot add contacts"));
-    dbus_g_method_return_error (context, error);
-    g_error_free (error);
+    DBusErrorReturnData *data = dbus_error_return_data_new (context, error);
+    g_idle_add (idle_dbus_return_error, data);
   } else {
     char **uids;
     int i = 0;
@@ -505,8 +667,8 @@ e_data_book_respond_create_contacts (EDataBook *book, guint32 opid, EDataBookSta
     }
     e_book_backend_notify_complete (e_data_book_get_backend (book));
 
-    dbus_g_method_return (context, uids);
-    g_strfreev (uids);
+    g_idle_add (idle_dbus_method_return_strarray,
+                dbus_method_return_strarray_data_new (context, uids));
   }
 }
 
@@ -517,8 +679,8 @@ impl_AddressBook_Book_modifyContact (EDataBook *book, const char *IN_vcard, DBus
 
   if (IN_vcard == NULL) {
     GError *error = g_error_new (E_DATA_BOOK_ERROR, InvalidQuery, _("Cannot modify contact"));
-    dbus_g_method_return_error (context, error);
-    g_error_free (error);
+    DBusErrorReturnData *data = dbus_error_return_data_new (context, error);
+    g_idle_add (idle_dbus_return_error, data);
     return;
   }
 
@@ -534,13 +696,13 @@ e_data_book_respond_modify (EDataBook *book, guint32 opid, EDataBookStatus statu
 
   if (status != Success) {
     GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot modify contact"));
-    dbus_g_method_return_error (context, error);
-    g_error_free (error);
+    DBusErrorReturnData *data = dbus_error_return_data_new (context, error);
+    g_idle_add (idle_dbus_return_error, data);
   } else {
     e_book_backend_notify_update (e_data_book_get_backend (book), contact);
     e_book_backend_notify_complete (e_data_book_get_backend (book));
 
-    dbus_g_method_return (context);
+    g_idle_add (idle_dbus_method_return, context);
   }
 }
 
@@ -551,8 +713,8 @@ impl_AddressBook_Book_modifyContacts(EDataBook *book, const char **IN_vcards, DB
 
   if (IN_vcards == NULL || IN_vcards[0] == NULL) {
     GError *error = g_error_new (E_DATA_BOOK_ERROR, InvalidQuery, _("Cannot modify contacts"));
-    dbus_g_method_return_error (context, error);
-    g_error_free (error);
+    DBusErrorReturnData *data = dbus_error_return_data_new (context, error);
+    g_idle_add (idle_dbus_return_error, data);
     return;
   }
 
@@ -568,15 +730,15 @@ e_data_book_respond_modify_contacts (EDataBook *book, guint32 opid, EDataBookSta
 
   if (status != Success) {
     GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot modify contacts"));
-    dbus_g_method_return_error (context, error);
-    g_error_free (error);
+    DBusErrorReturnData *data = dbus_error_return_data_new (context, error);
+    g_idle_add (idle_dbus_return_error, data);
   } else {
     for (; contacts; contacts = contacts->next) {
       e_book_backend_notify_update (e_data_book_get_backend (book), contacts->data);
     }
     e_book_backend_notify_complete (e_data_book_get_backend (book));
 
-    dbus_g_method_return (context);
+    g_idle_add (idle_dbus_method_return, context);
   }
 }
 
@@ -587,7 +749,7 @@ impl_AddressBook_Book_removeContacts(EDataBook *book, const char **IN_uids, DBus
 
   /* Allow an empty array to be removed */
   if (IN_uids == NULL) {
-    dbus_g_method_return (context);
+    g_idle_add (idle_dbus_method_return, context);
     return;
   }
 
@@ -607,8 +769,8 @@ e_data_book_respond_remove_contacts (EDataBook *book, guint32 opid, EDataBookSta
 
   if (status != Success) {
     GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot remove contacts"));
-    dbus_g_method_return_error (context, error);
-    g_error_free (error);
+    DBusErrorReturnData *data = dbus_error_return_data_new (context, error);
+    g_idle_add (idle_dbus_return_error, data);
   } else {
     GList *i;
 
@@ -616,7 +778,7 @@ e_data_book_respond_remove_contacts (EDataBook *book, guint32 opid, EDataBookSta
       e_book_backend_notify_remove (e_data_book_get_backend (book), i->data);
     e_book_backend_notify_complete (e_data_book_get_backend (book));
 
-    dbus_g_method_return (context);
+    g_idle_add (idle_dbus_method_return, context);
   }
 }
 
@@ -684,8 +846,8 @@ impl_AddressBook_Book_getBookView (EDataBook *book, const char *search, const gu
   card_sexp = e_book_backend_sexp_new (search);
   if (!card_sexp) {
     GError *error = g_error_new (E_DATA_BOOK_ERROR, InvalidQuery, _("Invalid query"));
-    dbus_g_method_return_error (context, error);
-    g_error_free (error);
+    DBusErrorReturnData *data = dbus_error_return_data_new (context, error);
+    g_idle_add (idle_dbus_return_error, data);
     return;
   }
 
@@ -694,8 +856,8 @@ impl_AddressBook_Book_getBookView (EDataBook *book, const char *search, const gu
 
   e_book_backend_add_book_view (backend, book_view);
 
-  dbus_g_method_return (context, path);
-  g_free (path);
+  g_idle_add (idle_dbus_method_return_str,
+              dbus_method_return_str_data_new (context, path));
 }
 
 static void
@@ -715,8 +877,8 @@ e_data_book_respond_get_changes (EDataBook *book, guint32 opid, EDataBookStatus 
 
   if (status != Success) {
     GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot get changes"));
-    dbus_g_method_return_error (context, error);
-    g_error_free (error);
+    DBusErrorReturnData *data = dbus_error_return_data_new (context, error);
+    g_idle_add (idle_dbus_return_error, data);
   } else {
     /* The DBus interface to this is a(us), an array of structs of unsigned ints
        and strings.  In dbus-glib this is a GPtrArray of GValueArray of unsigned
@@ -746,9 +908,8 @@ e_data_book_respond_get_changes (EDataBook *book, guint32 opid, EDataBookStatus 
       changes = g_list_remove (changes, change);
     }
 
-    dbus_g_method_return (context, array);
-    g_ptr_array_foreach (array, (GFunc)g_value_array_free, NULL);
-    g_ptr_array_free (array, TRUE);
+    g_idle_add (idle_dbus_method_return_ptrarray,
+                dbus_method_return_ptrarray_data_new (context, array));
   }
 }
 
@@ -777,7 +938,7 @@ impl_AddressBook_Book_close(EDataBook *book, DBusGMethodInvocation *context)
 
   g_object_unref (book);
 
-  dbus_g_method_return (context);
+  g_idle_add (idle_dbus_method_return, context);
 }
 
 void
@@ -816,19 +977,17 @@ return_status_and_list (guint32 opid, EDataBookStatus status, GList *list, gbool
 
     array = g_new0 (char*, g_list_length (list) + 1);
     for (l = list; l != NULL; l = l->next) {
-      array[i++] = l->data;
+      /* since we're returning this in an idle hander, we need to avoid freeing
+       * the array until the idle handler gets a chance to run, so dup all
+       * elements if we don't already own them */
+      array[i++] = free_data ? l->data : g_strdup (l->data);
     }
 
-    dbus_g_method_return (context, array);
-
-    if (free_data) {
-      g_strfreev (array);
-    } else {
-      g_free (array);
-    }
+    g_idle_add (idle_dbus_method_return_strarray,
+                dbus_method_return_strarray_data_new (context, array));
   } else {
     GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot complete operation"));
-    dbus_g_method_return_error (context, error);
-    g_error_free (error);
+    DBusErrorReturnData *data = dbus_error_return_data_new (context, error);
+    g_idle_add (idle_dbus_return_error, data);
   }
 }

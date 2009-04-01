@@ -1,5 +1,14 @@
 2009-04-01  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
 
+	* addressbook/libedata-book-dbus/e-data-book.c:
+	Do dbus method response (and error response) calls from an idle handler so
+	that they are executed from the main thread since these responses could be
+	executed from other threads and potentially cause dbus thread-safety issues.
+	The idle handler's priority is HIGH_IDLE so that it will be higher than the
+	telepathy backend, which does a lot of things in idle handlers.
+
+2009-04-01  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
 	Fix parsing of broken vcards.  Don't abort on the first failure to read an
 	attribute.  Instead, skip that line and continue parsing.  This should allow
 	the user to import most of the information even if some fields of the vcard
