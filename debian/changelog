@@ -1,11 +1,11 @@
-evolution-data-server (1.4.2.1-20090331.99) unstable; urgency=low
+evolution-data-server (1.4.2.1-20090401) unstable; urgency=low
 
-  * Handle properly the default data directory in e_contact_persist_data()
+  * Fixes: NB#99034 - Synch. does not extract/include avatars.
   * Fixes: NB#108665 - Random crash in
     org_gnome_evolution_dataserver_addressbook_Book_get_changes_async_callback
     function.
 
- -- Robert Peto <robert.peto@maemo.org>  Mon, 31 Mar 2009 19:37:09 +0100
+ -- Robert Peto <robert.peto@maemo.org>  Wed,  1 Apr 2009 09:52:00 +0100
 
 evolution-data-server (1.4.2.1-20090331) unstable; urgency=low
 
