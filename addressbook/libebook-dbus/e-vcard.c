@@ -565,10 +565,14 @@ read_attribute (const char **p)
 	if (count == 200) {
 		g_warning (G_STRLOC ": Excessive VCARD detected. " 
 		    "More than 200 characters before attribute parameters.");
+		*p = lp;
+		skip_to_next_line(p);
 		goto lose;
 	}
 
 	if (!attr_name) {
+		*p = lp;
+		skip_to_next_line(p);
 		goto lose;
 	}
 
@@ -579,8 +583,11 @@ read_attribute (const char **p)
 	if (*lp == ';') {
 		/* skip past the ';' */
 		lp = g_utf8_next_char(lp);
-		if (!read_attribute_params (attr, &lp, &is_qp))
+		if (!read_attribute_params (attr, &lp, &is_qp)) {
+			*p = lp;
+			skip_to_next_line(p);
 			goto lose;
+		}
 
 		if (is_qp)
 			attr->encoding = EVC_ENCODING_RAW;
@@ -622,23 +629,28 @@ parse (EVCard *evc, const char *str, gboolean ignore_uid)
 	}
 	if (attr) {
 		if (!strcmp (attr->name, "BEGIN") ||
-                    (ignore_uid && !strcmp (attr->name, EVC_UID)))
+		    (ignore_uid && !strcmp (attr->name, EVC_UID)))
 			e_vcard_attribute_free (attr);
 		else
 			e_vcard_add_attribute (evc, attr);
 	}
 
-	while ((attr = read_attribute (&str)) && (count < 50)) {
-		if (G_UNLIKELY (0 == strcmp (attr->name, "END")))
+	for (; (*str) && count < 50; count++) {
+		attr = read_attribute (&str);
+		if (G_UNLIKELY (!attr)) {
+			g_warning ("Couldn't parse attribute, ignoring line.");
+			continue;
+		}
+		/* stop parsing if we reach an END or another BEGIN attribute */
+		if (G_UNLIKELY (0 == strcmp (attr->name, "END") ||
+				0 == strcmp (attr->name, "BEGIN")))
 			break;
 
 		if (G_UNLIKELY (ignore_uid && 0 == strcmp (attr->name, EVC_UID))) {
-                        e_vcard_attribute_free (attr);
+			e_vcard_attribute_free (attr);
 			continue;
-                }
-
+		}
 		e_vcard_add_attribute (evc, attr);
-		count++;
 	}
 
 	if (count == 50) {

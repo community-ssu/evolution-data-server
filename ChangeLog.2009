@@ -1,3 +1,17 @@
+2009-04-01  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
+	Fix parsing of broken vcards.  Don't abort on the first failure to read an
+	attribute.  Instead, skip that line and continue parsing.  This should allow
+	the user to import most of the information even if some fields of the vcard
+	are corrupted.  Fixes NB#106483
+
+	* addressbook/libebook-dbus/e-vcard.c (read_attribute(), parse()):
+	when read_attribute() fails, just ignore that line and attempt to keep
+	parsing the vcard.  This requires the behavior of read_attribute() to change
+	such that it advances its char** argument to the next line even when parsing
+	fails so that we don't attempt to re-parse the same invalid line over and
+	over.
+
 2009-03-31  Robert Peto  <robert.peto@maemo.org>
 
 	Assemble change list in e_book_get_changes() in a more robust way.
