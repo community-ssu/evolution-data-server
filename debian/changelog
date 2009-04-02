@@ -3,6 +3,8 @@ evolution-data-server (1.4.2.1-20090401.99) unstable; urgency=low
   * Fixes: NB#106483 - Importing a vcf file exported from device showing
     'no name' contact
   * Fixes: NB#108964 - Coverity findings in evolution-data-server
+  * Fixes: NB#109605 - e_contact_get_const() always returns NULL for all
+    non string type attribute, critical warning is displayed
 
  -- Robert Peto <robert.peto@maemo.org>  Wed,  1 Apr 2009 14:15:03 +0100
 
