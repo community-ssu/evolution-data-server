@@ -1,5 +1,12 @@
 2009-04-01  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
 
+	* addressbook/libedata-book-dbus/e-book-backend-cache.c:
+	* libedataserver/e-account.c:
+	Fix a couple more coverity findings.  Fixes: NB#108964 (most of those
+	findings were already fixed in a previous commit)
+
+2009-04-01  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
 	* addressbook/libebook-dbus/e-vcard.c (parse()):
 	Fix a couple segfaults reported by arifa when running the vcard
 	parsing test suite.  These segfaults happened because in some

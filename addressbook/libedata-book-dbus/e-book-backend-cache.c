@@ -397,7 +397,7 @@ e_book_backend_cache_get_contacts (EBookBackendCache *cache, const char *query)
 			uid = e_contact_get_const (contact, E_CONTACT_UID);
                         if (contact && uid && *uid &&(query && e_book_backend_sexp_match_contact(sexp, contact)))
 				list = g_list_prepend (list, contact);
-			else
+			else if (contact)
 				g_object_unref (contact);
                 }
 
