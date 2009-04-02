@@ -5,6 +5,7 @@ evolution-data-server (1.4.2.1-20090401.99) unstable; urgency=low
   * Fixes: NB#108964 - Coverity findings in evolution-data-server
   * Fixes: NB#109605 - e_contact_get_const() always returns NULL for all
     non string type attribute, critical warning is displayed
+  * Fixes: NB#88169 - Vcard with \n (attached) is parsed in wrong manner
 
  -- Robert Peto <robert.peto@maemo.org>  Wed,  1 Apr 2009 14:15:03 +0100
 
