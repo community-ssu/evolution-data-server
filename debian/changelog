@@ -1,4 +1,4 @@
-evolution-data-server (1.4.2.1-20090401.99) unstable; urgency=low
+evolution-data-server (1.4.2.1-20090403) unstable; urgency=low
 
   * Fixes: NB#106483 - Importing a vcf file exported from device showing
     'no name' contact
@@ -7,7 +7,7 @@ evolution-data-server (1.4.2.1-20090401.99) unstable; urgency=low
     non string type attribute, critical warning is displayed
   * Fixes: NB#88169 - Vcard with \n (attached) is parsed in wrong manner
 
- -- Robert Peto <robert.peto@maemo.org>  Wed,  1 Apr 2009 14:15:03 +0100
+ -- Robert Peto <robert.peto@maemo.org>  Wed,  3 Apr 2009 10:53:33 +0100
 
 evolution-data-server (1.4.2.1-20090401) unstable; urgency=low
 
