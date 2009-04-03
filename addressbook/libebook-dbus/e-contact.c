@@ -326,12 +326,14 @@ e_contact_finalize (GObject *object)
 }
 
 static void
-reset_chached_attribute (EContact *contact, EVCardAttribute *attr)
+reset_cached_attribute (EContact *contact, EVCardAttribute *attr)
 {
 	const char *vcard_field;
 	int i;
 
+	g_return_if_fail (contact && attr);
 	vcard_field = e_vcard_attribute_get_name (attr);
+	g_return_if_fail (vcard_field);
 
 	for (i = E_CONTACT_FIELD_FIRST; i < E_CONTACT_FIELD_LAST; i ++) {
 		if (!(field_info [i].t & E_CONTACT_FIELD_TYPE_STRING))
@@ -349,14 +351,14 @@ reset_chached_attribute (EContact *contact, EVCardAttribute *attr)
 static void
 e_contact_add_attribute (EVCard *evc, EVCardAttribute *attr)
 {
-	reset_chached_attribute (E_CONTACT (evc), attr);
+	reset_cached_attribute (E_CONTACT (evc), attr);
 	E_VCARD_CLASS (parent_class)->add_attribute (evc, attr);
 }
 
 static void
 e_contact_remove_attribute (EVCard *evc, EVCardAttribute *attr)
 {
-	reset_chached_attribute (E_CONTACT (evc), attr);
+	reset_cached_attribute (E_CONTACT (evc), attr);
 	E_VCARD_CLASS (parent_class)->remove_attribute (evc, attr);
 }
 
