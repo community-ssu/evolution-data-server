@@ -1,4 +1,10 @@
-2009-04-01  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+2009-04-06  Robert Peto  <robert.peto@maemo.org>
+
+	* addressbook/libebook-dbus/e-vcard.c (_evc_base64_encode_simple):
+	Prevent multiple integer overflows. Patch is applied from
+	http://ocert.org/patches/2008-015/evc-CVE-2009-0587.diff
+
+2009-04-02  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
 
 	* addressbook/libebook-dbus/e-contact.c (reset_cached_attribute):
 	fix typo in function name, prevent a potential crash in strcmp in

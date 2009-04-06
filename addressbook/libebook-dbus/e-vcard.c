@@ -2450,7 +2450,11 @@ _evc_base64_encode_simple (const char *data, size_t len)
 
 	g_return_val_if_fail (data != NULL, NULL);
 
-	out = g_malloc (len * 4 / 3 + 5);
+	if (len >= ((G_MAXSIZE - 1) / 4 - 1) * 3)
+		return NULL;
+
+	out = g_malloc ((len / 3 + 1) * 4 + 1);
+
 	outlen = _evc_base64_encode_close ((unsigned char *)data, len, FALSE,
 				      out, &state, &save);
 	out[outlen] = 0;
