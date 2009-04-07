@@ -27,6 +27,7 @@ libedataserver_1_2_la_SOURCES =		\
 	e-iterator.c			\
 	e-list.c			\
 	e-list-iterator.c		\
+	e-log.c				\
 	e-memory.c			\
 	e-sexp.c			\
 	e-source-group.c		\
@@ -63,6 +64,7 @@ libedataserverinclude_HEADERS =		\
 	e-iterator.h			\
 	e-list.h			\
 	e-list-iterator.h		\
+	e-log.h				\
 	e-memory.h			\
 	e-sexp.h			\
 	e-source-group.h		\

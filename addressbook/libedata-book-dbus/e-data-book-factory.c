@@ -28,6 +28,7 @@
 #include <dbus/dbus-glib-lowlevel.h>
 #include <dbus/dbus-glib-bindings.h>
 #include <libedataserver/e-data-server-module.h>
+#include <libedataserver/e-log.h>
 #include "e-book-backend-factory.h"
 #include "e-data-book-factory.h"
 #include "e-data-book.h"
@@ -322,6 +323,9 @@ main (int argc, char **argv)
   g_type_init ();
   if (!g_thread_supported ()) g_thread_init (NULL);
   dbus_g_thread_init ();
+
+  e_log_set_domains (g_getenv ("EDS_DEBUG"));
+  e_log_set_level_from_string (g_getenv ("EDS_DEBUG_LEVEL"));
 
   loop = g_main_loop_new (NULL, FALSE);
 
