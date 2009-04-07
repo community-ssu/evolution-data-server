@@ -905,10 +905,16 @@ e_vcard_to_string_vcard_21 (EVCard *evc)
 
                         g_string_append_c (attr_str, ';');
 
-                        /* only append type parameter's name iff it's PHOTO or LOGO */
-                        if (!g_ascii_strcasecmp (param->name, EVC_TYPE) &&
-                                        (!g_ascii_strcasecmp (attr->name, EVC_PHOTO) ||
-                                         !g_ascii_strcasecmp (attr->name, EVC_LOGO))) {
+                        /* only append TYPE parameter's name iff it's PHOTO or LOGO */
+                        if (!g_ascii_strcasecmp (param->name, EVC_TYPE)) {
+                                if (!g_ascii_strcasecmp (attr->name, EVC_PHOTO) ||
+                                    !g_ascii_strcasecmp (attr->name, EVC_LOGO)) {
+                                        g_string_append (attr_str, param->name);
+                                        if (param->values)
+                                                g_string_append_c (attr_str, '=');
+                                }
+                        }
+                        else {
                                 g_string_append (attr_str, param->name);
                                 if (param->values)
                                         g_string_append_c (attr_str, '=');
@@ -920,7 +926,8 @@ e_vcard_to_string_vcard_21 (EVCard *evc)
 					char *p = value;
 					gboolean quotes = FALSE;
 					while (*p) {
-						if (!g_unichar_isalnum (g_utf8_get_char (p))) {
+                                                /* values like UTF-8 shouldn't be quoted */
+						if (!g_unichar_isalnum (g_utf8_get_char (p)) && *p != '-') {
 							quotes = TRUE;
 							break;
 						}

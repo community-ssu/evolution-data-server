@@ -1,3 +1,9 @@
+2009-04-07  Robert Peto  <robert.peto@maemo.org>
+
+	* addressbook/libebook-dbus/e-vcard.c (e_vcard_to_string_vcard_21):
+	Only TYPE should be omitted. Don't quote strings that cointains only
+	alphanumeric and dash characters, like UTF-8.
+
 2009-04-06  Robert Peto  <robert.peto@maemo.org>
 
 	* addressbook/libebook-dbus/e-vcard.c (_evc_base64_encode_simple):
