@@ -3,6 +3,7 @@ evolution-data-server (1.4.2.1-20090408.99) unstable; urgency=low
   * Performance: Lazy parse vcards in an idle callback
   * Performance: Do not use e_vcard_add_attribute when parsing the vcard,
     we don't need change notification.
+  * Fixes: NB#101873 - EDS is too verbose
 
  -- Robert Peto <robert.peto@maemo.org>  Wed,  8 Apr 2009 12:53:02 +0100
 
