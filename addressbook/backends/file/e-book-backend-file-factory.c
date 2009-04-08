@@ -30,6 +30,7 @@
 #include "libedataserver/e-data-server-module.h"
 #include "libedata-book/e-book-backend-factory.h"
 #include "e-book-backend-file.h"
+#include "e-book-backend-file-log.h"
 
 E_BOOK_BACKEND_FACTORY_SIMPLE (file, File, e_book_backend_file_new)
 
@@ -39,6 +40,8 @@ void
 eds_module_initialize (GTypeModule *module)
 {
 	file_type = _file_factory_get_type (module);
+
+	e_book_backend_file_log_domain_id = e_log_get_id ("file");
 }
 
 void

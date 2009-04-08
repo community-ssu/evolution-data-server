@@ -1,3 +1,37 @@
+2009-04-08  Marco Barisione  <marco.barisione@maemo.org>
+
+	* backends/file/Makefile.am:
+	* backends/file/e-book-backend-file-factory.c:
+	(eds_module_initialize):
+	* backends/file/e-book-backend-file-index.c:
+	(e_book_backend_file_index_is_usable),
+	(e_book_backend_file_index_query),
+	(e_book_backend_file_index_setup_indicies),
+	(e_book_backend_file_index_get_ordered_ids), (test_always_fails),
+	(real_test_generic_field_is_indexed), (index_populate),
+	(get_key_attribute), (get_key), (generic_name_add_cb),
+	(generic_name_remove_cb), (generic_field_add),
+	(generic_field_remove), (index_sync), (real_is_query),
+	(real_query), (index_close_db_func):
+	* backends/file/e-book-backend-file-log.c:
+	* backends/file/e-book-backend-file-log.h:
+	* backends/file/e-book-backend-file.c: (load_last_running_id),
+	(e_book_backend_file_store_unique_id),
+	(e_book_backend_file_create_unique_id), (insert_contact),
+	(do_create), (e_book_backend_file_create_contacts),
+	(e_book_backend_file_remove_contacts), (modify_contact),
+	(e_book_backend_file_modify_contact),
+	(e_book_backend_file_get_contact),
+	(e_book_backend_file_get_contact_list), (book_view_thread),
+	(e_book_backend_file_stop_book_view),
+	(e_book_backend_file_set_book_view_sort_order),
+	(e_book_backend_file_get_changes),
+	(e_book_backend_file_upgrade_db), (file_errcall), (check_md5sum),
+	(e_book_backend_file_setup_running_ids),
+	(e_book_backend_file_load_source), (e_book_backend_file_remove),
+	(e_book_backend_file_sync):
+	Use the new logging functions in the file backend.
+
 2009-04-08  Robert Peto  <robert.peto@maemo.org>
 
 	Apply Xavier's performance patch:

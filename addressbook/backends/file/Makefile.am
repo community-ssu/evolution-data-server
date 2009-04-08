@@ -15,6 +15,8 @@ libebookbackendfile_la_SOURCES =			\
 	e-book-backend-file-index.c				\
 	e-book-backend-file-index.h				\
 	e-book-backend-file-factory.c			\
+	e-book-backend-file-log.c			\
+	e-book-backend-file-log.h			\
 	$(top_srcdir)/libedataserver/e-db3-utils.c	\
 	$(top_srcdir)/libedataserver/e-dbhash.c		\
 	$(top_srcdir)/libedataserver/md5-utils.c

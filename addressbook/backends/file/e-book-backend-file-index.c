@@ -23,6 +23,8 @@
 
 #include "db.h"
 
+#include "e-book-backend-file-log.h"
+
 #include <string.h>
 #include <errno.h>
 
@@ -219,7 +221,7 @@ e_book_backend_file_index_is_usable (EBookBackendFileIndex *index, const gchar *
 
   if (sexp_error == -1)
   {
-    g_warning (G_STRLOC ": Failed to parse query %s, %s", query, e_sexp_error (sexp));
+    WARNING ("Failed to parse query %s, %s", query, e_sexp_error (sexp));
     e_sexp_unref (sexp);
     return FALSE;
   }
@@ -231,7 +233,7 @@ e_book_backend_file_index_is_usable (EBookBackendFileIndex *index, const gchar *
   e_sexp_result_free (sexp, sexp_result);
   e_sexp_unref (sexp);
 
-  g_debug (G_STRLOC ": able to use index %s", res ? "yes": "no");
+  DEBUG ("able to use index %s", res ? "yes": "no");
 
   return res;
 }
@@ -250,7 +252,7 @@ e_book_backend_file_index_query (EBookBackendFileIndex *index, const gchar *quer
 
   sexp = e_sexp_new ();
 
-  g_debug (G_STRLOC ": Using query %s", query);
+  DEBUG ("Using query %s", query);
 
   /* Now add the 'test' functions, we just use these to find out whether we
    * can do a query. They return booleans and then ESexp logic should figure
@@ -268,7 +270,7 @@ e_book_backend_file_index_query (EBookBackendFileIndex *index, const gchar *quer
 
   if (sexp_error == -1)
   {
-    g_warning (G_STRLOC ": Failed to parse query %s, %s", query, e_sexp_error (sexp));
+    WARNING ("Failed to parse query %s, %s", query, e_sexp_error (sexp));
     e_sexp_unref (sexp);
     return NULL;
   }
@@ -292,7 +294,7 @@ e_book_backend_file_index_query (EBookBackendFileIndex *index, const gchar *quer
 
       e_sexp_result_free (sexp, sexp_result);
     } else {
-      g_warning (G_STRLOC ": Unexpected result type");
+      WARNING ("Unexpected result type");
     }
   }
 
@@ -332,13 +334,13 @@ e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db,
     db_error = db_create (&sdb, env, 0);
 
     if (db_error != 0) {
-      g_warning (G_STRLOC ": db_create failed: %s", db_strerror (db_error));
+      WARNING ("db_create failed: %s", db_strerror (db_error));
       return FALSE;
     }
 
     db_error = sdb->set_flags(sdb, DB_DUP | DB_DUPSORT);
     if (db_error != 0) {
-      g_warning (G_STRLOC ": set_flags failed: %s", db_strerror (db_error));
+      WARNING ("set_flags failed: %s", db_strerror (db_error));
     }
 
     if (indexes[i].order_func)
@@ -362,14 +364,14 @@ e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db,
 
       if (db_error != 0)
       {
-        g_warning (G_STRLOC ": open failed: %s", db_strerror (db_error));
+        WARNING ("open failed: %s", db_strerror (db_error));
         sdb->close (sdb, 0);
         return FALSE;
       }
     } else if (db_error != 0) {
       if (db_error != 0)
       {
-        g_warning (G_STRLOC ": open failed: %s", db_strerror (db_error));
+        WARNING ("open failed: %s", db_strerror (db_error));
         sdb->close (sdb, 0);
         return FALSE;
       }
@@ -387,7 +389,7 @@ e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db,
   {
     if (!index_populate (index, dbs_to_populate))
     {
-      g_warning (G_STRLOC ": Error whilst trying to populate the index");
+      WARNING ("Error whilst trying to populate the index");
       g_list_free (dbs_to_populate);
       return FALSE;
     }
@@ -480,7 +482,7 @@ e_book_backend_file_index_get_ordered_ids (EBookBackendFileIndex *index, const g
 
   if (db == NULL)
   {
-    g_warning (G_STRLOC ": invalid query term: %s", query_term);
+    WARNING ("invalid query term: %s", query_term);
     return NULL;
   }
 
@@ -488,7 +490,7 @@ e_book_backend_file_index_get_ordered_ids (EBookBackendFileIndex *index, const g
 
   if (db_error != 0)
   {
-    g_warning (G_STRLOC ": db->state failed: %s", db_strerror (db_error));
+    WARNING ("db->state failed: %s", db_strerror (db_error));
   }
 
   if (stat->bt_ndata > 0)
@@ -500,7 +502,7 @@ e_book_backend_file_index_get_ordered_ids (EBookBackendFileIndex *index, const g
 
   if (db_error != 0)
   {
-    g_warning (G_STRLOC ": db->cursor failed: %s", db_strerror (db_error)); 
+    WARNING ("db->cursor failed: %s", db_strerror (db_error)); 
     return NULL;
   }
 
@@ -544,7 +546,7 @@ test_always_fails (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata
 
   *(gboolean *)userdata = FALSE;
 
-  g_debug (G_STRLOC ": failing the test");
+  DEBUG ("failing the test");
   return result;
 }
 
@@ -595,11 +597,11 @@ real_test_generic_field_is_indexed (gboolean vcard_query, gboolean endswith_quer
     }
 
   } else {
-    g_warning (G_STRLOC ": Unexpected query structure");
+    WARNING ("Unexpected query structure");
   }
 
   *(gboolean *)userdata = FALSE;
-  g_debug (G_STRLOC ": failing the test");
+  DEBUG ("failing the test");
 
   return result;
 }
@@ -661,7 +663,7 @@ index_populate (EBookBackendFileIndex *index, GList *fields)
 
   if (db_error != 0)
   {
-    g_warning (G_STRLOC ": db->cursor failed: %s", db_strerror (db_error)); 
+    WARNING ("db->cursor failed: %s", db_strerror (db_error)); 
     return FALSE;
   }
 
@@ -737,7 +739,7 @@ get_key_attribute (EContact *contact)
     EVCardAttribute *attr = (EVCardAttribute *)attrs->data;
     const char *attr_name = e_vcard_attribute_get_name (attr);
 
-    g_debug (G_STRLOC ": looking attrib '%s'", attr_name);
+    DEBUG ("looking attrib '%s'", attr_name);
 
     if (g_str_equal (attr_name, key_priority[0])) {
       if (!e_vcard_attribute_get_values (attr))
@@ -790,13 +792,13 @@ get_key (EContact *contact, gint ordering)
 
   key_attr = get_key_attribute (contact);
   if (!key_attr) {
-    g_warning (G_STRLOC ": contact is empty?");
+    WARNING ("contact is empty?");
     return NULL;
   }
 
   values = e_vcard_attribute_get_values (key_attr);
   if (!values) {
-    g_warning (G_STRLOC ": attrib's value is empty, this shouldn't happen");
+    WARNING ("attrib's value is empty, this shouldn't happen");
     return NULL;
   }
 
@@ -826,21 +828,21 @@ generic_name_add_cb (EBookBackendFileIndex *index, EContact *contact,
 
   key = get_key (contact, ordering);
   if (!key) {
-    g_warning (G_STRLOC ": cannot create a sufficient key value");
+    WARNING ("cannot create a sufficient key value");
     return;
   }
   dbt_fill_with_string (&index_dbt, key);
 
   dbt_fill_with_string (&id_dbt, (gchar *)uid);
 
-  g_debug (G_STRLOC ": adding to index with key %s and data %s",
+  DEBUG ("adding to index with key %s and data %s",
            (gchar *)index_dbt.data, (gchar *)id_dbt.data);
 
   db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
   g_free (key);
 
   if (db_error != 0) {
-    g_warning (G_STRLOC ": db->put failed: %s", db_strerror (db_error));
+    WARNING ("db->put failed: %s", db_strerror (db_error));
   }
 }
 
@@ -855,7 +857,7 @@ generic_name_remove_cb (EBookBackendFileIndex *index, EContact *contact,
 
   db_error = db->cursor (db, NULL, &dbc, 0);
   if (db_error) {
-    g_warning (G_STRLOC ": db->cursor failed: %s", db_strerror (db_error));
+    WARNING ("db->cursor failed: %s", db_strerror (db_error));
     return;
   }
 
@@ -869,25 +871,25 @@ generic_name_remove_cb (EBookBackendFileIndex *index, EContact *contact,
 
   dbt_fill_with_string (&id_dbt, (gchar *)uid);
 
-  g_debug (G_STRLOC ": removing from index with key %s and data %s",
+  DEBUG ("removing from index with key %s and data %s",
            (gchar *)index_dbt.data, (gchar *)id_dbt.data);
 
   id_dbt.flags = 0;
   index_dbt.flags = 0;
   db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_GET_BOTH);
   if (db_error) {
-    g_warning (G_STRLOC ": dbc->c_get failed: %s", db_strerror (db_error));
+    WARNING ("dbc->c_get failed: %s", db_strerror (db_error));
   } else {
     db_error = dbc->c_del (dbc, 0);
     if (db_error != 0) {
-      g_warning (G_STRLOC ": dbc->c_del failed: %s", db_strerror (db_error));
+      WARNING ("dbc->c_del failed: %s", db_strerror (db_error));
     }
   }
   g_free (key);
 
   db_error = dbc->c_close (dbc);
   if (db_error) {
-    g_warning (G_STRLOC ": db->c_close failed: %s", db_strerror (db_error));
+    WARNING ("db->c_close failed: %s", db_strerror (db_error));
   }
 }
 
@@ -957,7 +959,7 @@ generic_field_add (EBookBackendFileIndex *index, EContact *contact,
         }
         dbt_fill_with_string (&index_dbt, tmp);
 
-        g_debug (G_STRLOC ": adding to index with key %s and data %s", 
+        DEBUG ("adding to index with key %s and data %s", 
             (gchar *)index_dbt.data, (gchar *)id_dbt.data);
 
         db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
@@ -965,7 +967,7 @@ generic_field_add (EBookBackendFileIndex *index, EContact *contact,
 
         if (db_error != 0)
         {
-          g_warning (G_STRLOC ": db->put failed: %s", db_strerror (db_error));
+          WARNING ("db->put failed: %s", db_strerror (db_error));
         }
       }
     }
@@ -988,7 +990,7 @@ generic_field_remove (EBookBackendFileIndex *index, EContact *contact,
 
   if (db_error != 0)
   {
-    g_warning (G_STRLOC ": db->cursor failed: %s", db_strerror (db_error)); 
+    WARNING ("db->cursor failed: %s", db_strerror (db_error)); 
     return;
   }
 
@@ -1015,7 +1017,7 @@ generic_field_remove (EBookBackendFileIndex *index, EContact *contact,
         }
         dbt_fill_with_string (&index_dbt, tmp);
 
-        g_debug (G_STRLOC ": removing from index with key %s and data %s", 
+        DEBUG ("removing from index with key %s and data %s", 
             (gchar *)index_dbt.data, (gchar *)id_dbt.data);
 
         id_dbt.flags = 0;
@@ -1023,12 +1025,12 @@ generic_field_remove (EBookBackendFileIndex *index, EContact *contact,
         db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_GET_BOTH);
         if (db_error != 0)
         {
-          g_warning (G_STRLOC ": dbc->c_get failed: %s", db_strerror (db_error));
+          WARNING ("dbc->c_get failed: %s", db_strerror (db_error));
         } else {
           db_error = dbc->c_del (dbc, 0);
           if (db_error != 0)
           {
-            g_warning (G_STRLOC ": dbc->c_del failed: %s", db_strerror (db_error));
+            WARNING ("dbc->c_del failed: %s", db_strerror (db_error));
           }
         }
         g_free (tmp);
@@ -1039,7 +1041,7 @@ generic_field_remove (EBookBackendFileIndex *index, EContact *contact,
 
   if (db_error != 0)
   {
-    g_warning (G_STRLOC ": db->c_closed failed: %s", db_strerror (db_error));
+    WARNING ("db->c_closed failed: %s", db_strerror (db_error));
   }
 }
 
@@ -1111,7 +1113,7 @@ index_sync (EBookBackendFileIndex *index, EBookBackendFileIndexData *data)
 
   if (db_error != 0)
   {
-    g_warning (G_STRLOC ": db->sync failed: %s", db_strerror (db_error));
+    WARNING ("db->sync failed: %s", db_strerror (db_error));
   }
 }
 
@@ -1174,14 +1176,14 @@ real_is_query (gboolean vcard_query, ESExp *sexp, gint argc, ESExpResult **argv,
 
     if (db_error != 0)
     {
-      g_warning (G_STRLOC ": db->cursor failed: %s", db_strerror (db_error)); 
+      WARNING ("db->cursor failed: %s", db_strerror (db_error)); 
       goto out;
     } else {
       db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_SET);
 
       while (db_error == 0)
       {
-        g_debug (G_STRLOC ": index query found: %s", (gchar *)id_dbt.data);
+        DEBUG ("index query found: %s", (gchar *)id_dbt.data);
         g_ptr_array_add (ids, g_strdup (id_dbt.data));
         g_free (id_dbt.data);
 
@@ -1192,7 +1194,7 @@ real_is_query (gboolean vcard_query, ESExp *sexp, gint argc, ESExpResult **argv,
 
       if (db_error != DB_NOTFOUND)
       {
-        g_warning (G_STRLOC ": dbc->c_get failed: %s", db_strerror (db_error));
+        WARNING ("dbc->c_get failed: %s", db_strerror (db_error));
         goto out;
       }
 
@@ -1200,12 +1202,12 @@ real_is_query (gboolean vcard_query, ESExp *sexp, gint argc, ESExpResult **argv,
 
       if (db_error != 0)
       {
-        g_warning (G_STRLOC ": dbc->c_close failed: %s", db_strerror (db_error));
+        WARNING ("dbc->c_close failed: %s", db_strerror (db_error));
         goto out;
       }
     }
   } else {
-    g_warning (G_STRLOC ": Unexpected query structure");
+    WARNING ("Unexpected query structure");
   }
 
 out:
@@ -1284,7 +1286,7 @@ real_query (gboolean vcard_query, gboolean endswith_query, ESExp *sexp, gint arg
 
     if (db_error != 0)
     {
-      g_warning (G_STRLOC ": db->cursor failed: %s", db_strerror (db_error)); 
+      WARNING ("db->cursor failed: %s", db_strerror (db_error)); 
       goto out;
     } else {
       db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_SET_RANGE);
@@ -1293,7 +1295,7 @@ real_query (gboolean vcard_query, gboolean endswith_query, ESExp *sexp, gint arg
       {
         if (g_str_has_prefix (index_dbt.data, query_key))
         {
-          g_debug (G_STRLOC ": index query found: %s for %s for %s", 
+          DEBUG ("index query found: %s for %s for %s", 
               (gchar *)id_dbt.data, query_key, (gchar *)index_dbt.data);
           g_ptr_array_add (ids, g_strdup (id_dbt.data));
           g_free (id_dbt.data);
@@ -1307,7 +1309,7 @@ real_query (gboolean vcard_query, gboolean endswith_query, ESExp *sexp, gint arg
 
       if (db_error != 0 && db_error != DB_NOTFOUND)
       {
-        g_warning (G_STRLOC ": dbc->c_get failed: %s", db_strerror (db_error));
+        WARNING ("dbc->c_get failed: %s", db_strerror (db_error));
         goto out;
       }
 
@@ -1315,12 +1317,12 @@ real_query (gboolean vcard_query, gboolean endswith_query, ESExp *sexp, gint arg
 
       if (db_error != 0)
       {
-        g_warning (G_STRLOC ": dbc->c_close failed: %s", db_strerror (db_error));
+        WARNING ("dbc->c_close failed: %s", db_strerror (db_error));
         goto out;
       }
     }
   } else {
-    g_warning (G_STRLOC ": Unexpected query structure");
+    WARNING ("Unexpected query structure");
   }
 
 out:
@@ -1367,7 +1369,7 @@ index_close_db_func (gpointer key, gpointer value, gpointer userdata)
 
   if (db_error != 0)
   {
-    g_warning (G_STRLOC ": close failed: %s", db_strerror (db_error));
+    WARNING ("close failed: %s", db_strerror (db_error));
   }
 
   return TRUE;
