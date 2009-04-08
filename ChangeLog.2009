@@ -1,3 +1,15 @@
+2009-04-08  Robert Peto  <robert.peto@maemo.org>
+
+	Apply Xavier's performance patch:
+	
+	* addressbook/libebook-dbus/e-vcard.c (e_vcard_construct_with_uid(),
+	  parse_idle_cb(), e_vcard_dispose()):
+	Lazy parse vcards in an idle callback
+
+	* addressbook/libebook-dbus/e-vcard.c (e_vcard_dispose()):
+	Do not use e_vcard_add_attribute when parsing the vcard, we don't need
+	change notification.
+
 2009-04-07  Robert Peto  <robert.peto@maemo.org>
 
 	* addressbook/libebook-dbus/e-vcard.c (e_vcard_to_string_vcard_21):
