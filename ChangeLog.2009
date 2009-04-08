@@ -10,6 +10,17 @@
 	Do not use e_vcard_add_attribute when parsing the vcard, we don't need
 	change notification.
 
+2009-04-07  Marco Barisione  <marco.barisione@maemo.org>
+
+	* libedataserver/e-log.c:
+	* libedataserver/e-log.h:
+	* libedataserver/Makefile.am:
+	* addressbook/libedata-book-dbus/e-data-book-factory.c:
+	* addressbook/libedata-book-dbus/Makefile.am:
+	Add logging functions that, using environment variables, allow to
+	control which modules should print debug messages and how much verbose
+	they should be.
+
 2009-04-07  Robert Peto  <robert.peto@maemo.org>
 
 	* addressbook/libebook-dbus/e-vcard.c (e_vcard_to_string_vcard_21):
