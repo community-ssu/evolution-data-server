@@ -395,7 +395,7 @@ e_book_backend_file_create_contact (EBookBackendSync *backend,
 	EBookBackendFile *bf = E_BOOK_BACKEND_FILE (backend);
 
         if (e_book_backend_is_writable (E_BOOK_BACKEND (backend)) == FALSE) {
-                g_warning (G_STRLOC ": book is read only");
+                WARNING (G_STRLOC ": book is read only");
                 return GNOME_Evolution_Addressbook_PermissionDenied;
         }
 
@@ -421,7 +421,7 @@ e_book_backend_file_create_contacts (EBookBackendSync *backend,
         EBookBackendSyncStatus status;
 
         if (e_book_backend_is_writable (E_BOOK_BACKEND (backend)) == FALSE) {
-                g_warning (G_STRLOC ": book is read only");
+                WARNING (G_STRLOC ": book is read only");
                 return GNOME_Evolution_Addressbook_PermissionDenied;
         }
 
@@ -490,7 +490,7 @@ e_book_backend_file_remove_contacts (EBookBackendSync *backend,
 	GNOME_Evolution_Addressbook_CallStatus rv = GNOME_Evolution_Addressbook_Success;
 
         if (e_book_backend_is_writable (E_BOOK_BACKEND (backend)) == FALSE) {
-                g_warning (G_STRLOC ": book is read only");
+                WARNING (G_STRLOC ": book is read only");
                 return GNOME_Evolution_Addressbook_PermissionDenied;
         }
 
@@ -622,7 +622,7 @@ e_book_backend_file_modify_contact (EBookBackendSync *backend,
 	int            db_error;
 
         if (e_book_backend_is_writable (E_BOOK_BACKEND (backend)) == FALSE) {
-                g_warning (G_STRLOC ": book is read only");
+                WARNING (G_STRLOC ": book is read only");
                 return GNOME_Evolution_Addressbook_PermissionDenied;
         }
 
@@ -659,7 +659,7 @@ e_book_backend_file_modify_contacts (EBookBackendSync *backend,
 	int db_error;
 
         if (e_book_backend_is_writable (E_BOOK_BACKEND (backend)) == FALSE) {
-                g_warning (G_STRLOC ": book is read only");
+                WARNING (G_STRLOC ": book is read only");
                 return GNOME_Evolution_Addressbook_PermissionDenied;
         }
 
