@@ -1,3 +1,10 @@
+2009-04-09  Robert Peto  <robert.peto@maemo.org>
+
+	Switch file-backend's addressbook to read-only mode if index.db is not
+	usable.
+
+	* addressbook/backends/file/e-book-backend-file.c
+
 2009-04-08  Marco Barisione  <marco.barisione@maemo.org>
 
 	* backends/file/Makefile.am:

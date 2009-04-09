@@ -151,6 +151,8 @@ load_last_running_id (EBookBackendFile *bf)
 	DBT rid_dbt, id_dbt;
 	int db_error;
 
+        g_return_if_fail (bf->priv->id_db);
+
 	db = bf->priv->id_db;
 
 	db_error = db->cursor (db, NULL, &dbc, 0);
@@ -392,6 +394,11 @@ e_book_backend_file_create_contact (EBookBackendSync *backend,
 	EBookBackendSyncStatus status;
 	EBookBackendFile *bf = E_BOOK_BACKEND_FILE (backend);
 
+        if (e_book_backend_is_writable (E_BOOK_BACKEND (backend)) == FALSE) {
+                g_warning (G_STRLOC ": book is read only");
+                return GNOME_Evolution_Addressbook_PermissionDenied;
+        }
+
 	status = do_create (bf, vcard, contact);
 	if (status == GNOME_Evolution_Addressbook_Success) {
 		e_book_backend_file_index_add_contact (bf->priv->index, *contact);
@@ -412,6 +419,11 @@ e_book_backend_file_create_contacts (EBookBackendSync *backend,
         DB *db;
         int db_error = 0;
         EBookBackendSyncStatus status;
+
+        if (e_book_backend_is_writable (E_BOOK_BACKEND (backend)) == FALSE) {
+                g_warning (G_STRLOC ": book is read only");
+                return GNOME_Evolution_Addressbook_PermissionDenied;
+        }
 
         bf = E_BOOK_BACKEND_FILE (backend);
         db = bf->priv->file_db;
@@ -476,6 +488,11 @@ e_book_backend_file_remove_contacts (EBookBackendSync *backend,
 	GList         *removed_cards = NULL;
 	GList         *removed_contacts = NULL;
 	GNOME_Evolution_Addressbook_CallStatus rv = GNOME_Evolution_Addressbook_Success;
+
+        if (e_book_backend_is_writable (E_BOOK_BACKEND (backend)) == FALSE) {
+                g_warning (G_STRLOC ": book is read only");
+                return GNOME_Evolution_Addressbook_PermissionDenied;
+        }
 
 	for (l = id_list; l; l = l->next) {
 		id = l->data;
@@ -604,6 +621,11 @@ e_book_backend_file_modify_contact (EBookBackendSync *backend,
 	DB             *db = bf->priv->file_db;
 	int            db_error;
 
+        if (e_book_backend_is_writable (E_BOOK_BACKEND (backend)) == FALSE) {
+                g_warning (G_STRLOC ": book is read only");
+                return GNOME_Evolution_Addressbook_PermissionDenied;
+        }
+
 	status = modify_contact (bf, vcard, contact);
 	
 	if (status == GNOME_Evolution_Addressbook_Success) {
@@ -635,6 +657,11 @@ e_book_backend_file_modify_contacts (EBookBackendSync *backend,
 	EContact *contact;
 	DB *db;
 	int db_error;
+
+        if (e_book_backend_is_writable (E_BOOK_BACKEND (backend)) == FALSE) {
+                g_warning (G_STRLOC ": book is read only");
+                return GNOME_Evolution_Addressbook_PermissionDenied;
+        }
 
 	bf = E_BOOK_BACKEND_FILE (backend);
 	db = bf->priv->file_db;
@@ -1531,6 +1558,12 @@ e_book_backend_file_setup_running_ids (EBookBackendFile *bf)
 	int db_error;
 
 	DEBUG ("%s", G_STRFUNC);
+        g_return_val_if_fail (bf->priv->file_db, GNOME_Evolution_Addressbook_OtherError);
+
+        if (bf->priv->index == NULL) {
+                WARNING ("no index.db => no running id");
+                return GNOME_Evolution_Addressbook_OtherError;
+        }
 
 	db_error = bf->priv->file_db->get_env (bf->priv->file_db, &env);
 	if (db_error != 0) {
@@ -1779,20 +1812,31 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 	global_env.ref_count++;
 	G_UNLOCK (global_env);
 
-	e_book_backend_file_index_setup_indicies (bf->priv->index, db, bf->priv->index_filename);
+	if (TRUE == e_book_backend_file_index_setup_indicies (bf->priv->index, db,
+                                bf->priv->index_filename)) {
+                /* index file is usable */
+                retval = e_book_backend_file_setup_running_ids (bf);
+                if (retval != GNOME_Evolution_Addressbook_Success) {
+                        WARNING ("cannot setup the running id");
+                        return retval;
+                }
+
+                install_pre_installed_vcards (backend);
+        }
+        else {
+                /* index file is not usable, we must operate in read-only mode
+                 * since running_id is stored in index.db as well */
+                WARNING (G_STRLOC ": setup indices failed, "
+                                "index is not usable. try to live without them");
+                writable = FALSE;
+
+                /* unref the index object */
+                g_object_unref (bf->priv->index);
+                bf->priv->index = NULL;
+        }
 
 	e_book_backend_set_is_loaded (backend, TRUE);
 	e_book_backend_set_is_writable (backend, writable);
-
-        retval = e_book_backend_file_setup_running_ids (bf);
-        if (retval != GNOME_Evolution_Addressbook_Success)
-                return retval;
-
-	if (bf->priv->file_db) {
-		install_pre_installed_vcards (backend);
-	} else {
-		WARNING ("No file_db");
-	}
 
 	return GNOME_Evolution_Addressbook_Success;
 }
