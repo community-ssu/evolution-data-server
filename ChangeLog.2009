@@ -1,5 +1,11 @@
 2009-04-14  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
 
+	* addressbook/libebook-dbus/e-vcard.c:
+	fix an inadvertent (and large) memory leak caused by the fix for the crash
+	in the idle parse callback
+
+2009-04-14  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
 	* addressbook/libedata-book-dbus/e-data-book-view.c:
 	Fix leak by freeing the ptr array segment.  valgrind report:
 		==27370== 896 bytes in 4 blocks are definitely lost in loss record 13 of 30

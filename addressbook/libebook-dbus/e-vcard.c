@@ -81,14 +81,25 @@ static char * _evc_escape_string_21 (const char *s);
 
 static void e_vcard_attribute_param_add_value_with_len (EVCardAttributeParam *param, const char *value, int length);
 
+static void _evc_cancel_idle_parsing (EVCard *evc)
+{
+	if (evc->priv->parse_id != 0) {
+		g_source_remove (evc->priv->parse_id);
+		evc->priv->parse_id = 0;
+		/* in order to prevent crashes in the parse idle callback when the vcard
+		 * has been unreffed before the idle handler is called, we take a ref,
+		 * so we must cancel it here */
+		g_object_unref (evc);
+	}
+
+}
+
 static void
 e_vcard_dispose (GObject *object)
 {
 	EVCard *evc = E_VCARD (object);
 
-	if (evc->priv->parse_id != 0) {
-		g_source_remove (evc->priv->parse_id);
-	}
+	_evc_cancel_idle_parsing (evc);
 
 	if (evc->priv) {
 		/* Directly access priv->attributes and don't call e_vcard_ensure_attributes(),
@@ -700,9 +711,7 @@ e_vcard_ensure_attributes (EVCard *evc)
 		evc->priv->parsing = FALSE;
 
 		/* If the parsing was forced before the idle cb, remove it */
-		if (evc->priv->parse_id != 0) {
-			g_source_remove (evc->priv->parse_id);
-		}
+		_evc_cancel_idle_parsing (evc);
 	}
 
 	return evc->priv->attributes;
@@ -715,7 +724,7 @@ parse_idle_cb (gpointer user_data)
 
 	evc->priv->parse_id = 0;
 	e_vcard_ensure_attributes (evc);
-    g_object_unref (evc);
+	g_object_unref (evc);
 
 	return FALSE;
 }
