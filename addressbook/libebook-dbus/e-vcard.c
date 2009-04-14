@@ -2613,17 +2613,8 @@ _evc_escape_string_21 (const char *s)
 	/* Escape a string as described in vCard 2.1 specification */
 	for (p = s; p && *p; p++) {
 		switch (*p) {
-		case '\n':
-			g_string_append (str, "\\n");
-			break;
-		case '\r':
-			g_string_append (str, "\\r");
-			break;
 		case ';':
 			g_string_append (str, "\\;");
-			break;
-		case ',':
-			g_string_append (str, "\\,");
 			break;
 		case '\\':
 			g_string_append (str, "\\\\");
