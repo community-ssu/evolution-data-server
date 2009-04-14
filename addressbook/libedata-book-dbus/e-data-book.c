@@ -661,7 +661,7 @@ e_data_book_respond_create_contacts (EDataBook *book, guint32 opid, EDataBookSta
         g_warning ("%s: not a contact", G_STRFUNC);
         continue;
       }
-      uids[i++] = (char *) e_contact_get_const (contacts->data, E_CONTACT_UID);
+      uids[i++] = (char *) e_contact_get (contacts->data, E_CONTACT_UID);
 
       e_book_backend_notify_update (e_data_book_get_backend (book), contacts->data);
     }

@@ -1,3 +1,14 @@
+2009-04-14  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
+	* addressbook/libedata-book/e-book-backend-sync.c
+	(_e_book_backend_create_contacts): free the contacts in the list after
+	calling _respond_create_contacts to eliminate a large memory leak on
+	importing a large number of contacts.  Fixes Bug 110765
+	* addressbook/libedata-book-dbus/e-data-book.c
+	(e_data_book_respond_create_contacts): use e_contact_get rather than
+	e_contact_get_const so that we own the data and can free it after the idle
+	handler has run.  Prevents a potential double-free error.
+
 2009-04-14  Robert Peto  <robert.peto@maemo.org>
 
 	* addressbook/libebook-dbus/e-book.c(e_book_add_contacts):

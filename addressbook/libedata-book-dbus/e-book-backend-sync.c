@@ -451,8 +451,7 @@ _e_book_backend_create_contacts (EBookBackend *backend,
 
 	e_data_book_respond_create_contacts (book, opid, status, contacts);
 
-        /* cause double free */
-	/*g_list_foreach (contacts, (GFunc)g_object_unref, NULL);*/
+	g_list_foreach (contacts, (GFunc)g_object_unref, NULL);
 	g_list_free (contacts);
 }
 
