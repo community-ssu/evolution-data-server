@@ -1,5 +1,10 @@
 2009-04-14  Robert Peto  <robert.peto@maemo.org>
 
+	* addressbook/libebook-dbus/e-book.c(e_book_add_contacts):
+	Eliminate memory leak.
+
+2009-04-14  Robert Peto  <robert.peto@maemo.org>
+
 	Do not escape the newline and comma characters in case of 2.1 format
 	in addressbook.
 

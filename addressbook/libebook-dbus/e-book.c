@@ -1471,7 +1471,7 @@ e_book_add_contacts_by_threshold_limit (EBook *book, GList *contacts_list_thresh
 gboolean
 e_book_add_contacts (EBook *book, GList *contacts, GError **error)
 {
-  int list_count = 0;
+  int i;
   GList *list_threshold = NULL;
   GList *node = contacts;
 
@@ -1479,29 +1479,21 @@ e_book_add_contacts (EBook *book, GList *contacts, GError **error)
   e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
   e_return_error_if_fail (contacts != NULL, E_BOOK_ERROR_INVALID_ARG);
 
-  g_debug ("%s: %d", G_STRFUNC, g_list_length (contacts));
-
   while (node) {
-    if (list_count < THRESHOLD) {
-      list_count++;
-      list_threshold = g_list_append (list_threshold, node->data);
-      node = g_list_next (node);
+    /* assemble the list_threshold */
+    for (i = 0, list_threshold = NULL;
+         node && i < THRESHOLD;
+         node = g_list_next (node), i++) {
+      list_threshold = g_list_prepend (list_threshold, node->data);
     }
-    else {
-      if (FALSE == e_book_add_contacts_by_threshold_limit (book, list_threshold, error)) {
-        g_list_free (list_threshold);
-        return FALSE;
-      }
+    list_threshold = g_list_reverse (list_threshold);
 
-      list_count = 0;
-      list_threshold = NULL;
+    /* add them to book */
+    if (FALSE == e_book_add_contacts_by_threshold_limit (book, list_threshold, error)) {
       g_list_free (list_threshold);
+      return FALSE;
     }
-  }
-
-  if (FALSE == e_book_add_contacts_by_threshold_limit (book, list_threshold, error)) {
     g_list_free (list_threshold);
-    return FALSE;
   }
 
   return TRUE;
