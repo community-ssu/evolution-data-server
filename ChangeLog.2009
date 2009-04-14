@@ -1,5 +1,23 @@
 2009-04-14  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
 
+	* addressbook/libedata-book-dbus/e-data-book-view.c:
+	Fix leak by freeing the ptr array segment.  valgrind report:
+		==27370== 896 bytes in 4 blocks are definitely lost in loss record 13 of 30
+		==27370==    at 0x47E7C19: malloc (vg_replace_malloc.c:207)
+		==27370==    by 0x47E7D5F: realloc (vg_replace_malloc.c:429)
+		==27370==    by 0x718FB13: g_realloc (gmem.c:170)
+		==27370==    by 0x7162C12: g_ptr_array_maybe_expand (garray.c:414)
+		==27370==    by 0x71630C5: g_ptr_array_sized_new (garray.c:379)
+		==27370==    by 0x47F9498: e_data_book_view_init (e-data-book-view.c:146)
+		==27370==    by 0x4A9C28E: g_type_create_instance (gtype.c:1674)
+		==27370==    by 0x4A80B90: g_object_constructor (gobject.c:1334)
+		==27370==    by 0x4A7F5CD: g_object_newv (gobject.c:1211)
+		==27370==    by 0x4A800CF: g_object_new_valist (gobject.c:1274)
+		==27370==    by 0x4A80216: g_object_new (gobject.c:1056)
+		==27370==    by 0x47F8F8F: e_data_book_view_new (e-data-book-view.c:229)
+
+2009-04-14  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
 	* addressbook/libebook-dbus/e-vcard.c:
 	Fix a crash that can occur during idle parsing observed while importing sim
 	contacts.  We need to ref the vcard and then unref it after our idle handler
