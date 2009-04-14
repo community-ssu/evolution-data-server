@@ -715,6 +715,7 @@ parse_idle_cb (gpointer user_data)
 
 	evc->priv->parse_id = 0;
 	e_vcard_ensure_attributes (evc);
+    g_object_unref (evc);
 
 	return FALSE;
 }
@@ -829,6 +830,7 @@ e_vcard_construct_with_uid (EVCard *evc, const char *str, const char *uid)
                 evc->priv->attributes = g_list_prepend (evc->priv->attributes, attr);
         }
 
+    g_object_ref (evc);
 	/* Lazy parse the vcard if we have nothing more important to do */
 	evc->priv->parse_id = g_idle_add_full (G_PRIORITY_LOW,
 		parse_idle_cb, evc, NULL);

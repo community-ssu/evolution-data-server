@@ -1,5 +1,12 @@
 2009-04-14  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
 
+	* addressbook/libebook-dbus/e-vcard.c:
+	Fix a crash that can occur during idle parsing observed while importing sim
+	contacts.  We need to ref the vcard and then unref it after our idle handler
+	has run.
+
+2009-04-14  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
 	* addressbook/libedata-book/e-book-backend-sync.c
 	(_e_book_backend_create_contacts): free the contacts in the list after
 	calling _respond_create_contacts to eliminate a large memory leak on
