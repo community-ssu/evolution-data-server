@@ -1,3 +1,8 @@
+2009-04-15  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
+	* addressbook/libedata-book-dbus/e-data-book-view.c:
+	revert commit below freeing ptr array segment because it was causing crashes
+
 2009-04-15  Robert Peto  <robert.peto@maemo.org>
 
 	* addressbook/libebook-dbus/e-vcard.c (e_vcard_to_string_vcard_21):
