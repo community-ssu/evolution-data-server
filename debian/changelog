@@ -4,6 +4,8 @@ evolution-data-server (1.4.2.1-20090409.99) unstable; urgency=low
     fields.
   * Eliminate memory leak in e_book_add_contacts().
   * Fixes: NB#110765 - Large memory leak when importing a . vcf file with lots of contacts
+  * Fixes: NB#107777 - Extra newline is needed after base64 encoded values in
+    vCard 2.1
 
  -- Robert Peto <robert.peto@maemo.org>  Thu, 14 Apr 2009 10:08:02 +0100
 

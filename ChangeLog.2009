@@ -1,3 +1,8 @@
+2009-04-15  Robert Peto  <robert.peto@maemo.org>
+
+	* addressbook/libebook-dbus/e-vcard.c (e_vcard_to_string_vcard_21):
+	Insert an exra new line after every base64 encoded value.
+
 2009-04-14  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
 
 	* addressbook/libebook-dbus/e-vcard.c:

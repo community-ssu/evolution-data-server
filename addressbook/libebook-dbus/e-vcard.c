@@ -1046,7 +1046,12 @@ e_vcard_to_string_vcard_21 (EVCard *evc)
                         } while (l < attr_str->len);
                 }
 
-		g_string_append_printf (str, "%s"CRLF, attr_str->str);
+                if (attr->encoding != EVC_ENCODING_BASE64) {
+		        g_string_append_printf (str, "%s"CRLF, attr_str->str);
+                }
+                else {
+                        g_string_append_printf (str, "%s"CRLF CRLF, attr_str->str);
+                }
 		g_string_free (attr_str, TRUE);
 	}
 
