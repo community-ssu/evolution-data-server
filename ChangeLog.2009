@@ -1,5 +1,24 @@
 2009-04-15  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
 
+	* addressbook/libebook-dbus/e-vcard.c:
+	Fix crashes observed regularly when importing contacts from the SIM card.
+	The failure mode was that the idle_parse_cb is called from the main thread,
+	but at any time during the idle handler, the object can be deleted from a
+	different thread since the idle callback does not hold a reference.  My
+	previous attempt to fix the leak exacerbated the problem because the
+	_evc_cancel_idle_parsing was indirectly called by the idle callback.  So I
+	split the out an ensure_attributes_internal() function that does not cancel
+	the idle source.
+	In addition, the parse_id member variable can be accessed from multiple
+	threads and access is not protected.  I tried ot use a weak pointer instead
+	of taking a reference for the idle callback, but that caused a lot of other
+	problems and I was not able to make it work.
+	* addressbook/libedata-book-dbus/e-data-book-view.c:
+	un-revert the previous change since that was not actually the cause of the
+	crash, it was in fact the change right before that was causing the problems
+
+2009-04-15  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
 	* addressbook/libedata-book-dbus/e-data-book-view.c:
 	revert commit below freeing ptr array segment because it was causing crashes
 

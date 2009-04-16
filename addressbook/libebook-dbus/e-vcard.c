@@ -50,6 +50,7 @@ struct _EVCardPrivate {
 	char     *vcard;
 	guint     parse_id;
 	unsigned  parsing : 1;
+	GMutex   *idle_parse_mutex;
 };
 
 struct _EVCardAttribute {
@@ -81,17 +82,15 @@ static char * _evc_escape_string_21 (const char *s);
 
 static void e_vcard_attribute_param_add_value_with_len (EVCardAttributeParam *param, const char *value, int length);
 
-static void _evc_cancel_idle_parsing (EVCard *evc)
+static void _evc_cancel_idle_parsing (EVCardPrivate *priv)
 {
-	if (evc->priv->parse_id != 0) {
-		g_source_remove (evc->priv->parse_id);
-		evc->priv->parse_id = 0;
-		/* in order to prevent crashes in the parse idle callback when the vcard
-		 * has been unreffed before the idle handler is called, we take a ref,
-		 * so we must cancel it here */
-		g_object_unref (evc);
+	g_return_if_fail (priv);
+	g_mutex_lock (priv->idle_parse_mutex);
+	if (priv->parse_id != 0) {
+		g_source_remove (priv->parse_id);
+		priv->parse_id = 0;
 	}
-
+	g_mutex_unlock (priv->idle_parse_mutex);
 }
 
 static void
@@ -99,14 +98,14 @@ e_vcard_dispose (GObject *object)
 {
 	EVCard *evc = E_VCARD (object);
 
-	_evc_cancel_idle_parsing (evc);
-
 	if (evc->priv) {
+		_evc_cancel_idle_parsing (evc->priv);
 		/* Directly access priv->attributes and don't call e_vcard_ensure_attributes(),
  		 * since it is pointless to start vCard parsing that late. */
 		g_list_foreach (evc->priv->attributes, (GFunc)e_vcard_attribute_free, NULL);
 		g_list_free (evc->priv->attributes);
 		g_free (evc->priv->vcard);
+		g_mutex_free (evc->priv->idle_parse_mutex);
 
 		g_free (evc->priv);
 		evc->priv = NULL;
@@ -147,6 +146,7 @@ static void
 e_vcard_init (EVCard *evc)
 {
 	evc->priv = g_new0 (EVCardPrivate, 1);
+	evc->priv->idle_parse_mutex = g_mutex_new ();
 }
 
 GType
@@ -687,8 +687,8 @@ parse (EVCard *evc, const char *str, gboolean ignore_uid)
 	evc->priv->attributes = g_list_reverse (evc->priv->attributes);
 }
 
-static GList*
-e_vcard_ensure_attributes (EVCard *evc)
+static void
+_e_vcard_ensure_attributes_internal (EVCard *evc)
 {
 	if (evc->priv->vcard) {
 		gboolean have_uid = (NULL != evc->priv->attributes);
@@ -709,10 +709,15 @@ e_vcard_ensure_attributes (EVCard *evc)
 		g_free (vcs);
 
 		evc->priv->parsing = FALSE;
-
-		/* If the parsing was forced before the idle cb, remove it */
-		_evc_cancel_idle_parsing (evc);
 	}
+}
+
+static GList*
+e_vcard_ensure_attributes (EVCard *evc)
+{
+	_e_vcard_ensure_attributes_internal (evc);
+	/* If the parsing was forced before the idle cb, remove it */
+	_evc_cancel_idle_parsing (evc->priv);
 
 	return evc->priv->attributes;
 }
@@ -722,9 +727,13 @@ parse_idle_cb (gpointer user_data)
 {
 	EVCard *evc = user_data;
 
-	evc->priv->parse_id = 0;
-	e_vcard_ensure_attributes (evc);
-	g_object_unref (evc);
+	g_mutex_lock (evc->priv->idle_parse_mutex);
+	if (evc->priv->parse_id) {
+		g_debug ("executing source id %d for %p", evc->priv->parse_id, evc);
+		evc->priv->parse_id = 0;
+		_e_vcard_ensure_attributes_internal (evc);
+	}
+	g_mutex_unlock (evc->priv->idle_parse_mutex);
 
 	return FALSE;
 }
@@ -830,19 +839,19 @@ e_vcard_construct_with_uid (EVCard *evc, const char *str, const char *uid)
 	if (*str)
 		evc->priv->vcard = g_strdup (str);
 
-        if (uid) {
-                EVCardAttribute *attr;
+	if (uid) {
+		EVCardAttribute *attr;
 
-                attr = e_vcard_attribute_new (NULL, EVC_UID);
-                e_vcard_attribute_add_value (attr, uid);
+		attr = e_vcard_attribute_new (NULL, EVC_UID);
+		e_vcard_attribute_add_value (attr, uid);
 
-                evc->priv->attributes = g_list_prepend (evc->priv->attributes, attr);
-        }
+		evc->priv->attributes = g_list_prepend (evc->priv->attributes, attr);
+	}
 
-    g_object_ref (evc);
 	/* Lazy parse the vcard if we have nothing more important to do */
+	g_object_ref (evc);
 	evc->priv->parse_id = g_idle_add_full (G_PRIORITY_LOW,
-		parse_idle_cb, evc, NULL);
+		parse_idle_cb, evc, g_object_unref);
 }
 
 void

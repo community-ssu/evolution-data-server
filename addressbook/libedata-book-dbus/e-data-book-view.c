@@ -284,9 +284,9 @@ e_data_book_view_finalize (GObject *object)
   reset_array (priv->adds);
   reset_array (priv->changes);
   reset_array (priv->removes);
-  g_ptr_array_free (priv->adds, FALSE);
-  g_ptr_array_free (priv->changes, FALSE);
-  g_ptr_array_free (priv->removes, FALSE);
+  g_ptr_array_free (priv->adds, TRUE);
+  g_ptr_array_free (priv->changes, TRUE);
+  g_ptr_array_free (priv->removes, TRUE);
 
   g_free (priv->card_query);
 
