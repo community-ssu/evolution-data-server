@@ -1,5 +1,14 @@
 2009-04-16  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
 
+	* addressbook/libebook-dbus/e-book.c:
+	Take a ref on the EBook* or EBookQuery* variables when we use them for async
+	dbus calls.  Only one of the functions in this file actually reffed the
+	object that it was holding.  So I added some helper functions to
+	automatically ref and unref these variables when creating / freeing the
+	AsyncData structs.  Fixes: NB#108665
+
+2009-04-16  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
 	* addressbook/libebook-dbus/e-vcard.c:
 	un-revert a couple changes that should not have been reverted with the lazy parsing.
 
