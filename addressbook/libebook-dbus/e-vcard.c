@@ -632,7 +632,7 @@ parse (EVCard *evc, const char *str, gboolean ignore_uid)
 		    (ignore_uid && !strcmp (attr->name, EVC_UID)))
 			e_vcard_attribute_free (attr);
 		else
-			e_vcard_add_attribute (evc, attr);
+			evc->priv->attributes = g_list_prepend (evc->priv->attributes, attr);
 	}
 
 	gboolean seen_end = FALSE;
@@ -657,7 +657,7 @@ parse (EVCard *evc, const char *str, gboolean ignore_uid)
 			e_vcard_attribute_free (attr);
 			continue;
 		}
-		e_vcard_add_attribute (evc, attr);
+		evc->priv->attributes = g_list_prepend (evc->priv->attributes, attr);
 	}
 
 	if (count == 50) {

@@ -1,5 +1,10 @@
 2009-04-16  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
 
+	* addressbook/libebook-dbus/e-vcard.c:
+	un-revert a couple changes that should not have been reverted with the lazy parsing.
+
+2009-04-16  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
 	* Revert lazy vcard parsing since it was causing too many regressions
 
 2009-04-15  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
