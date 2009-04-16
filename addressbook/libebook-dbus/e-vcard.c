@@ -48,7 +48,6 @@ typedef enum {
 struct _EVCardPrivate {
 	GList    *attributes;
 	char     *vcard;
-	guint     parse_id;
 	unsigned  parsing : 1;
 };
 
@@ -85,10 +84,6 @@ static void
 e_vcard_dispose (GObject *object)
 {
 	EVCard *evc = E_VCARD (object);
-
-	if (evc->priv->parse_id != 0) {
-		g_source_remove (evc->priv->parse_id);
-	}
 
 	if (evc->priv) {
 		/* Directly access priv->attributes and don't call e_vcard_ensure_attributes(),
@@ -637,7 +632,7 @@ parse (EVCard *evc, const char *str, gboolean ignore_uid)
 		    (ignore_uid && !strcmp (attr->name, EVC_UID)))
 			e_vcard_attribute_free (attr);
 		else
-			evc->priv->attributes = g_list_prepend (evc->priv->attributes, attr);
+			e_vcard_add_attribute (evc, attr);
 	}
 
 	gboolean seen_end = FALSE;
@@ -662,7 +657,7 @@ parse (EVCard *evc, const char *str, gboolean ignore_uid)
 			e_vcard_attribute_free (attr);
 			continue;
 		}
-		evc->priv->attributes = g_list_prepend (evc->priv->attributes, attr);
+		e_vcard_add_attribute (evc, attr);
 	}
 
 	if (count == 50) {
@@ -698,25 +693,9 @@ e_vcard_ensure_attributes (EVCard *evc)
 		g_free (vcs);
 
 		evc->priv->parsing = FALSE;
-
-		/* If the parsing was forced before the idle cb, remove it */
-		if (evc->priv->parse_id != 0) {
-			g_source_remove (evc->priv->parse_id);
-		}
 	}
 
 	return evc->priv->attributes;
-}
-
-static gboolean
-parse_idle_cb (gpointer user_data)
-{
-	EVCard *evc = user_data;
-
-	evc->priv->parse_id = 0;
-	e_vcard_ensure_attributes (evc);
-
-	return FALSE;
 }
 
 /**
@@ -828,10 +807,6 @@ e_vcard_construct_with_uid (EVCard *evc, const char *str, const char *uid)
 
                 evc->priv->attributes = g_list_prepend (evc->priv->attributes, attr);
         }
-
-	/* Lazy parse the vcard if we have nothing more important to do */
-	evc->priv->parse_id = g_idle_add_full (G_PRIORITY_LOW,
-		parse_idle_cb, evc, NULL);
 }
 
 void
