@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20090420.99) unstable; urgency=low
+
+  * Fixes: NB#112037 - crash in book_view_thread
+
+ -- Robert Peto <robert.peto@maemo.org>  Tue, 21 Apr 2009 14:12:32 +0100
+
 evolution-data-server (1.4.2.1-20090420) unstable; urgency=low
 
   * Fixes: NB#108665 - Random crash in

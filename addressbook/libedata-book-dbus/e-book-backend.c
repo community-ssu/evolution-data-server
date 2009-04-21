@@ -371,6 +371,8 @@ e_book_backend_start_book_view (EBookBackend  *backend,
 
 	g_assert (E_BOOK_BACKEND_GET_CLASS (backend)->start_book_view);
 
+        e_flag_wait (backend->priv->opened_flag);
+
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->start_book_view) (backend, book_view);
 }
 
@@ -390,6 +392,8 @@ e_book_backend_stop_book_view (EBookBackend  *backend,
 	g_return_if_fail (E_IS_DATA_BOOK_VIEW (book_view));
 
 	g_assert (E_BOOK_BACKEND_GET_CLASS (backend)->stop_book_view);
+
+        e_flag_wait (backend->priv->opened_flag);
 
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->stop_book_view) (backend, book_view);
 }

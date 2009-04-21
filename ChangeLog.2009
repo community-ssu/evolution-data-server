@@ -1,3 +1,9 @@
+2009-04-21  Robert Peto  <robert.peto@maemo.org>
+
+	* addressbook/libedata-book-dbus/e-book-backend.c
+	(e_book_backend_start_book_view(), e_book_backend_stop_book_view()):
+	Start/Stop book views only after backend is loaded.
+
 2009-04-16  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
 
 	* addressbook/libebook-dbus/e-book.c:
