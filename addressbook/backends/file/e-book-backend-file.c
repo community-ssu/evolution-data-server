@@ -143,6 +143,30 @@ set_revision (EContact *contact)
 	e_contact_set (contact, E_CONTACT_REV, time_string);
 }
 
+/* sync both main and index DBs */
+static int
+sync_dbs (EBookBackendFile *bf)
+{
+        int db_error;
+
+        global_env.had_error = FALSE;
+
+        /* sync the index file if available */
+        if (bf->priv->index)
+                e_book_backend_file_index_sync (bf->priv->index);
+
+        /* sync the main db */
+        db_error = bf->priv->file_db->sync (bf->priv->file_db, 0);
+        if (db_error != 0)
+                WARNING ("db->sync failed with %s", db_strerror (db_error));
+        else if (global_env.had_error) {
+                WARNING ("db->sync failed: global env error");
+                db_error = ENOSPC;
+        }
+
+        return db_error;
+}
+
 static void
 load_last_running_id (EBookBackendFile *bf)
 {
@@ -200,6 +224,7 @@ unique_id_to_string (int id)
 	return g_strdup_printf ("%d", id);
 }
 
+/* put the running_id only, sync should called in caller */
 static gboolean
 e_book_backend_file_store_unique_id (EBookBackendFile *bf)
 {
@@ -217,19 +242,19 @@ e_book_backend_file_store_unique_id (EBookBackendFile *bf)
 	uid = unique_id_to_string (bf->priv->running_id);
 	string_to_dbt((const char *)uid, &id_dbt);
 
+        global_env.had_error = FALSE;
 	db_error = db->put (db, NULL, &rid_dbt, &id_dbt, 0);
 	g_free (uid);
  	if (db_error != 0) {
 		WARNING ("put failed: %s", db_strerror (db_error));
 		return FALSE;
 	}
+        else if (global_env.had_error == TRUE) {
+                WARNING ("global env error");
+                return FALSE;
+        }
 
-	db_error = db->sync (db, 0);
-	if (db_error != 0) {
-		WARNING ("sync failed: %s", db_strerror (db_error));
-		return FALSE;
-	}
-	return TRUE;
+        return TRUE;
 }
 
 static char *
@@ -240,7 +265,7 @@ e_book_backend_file_create_unique_id (EBookBackendFile *bf)
 		load_last_running_id (bf);
 	}
 	if (bf->priv->running_id >= RUNNING_ID_MAX) {
-		WARNING ("Warning running id overrun");
+		WARNING ("running id overrun");
 		bf->priv->running_id = 1;
 	}
 	++bf->priv->running_id;
@@ -275,7 +300,7 @@ is_contact_preserved (EContact *contact)
         return FALSE;
 }
 
-/* put the vcard to db, but doesn't sync the db */
+/* put the vcard to main db and index db, but don't sync the DBs */
 static int
 insert_contact (EBookBackendFile *bf,
                 const char       *vcard_req,
@@ -334,6 +359,7 @@ insert_contact (EBookBackendFile *bf,
         /* recreate the vcard string with the new values */
         vcard = e_vcard_to_string (E_VCARD (*contact), EVC_FORMAT_VCARD_30);
 
+        /* put the vcard to db */
         string_to_dbt (vcard, &vcard_dbt);
 
         global_env.had_error = FALSE;
@@ -349,39 +375,34 @@ insert_contact (EBookBackendFile *bf,
 		g_object_unref (*contact);
 		*contact = NULL;
 	}
+        else if (bf->priv->index) {
+                /* put contact to index db */
+                e_book_backend_file_index_add_contact (bf->priv->index, *contact);
+        }
 
         return db_error;
 }
 
-/* put the vcard to db and sync the db directly */
-static EBookBackendSyncStatus
-do_create (EBookBackendFile *bf,
-           const char       *vcard_req,
-           EContact        **contact)
+/* put contact to main and index DBs, put running id, sync DBs */
+static int
+insert_contact_sync (EBookBackendFile *bf,
+                     const char       *vcard_req,
+                     EContact        **contact)
 {
-        DB *db = bf->priv->file_db;
-        int db_error;
 
-        g_assert (bf);
-        g_assert (vcard_req);
-        g_assert (contact);
+        int db_error;
 
         db_error = insert_contact (bf, vcard_req, contact);
 
-	if (0 == db_error) {
-		/* Sync the database */
-		global_env.had_error = FALSE;
-		if (e_book_backend_file_store_unique_id (bf)) {
-			db_error = db->sync (db, 0);
-		}
-		if (db_error != 0) {
-			WARNING ("db->sync failed with %s", db_strerror (db_error));
-		}
-		if (global_env.had_error)
-			db_error = ENOSPC;
-	}
+        if (0 == db_error) {
+                /* store the running id */
+                if (e_book_backend_file_store_unique_id (bf)) {
+                        /* sync databases */
+                        db_error = sync_dbs (bf);
+                }
+        }
 
-        return db_error_to_status (db_error);
+        return db_error;
 }
 
 static EBookBackendSyncStatus
@@ -391,20 +412,17 @@ e_book_backend_file_create_contact (EBookBackendSync *backend,
 				    const char *vcard,
 				    EContact **contact)
 {
-	EBookBackendSyncStatus status;
 	EBookBackendFile *bf = E_BOOK_BACKEND_FILE (backend);
+        int db_error;
 
         if (e_book_backend_is_writable (E_BOOK_BACKEND (backend)) == FALSE) {
                 WARNING (G_STRLOC ": book is read only");
                 return GNOME_Evolution_Addressbook_PermissionDenied;
         }
 
-	status = do_create (bf, vcard, contact);
-	if (status == GNOME_Evolution_Addressbook_Success) {
-		e_book_backend_file_index_add_contact (bf->priv->index, *contact);
-		e_book_backend_file_index_sync (bf->priv->index);
-	}
-	return status;
+        db_error = insert_contact_sync (bf, vcard, contact);
+
+        return db_error_to_status (db_error);
 }
 
 static EBookBackendSyncStatus
@@ -418,7 +436,6 @@ e_book_backend_file_create_contacts (EBookBackendSync *backend,
         EContact *contact;
         DB *db;
         int db_error = 0;
-        EBookBackendSyncStatus status;
 
         if (e_book_backend_is_writable (E_BOOK_BACKEND (backend)) == FALSE) {
                 WARNING (G_STRLOC ": book is read only");
@@ -445,7 +462,8 @@ e_book_backend_file_create_contacts (EBookBackendSync *backend,
                         break;
                 }
 
-                e_book_backend_file_index_add_contact (bf->priv->index, contact);
+                /* NOTE: this function is moved to insert_contact
+                e_book_backend_file_index_add_contact (bf->priv->index, contact); */
 
                 /* Pass the contact back to the server for view updates */
                 *contacts = g_list_prepend (*contacts, contact);
@@ -453,22 +471,13 @@ e_book_backend_file_create_contacts (EBookBackendSync *backend,
         /* reverse contacts list, to keep order */
         *contacts = g_list_reverse (*contacts);
 
-	/* Sync the database */
-	global_env.had_error = FALSE;
+        /* store the running id */
 	if (e_book_backend_file_store_unique_id (bf)) {
-		db_error = db->sync (db, 0);
+	        /* sync the databases */
+                db_error = sync_dbs (bf);
 	}
-	if (db_error != 0) {
-		WARNING ("db->sync failed with %s", db_strerror (db_error));
-	}
-	if (global_env.had_error)
-		db_error = ENOSPC;
 
-        status = db_error_to_status (db_error);
-        if (status == GNOME_Evolution_Addressbook_Success) {
-                e_book_backend_file_index_sync (bf->priv->index);
-        }
-        return status;
+        return db_error_to_status (db_error);
 }
 
 static EBookBackendSyncStatus
@@ -521,23 +530,24 @@ e_book_backend_file_remove_contacts (EBookBackendSync *backend,
 		g_free (vcard_dbt.data);
 	}
 
-	/* if we actually removed some, try to sync */
-	if (removed_cards) {
-		db_error = db->sync (db, 0);
-		if (db_error != 0)
-			WARNING ("db->sync failed with %s", db_strerror (db_error));
-	}
+        while (removed_contacts) {
+                EContact *contact = removed_contacts->data;
+                e_book_backend_file_index_remove_contact (bf->priv->index, contact);
+                removed_contacts = g_list_delete_link (removed_contacts, removed_contacts);
+                // TODO: unref contact?
+                // TODO: check if conversion to EContact is realy needed for removing from index
+                //       at 1st glance it seems it uses only the id, which is already given
+        }
 
-	*ids = removed_cards;
+        db_error = sync_dbs (bf);
 
-	while (removed_contacts) {
-		EContact *contact = removed_contacts->data;
-		e_book_backend_file_index_remove_contact (bf->priv->index, contact);
-		removed_contacts = g_list_delete_link (removed_contacts, removed_contacts);
-	}
-	e_book_backend_file_index_sync (bf->priv->index);
-
-	return rv;
+        if (rv != GNOME_Evolution_Addressbook_Success) {
+                /* error happend whilst deleting contacts from db */
+                return rv;
+        }
+        else {
+                return db_error_to_status (db_error);
+        }
 }
 
 static EBookBackendSyncStatus
@@ -606,7 +616,6 @@ modify_contact (EBookBackendFile *bf, const char *vcard, EContact **contact)
 		g_object_unref (old_contact);
 		return db_error_to_status (db_error);
 	}
-
 }
 
 static EBookBackendSyncStatus
@@ -618,8 +627,7 @@ e_book_backend_file_modify_contact (EBookBackendSync *backend,
 {
 	EBookBackendSyncStatus status;
 	EBookBackendFile *bf = E_BOOK_BACKEND_FILE (backend);
-	DB             *db = bf->priv->file_db;
-	int            db_error;
+	int db_error;
 
         if (e_book_backend_is_writable (E_BOOK_BACKEND (backend)) == FALSE) {
                 WARNING (G_STRLOC ": book is read only");
@@ -627,22 +635,13 @@ e_book_backend_file_modify_contact (EBookBackendSync *backend,
         }
 
 	status = modify_contact (bf, vcard, contact);
-	
+
 	if (status == GNOME_Evolution_Addressbook_Success) {
-		global_env.had_error = FALSE;
-		db_error = db->sync (db, 0);
-		if (global_env.had_error) db_error = ENOSPC;
-		if (db_error == 0) {
-			e_book_backend_file_index_sync (bf->priv->index);
-			
-			return GNOME_Evolution_Addressbook_Success;
-		} else {
-			WARNING ("db->sync failed with %s", db_strerror (db_error));
-			return db_error_to_status (db_error);
-		}
-	} else {
-		return status;
-	}
+                /* sync databases */
+                db_error = sync_dbs (bf);
+        }
+
+        return db_error_to_status (db_error);
 }
 
 static EBookBackendSyncStatus
@@ -674,23 +673,16 @@ e_book_backend_file_modify_contacts (EBookBackendSync *backend,
 		/* Commit the contact */
 		status = modify_contact (bf, *vcards, &contact);
 		if (status != GNOME_Evolution_Addressbook_Success)
-			goto done;
+			return status;
 
 		/* Pass the contact back to the server for view updates */
 		*contacts = g_list_prepend (*contacts, contact);
 	}
 
-	/* Sync the database */
-	global_env.had_error = FALSE;
-	db_error = db->sync (db, 0);
-	if (global_env.had_error) db_error = ENOSPC;
-	if (db_error != 0) {
-		return db_error_to_status (db_error);
-	}
-	e_book_backend_file_index_sync (bf->priv->index);
+        /* sync databases */
+        db_error = sync_dbs (bf);
 
- done:
-	return status;
+        return db_error_to_status (db_error);
 }
 
 static EBookBackendSyncStatus
@@ -1433,7 +1425,6 @@ get_contact_from_string (gchar *str, guint *start, guint *end)
 static gboolean
 check_md5sum (const gchar *name)
 {
-	const gchar *home;
 	gint i = 0;
 	gint fd = -1;
 	gchar *md5file;
@@ -1537,17 +1528,17 @@ install_pre_installed_vcards (EBookBackend *backend)
 		while ((get_contact_from_string (vcard, &start, &end)) != FALSE) {
 			vctmpstr = g_strndup (vcard+start, end-start+1);
 			if (vctmpstr) {
-				EBookBackendSyncStatus status;
-				status = do_create (bf, vctmpstr, &contact);
+                                /* the returned error is useless in this case */
+                                insert_contact (bf, vctmpstr, &contact);
+                                g_object_unref (contact);
 				g_free (vctmpstr);
-				if (status == GNOME_Evolution_Addressbook_Success) {
-					e_book_backend_file_index_add_contact (bf->priv->index, contact);
-				}
 			}
 		}
 	}
 	g_dir_close (directory);
 
+        /* sync the main and index dbs */
+        sync_dbs (bf);
 }
 
 static GNOME_Evolution_Addressbook_CallStatus
@@ -1660,7 +1651,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
                 /* TODO: refactor this whole function... */
                 /* Do deadlock detection internally. */
                 if ((db_error = env->set_lk_detect(env, DB_LOCK_DEFAULT)) != 0) {
-                        env_close (env, 0);
+                        env->close (env, 0);
                         WARNING ("set_lk_detect failed with %s", db_strerror (db_error));
                         G_UNLOCK (global_env);
                         g_free (dirname);
@@ -1761,11 +1752,11 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 			else {
 #ifdef CREATE_DEFAULT_VCARD
 				EContact *contact = NULL;
-				EBookBackendSyncStatus status;
-				
-				status = do_create (bf, XIMIAN_VCARD, &contact);
-				if (status != GNOME_Evolution_Addressbook_Success)
-					WARNING ("Cannot create default contact: %d", status);
+
+                                db_error = insert_contact_sync (bf, XIMIAN_VCARD, &contact);
+                                if (db_error != 0) {
+                                        WARNING ("Cannot create default contact: %s", db_strerror (db_error));
+                                }
 				if (contact)
 					g_object_unref (contact);
 #endif
@@ -1932,15 +1923,16 @@ static void
 e_book_backend_file_sync (EBookBackend *backend)
 {
 	EBookBackendFile *bf = E_BOOK_BACKEND_FILE (backend);
-	int db_error;
-	
+
 	g_return_if_fail (bf != NULL);
-	
-	if (bf->priv->file_db) {
-		db_error = bf->priv->file_db->sync (bf->priv->file_db, 0);
-		if (db_error != 0)
-			WARNING ("db->sync failed with %s", db_strerror (db_error));
-	}
+        g_return_if_fail (bf->priv->file_db != NULL);
+
+        if (e_book_backend_is_writable (E_BOOK_BACKEND (backend)) == FALSE) {
+                WARNING (G_STRLOC ": book is read only");
+                return;
+        }
+
+        sync_dbs (bf);
 }
 
 static gboolean
