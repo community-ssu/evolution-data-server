@@ -539,6 +539,8 @@ e_book_backend_file_remove_contacts (EBookBackendSync *backend,
                 //       at 1st glance it seems it uses only the id, which is already given
         }
 
+        *ids = removed_cards;
+
         db_error = sync_dbs (bf);
 
         if (rv != GNOME_Evolution_Addressbook_Success) {

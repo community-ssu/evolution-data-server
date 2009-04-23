@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20090422.99) unstable; urgency=low
+
+  * Fixes: NB#112735 - Unable to delete contacts from addressbook
+
+ -- Robert Peto <robert.peto@maemo.org>  Thu, 23 Apr 2009 16:21:32 +0100
+
 evolution-data-server (1.4.2.1-20090422) unstable; urgency=low
 
   * Fixes: NB#112037 - crash in book_view_thread

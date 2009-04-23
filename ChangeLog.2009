@@ -1,3 +1,10 @@
+2009-04-23  Robert Peto  <robert.peto@maemo.org>
+
+	Pupulate back the removed ids after contacts are deleted in file-backend.
+
+	* addressbook/backends/file/e-book-backend-file.c
+	 (e_book_backend_file_remove_contacts())
+
 2009-04-22  Robert Peto  <robert.peto@maemo.org>
 
 	Sync both main db and index db when file-backend's sync method is
