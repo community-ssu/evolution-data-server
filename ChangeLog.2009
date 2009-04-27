@@ -1,3 +1,13 @@
+2009-04-27  Robert Peto  <robert.peto@maemo.org>
+
+	* addressbook/libebook-dbus/e-vcard.c (read_attribute_value(),
+	read_attribute_params(), read_attribute()): Check CHARSET parameter
+	and convert different charsets to UTF-8.
+
+	* e_vcard_to_string_vcard_21(): Put CHARSET=UTF-8 string where
+	QUOTED-PRINTABLE encoding is applied, since we represent all strings
+	in UTF-8 internally.
+
 2009-04-23  Robert Peto  <robert.peto@maemo.org>
 
 	Pupulate back the removed ids after contacts are deleted in file-backend.

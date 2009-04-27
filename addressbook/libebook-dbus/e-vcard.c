@@ -243,7 +243,7 @@ skip_until (const char **p, char *s)
 
 
 static gboolean
-read_attribute_value (EVCardAttribute *attr, const char **p, gboolean quoted_printable)
+read_attribute_value (EVCardAttribute *attr, const char **p, gboolean quoted_printable, char *charset)
 {
 	const char *lp = *p;
 	GString *str;
@@ -304,7 +304,22 @@ read_attribute_value (EVCardAttribute *attr, const char **p, gboolean quoted_pri
 		else if ((*lp == ';') ||
 			 (*lp == ',' && !strcmp (attr->name, "CATEGORIES"))) {
 			WRITE_CHUNK;
-			e_vcard_attribute_add_value (attr, str->str);
+                        if (!charset || !g_ascii_strcasecmp (charset, "utf-8"))
+			        e_vcard_attribute_add_value (attr, str->str);
+                        else {
+                                char *converted;
+
+                                converted = g_convert (str->str, -1, "utf-8",
+                                                charset, NULL, NULL, NULL);
+                                if (converted) {
+                                        e_vcard_attribute_add_value (attr, converted);
+                                        g_free (converted);
+                                }
+                                else {
+                                        /* error in conversion, using original string */
+                                        e_vcard_attribute_add_value (attr, str->str);
+                                }
+                        }
 			g_string_assign (str, "");
 			lp = g_utf8_next_char(lp);
 			count++;
@@ -337,7 +352,7 @@ read_attribute_value (EVCardAttribute *attr, const char **p, gboolean quoted_pri
 }
 
 static gboolean
-read_attribute_params (EVCardAttribute *attr, const char **p, gboolean *quoted_printable)
+read_attribute_params (EVCardAttribute *attr, const char **p, gboolean *quoted_printable, char **charset)
 {
 	const char *lp = *p;
 	GString *str;
@@ -359,7 +374,7 @@ read_attribute_params (EVCardAttribute *attr, const char **p, gboolean *quoted_p
 		 * a '=' the string contains the parameter name.  if
 		 * we hit a ';' the string contains the parameter
 		 * value and the name is either ENCODING (if value ==
-		 * QUOTED-PRINTABLE) or TYPE (in any other case.)
+		 * QUOTED-PRINTABLE) or TYPE or CHARSET
 		 */
 		else if (*lp == '=') {
 			if (str->len > 0) {
@@ -405,15 +420,21 @@ read_attribute_params (EVCardAttribute *attr, const char **p, gboolean *quoted_p
 							lp = g_utf8_next_char (lp);
 					}
 				}
-
-				if (param
-				    && !strcmp (param->name, "ENCODING")
-				    && !g_ascii_strcasecmp (param->values->data, "quoted-printable")) {
-					*quoted_printable = TRUE;
-					e_vcard_attribute_param_free (param);
-					param = NULL;
+				if (param) {
+                                        if (!strcmp (param->name, "ENCODING")  &&
+                                            !g_ascii_strcasecmp (param->values->data, "quoted-printable")) {
+					        *quoted_printable = TRUE;
+					        e_vcard_attribute_param_free (param);
+					        param = NULL;
+                                        }
+                                        /* we convert any charset to UTF-8 so we don't need it further */
+                                        else if (!g_ascii_strcasecmp (param->name, "CHARSET")) {
+                                                *charset = g_strdup (param->values->data);
+                                                e_vcard_attribute_param_free (param);
+                                                param = NULL;
+                                        }
 				}
-			}
+                        }
 			else {
 				if (str->len > 0) {
 					char *param_name;
@@ -504,6 +525,7 @@ read_attribute (const char **p)
 {
 	char *attr_group = NULL;
 	char *attr_name = NULL;
+        char *charset = NULL;
 	EVCardAttribute *attr = NULL;
 	GString *str;
 	const char *lp = *p;
@@ -583,7 +605,7 @@ read_attribute (const char **p)
 	if (*lp == ';') {
 		/* skip past the ';' */
 		lp = g_utf8_next_char(lp);
-		if (!read_attribute_params (attr, &lp, &is_qp)) {
+		if (!read_attribute_params (attr, &lp, &is_qp, &charset)) {
 			*p = lp;
 			skip_to_next_line(p);
 			goto lose;
@@ -595,7 +617,7 @@ read_attribute (const char **p)
 	if (*lp == ':') {
 		/* skip past the ':' */
 		lp = g_utf8_next_char(lp);
-		if (!read_attribute_value (attr, &lp, is_qp))
+		if (!read_attribute_value (attr, &lp, is_qp, charset))
 		{
 			goto lose;
 		}
@@ -606,11 +628,16 @@ read_attribute (const char **p)
 	if (!attr->values) {
 		goto lose;
 	}
+        if (charset)
+                g_free (charset);
 
 	return attr;
  lose:
 	if (attr)
 		e_vcard_attribute_free (attr);
+        if (charset)
+                g_free (charset);
+
 	return NULL;
 }
 
@@ -888,7 +915,7 @@ e_vcard_to_string_vcard_21 (EVCard *evc)
                                         g_string_append (attr_str, ";ENCODING=BASE64");
                                         break;
                                 case EVC_ENCODING_QP:
-                                        g_string_append (attr_str, ";ENCODING=QUOTED-PRINTABLE");
+                                        g_string_append (attr_str, ";CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE");
                                         qp_set = TRUE;
                                         break;
                                 default:
@@ -956,7 +983,10 @@ e_vcard_to_string_vcard_21 (EVCard *evc)
                                 gboolean is_qp = FALSE;
                                 char *qp_str = _evc_quoted_printable_encode (escaped_value, strlen (escaped_value), &is_qp);
                                 if (is_qp && !qp_set) {
-                                        attr_str = g_string_append (attr_str, ";ENCODING=QUOTED-PRINTABLE");
+                                        /* we set up charset to utf-8 implicitely, because
+                                         * the internal representation is always utf-8 */
+                                        attr_str = g_string_append (attr_str,
+                                                        ";CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE");
                                         qp_set = TRUE;
                                 }
                                 g_string_append (value_str, qp_str);
