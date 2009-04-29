@@ -719,11 +719,15 @@ get_required_fields_reply(DBusGProxy *proxy, char **fields, GError *error, gpoin
 {
   AsyncData *data = user_data;
   EBookEListCallback cb = data->callback;
-  char **i = fields;
+  char **i;
   EList *efields = e_list_new (NULL,
                                (EListFreeFunc) g_free,
                                NULL);
 
+  if (error)
+    fields = NULL;
+
+  i = fields;
   while (*i != NULL) {
     e_list_append (efields, (*i++));
   }
@@ -802,9 +806,13 @@ get_supported_fields_reply(DBusGProxy *proxy, char **fields, GError *error, gpoi
 {
   AsyncData *data = user_data;
   EBookEListCallback cb = data->callback;
-  char **i = fields;
+  char **i;
   EList *efields = e_list_new (NULL,  (EListFreeFunc) g_free, NULL);
 
+  if (error)
+    fields = NULL;
+
+  i = fields;
   while (*i != NULL) {
     e_list_append (efields, (*i++));
   }
@@ -883,11 +891,15 @@ get_supported_auth_methods_reply(DBusGProxy *proxy, char **methods, GError *erro
 {
   AsyncData *data = user_data;
   EBookEListCallback cb = data->callback;
-  char **i = methods;
+  char **i;
   EList *emethods = e_list_new (NULL,
                                 (EListFreeFunc) g_free,
                                 NULL);
 
+  if (error)
+    methods = NULL;
+
+  i = methods;
   while (*i != NULL) {
     e_list_append (emethods, (*i++));
   }
@@ -1280,6 +1292,9 @@ get_changes_reply (DBusGProxy *proxy, GPtrArray *changes, GError *error, gpointe
   EBookListCallback cb = data->callback;
   GList *list = NULL;
 
+  if (error)
+    changes = NULL;
+
   if (changes)
     list = parse_changes_array (changes);
 
@@ -1501,6 +1516,9 @@ add_contacts_reply (DBusGProxy *proxy, char **uids, GError *error, gpointer user
 {
   AsyncData *data = user_data;
   EBookCallback cb = data->callback;
+
+  if (error)
+    uids = NULL;
 
   /* TODO: what to do with uids? */
   if (cb)
@@ -1950,6 +1968,9 @@ get_book_view_reply (DBusGProxy *proxy, char *address, GError *error, gpointer u
   DBusGConnection *view_conn;
   DBusGProxy *view_proxy;
   EBookStatus status;
+
+  if (error)
+    address = NULL;
 
   if (address) {
     view_conn = dbus_g_connection_open (address, &err);

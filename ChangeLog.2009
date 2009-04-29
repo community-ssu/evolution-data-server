@@ -1,3 +1,13 @@
+2009-04-29  Marco Barisione  <marco.barisione@maemo.org>
+
+	reviewed by: Robert Peto
+
+	* libebook-dbus/e-book.c (get_required_fields_reply),
+	(get_supported_fields_reply), (get_supported_auth_methods_reply),
+	(get_changes_reply), (add_contacts_reply), (get_book_view_reply):
+	In case of error don't use the return values of D-Bus calls as they
+	are uninitialised garbage.
+
 2009-04-27  Robert Peto  <robert.peto@maemo.org>
 
 	* addressbook/libebook-dbus/e-vcard.c (read_attribute_value(),
