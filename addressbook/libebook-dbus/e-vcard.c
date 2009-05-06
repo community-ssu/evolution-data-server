@@ -979,6 +979,21 @@ e_vcard_to_string_vcard_21 (EVCard *evc)
 
                         escaped_value = _evc_escape_string_21 (value);
 
+                        if (!g_ascii_strcasecmp (attr->name, EVC_BDAY)) {
+                                /* convert date to ISO 8601 basic format since some
+                                 * 2.1 parsers can handle only this */
+                                GString *basic = g_string_new ("");
+                                char *p;
+
+                                for (p = escaped_value; *p; p++) {
+                                        if (*p != '-')
+                                                basic = g_string_append_c (basic, *p);
+                                }
+
+                                g_free (escaped_value);
+                                escaped_value = g_string_free (basic, FALSE);
+                        }
+
                         if (attr->encoding == EVC_ENCODING_RAW) {
                                 gboolean is_qp = FALSE;
                                 char *qp_str = _evc_quoted_printable_encode (escaped_value, strlen (escaped_value), &is_qp);

@@ -4,7 +4,9 @@ evolution-data-server (1.4.2.1-20090428.99) unstable; urgency=low
     Fixes: NB#111825 - Application crashing while importing Vcards with lot of
     contacts
   * Fixes: NB#111407 - e-d-s crash in e_book_backend_file_load_source ()
-    FIxes: NB#111722 - Customized preinstalled contact is not shown in Contacts
+    Fixes: NB#111722 - Customized preinstalled contact is not shown in Contacts
+  * Fixes: NB#99837 - Contact birthdate created by osso-addressbook is displayed
+    as "Invalid Date Time" in PC Suit logs
 
  -- Robert Peto <robert.peto@maemo.org>  Tue, 28 Apr 2009 09:35:24 +0100
 
