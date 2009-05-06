@@ -1,3 +1,14 @@
+2009-05-06  Robert Peto  <robert.peto@maemo.org>
+
+	NB#111407 - e-d-s crash in e_book_backend_file_load_source ()
+	NB#111722 - Customized preinstalled contact is not shown in Contacts.
+
+	* addressbook/backends/file/e-book-backend-file.c
+	(e_book_backend_file_load_source()): assign addressbook's DB after it
+	has been created successfully.
+
+	Reviewed-By: Joergen Scheibengruber <jorgen.scheibengruber@nokia.com>
+
 2009-04-29  Marco Barisione  <marco.barisione@maemo.org>
 
 	reviewed by: Robert Peto

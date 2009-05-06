@@ -1703,8 +1703,6 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 		db_error = (*db->open) (db, NULL, filename, NULL, DB_HASH, DB_THREAD, 0666);
 	}
 
-	bf->priv->file_db = db;
-
 	if (db_error == 0) {
 		writable = TRUE;
 	} else {
@@ -1774,6 +1772,8 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 		g_free (filename);
 		return db_error_to_status (db_error);
 	}
+
+	bf->priv->file_db = db;
 
 	if (!e_book_backend_file_maybe_upgrade_db (bf)) {
 		db->close (db, 0);
