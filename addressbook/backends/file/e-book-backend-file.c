@@ -1517,11 +1517,13 @@ install_pre_installed_vcards (EBookBackend *backend)
 		path_plus_name = g_build_filename (PREINSTALL_DIR, name, NULL);
 
 		if (!check_md5sum (path_plus_name)) {
+			g_dir_close (directory);
 			g_free (path_plus_name);
 			return;
 		}
 
 		if(!g_file_get_contents (path_plus_name, &vcard, NULL, NULL)) {
+			g_dir_close (directory);
 			g_free (path_plus_name);
 			return;
 		}

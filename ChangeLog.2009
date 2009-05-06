@@ -1,5 +1,12 @@
 2009-05-06  Robert Peto  <robert.peto@maemo.org>
 
+	Fix memory leak in file-backend.
+
+	* addressbook/backends/file/e-book-backend-file.c
+	(install_pre_installed_vcards()): Close GDir when escaping
+
+2009-05-06  Robert Peto  <robert.peto@maemo.org>
+
 	Convert date parameters to ISO 8601 basic format since some 2.1
 	parsers can handle only this.
 
