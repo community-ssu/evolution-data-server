@@ -3,7 +3,19 @@
 	Fix memory leak in file-backend.
 
 	* addressbook/backends/file/e-book-backend-file.c
+	(e_book_backend_file_get_contact_list()): Free coursor's data if we
+	are not interested to keep it.
+
+	Reviewed-By: Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
+2009-05-06  Robert Peto  <robert.peto@maemo.org>
+
+	Fix memory leak in file-backend.
+
+	* addressbook/backends/file/e-book-backend-file.c
 	(install_pre_installed_vcards()): Close GDir when escaping
+
+	Reviewed-By: Jonathon Jongsma  <jonathon.jongsma@maemo.org>
 
 2009-05-06  Robert Peto  <robert.peto@maemo.org>
 
