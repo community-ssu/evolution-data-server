@@ -71,6 +71,9 @@ e_book_view_dispose (GObject *object)
     g_object_unref (view->priv->book);
     view->priv->book = NULL;
   }
+
+  if (G_OBJECT_CLASS (e_book_view_parent_class)->dispose)
+    G_OBJECT_CLASS (e_book_view_parent_class)->dispose (object);
 }
 
 static void
