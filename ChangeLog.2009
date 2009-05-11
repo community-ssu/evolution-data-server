@@ -1,5 +1,13 @@
 2009-05-11  Robert Peto  <robert.peto@maemo.org>
 
+	* addressbook/backends/file/e-book-backend-file.c (insert_contact()):
+	Persist attached photos to ensure no image data is stored in main db,
+	thus reducing its size and ease down DBus traffic.
+
+	Reviewed-By: Joergen Scheibengruber <jorgen.scheibengruber@nokia.com>
+
+2009-05-11  Robert Peto  <robert.peto@maemo.org>
+
 	* addressbook/backends/file/e-book-backend-file.c
 	  get_contact_from_string(): Optimize the reading of pre-installed
 	  contacts.

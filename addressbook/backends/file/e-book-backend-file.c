@@ -361,6 +361,11 @@ insert_contact (EBookBackendFile *bf,
         if (!(rev && *rev))
                 set_revision (*contact);
 
+	/* extract the attached image(s) (if there is any) to default photo dir */
+	/* NOTE: no need to check the return value, since it denotes only that
+	 * original contact was changed or not */
+	e_contact_persist_data (*contact, NULL);
+
         /* recreate the vcard string with the new values */
         vcard = e_vcard_to_string (E_VCARD (*contact), EVC_FORMAT_VCARD_30);
 
