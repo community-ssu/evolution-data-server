@@ -25,6 +25,11 @@
 
 #include <config.h> 
 
+/* Needed for strcasestr() which is used for reading pre-installed contacts. */
+/* TODO: create some maemo specific macro, so it's only enabled when
+ * this is compiled in sbox. This way we wouldn't break cross-compiling. */
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1410,24 +1415,28 @@ file_errcall (const char *buf1, char *buf2)
 static gchar md5conv[] = "0123456789abcdef";
 #define conv_to_digit(x) md5conv[(x)]
 
-static gboolean
-get_contact_from_string (gchar *str, guint *start, guint *end)
+/* Returns a newly allocated string that is read from @str,
+ * @next points to the next char. On failure it returns NULL
+ * and next points to NULL. */
+static char *
+get_contact_from_string (const char *str, char **next)
 {
-	gboolean found = FALSE;
+	char *begin, *end;
 
-	*start = *end;
-	
-	for (; *start <= strlen (str) && str[*start] != 'B'; (*start)++);
-	*end = *start+1;
+	*next = NULL;
+	g_return_val_if_fail (str, NULL);
 
-	for (; *end <= strlen (str); (*end)++) {
-		if (!g_ascii_strncasecmp (&str[*end], "END:VCARD", 8)) {
-			found = TRUE;
-			*end += 8;
-			break;
-		}
-	}
-	return found;
+	begin = strcasestr (str, "BEGIN:VCARD");
+	if (!begin)
+		return NULL;
+
+	end = strcasestr (begin + strlen ("BEGIN:VCARD"), "END:VCARD");
+	if (!end)
+		return NULL;
+
+	*next = end + strlen ("END:VCARD") + 1;
+
+	return g_strndup (begin, *next - begin);
 }
 
 static gboolean
@@ -1511,44 +1520,44 @@ install_pre_installed_vcards (EBookBackend *backend)
 	while ((name = g_dir_read_name (directory)) != NULL) {
 		gchar *path_plus_name;
 		gchar *vctmpstr = NULL;
-		guint end = 0;
-		guint start = 0;
 		EContact *contact;
 		gchar *vcard = NULL;
+		gchar *next = NULL;
+		gchar *begin;
 
 		if (!g_str_has_suffix (name, ".vcf")) {
 			continue;
-		};
+		}
 
 		path_plus_name = g_build_filename (PREINSTALL_DIR, name, NULL);
 
 		if (!check_md5sum (path_plus_name)) {
-			g_dir_close (directory);
 			g_free (path_plus_name);
-			return;
+			continue;
 		}
 
-		if(!g_file_get_contents (path_plus_name, &vcard, NULL, NULL)) {
-			g_dir_close (directory);
+		if (!g_file_get_contents (path_plus_name, &vcard, NULL, NULL)) {
 			g_free (path_plus_name);
-			return;
+			continue;
 		}
 		g_free (path_plus_name);
 
-		while ((get_contact_from_string (vcard, &start, &end)) != FALSE) {
-			vctmpstr = g_strndup (vcard+start, end-start+1);
-			if (vctmpstr) {
-                                /* the returned error is useless in this case */
-                                insert_contact (bf, vctmpstr, &contact);
-                                g_object_unref (contact);
-				g_free (vctmpstr);
-			}
+		begin = vcard;
+		while (begin &&
+			(vctmpstr = get_contact_from_string (begin, &next)) != NULL) {
+
+			insert_contact (bf, vctmpstr, &contact);
+
+			g_object_unref (contact);
+			g_free (vctmpstr);
+			begin = next;
 		}
+		g_free (vcard);
 	}
 	g_dir_close (directory);
 
-        /* sync the main and index dbs */
-        sync_dbs (bf);
+	/* sync the main and index dbs */
+	sync_dbs (bf);
 }
 
 static GNOME_Evolution_Addressbook_CallStatus
