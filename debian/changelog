@@ -3,6 +3,7 @@ evolution-data-server (1.4.2.1-20090507.99) unstable; urgency=low
   * Chain up to parent in e_book_view_dispose
   * Fixes: NB#115066 - Unable to pre-install big vcf files.
   * Persist photos while insert contact to file-backend's db.
+  * Fixes: NB#115704 - EDS leaks memory in file-backend
 
  -- Joergen Scheibengruber <Jorgen.Scheibengruber@nokia.com>  Fri,  8 May 2009 16:22:40 +0300
 
