@@ -2030,7 +2030,8 @@ e_book_backend_file_finalize (GObject *object)
 	g_free (bf->priv->filename);
 	g_free (bf->priv->dirname);
 	g_free (bf->priv->index_filename);
-	
+	g_free (bf->priv->sort_order);
+
 	g_free (bf->priv);
 
 	G_OBJECT_CLASS (e_book_backend_file_parent_class)->finalize (object);
