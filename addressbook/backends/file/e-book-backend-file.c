@@ -858,7 +858,6 @@ book_view_thread (gpointer data)
 	int db_error;
 	gboolean allcontacts;
 	GPtrArray *ids = NULL;
-	gboolean using_index = FALSE;
 
 	g_return_val_if_fail (E_IS_DATA_BOOK_VIEW (data), NULL);
 
@@ -899,7 +898,6 @@ book_view_thread (gpointer data)
 		DEBUG ("Using index for %s", query);
 
 		ids = e_book_backend_file_index_query (bf->priv->index, query);
-		using_index = TRUE;
 	} else if (allcontacts) {
 		if (priv->sort_order) {
 			DEBUG ("sending contacts in order sort by %s", priv->sort_order);
@@ -932,10 +930,8 @@ book_view_thread (gpointer data)
 			}
 		}
 
-		if (using_index) {
-			g_ptr_array_foreach (ids, (GFunc)g_free, NULL);
-		}
-
+		/* free the elements of pointer array */
+		g_ptr_array_foreach (ids, (GFunc) g_free, NULL);
 		g_ptr_array_free (ids, TRUE);
 	} else {
 		/* iterate over the db and do the query there */

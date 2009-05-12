@@ -1,6 +1,13 @@
 2009-05-12  Robert Peto  <robert.peto@maemo.org>
 
 	* addressbook/backends/file/e-book-backend-file.c
+	(book_view_thread()): Free properly the GPtrArray *ids variable.
+
+	Reviewed-By: Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
+2009-05-12  Robert Peto  <robert.peto@maemo.org>
+
+	* addressbook/backends/file/e-book-backend-file.c
 	(load_last_running_id()): Free cursor's data that is allocated by
 	BerkeleyDB but file-backend own it.
 
