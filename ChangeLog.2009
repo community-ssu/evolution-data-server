@@ -1,3 +1,12 @@
+2009-05-12  Robert Peto  <robert.peto@maemo.org>
+
+	* addressbook/libedata-book-dbus/e-data-book-view.c
+	(e_data_book_view_finalize()): Free the memory blocks that belongs to
+	the pointer arrays in priv struct, since we don't want them after
+	e_data_book_view_finalize() has run.
+
+	Reviewed-By: Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
 2009-05-11  Robert Peto  <robert.peto@maemo.org>
 
 	* addressbook/backends/file/e-book-backend-file.c (insert_contact()):
