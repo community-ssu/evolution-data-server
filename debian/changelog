@@ -1,11 +1,13 @@
-evolution-data-server (1.4.2.1-20090507.99) unstable; urgency=low
+evolution-data-server (1.4.2.1-20090512) unstable; urgency=low
 
   * Chain up to parent in e_book_view_dispose
   * Fixes: NB#115066 - Unable to pre-install big vcf files.
   * Persist photos while insert contact to file-backend's db.
   * Fixes: NB#115704 - EDS leaks memory in file-backend
+  * Fixes: NB#113312 - Reference counting doesn't work correctly in
+    file-backend
 
- -- Joergen Scheibengruber <Jorgen.Scheibengruber@nokia.com>  Fri,  8 May 2009 16:22:40 +0300
+ -- Robert Peto <robert.peto@maemo.org>  Tue, 12 May 2009 09:02:11 +0100
 
 evolution-data-server (1.4.2.1-20090507) unstable; urgency=low
 

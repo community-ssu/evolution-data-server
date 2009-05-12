@@ -1,5 +1,19 @@
 2009-05-12  Robert Peto  <robert.peto@maemo.org>
 
+	Fix reference counting issue in file backend's global db environment.
+	Refcount is increased/decreased from now by one.
+
+	* addressbook/backends/file/e-book-backend-file.c (setup_global_env(),
+	unref_global_env(), e_book_backend_file_load_source()):
+	Cut out the creation of global environment from
+	e_book_backend_file_load_source() and create a new function for it.
+	Create a reverese function (unref_global_env())	as well. Update
+	e_book_backend_file_dispose().
+
+	Reviewed-By: Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
+2009-05-12  Robert Peto  <robert.peto@maemo.org>
+
 	* addressbook/backends/file/e-book-backend-file.c
 	(e_book_backend_file_remove_contacts()): Unref removed_contacts' data
 	while freeing the list.
