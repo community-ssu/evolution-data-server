@@ -541,26 +541,27 @@ e_book_backend_file_remove_contacts (EBookBackendSync *backend,
 		g_free (vcard_dbt.data);
 	}
 
-        while (removed_contacts) {
-                EContact *contact = removed_contacts->data;
-                e_book_backend_file_index_remove_contact (bf->priv->index, contact);
-                removed_contacts = g_list_delete_link (removed_contacts, removed_contacts);
-                // TODO: unref contact?
-                // TODO: check if conversion to EContact is realy needed for removing from index
-                //       at 1st glance it seems it uses only the id, which is already given
-        }
+	while (removed_contacts) {
+		EContact *contact = removed_contacts->data;
+		e_book_backend_file_index_remove_contact (bf->priv->index, contact);
+		g_object_unref (contact);
+		removed_contacts = g_list_delete_link (removed_contacts, removed_contacts);
+		/* TODO: check if conversion to EContact is realy needed for
+		 * removing from index.  At 1st glance it seems it uses only
+		 * the id, which is already given */
+	}
 
-        *ids = removed_cards;
+	*ids = removed_cards;
 
-        db_error = sync_dbs (bf);
+	db_error = sync_dbs (bf);
 
-        if (rv != GNOME_Evolution_Addressbook_Success) {
-                /* error happend whilst deleting contacts from db */
-                return rv;
-        }
-        else {
-                return db_error_to_status (db_error);
-        }
+	if (rv != GNOME_Evolution_Addressbook_Success) {
+		/* error happend whilst deleting contacts from db */
+		return rv;
+	}
+	else {
+		return db_error_to_status (db_error);
+	}
 }
 
 static EBookBackendSyncStatus
