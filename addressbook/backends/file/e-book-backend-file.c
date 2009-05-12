@@ -208,6 +208,7 @@ load_last_running_id (EBookBackendFile *bf)
 			WARNING ("String to long integer conversion failed");
 			g_assert_not_reached ();
 		}
+		g_free (id_dbt.data);
 
 		bf->priv->running_id = ret;
 

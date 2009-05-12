@@ -1,5 +1,13 @@
 2009-05-12  Robert Peto  <robert.peto@maemo.org>
 
+	* addressbook/backends/file/e-book-backend-file.c
+	(load_last_running_id()): Free cursor's data that is allocated by
+	BerkeleyDB but file-backend own it.
+
+	Reviewed-By: Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
+2009-05-12  Robert Peto  <robert.peto@maemo.org>
+
 	* addressbook/backends/file/e-book-backend-file-index.c
 	(e_book_backend_file_index_get_ordered_ids()): Free stat struct
 
