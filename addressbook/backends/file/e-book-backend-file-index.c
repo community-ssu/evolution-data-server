@@ -498,6 +498,10 @@ e_book_backend_file_index_get_ordered_ids (EBookBackendFileIndex *index, const g
   else
     ids = g_ptr_array_sized_new (128);
 
+  /* free the stat struct, since it's allocated with g_try_malloc
+   * as we set up the allocation routine by env->set_alloc */
+  g_free (stat);
+
   db_error = db->cursor (db, NULL, &dbc, 0);
 
   if (db_error != 0)
