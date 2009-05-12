@@ -59,6 +59,7 @@ typedef enum {
 	OtherError,
 	InvalidServerVersion,
 	NoSpace,
+	InvalidField,
 } EDataBookStatus;
 
 /* Some hacks so the backends compile without change */
@@ -70,6 +71,7 @@ typedef enum {
 #define GNOME_Evolution_Addressbook_OtherError OtherError
 #define GNOME_Evolution_Addressbook_PermissionDenied PermissionDenied
 #define GNOME_Evolution_Addressbook_CouldNotCancel CouldNotCancel
+#define GNOME_Evolution_Addressbook_InvalidField InvalidField
 
 typedef enum {
 	Local,

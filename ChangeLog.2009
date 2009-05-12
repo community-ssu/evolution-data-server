@@ -1,3 +1,12 @@
+2009-05-12  Marco Barisione  <marco.barisione@maemo.org>
+
+	Add an error code for when some contact fields are invalid.
+
+	* libedata-book-dbus/e-data-book-types.h: Add the InvalidField error
+	code.
+
+	Reviewed-By: Robert Peto <robert.peto@maemo.org>
+
 2009-05-12  Robert Peto  <robert.peto@maemo.org>
 
 	Fix reference counting issue in file backend's global db environment.
