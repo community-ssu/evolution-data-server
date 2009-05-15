@@ -1,5 +1,15 @@
 2009-05-15  Robert Peto  <robert.peto@maemo.org>
 
+	Skip empty lines (CRLF) while parsing vcards. It is needed since in
+	vCard 2.1 there is an empty line after binary encoded values.
+
+	* addressbook/libebook-dbus/e-vcard.c (skip_empty_lines(),
+	read_attribute())
+
+	Reviewed-By: Marco Barisione  <marco.barisione@maemo.org>
+
+2009-05-15  Robert Peto  <robert.peto@maemo.org>
+
 	Convert different CHARSET to utf8 while parsing vcard, this way we
 	handle only utf8 charsets internally.
 

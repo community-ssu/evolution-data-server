@@ -173,6 +173,18 @@ skip_to_next_line (const char **p)
 	*p = lp;
 }
 
+/* skip forward CRLF sequences */
+static void
+skip_empty_lines (const char **p)
+{
+	const char *lp = *p;
+
+	while (*lp != '\0' && *lp == '\r' && *++lp == '\n')
+		lp++;
+
+	*p = lp;
+}
+
 /* skip forward until we hit a character in @s, CRLF, or \0.  leave *p
    pointing at the character that causes us to stop */
 static void
@@ -559,6 +571,9 @@ read_attribute (const char **p)
 	gboolean is_qp = FALSE;
 	gunichar uc;
 	gint count = 0;
+
+	/* skip past leading empty lines */
+	skip_empty_lines (&lp);
 
 	/* first read in the group/name */
 	str = g_string_sized_new (16);
