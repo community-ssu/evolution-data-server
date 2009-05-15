@@ -1,5 +1,15 @@
 2009-05-15  Robert Peto  <robert.peto@maemo.org>
 
+	Convert different CHARSET to utf8 while parsing vcard, this way we
+	handle only utf8 charsets internally.
+
+	* addressbook/libebook-dbus/e-vcard.c (attribute_add_value_utf8(),
+	read_attribute_value())
+
+	Reviewed-By: Marco Barisione  <marco.barisione@maemo.org>
+
+2009-05-15  Robert Peto  <robert.peto@maemo.org>
+
 	Set default log domain to "all" and default debug level to WARNING, so
 	we get valuable syslogs even when those variables are not set
 	explicitely.

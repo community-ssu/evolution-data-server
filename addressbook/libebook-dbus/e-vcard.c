@@ -242,6 +242,41 @@ skip_until (const char **p, char *s)
 	}
 
 
+/* Try to convert @value from @charset to utf-8, and add it to @attr */
+/* NOTE: This is only needed for parsing attribute values, since we use utf-8
+ * internally. */
+static void
+attribute_add_value_utf8 (EVCardAttribute *attr, const char *value, const char *charset)
+{
+	if (G_UNLIKELY (charset && g_ascii_strcasecmp (charset, "utf-8"))) {
+		/* charset is different than utf8, we need to convert */
+		char *converted;
+
+		converted = g_convert (value, -1, "utf-8", charset, NULL, NULL, NULL);
+		if (converted) {
+			e_vcard_attribute_add_value (attr, converted);
+			g_free (converted);
+			return;
+		}
+		else {
+			g_warning (G_STRLOC ": value conversion failed from "
+					"charset %s to utf-8", charset);
+		}
+	}
+
+	/* charset is not set or it is alredy utf-8, or conversion failed */
+	/* validate the value string as utf-8, don't add it if it's not valid */
+	if (g_utf8_validate (value, -1, NULL)) {
+		e_vcard_attribute_add_value (attr, value);
+	} else {
+		g_warning (G_STRLOC ": invalid utf-8 sting");
+	}
+}
+
+/* returns with the next char in lp, only used in read_attribure_value()
+ * since other functions use uft8 */
+#define NEXT_CHAR(lp,utf8) (utf8 ? g_utf8_next_char (lp) : lp + 1)
+
 static gboolean
 read_attribute_value (EVCardAttribute *attr, const char **p, gboolean quoted_printable, char *charset)
 {
@@ -249,6 +284,7 @@ read_attribute_value (EVCardAttribute *attr, const char **p, gboolean quoted_pri
 	GString *str;
 	const char *chunk_start = NULL;
 	gint count = 0;
+	gboolean utf8 = (!charset || !g_ascii_strcasecmp (charset, "utf-8")) ? TRUE : FALSE;
 
 	/* read in the value */
 	str = g_string_sized_new (16);
@@ -275,14 +311,14 @@ read_attribute_value (EVCardAttribute *attr, const char **p, gboolean quoted_pri
 					g_string_append_c (str, a);
 					g_string_append_c (str, b);
 				}
-			
+
 			lp++;
 		}
 		else if (*lp == '\\') {
 			WRITE_CHUNK;
 			/* convert back to the non-escaped version of
 			   the characters */
-			lp = g_utf8_next_char(lp);
+			lp = NEXT_CHAR(lp, utf8);
 			if (*lp == '\0') {
 				g_string_append_c (str, '\\');
 				break;
@@ -296,32 +332,21 @@ read_attribute_value (EVCardAttribute *attr, const char **p, gboolean quoted_pri
 			default:
 				g_warning ("invalid escape, passing it through");
 				g_string_append_c (str, '\\');
-				g_string_insert_unichar (str, -1, g_utf8_get_char(lp));
+				if (utf8) {
+					g_string_append_unichar (str, g_utf8_get_char(lp));
+				} else {
+					g_string_append_c (str, *lp);
+				}
 				break;
 			}
-			lp = g_utf8_next_char(lp);
+			lp = NEXT_CHAR(lp, utf8);
 		}
 		else if ((*lp == ';') ||
 			 (*lp == ',' && !strcmp (attr->name, "CATEGORIES"))) {
 			WRITE_CHUNK;
-                        if (!charset || !g_ascii_strcasecmp (charset, "utf-8"))
-			        e_vcard_attribute_add_value (attr, str->str);
-                        else {
-                                char *converted;
-
-                                converted = g_convert (str->str, -1, "utf-8",
-                                                charset, NULL, NULL, NULL);
-                                if (converted) {
-                                        e_vcard_attribute_add_value (attr, converted);
-                                        g_free (converted);
-                                }
-                                else {
-                                        /* error in conversion, using original string */
-                                        e_vcard_attribute_add_value (attr, str->str);
-                                }
-                        }
+			attribute_add_value_utf8 (attr, str->str, charset);
 			g_string_assign (str, "");
-			lp = g_utf8_next_char(lp);
+			lp = NEXT_CHAR(lp, utf8);
 			count++;
 		}
 		UNFOLD_CHUNK(lp)
@@ -330,7 +355,7 @@ read_attribute_value (EVCardAttribute *attr, const char **p, gboolean quoted_pri
 				chunk_start = lp;
 
 			//g_string_insert_unichar (str, -1, g_utf8_get_char (lp));
-			lp = g_utf8_next_char(lp);
+			lp = NEXT_CHAR(lp, utf8);
 		}
 	}
 
@@ -343,7 +368,8 @@ read_attribute_value (EVCardAttribute *attr, const char **p, gboolean quoted_pri
 
 	WRITE_CHUNK;
 	if (str) {
-		e_vcard_attribute_add_value (attr, str->str);
+		/* don't forget the last value */
+		attribute_add_value_utf8 (attr, str->str, charset);
 		g_string_free (str, TRUE);
 	}
 

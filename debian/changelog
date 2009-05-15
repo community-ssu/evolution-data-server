@@ -2,6 +2,8 @@ evolution-data-server (1.4.2.1-20090512.99) unstable; urgency=low
 
   * Fixes: NB#114091 - Add error code for invalid contact fields
   * Fixes: NB#116807 - E_LOG (G_LOG_LEVEL_WARNING) does not log per default
+  * Fixes: NB#113788 - Business card with non-utf8 charset values is not
+    properly saved.
 
  -- Robert Peto <robert.peto@maemo.org>  Tue, 12 May 2009 09:02:11 +0100
 
