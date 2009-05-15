@@ -12,7 +12,7 @@
  
 #include "e-log.h"
 
-static GLogLevelFlags current_log_level = G_LOG_LEVEL_MESSAGE;
+static GLogLevelFlags current_log_level = G_LOG_LEVEL_WARNING;
 static GPtrArray *enabled_log_domains = NULL;
 static gboolean enable_all_log_domains = FALSE;
 
@@ -84,8 +84,10 @@ e_log_set_domains (const gchar *domains)
 	const gchar *end;
 	gchar *domain;
 
-	if (!domains || !*domains)
+	if (!domains || !*domains) {
+		enable_all_log_domains = TRUE;
 		return;
+	}
 
 	start = domains;
 

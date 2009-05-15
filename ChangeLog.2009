@@ -1,3 +1,13 @@
+2009-05-15  Robert Peto  <robert.peto@maemo.org>
+
+	Set default log domain to "all" and default debug level to WARNING, so
+	we get valuable syslogs even when those variables are not set
+	explicitely.
+
+	* libedataserver/e-log.c
+
+	Reviewed-By: Marco Barisione  <marco.barisione@maemo.org>
+
 2009-05-12  Marco Barisione  <marco.barisione@maemo.org>
 
 	Add an error code for when some contact fields are invalid.
