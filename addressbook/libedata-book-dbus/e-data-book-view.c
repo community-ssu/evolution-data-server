@@ -23,6 +23,7 @@
 #include <dbus/dbus.h>
 #include <dbus/dbus-glib-lowlevel.h>
 #include <libebook/e-contact.h>
+#include <libedataserver/e-log.h>
 #include "e-data-book-view.h"
 
 static gboolean impl_BookView_start (EDataBookView *view, GError **error);
@@ -79,6 +80,20 @@ static void e_data_book_view_finalize (GObject *object);
 
 static void e_data_book_view_thaw (EDataBookView *view);
 
+static gint e_data_book_view_log_domain_id = E_LOG_INVALID_DOMAIN;
+
+#define DEBUG(format, ...) \
+      E_LOG (e_data_book_view_log_domain_id, G_LOG_LEVEL_DEBUG, format, \
+                    ##__VA_ARGS__)
+
+#define MESSAGE(format, ...) \
+      E_LOG (e_data_book_view_log_domain_id, G_LOG_LEVEL_MESSAGE, format, \
+                    ##__VA_ARGS__)
+
+#define WARNING(format, ...) \
+      E_LOG (e_data_book_view_log_domain_id, G_LOG_LEVEL_WARNING, format, \
+                    ##__VA_ARGS__)
+
 static void
 e_data_book_view_class_init (EDataBookViewClass *klass)
 { 
@@ -86,6 +101,8 @@ e_data_book_view_class_init (EDataBookViewClass *klass)
 
   object_class->dispose = e_data_book_view_dispose;
   object_class->finalize = e_data_book_view_finalize;
+
+  e_data_book_view_log_domain_id = e_log_get_id ("bookview");
 
   signals[CONTACTS_ADDED] =
     g_signal_new ("contacts-added",
@@ -404,7 +421,7 @@ impl_BookView_set_freezable (EDataBookView *view, gboolean freezable, GError **e
 
   priv->freezable = freezable;
 
-  g_debug (G_STRLOC ": setting freezable");
+  DEBUG (G_STRLOC ": setting freezable");
 
   if (!freezable)
   {
@@ -430,7 +447,7 @@ e_data_book_view_set_thresholds (EDataBookView *book_view,
 {
   g_return_if_fail (E_IS_DATA_BOOK_VIEW (book_view));
   
-  g_debug ("e_data_book_view_set_thresholds does nothing in eds-dbus");
+  WARNING ("e_data_book_view_set_thresholds does nothing in eds-dbus");
 }
 
 const char*

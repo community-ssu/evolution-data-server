@@ -1,3 +1,12 @@
+2009-05-20  Robert Peto  <robert.peto@maemo.org>
+
+	Use e-log in EDataBookView.
+
+	* addressbook/libedata-book-dbus/e-data-book-view.c
+	(e_data_book_view_class_init(), impl_BookView_set_freezable(),
+	e_data_book_view_set_thresholds()): replace g_debug with proper
+	macros.
+
 2009-05-15  Robert Peto  <robert.peto@maemo.org>
 
 	Skip empty lines (CRLF) while parsing vcards. It is needed since in
