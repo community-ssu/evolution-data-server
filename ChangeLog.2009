@@ -1,3 +1,12 @@
+2009-05-21  Robert Peto  <robert.peto@maemo.org>
+
+	Do not use soft-line break when folding long QP encoded values, since
+	some parsers can not handle it.
+
+	* addressbook/libebook-dbus/e-vcard.c (e_vcard_to_string_vcard_21 ())
+
+	Reviewed-By: Marco Barisione  <marco.barisione@maemo.org>
+
 2009-05-20  Robert Peto  <robert.peto@maemo.org>
 
 	Use e-log in EDataBookView.
