@@ -2440,6 +2440,8 @@ get_status_from_error (GError *error)
       E_BOOK_ERROR_INVALID_SERVER_VERSION, 0 },
     { "org.gnome.evolution.dataserver.addressbook.Book.nospace",
       E_BOOK_ERROR_NO_SPACE, 0 },
+    { "org.gnome.evolution.dataserver.addressbook.Book.invalidfield",
+      E_BOOK_ERROR_INVALID_FIELD, 0 },
     { "org.gnome.evolution.dataserver.addressbook.BookView.invalidquery",
       E_BOOK_VIEW_ERROR_INVALID_QUERY, 0 },
     { "org.gnome.evolution.dataserver.addressbook.BookView.queryrefused",

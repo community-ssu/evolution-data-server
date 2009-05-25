@@ -1,3 +1,13 @@
+2009-05-25  Robert Peto  <robert.peto@maemo.org>
+
+	The new InvalidField error type was partially defined as a solution,
+	handle it on client side as well.
+
+	* addressbook/libebook-dbus/e-book-types.h
+	* addressbook/libebook-dbus/e-book.c
+
+	Patch-By: Travis Reitter  <travis.reitter@maemo.org>
+
 2009-05-21  Robert Peto  <robert.peto@maemo.org>
 
 	Do not use soft-line break when folding long QP encoded values, since
