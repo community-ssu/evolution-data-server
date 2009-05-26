@@ -1,10 +1,10 @@
-evolution-data-server (1.4.2.1-20090515.99) unstable; urgency=low
+evolution-data-server (1.4.2.1-20090526) unstable; urgency=low
 
   * Apply e-log in EDataBookView.
   * Fixes: NB#116892 - Cyrillic contact names are spaced in PC.
   * Fixes: NB#118211 - EDS "InvalidField" error not fully defined
 
- -- Robert Peto <robert.peto@maemo.org>  Wed, 20 May 2009 16:34:25 +0100
+ -- Robert Peto <robert.peto@maemo.org>  Tue, 26 May 2009 07:57:10 +0100
 
 evolution-data-server (1.4.2.1-20090515) unstable; urgency=low
 
