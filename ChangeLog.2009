@@ -1,3 +1,13 @@
+2009-05-27  Robert Peto  <robert.peto@maemo.org>
+
+	Put running_id to DB after installing pre-installed contacts, so it
+	won't lost when the factory exists.
+
+	* addressbook/backends/file/e-book-backend-file.c
+	(install_pre_installed_vcards())
+
+	Reviewed-By: Marco Barisione  <marco.barisione@maemo.org>
+
 2009-05-25  Robert Peto  <robert.peto@maemo.org>
 
 	The new InvalidField error type was partially defined as a solution,

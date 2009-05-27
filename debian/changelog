@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20090526.99) unstable; urgency=low
+
+  * Fixes: NB#118502 - New contacts replacing existing ones
+
+ -- Robert Peto <robert.peto@maemo.org>  Tue, 26 May 2009 07:57:10 +0100
+
 evolution-data-server (1.4.2.1-20090526) unstable; urgency=low
 
   * Apply e-log in EDataBookView.

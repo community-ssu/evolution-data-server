@@ -1559,7 +1559,9 @@ install_pre_installed_vcards (EBookBackend *backend)
 	}
 	g_dir_close (directory);
 
-	/* sync the main and index dbs */
+	/* store running_id and sync main and index dbs */
+	e_book_backend_file_store_unique_id (bf);
+
 	sync_dbs (bf);
 }
 
