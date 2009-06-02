@@ -25,8 +25,6 @@ DEB_SHLIBDEPS_INCLUDE := debian/tmp/usr/lib
 
 DEB_DH_MAKESHLIBS_ARGS_ALL := -V
 
-DEB_DH_STRIP_ARGS := --dbg-package=evolution-data-server-addressbook-dbg --dbg-package=libedataserver-dbg --dbg-package=libedata-book-dbg --dbg-package=libebook-dbg
-
 DEB_CONFIGURE_SCRIPT := ./autogen.sh
 
 DEB_CONFIGURE_EXTRA_FLAGS := \

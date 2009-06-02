@@ -2,6 +2,7 @@ evolution-data-server (1.4.2.1-20090526.99) unstable; urgency=low
 
   * Fixes: NB#118502 - New contacts replacing existing ones
   * Fixes: NB#110704 - Saving 100 contacts takes 7 to 8 seconds
+  * Fixes: NB#118609 - no debug info in libebook-dbg and libedataserver-dbg
 
  -- Robert Peto <robert.peto@maemo.org>  Tue, 26 May 2009 07:57:10 +0100
 

@@ -1,5 +1,13 @@
 2009-06-02  Robert Peto  <robert.peto@maemo.org>
 
+	Fix debug packages.
+
+	* debian/rules: Remove DEB_DH_STRIP_ARGS since it does not work with
+	multiple packages, and CDBS is smart enough to find out the dh_strip
+	args from the control file.
+
+2009-06-02  Robert Peto  <robert.peto@maemo.org>
+
 	Notify book-views only after return values has been sent back to
 	requestor.
 
