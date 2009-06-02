@@ -646,6 +646,7 @@ void
 e_data_book_respond_create_contacts (EDataBook *book, guint32 opid, EDataBookStatus status, GList *contacts)
 {
   DBusGMethodInvocation *context = opid_fetch (opid);
+  GList *contact_list = contacts;
 
   if (status != Success) {
     GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot add contacts"));
@@ -661,14 +662,23 @@ e_data_book_respond_create_contacts (EDataBook *book, guint32 opid, EDataBookSta
         g_warning ("%s: not a contact", G_STRFUNC);
         continue;
       }
-      uids[i++] = (char *) e_contact_get (contacts->data, E_CONTACT_UID);
+      /* we are freeing uids in idle_dbus_method_return_strarray */
+      uids[i++] = (char *) g_strdup (e_contact_get_const (contacts->data, E_CONTACT_UID));
+    }
 
+    /* send the status to sender first */
+    g_idle_add (idle_dbus_method_return_strarray,
+                dbus_method_return_strarray_data_new (context, uids));
+
+    /* then notify all views */
+    for (contacts = contact_list; contacts; contacts = contacts->next) {
+      if (!E_IS_CONTACT (contacts->data)) {
+        g_warning ("%s: not a contact", G_STRFUNC);
+        continue;
+      }
       e_book_backend_notify_update (e_data_book_get_backend (book), contacts->data);
     }
     e_book_backend_notify_complete (e_data_book_get_backend (book));
-
-    g_idle_add (idle_dbus_method_return_strarray,
-                dbus_method_return_strarray_data_new (context, uids));
   }
 }
 
@@ -733,12 +743,15 @@ e_data_book_respond_modify_contacts (EDataBook *book, guint32 opid, EDataBookSta
     DBusErrorReturnData *data = dbus_error_return_data_new (context, error);
     g_idle_add (idle_dbus_return_error, data);
   } else {
+
+    /* notify sender */
+    g_idle_add (idle_dbus_method_return, context);
+
+    /* notify book-views */
     for (; contacts; contacts = contacts->next) {
       e_book_backend_notify_update (e_data_book_get_backend (book), contacts->data);
     }
     e_book_backend_notify_complete (e_data_book_get_backend (book));
-
-    g_idle_add (idle_dbus_method_return, context);
   }
 }
 
@@ -774,11 +787,13 @@ e_data_book_respond_remove_contacts (EDataBook *book, guint32 opid, EDataBookSta
   } else {
     GList *i;
 
+    /* return to sender first */
+    g_idle_add (idle_dbus_method_return, context);
+
+    /* notify views after */
     for (i = ids; i; i = i->next)
       e_book_backend_notify_remove (e_data_book_get_backend (book), i->data);
     e_book_backend_notify_complete (e_data_book_get_backend (book));
-
-    g_idle_add (idle_dbus_method_return, context);
   }
 }
 

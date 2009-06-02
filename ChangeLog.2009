@@ -1,3 +1,14 @@
+2009-06-02  Robert Peto  <robert.peto@maemo.org>
+
+	Notify book-views only after return values has been sent back to
+	requestor.
+
+	* addressbook/libedata-book-dbus/e-data-book.c
+	(e_data_book_respond_create_contacts(),
+	 e_data_book_respond_modify_contacts(),
+	 e_data_book_respond_remove_contacts()): send return value before
+	 signaling book-views.
+
 2009-05-27  Robert Peto  <robert.peto@maemo.org>
 
 	Put running_id to DB after installing pre-installed contacts, so it
