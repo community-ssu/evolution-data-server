@@ -1,3 +1,14 @@
+2009-06-04  Robert Peto  <robert.peto@maemo.org>
+
+	Only sync addressbook's index db when it is necessary.
+
+	* addressbook/backends/file/e-book-backend-file-index.c
+	(e_book_backend_file_index_setup_indicies()): only sync when index dbs
+	wasn't exist before
+	* addressbook/backends/file/e-book-backend-file.c
+	(install_pre_installed_vcards()): only sync when pre-installed cards
+	are inserted
+
 2009-06-02  Robert Peto  <robert.peto@maemo.org>
 
 	Fix debug packages.

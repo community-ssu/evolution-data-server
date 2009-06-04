@@ -358,7 +358,7 @@ e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db,
 
     if (db_error == EEXIST) {
 
-      /* try and open again, this time without exclusivity */
+      /* db already exists, try and open again, this time without exclusivity */
       db_error = sdb->open (sdb, NULL, index_filename,
           indexes[i].index_name, DB_BTREE, DB_CREATE | DB_THREAD, 0666);
 
@@ -376,7 +376,7 @@ e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db,
         return FALSE;
       }
     } else {
-      /* we know need to populate this one */
+      /* db didn't exist before, so we now need to populate this one */
       dbs_to_populate = g_list_prepend (dbs_to_populate, (gpointer)&(indexes[i]));
     }
 
@@ -394,8 +394,10 @@ e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db,
       return FALSE;
     }
     g_list_free (dbs_to_populate);
+
+    /* sync the db file, since we created dbs here */
+    e_book_backend_file_index_sync (index);
   }
-  e_book_backend_file_index_sync (index);
 
   return TRUE;
 }
@@ -454,7 +456,7 @@ e_book_backend_file_index_sync (EBookBackendFileIndex *index)
 
   g_return_if_fail (E_IS_BOOK_BACKEND_FILE_INDEX (index));
 
-  /* for each index database try add this contact */
+  /* sync each index database */
   for (i = 0; i < G_N_ELEMENTS (indexes); i++)
   {
     index_sync (index, (EBookBackendFileIndexData *)&indexes[i]);

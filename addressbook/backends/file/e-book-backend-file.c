@@ -306,7 +306,8 @@ is_contact_preserved (EContact *contact)
         return FALSE;
 }
 
-/* put the vcard to main db and index db, but don't sync the DBs */
+/* put the vcard to main db and index db, but don't sync the DBs *
+ * returns 0 on success */
 static int
 insert_contact (EBookBackendFile *bf,
                 const char       *vcard_req,
@@ -1511,6 +1512,7 @@ install_pre_installed_vcards (EBookBackend *backend)
 {
 	GDir *directory;
 	const gchar *name;
+	gboolean sync_needed = FALSE;
 	EBookBackendFile *bf = E_BOOK_BACKEND_FILE (backend);
 
 	/* Get files from pre-install directory */
@@ -1549,7 +1551,12 @@ install_pre_installed_vcards (EBookBackend *backend)
 		while (begin &&
 			(vctmpstr = get_contact_from_string (begin, &next)) != NULL) {
 
-			insert_contact (bf, vctmpstr, &contact);
+			if (G_LIKELY (insert_contact (bf, vctmpstr, &contact) == 0)) {
+				sync_needed = TRUE;
+			}
+			else {
+				WARNING ("cannot insert preinstalled contact");
+			}
 
 			g_object_unref (contact);
 			g_free (vctmpstr);
@@ -1559,10 +1566,14 @@ install_pre_installed_vcards (EBookBackend *backend)
 	}
 	g_dir_close (directory);
 
-	/* store running_id and sync main and index dbs */
-	e_book_backend_file_store_unique_id (bf);
+	/* sync the main and index dbs only if needed */
+	if (sync_needed) {
+		/* store the running id */
+		e_book_backend_file_store_unique_id (bf);
 
-	sync_dbs (bf);
+		/* sync databases */
+		sync_dbs (bf);
+	}
 }
 
 static GNOME_Evolution_Addressbook_CallStatus
