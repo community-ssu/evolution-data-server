@@ -1,3 +1,13 @@
+2009-06-04  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
+	Reviewed by Travis Reitter  <travis.reitter@maemo.org>
+
+	* libedata-book-dbus/e-book-backend.c:
+	(e_book_backend_remove_contacts): if we're passed an empty list of ids
+	to remove, simply respond 'Success' rather than just dropping the
+	request and letting the caller time out waiting for a dbus response
+	Fixes NB#120845
+
 2009-06-04  Robert Peto  <robert.peto@maemo.org>
 
 	Only sync addressbook's index db when it is necessary.

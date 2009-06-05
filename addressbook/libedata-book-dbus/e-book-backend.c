@@ -237,7 +237,13 @@ e_book_backend_remove_contacts (EBookBackend *backend,
 {
 	g_return_if_fail (E_IS_BOOK_BACKEND (backend));
 	g_return_if_fail (E_IS_DATA_BOOK (book));
-	g_return_if_fail (id_list);
+	/* if no ids are requested, just respond that we 'successfully' deleted
+	 * zero contacts */
+	if (!id_list) {
+		g_warning ("%s: attempted to delete 0 contacts", G_STRFUNC);
+		e_data_book_respond_remove_contacts (book, opid, Success, id_list);
+		return;
+	}
 
 	g_assert (E_BOOK_BACKEND_GET_CLASS (backend)->remove_contacts);
 
