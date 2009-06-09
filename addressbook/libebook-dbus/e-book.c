@@ -620,7 +620,9 @@ e_book_async_open (EBook *book, gboolean only_if_exists, EBookCallback cb, gpoin
 
   data = async_data_new (book, NULL, cb, closure);
 
-  org_gnome_evolution_dataserver_addressbook_Book_open_async (book->priv->proxy, only_if_exists, open_reply, data);
+  if (!org_gnome_evolution_dataserver_addressbook_Book_open_async (book->priv->proxy, only_if_exists, open_reply, data))
+    cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, closure);
+
   return 0;
 }
 
@@ -679,7 +681,9 @@ e_book_async_remove (EBook *book, EBookCallback cb, gpointer closure)
 
   data = async_data_new (book, NULL, cb, closure);
 
-  org_gnome_evolution_dataserver_addressbook_Book_remove_async (book->priv->proxy, remove_reply, data);
+  if (!org_gnome_evolution_dataserver_addressbook_Book_remove_async (book->priv->proxy, remove_reply, data))
+    cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, closure);
+
   return 0;
 }
 
@@ -765,7 +769,9 @@ e_book_async_get_required_fields (EBook *book, EBookEListCallback cb, gpointer c
 
   data = async_data_new (book, NULL, cb, closure);
 
-  org_gnome_evolution_dataserver_addressbook_Book_get_required_fields_async (book->priv->proxy, get_required_fields_reply, data);
+  if (!org_gnome_evolution_dataserver_addressbook_Book_get_required_fields_async (book->priv->proxy, get_required_fields_reply, data))
+    cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, NULL, closure);
+
   return 0;
 }
 
@@ -851,7 +857,9 @@ e_book_async_get_supported_fields (EBook *book, EBookEListCallback cb, gpointer 
 
   data = async_data_new (book, NULL, cb, closure);
 
-  org_gnome_evolution_dataserver_addressbook_Book_get_supported_fields_async (book->priv->proxy, get_supported_fields_reply, data);
+  if (!org_gnome_evolution_dataserver_addressbook_Book_get_supported_fields_async (book->priv->proxy, get_supported_fields_reply, data))
+    cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, NULL, closure);
+
   return 0;
 }
 
@@ -936,7 +944,9 @@ e_book_async_get_supported_auth_methods (EBook *book, EBookEListCallback cb, gpo
 
   data = async_data_new (book, NULL, cb, closure);
 
-  org_gnome_evolution_dataserver_addressbook_Book_get_supported_auth_methods_async (book->priv->proxy, get_supported_auth_methods_reply, data);
+  if (!org_gnome_evolution_dataserver_addressbook_Book_get_supported_auth_methods_async (book->priv->proxy, get_supported_auth_methods_reply, data))
+    cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, NULL, closure);
+
   return 0;
 }
 
@@ -1010,7 +1020,9 @@ e_book_async_authenticate_user (EBook *book, const char *user, const char *passw
 
   data = async_data_new (book, NULL, cb, closure);
 
-  org_gnome_evolution_dataserver_addressbook_Book_authenticate_user_async (book->priv->proxy, user, passwd, auth_method, authenticate_user_reply, data);
+  if (!org_gnome_evolution_dataserver_addressbook_Book_authenticate_user_async (book->priv->proxy, user, passwd, auth_method, authenticate_user_reply, data))
+    cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, closure);
+
   return 0;
 }
 
@@ -1095,7 +1107,9 @@ e_book_async_get_contact (EBook *book, const char *id, EBookContactCallback cb, 
 
   data = async_data_new (book, NULL, cb, closure);
 
-  org_gnome_evolution_dataserver_addressbook_Book_get_contact_async (book->priv->proxy, id, get_contact_reply, data);
+  if (!org_gnome_evolution_dataserver_addressbook_Book_get_contact_async (book->priv->proxy, id, get_contact_reply, data))
+    cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, NULL, closure);
+
   return 0;
 }
 
@@ -1193,7 +1207,9 @@ e_book_async_get_contacts (EBook *book, EBookQuery *query, EBookListCallback cb,
 
   data = async_data_new (book, NULL, cb, closure);
 
-  org_gnome_evolution_dataserver_addressbook_Book_get_contact_list_async (book->priv->proxy, sexp, get_contacts_reply, data);
+  if (!org_gnome_evolution_dataserver_addressbook_Book_get_contact_list_async (book->priv->proxy, sexp, get_contacts_reply, data))
+    cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, NULL, closure);
+
   g_free (sexp);
   return 0;
 }
@@ -1329,7 +1345,9 @@ e_book_async_get_changes (EBook *book, char *changeid, EBookListCallback cb, gpo
 
   data = async_data_new (book, NULL, cb, closure);
 
-  org_gnome_evolution_dataserver_addressbook_Book_get_changes_async (book->priv->proxy, changeid, get_changes_reply, data);
+  if (!org_gnome_evolution_dataserver_addressbook_Book_get_changes_async (book->priv->proxy, changeid, get_changes_reply, data))
+    cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, NULL, closure);
+
   return 0;
 }
 
@@ -1431,7 +1449,9 @@ e_book_async_add_contact (EBook *book, EContact *contact, EBookIdCallback cb, gp
 
   data = async_data_new (book, NULL, cb, closure);
 
-  org_gnome_evolution_dataserver_addressbook_Book_add_contact_async (book->priv->proxy, vcard, add_contact_reply, data);
+  if (!org_gnome_evolution_dataserver_addressbook_Book_add_contact_async (book->priv->proxy, vcard, add_contact_reply, data))
+    cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, NULL, closure);
+
   g_free (vcard);
   return 0;
 }
@@ -1562,7 +1582,8 @@ e_book_async_add_contacts (EBook *book, GList *contacts, EBookCallback cb, gpoin
 
   data = async_data_new (book, NULL, cb, closure);
 
-  org_gnome_evolution_dataserver_addressbook_Book_add_contacts_async (book->priv->proxy, (const char**)vcards, add_contacts_reply, data);
+  if (!org_gnome_evolution_dataserver_addressbook_Book_add_contacts_async (book->priv->proxy, (const char**)vcards, add_contacts_reply, data))
+    cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, closure);
 
   g_strfreev (vcards);
   return 0;
@@ -1636,7 +1657,9 @@ e_book_async_commit_contact (EBook *book, EContact *contact, EBookCallback cb, g
 
   data = async_data_new (book, NULL, cb, closure);
 
-  org_gnome_evolution_dataserver_addressbook_Book_modify_contact_async (book->priv->proxy, vcard, modify_contact_reply, data);
+  if (!org_gnome_evolution_dataserver_addressbook_Book_modify_contact_async (book->priv->proxy, vcard, modify_contact_reply, data))
+    cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, closure);
+
   g_free (vcard);
   return 0;
 }
@@ -1695,7 +1718,9 @@ e_book_async_commit_contacts (EBook *book, GList *contacts, EBookCallback cb, gp
 
   data = async_data_new (book, NULL, cb, closure);
 
-  org_gnome_evolution_dataserver_addressbook_Book_modify_contacts_async (book->priv->proxy, (const char**)vcards, modify_contacts_reply, data);
+  if (!org_gnome_evolution_dataserver_addressbook_Book_modify_contacts_async (book->priv->proxy, (const char**)vcards, modify_contacts_reply, data))
+    cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, closure);
+
   g_strfreev (vcards);
   return 0;
 }
@@ -1767,7 +1792,9 @@ e_book_async_remove_contact (EBook *book, EContact *contact, EBookCallback cb, g
 
   data = async_data_new (book, NULL, cb, closure);
 
-  org_gnome_evolution_dataserver_addressbook_Book_remove_contacts_async (book->priv->proxy, l, remove_contact_reply, data);
+  if (!org_gnome_evolution_dataserver_addressbook_Book_remove_contacts_async (book->priv->proxy, l, remove_contact_reply, data))
+    cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, closure);
+
   return 0;
 }
 
@@ -1812,7 +1839,9 @@ e_book_async_remove_contact_by_id (EBook *book, const char *id, EBookCallback cb
 
   data = async_data_new (book, NULL, cb, closure);
 
-  org_gnome_evolution_dataserver_addressbook_Book_remove_contacts_async (book->priv->proxy, l, remove_contact_by_id_reply, data);
+  if (!org_gnome_evolution_dataserver_addressbook_Book_remove_contacts_async (book->priv->proxy, l, remove_contact_by_id_reply, data))
+    cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, closure);
+
   return 0;
 }
 
@@ -1894,7 +1923,9 @@ e_book_async_remove_contacts (EBook *book, GList *id_list, EBookCallback cb, gpo
 
   data = async_data_new (book, NULL, cb, closure);
 
-  org_gnome_evolution_dataserver_addressbook_Book_remove_contacts_async (book->priv->proxy, (const char **) l, remove_contacts_reply, data);
+  if (!org_gnome_evolution_dataserver_addressbook_Book_remove_contacts_async (book->priv->proxy, (const char **) l, remove_contacts_reply, data))
+    cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, closure);
+
   g_free (l);
   return 0;
 }
@@ -2037,7 +2068,8 @@ e_book_async_get_book_view (EBook *book, EBookQuery *query, GList *requested_fie
 
   sexp = e_book_query_to_string (query);
 
-  org_gnome_evolution_dataserver_addressbook_Book_get_book_view_async (book->priv->proxy, sexp, max_results, get_book_view_reply, data);
+  if (!org_gnome_evolution_dataserver_addressbook_Book_get_book_view_async (book->priv->proxy, sexp, max_results, get_book_view_reply, data))
+    cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, NULL, closure);
 
   g_free (sexp);
   return 0;

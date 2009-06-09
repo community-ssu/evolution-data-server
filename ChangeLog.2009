@@ -1,3 +1,13 @@
+2009-06-09  Mathias Hasselmann  <hasselmm@gnome.org>
+
+	NB#97387 - Sometimes e_book_async_open() ends in Nirwana
+
+	* addressbook/libebook-dbus/e-book.c:
+	  Report E_BOOK_ERROR_CORBA_EXCEPTION when async calls fail because
+	  of a broken DBus connection.
+
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+
 2009-06-04  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
 
 	Reviewed by Travis Reitter  <travis.reitter@maemo.org>
