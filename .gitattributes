@@ -1,0 +1,5 @@
+# The ChangeLog merge driver is part of gnulib:
+# http://git.savannah.gnu.org/gitweb/?p=gnulib.git;a=blob;f=lib/git-merge-changelog.c
+######################################################################################
+ChangeLog	merge=merge-changelog
+ChangeLog.2009  merge=merge-changelog
