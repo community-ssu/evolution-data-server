@@ -1,5 +1,20 @@
 2009-06-10  Mathias Hasselmann  <hasselmm@gnome.org>
 
+	Gracefully handle missing virtual methods (see NB#105728).
+
+	* addressbook/libedata-book-dbus/e-book-backend-sync.c
+	 (E_BOOK_BACKEND_SYNC_CHECK_METHOD(),
+	  e_book_backend_sync_remove_all_contacts()):
+	* addressbook/libedata-book-dbus/e-book-backend.c
+	 (E_BOOK_BACKEND_CHECK_METHOD(),
+	  e_book_backend_remove_all_contacts()):
+	  Print a warning and return OtherError instead of crashing when
+	  remove_all_contacts() is not implemented.
+
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+
+2009-06-10  Mathias Hasselmann  <hasselmm@gnome.org>
+
 	NB#105728 - API change request: delete all contacts
 
 	* addressbook/libebook-dbus/e-book.c (e_book_remove_all_contacts(),

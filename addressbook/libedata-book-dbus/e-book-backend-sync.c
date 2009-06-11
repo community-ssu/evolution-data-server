@@ -12,6 +12,14 @@
 
 #include "e-book-backend-sync.h"
 
+#define E_BOOK_BACKEND_SYNC_CHECK_METHOD(backend, method) G_STMT_START{ \
+	if (!E_BOOK_BACKEND_SYNC_GET_CLASS ((backend))->method) { \
+		g_warning ("%s: unsupported method: %s (%s)", \
+			   G_STRFUNC, #method, G_OBJECT_TYPE_NAME ((backend))); \
+		return GNOME_Evolution_Addressbook_OtherError; \
+	} \
+}G_STMT_END
+
 struct _EBookBackendSyncPrivate {
   int mumble;
 };
@@ -168,7 +176,7 @@ e_book_backend_sync_remove_all_contacts (EBookBackendSync *backend,
 	g_return_val_if_fail (E_IS_DATA_BOOK (book), GNOME_Evolution_Addressbook_OtherError);
 	g_return_val_if_fail (removed_ids, GNOME_Evolution_Addressbook_OtherError);
 
-	g_assert (E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->remove_all_contacts_sync);
+	E_BOOK_BACKEND_SYNC_CHECK_METHOD (backend, remove_all_contacts_sync);
 
 	return (* E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->remove_all_contacts_sync) (backend, book, opid, removed_ids);
 }

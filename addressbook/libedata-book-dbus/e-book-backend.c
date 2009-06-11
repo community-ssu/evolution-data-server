@@ -12,6 +12,14 @@
 #include "e-book-backend.h"
 #include "libedataserver/e-flag.h"
 
+#define E_BOOK_BACKEND_CHECK_METHOD(backend, method, ...) G_STMT_START{ \
+	if (!E_BOOK_BACKEND_GET_CLASS ((backend))->method) { \
+		g_warning ("%s: unsupported method: %s (%s)", \
+			   G_STRFUNC, #method, G_OBJECT_TYPE_NAME ((backend))); \
+		return; \
+	} \
+}G_STMT_END
+
 struct _EBookBackendPrivate {
 	GMutex *open_mutex;
 
@@ -269,7 +277,7 @@ e_book_backend_remove_all_contacts (EBookBackend *backend,
 	g_return_if_fail (E_IS_BOOK_BACKEND (backend));
 	g_return_if_fail (E_IS_DATA_BOOK (book));
 
-	g_assert (E_BOOK_BACKEND_GET_CLASS (backend)->remove_all_contacts);
+	E_BOOK_BACKEND_CHECK_METHOD (backend, remove_all_contacts, NULL);
 
         e_flag_wait (backend->priv->opened_flag);
 
