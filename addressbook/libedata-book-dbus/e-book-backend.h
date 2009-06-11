@@ -78,7 +78,7 @@ struct _EBookBackendClass {
 
 	/* Padding for future expansion */
 	void (*set_view_sort_order) (EBookBackend *backend, EDataBookView *book_view, const gchar *query_term);
-	void (*_pas_reserved3) (void);
+	void (*remove_all_contacts) (EBookBackend *backend, EDataBook *book, guint32 opid);
 	void (*_pas_reserved4) (void);
 };
 
@@ -121,6 +121,9 @@ void        e_book_backend_remove_contacts          (EBookBackend             *b
 						     EDataBook                *book,
 						     guint32                   opid,
 						     GList                    *id_list);
+void        e_book_backend_remove_all_contacts      (EBookBackend             *backend,
+						     EDataBook                *book,
+						     guint32                   opid);
 void        e_book_backend_modify_contact           (EBookBackend             *backend,
 						     EDataBook                *book,
 						     guint32                   opid,

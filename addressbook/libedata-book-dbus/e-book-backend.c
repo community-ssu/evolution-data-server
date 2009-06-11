@@ -253,6 +253,30 @@ e_book_backend_remove_contacts (EBookBackend *backend,
 }
 
 /**
+ * e_book_backend_remove_all_contacts:
+ * @backend: an #EBookBackend
+ * @book: an #EDataBook
+ * @opid: the ID to use for this operation
+ *
+ * Executes a 'remove all contacts' request specified by @opid on @book
+ * using @backend.
+ **/
+void
+e_book_backend_remove_all_contacts (EBookBackend *backend,
+				    EDataBook    *book,
+				    guint32       opid)
+{
+	g_return_if_fail (E_IS_BOOK_BACKEND (backend));
+	g_return_if_fail (E_IS_DATA_BOOK (book));
+
+	g_assert (E_BOOK_BACKEND_GET_CLASS (backend)->remove_all_contacts);
+
+        e_flag_wait (backend->priv->opened_flag);
+
+	(* E_BOOK_BACKEND_GET_CLASS (backend)->remove_all_contacts) (backend, book, opid);
+}
+
+/**
  * e_book_backend_modify_contact:
  * @backend: an #EBookBackend
  * @book: an #EDataBook

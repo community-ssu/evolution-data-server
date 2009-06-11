@@ -1,3 +1,47 @@
+2009-06-10  Mathias Hasselmann  <hasselmm@gnome.org>
+
+	NB#105728 - API change request: delete all contacts
+
+	* addressbook/libebook-dbus/e-book.c (e_book_remove_all_contacts(),
+	  remove_all_contacts_reply(), e_book_async_remove_all_contacts()):
+	* addressbook/libebook-dbus/e-book.h
+	 (e_book_remove_all_contacts(), e_book_async_remove_all_contacts()):
+	  Introduce D-Bus wrappers for removeAllContacts method.
+
+	* addressbook/libedata-book-dbus/e-book-backend-sync.c
+	 (e_book_backend_sync_remove_all_contacts(),
+	  _e_book_backend_remove_all_contacts(), e_book_backend_sync_class_init()):
+	* addressbook/libedata-book-dbus/e-book-backend-sync.h
+	 (EBookBackendSyncClass, e_book_backend_sync_remove_all_contacts()):
+	  Provide hooks for synchronous version of removeAllContacts method.
+
+	* addressbook/libedata-book-dbus/e-book-backend.c
+	 (e_book_backend_remove_all_contacts()):
+	* addressbook/libedata-book-dbus/e-book-backend.h
+	 (EBookBackendClass, e_book_backend_remove_all_contacts()):
+	  Provide hooks for asynchronous version of removeAllContacts method.
+
+	* addressbook/libedata-book-dbus/e-data-book.c (OperationID,
+	  operation_thread(), impl_AddressBook_Book_removeAllContacts(),
+	  e_data_book_respond_remove_all_contacts()):
+	* addressbook/libedata-book-dbus/e-data-book.h
+	 (e_data_book_respond_remove_all_contacts()):
+	* addressbook/libedata-book-dbus/e-data-book.xml
+	 (org.gnome.evolution.dataserver.addressbook.Book):
+	  Introduce removeAllContacts DBus method.
+
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+
+2009-06-08  Mathias Hasselmann  <hasselmm@gnome.org>
+
+	NB#97387 - Sometimes e_book_async_open() ends in Nirwana
+
+	* addressbook/libebook-dbus/e-book.c:
+	  Report E_BOOK_ERROR_CORBA_EXCEPTION when async calls fail because
+	  of a broken DBus connection.
+
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+
 2009-06-09  Mathias Hasselmann  <hasselmm@gnome.org>
 
 	NB#97387 - Sometimes e_book_async_open() ends in Nirwana

@@ -146,6 +146,34 @@ e_book_backend_sync_remove_contacts (EBookBackendSync *backend,
 }
 
 /**
+ * e_book_backend_sync_remove_all_contacts:
+ * @backend: an #EBookBackendSync
+ * @book: an #EDataBook
+ * @opid: the unique ID of the operation
+ * @removed_ids: a pointer to a location to store a list of the contacts actually removed
+ *
+ * Removes all contacts from @backend. The returned list of removed contacts is
+ * a #GList of pointers to unique contact ID strings, and must be freed by the
+ * caller.
+ *
+ * Return value: An #EBookBackendSyncStatus indicating the outcome of the operation.
+ **/
+EBookBackendSyncStatus
+e_book_backend_sync_remove_all_contacts (EBookBackendSync *backend,
+					 EDataBook *book,
+					 guint32 opid,
+					 GList **removed_ids)
+{
+	g_return_val_if_fail (E_IS_BOOK_BACKEND_SYNC (backend), GNOME_Evolution_Addressbook_OtherError);
+	g_return_val_if_fail (E_IS_DATA_BOOK (book), GNOME_Evolution_Addressbook_OtherError);
+	g_return_val_if_fail (removed_ids, GNOME_Evolution_Addressbook_OtherError);
+
+	g_assert (E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->remove_all_contacts_sync);
+
+	return (* E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->remove_all_contacts_sync) (backend, book, opid, removed_ids);
+}
+
+/**
  * e_book_backend_sync_modify_contact:
  * @backend: an #EBookBackendSync
  * @book: an #EDataBook
@@ -468,8 +496,22 @@ _e_book_backend_remove_contacts (EBookBackend *backend,
 
 	e_data_book_respond_remove_contacts (book, opid, status, ids);
 
-	if (ids)
-		g_list_free (ids);
+	g_list_free (ids);
+}
+
+static void
+_e_book_backend_remove_all_contacts (EBookBackend *backend,
+				     EDataBook    *book,
+				     guint32       opid)
+{
+	EBookBackendSyncStatus status;
+	GList *ids = NULL;
+
+	status = e_book_backend_sync_remove_all_contacts (E_BOOK_BACKEND_SYNC (backend), book, opid, &ids);
+
+	e_data_book_respond_remove_all_contacts (book, opid, status, ids);
+
+	g_list_free (ids);
 }
 
 static void
@@ -660,6 +702,7 @@ e_book_backend_sync_class_init (EBookBackendSyncClass *klass)
 	backend_class->create_contact = _e_book_backend_create_contact;
         backend_class->create_contacts = _e_book_backend_create_contacts;
 	backend_class->remove_contacts = _e_book_backend_remove_contacts;
+	backend_class->remove_all_contacts = _e_book_backend_remove_all_contacts;
 	backend_class->modify_contact = _e_book_backend_modify_contact;
 	backend_class->modify_contacts = _e_book_backend_modify_contacts;
 	backend_class->get_contact = _e_book_backend_get_contact;

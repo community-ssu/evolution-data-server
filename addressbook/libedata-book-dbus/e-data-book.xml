@@ -71,6 +71,11 @@ Copyright (C) 2005 Opened Hand Ltd
       <arg name="list" type="as" direction="in"/>
     </method>
 
+    <method name="removeAllContacts">
+      <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_AddressBook_Book_removeAllContacts"/>
+      <annotation name="org.freedesktop.DBus.GLib.Async" value=""/>
+    </method>
+
     <method name="modifyContact">
       <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_AddressBook_Book_modifyContact"/>
       <annotation name="org.freedesktop.DBus.GLib.Async" value=""/>

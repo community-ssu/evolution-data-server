@@ -166,6 +166,13 @@ guint    e_book_async_remove_contacts      (EBook                 *book,
 					    EBookCallback          cb,
 					    gpointer               closure);
 
+gboolean e_book_remove_all_contacts        (EBook       *book,
+					    GError     **error);
+
+guint    e_book_async_remove_all_contacts  (EBook                 *book,
+					    EBookCallback          cb,
+					    gpointer               closure);
+
 /* Adding contacts. */
 gboolean e_book_add_contact                (EBook           *book,
 					    EContact        *contact,

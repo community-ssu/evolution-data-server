@@ -46,6 +46,7 @@ static void impl_AddressBook_Book_addContacts(EDataBook *book, const char **IN_v
 static void impl_AddressBook_Book_modifyContact(EDataBook *book, const char *IN_vcard, DBusGMethodInvocation *context);
 static void impl_AddressBook_Book_modifyContacts(EDataBook *book, const char **IN_vcards, DBusGMethodInvocation *context);
 static void impl_AddressBook_Book_removeContacts(EDataBook *book, const char **IN_uids, DBusGMethodInvocation *context);
+static void impl_AddressBook_Book_removeAllContacts(EDataBook *book, DBusGMethodInvocation *context);
 static gboolean impl_AddressBook_Book_getStaticCapabilities(EDataBook *book, char **OUT_capabilities, GError **error);
 static void impl_AddressBook_Book_getSupportedFields(EDataBook *book, DBusGMethodInvocation *context);
 static void impl_AddressBook_Book_getRequiredFields(EDataBook *book, DBusGMethodInvocation *context);
@@ -235,6 +236,7 @@ typedef enum {
   OP_MODIFY_CONTACT,
   OP_MODIFY_CONTACTS,
   OP_REMOVE_CONTACTS,
+  OP_REMOVE_ALL_CONTACTS,
   OP_GET_CHANGES,
 } OperationID;
 
@@ -321,6 +323,9 @@ operation_thread (gpointer data, gpointer user_data)
     e_book_backend_remove_contacts (backend, op->book, op->id, op->ids);
     g_list_foreach (op->ids, (GFunc)g_free, NULL);
     g_list_free (op->ids);
+    break;
+  case OP_REMOVE_ALL_CONTACTS:
+    e_book_backend_remove_all_contacts (backend, op->book, op->id);
     break;
   case OP_GET_CHANGES:
     e_book_backend_get_changes (backend, op->book, op->id, op->change_id);
@@ -775,6 +780,16 @@ impl_AddressBook_Book_removeContacts(EDataBook *book, const char **IN_uids, DBus
   g_thread_pool_push (op_pool, op, NULL);
 }
 
+static void
+impl_AddressBook_Book_removeAllContacts(EDataBook *book, DBusGMethodInvocation *context)
+{
+  OperationData *op;
+
+  op = op_new (OP_REMOVE_ALL_CONTACTS, book, context);
+
+  g_thread_pool_push (op_pool, op, NULL);
+}
+
 void
 e_data_book_respond_remove_contacts (EDataBook *book, guint32 opid, EDataBookStatus status, GList *ids)
 {
@@ -782,6 +797,28 @@ e_data_book_respond_remove_contacts (EDataBook *book, guint32 opid, EDataBookSta
 
   if (status != Success) {
     GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot remove contacts"));
+    DBusErrorReturnData *data = dbus_error_return_data_new (context, error);
+    g_idle_add (idle_dbus_return_error, data);
+  } else {
+    GList *i;
+
+    /* return to sender first */
+    g_idle_add (idle_dbus_method_return, context);
+
+    /* notify views after */
+    for (i = ids; i; i = i->next)
+      e_book_backend_notify_remove (e_data_book_get_backend (book), i->data);
+    e_book_backend_notify_complete (e_data_book_get_backend (book));
+  }
+}
+
+void
+e_data_book_respond_remove_all_contacts (EDataBook *book, guint32 opid, EDataBookStatus status, GList *ids)
+{
+  DBusGMethodInvocation *context = opid_fetch (opid);
+
+  if (status != Success) {
+    GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot remove all contacts"));
     DBusErrorReturnData *data = dbus_error_return_data_new (context, error);
     g_idle_add (idle_dbus_return_error, data);
   } else {

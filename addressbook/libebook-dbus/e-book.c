@@ -1898,7 +1898,7 @@ remove_contacts_reply (DBusGProxy *proxy, GError *error, gpointer user_data)
  * @closure: data to pass to callback function
  *
  * Removes the contacts with ids from the list @ids from @book.  This is
- * always more efficient than calling e_book_remove_contact_by_id() if you
+ * always more efficient than calling e_book_remove_contact() if you
  * have more than one id to remove, as some backends can implement it
  * as a batch request.
  *
@@ -1927,6 +1927,72 @@ e_book_async_remove_contacts (EBook *book, GList *id_list, EBookCallback cb, gpo
     cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, closure);
 
   g_free (l);
+  return 0;
+}
+
+/**
+ * e_book_remove_all_contacts:
+ * @book: an #EBook
+ * @error: a #GError to set on failure
+ *
+ * Removes all contacts from @book. This is always more efficient than calling
+ * e_book_remove_contacts(), as some backends can implement it as a batch
+ * request.
+ *
+ * Return value: %TRUE if successful, %FALSE otherwise
+ **/
+gboolean
+e_book_remove_all_contacts (EBook *book, GError **error)
+{
+  GError *err = NULL;
+
+  e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
+
+  org_gnome_evolution_dataserver_addressbook_Book_remove_all_contacts (book->priv->proxy, &err);
+
+  return unwrap_gerror (err, error);
+}
+
+static void
+remove_all_contacts_reply (DBusGProxy *proxy, GError *error, gpointer user_data)
+{
+  AsyncData *data = user_data;
+  EBookCallback cb = data->callback;
+
+  if (cb)
+    cb (data->book, get_status_from_error (error), data->closure);
+
+  if (error)
+    g_error_free (error);
+
+  async_data_free (data);
+}
+
+/**
+ * e_book_async_remove_all_contacts:
+ * @book: an #EBook
+ * @cb: a function to call when the operation finishes
+ * @closure: data to pass to callback function
+ *
+ * Removes all contacts from @book. This is always more efficient than calling
+ * e_book_remove_contact(), as some backends can implement it as a batch request.
+ *
+ * Return value: %TRUE if successful, %FALSE otherwise
+ **/
+guint
+e_book_async_remove_all_contacts (EBook *book, EBookCallback cb, gpointer closure)
+{
+  AsyncData *data;
+
+  e_return_async_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
+
+  data = async_data_new (book, NULL, cb, closure);
+
+  if (!org_gnome_evolution_dataserver_addressbook_Book_remove_all_contacts_async (book->priv->proxy, remove_contacts_reply, data))
+    cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, closure);
+
   return 0;
 }
 
