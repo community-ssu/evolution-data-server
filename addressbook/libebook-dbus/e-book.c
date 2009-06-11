@@ -1930,6 +1930,35 @@ e_book_async_remove_contacts (EBook *book, GList *id_list, EBookCallback cb, gpo
   return 0;
 }
 
+static gboolean
+e_book_remove_all_contacts_fallback (EBook *book, GError **error)
+{
+  gboolean success = FALSE;
+  GList *contacts = NULL;
+  EBookQuery *query;
+
+  query = e_book_query_any_field_contains ("");
+
+  if (e_book_get_contacts (book, query, &contacts, error)) {
+    GList *uids = NULL;
+    GList *l;
+
+    for (l = contacts; l; l = l->next)
+      uids = g_list_prepend (uids, e_contact_get_const (l->data, E_CONTACT_UID));
+
+    success = e_book_remove_contacts (book, uids, error);
+
+    g_list_free (uids);
+  }
+
+  g_list_foreach (contacts, (GFunc) g_object_unref, NULL);
+  g_list_free (contacts);
+
+  e_book_query_unref (query);
+
+  return success;
+}
+
 /**
  * e_book_remove_all_contacts:
  * @book: an #EBook
@@ -1949,9 +1978,56 @@ e_book_remove_all_contacts (EBook *book, GError **error)
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
+  if (!e_book_check_static_capability (book, "remove-all-contacts"))
+    return e_book_remove_all_contacts_fallback (book, error);
+
   org_gnome_evolution_dataserver_addressbook_Book_remove_all_contacts (book->priv->proxy, &err);
 
   return unwrap_gerror (err, error);
+}
+
+static void
+remove_all_contacts_get_contacts_cb (EBook       *book,
+                                     EBookStatus  status,
+                                     GList       *contacts,
+                                     gpointer     closure)
+{
+  AsyncData *data = closure;
+  EBookCallback cb = data->callback;
+
+  if (E_BOOK_ERROR_OK == status) {
+    GList *uids = NULL;
+    GList *l;
+
+    for (l = contacts; l; l = l->next)
+      uids = g_list_prepend (uids, e_contact_get_const (l->data, E_CONTACT_UID));
+
+    if (e_book_async_remove_contacts (book, uids, cb, data->closure))
+      status = E_BOOK_ERROR_OTHER_ERROR;
+
+    g_list_free (uids);
+  }
+
+  g_list_foreach (contacts, (GFunc) g_object_unref, NULL);
+  g_list_free (contacts);
+
+  if (E_BOOK_ERROR_OK != status && cb)
+    cb (data->book, status, data->closure);
+
+  async_data_free (data);
+}
+
+static guint
+e_book_async_remove_all_contacts_fallback (EBook *book, EBookCallback cb, gpointer closure)
+{
+  EBookQuery *query;
+  AsyncData *data;
+
+  query = e_book_query_any_field_contains ("");
+  data = async_data_new (book, query, cb, closure);
+  e_book_query_unref (query);
+
+  return e_book_async_get_contacts (book, query, remove_all_contacts_get_contacts_cb, data);
 }
 
 static void
@@ -1989,6 +2065,9 @@ e_book_async_remove_all_contacts (EBook *book, EBookCallback cb, gpointer closur
   e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
   data = async_data_new (book, NULL, cb, closure);
+
+  if (!e_book_check_static_capability (book, "remove-all-contacts"))
+    return e_book_async_remove_all_contacts_fallback (book, cb, closure);
 
   if (!org_gnome_evolution_dataserver_addressbook_Book_remove_all_contacts_async (book->priv->proxy, remove_contacts_reply, data))
     cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, closure);

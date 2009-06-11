@@ -1,5 +1,19 @@
 2009-06-10  Mathias Hasselmann  <hasselmm@gnome.org>
 
+	Provide fallback for remove-all-contacts method (see NB#105728).
+
+	* addressbook/libebook-dbus/e-book.c
+	 (e_book_remove_all_contacts_fallback(), e_book_remove_all_contacts(),
+	  remove_all_contacts_get_contacts_cb(),
+	  e_book_async_remove_all_contacts_fallback(),
+	  e_book_async_remove_all_contacts()):
+	  Emulate remove-all-contacts call when the backend doesn't have
+	  the "remove-all-contacts" capability.
+
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+
+2009-06-10  Mathias Hasselmann  <hasselmm@gnome.org>
+
 	Gracefully handle missing virtual methods (see NB#105728).
 
 	* addressbook/libedata-book-dbus/e-book-backend-sync.c
