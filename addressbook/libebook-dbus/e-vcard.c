@@ -859,7 +859,7 @@ void
 e_vcard_construct_with_uid (EVCard *evc, const char *str, const char *uid)
 {
 	g_return_if_fail (E_IS_VCARD (evc));
-	g_return_if_fail (str != NULL);
+	g_return_if_fail (str != NULL || !g_utf8_validate (str, -1, NULL));
 
 	g_return_if_fail (NULL == evc->priv->vcard);
 	g_return_if_fail (NULL == evc->priv->attributes);
@@ -868,12 +868,16 @@ e_vcard_construct_with_uid (EVCard *evc, const char *str, const char *uid)
 		evc->priv->vcard = g_strdup (str);
 
         if (uid) {
-                EVCardAttribute *attr;
+		if (G_UNLIKELY (!g_utf8_validate (uid, -1, NULL))) {
+			g_warning ("%s: uid is not valid utf-8", G_STRFUNC);
+		} else {
+			EVCardAttribute *attr;
 
-                attr = e_vcard_attribute_new (NULL, EVC_UID);
-                e_vcard_attribute_add_value (attr, uid);
+			attr = e_vcard_attribute_new (NULL, EVC_UID);
+			e_vcard_attribute_add_value (attr, uid);
 
-                evc->priv->attributes = g_list_prepend (evc->priv->attributes, attr);
+			evc->priv->attributes = g_list_prepend (evc->priv->attributes, attr);
+		}
         }
 }
 
@@ -910,7 +914,8 @@ e_vcard_new_from_string (const char *str)
 {
 	EVCard *evc;
 
-	g_return_val_if_fail (str != NULL, NULL);
+	g_return_val_if_fail (str != NULL &&
+			      g_utf8_validate (str, -1, NULL), NULL);
 
 	evc = g_object_new (E_TYPE_VCARD, NULL);
 
@@ -1241,17 +1246,30 @@ e_vcard_to_string_vcard_30 (EVCard *evc)
 char*
 e_vcard_to_string (EVCard *evc, EVCardFormat format)
 {
+	char* str = NULL;
+
 	g_return_val_if_fail (E_IS_VCARD (evc), NULL);
 
 	switch (format) {
 	case EVC_FORMAT_VCARD_21:
-		return e_vcard_to_string_vcard_21 (evc);
+		str = e_vcard_to_string_vcard_21 (evc);
+		break;
 	case EVC_FORMAT_VCARD_30:
-		return e_vcard_to_string_vcard_30 (evc);
+		str = e_vcard_to_string_vcard_30 (evc);
+		break;
 	default:
 		g_warning ("invalid format specifier passed to e_vcard_to_string");
-		return g_strdup ("");
+		str = g_strdup ("");
 	}
+
+	/* We cannot pass invalid utf-8 to d-bus or it will disconnect us from
+	 * the bus, which will cause the client app to abort */
+	if (!g_utf8_validate (str, -1, NULL)) {
+		g_warning ("%s: invalid utf8 in contact", G_STRFUNC);
+		g_free (str);
+		str = NULL;
+	}
+	return str;
 }
 
 /**

@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20090615.99) unstable; urgency=low
+
+  * Fixes: NB#111264 - Sometimes contacts application gets disconnected from message bus after trying to save a new contact
+
+ -- Robert Peto <robert.peto@maemo.org>  Mon, 15 Jun 2009 14:52:51 +0100
+
 evolution-data-server (1.4.2.1-20090615) unstable; urgency=low
 
   * Fixes: NB#120845 - e-d-s does not send a dbus response when trying to remove a contact without a UID

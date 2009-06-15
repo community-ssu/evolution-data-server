@@ -1,3 +1,22 @@
+2009-06-08  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
+	Make sure we don't pass invalid utf-8 strings over D-Bus,
+	otherwise the client application will be forcefully disconnected
+	from the bus and the client application will abort. Fixes NB#111264
+
+	* libebook-dbus/e-contact.c:
+	(e_contact_new_from_vcard): return NULL if passed string is invalid utf-8
+	* libebook-dbus/e-vcard.c:
+	(e_vcard_new_from_string): return NULL if string is invalid utf-8
+	(e_vcard_construct_with_uid): validate strings as utf-8
+	(e_vcard_to_string): make sure the returned string is valid
+	utf-8 or otherwise return NULL
+	* libebook-dbus/e-book.c: handle NULL responses from
+	e_vcard_to_string and return error status codes when this
+	happens.  Also validate all string input from API functions.
+
+	Reviewed by Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
 2009-06-15  Mathias Hasselmann  <hasselmm@gnome.org>
 
 	Rewire im-gadugadu in SEXP handler.
