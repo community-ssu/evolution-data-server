@@ -282,6 +282,7 @@ static struct prop_info {
 	LIST_PROP ( "im-icq",    compare_im_icq ),
 	LIST_PROP ( "im-jabber", compare_im_jabber ),
 	LIST_PROP ( "im-yahoo",  compare_im_yahoo ),
+	LIST_PROP ( "im-gadugadu",  compare_im_gadugadu ),
 	LIST_PROP ( "im-groupwise", compare_im_groupwise ),
 	LIST_PROP ( "im-skype", compare_im_skype ),
 	LIST_PROP ( "email",     compare_email ),

@@ -1,5 +1,14 @@
 2009-06-15  Mathias Hasselmann  <hasselmm@gnome.org>
 
+	Rewire im-gadugadu in SEXP handler.
+
+	* addressbook/libedata-book-dbus/e-book-backend-sexp.c
+	 (prop_info[]): See summary.
+
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+
+2009-06-15  Mathias Hasselmann  <hasselmm@gnome.org>
+
 	Gracefully handle missing virtual methods.
 
 	* addressbook/libedata-book-dbus/e-book-backend.c:

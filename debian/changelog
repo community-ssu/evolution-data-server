@@ -3,6 +3,7 @@ evolution-data-server (1.4.2.1-20090604.99) unstable; urgency=low
   * Fixes: NB#120845 - e-d-s does not send a dbus response when trying to remove a contact without a UID
   * Fixes: NB#97387 - Sometimes e_book_async_open() ends in Nirwana
   * Fixes: NB#105728 - API change request: delete all contacts
+  * Rewire im-gadugadu in SEXP handler
 
  -- Robert Peto <robert.peto@maemo.org>  Thu,  4 Jun 2009 11:19:41 +0100
 
