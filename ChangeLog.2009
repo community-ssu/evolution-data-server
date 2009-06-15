@@ -1,3 +1,17 @@
+2009-06-10  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
+	Reviewed by Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
+	* libebook-dbus/e-contact.c:
+	(e_contact_new_from_vcard): don't do a duplicate utf-8 validation
+	* libebook-dbus/e-vcard.c:
+	(e_vcard_construct):
+	(e_vcard_construct_with_uid): return a boolean value indicating whether
+	the construction was successful (e.g. whether there was invalid utf-8 or
+	not)
+	(e_vcard_new_from_string): don't do a duplicate utf-8 validation
+	* libebook-dbus/e-vcard.h: change return values
+
 2009-06-08  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
 
 	Make sure we don't pass invalid utf-8 strings over D-Bus,

@@ -131,8 +131,8 @@ struct _EVCardClass {
 
 GType   e_vcard_get_type                     (void) G_GNUC_CONST;
 
-void    e_vcard_construct                    (EVCard *evc, const char *str);
-void    e_vcard_construct_with_uid           (EVCard *evc, const char *str, const char *uid);
+gboolean e_vcard_construct                   (EVCard *evc, const char *str);
+gboolean e_vcard_construct_with_uid          (EVCard *evc, const char *str, const char *uid);
 
 EVCard* e_vcard_new                          (void);
 EVCard* e_vcard_new_from_string              (const char *str);

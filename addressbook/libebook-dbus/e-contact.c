@@ -1267,11 +1267,13 @@ e_contact_new_from_vcard (const char *vcard)
 {
 	EContact *contact;
 
-	g_return_val_if_fail (vcard != NULL &&
-			      g_utf8_validate (vcard, -1, NULL), NULL);
+	g_return_val_if_fail (vcard != NULL, NULL);
 
 	contact = g_object_new (E_TYPE_CONTACT, NULL);
-	e_vcard_construct (E_VCARD (contact), vcard);
+	if (!e_vcard_construct (E_VCARD (contact), vcard)) {
+		g_object_unref (contact);
+		return NULL;
+	}
 
 #if 0
 	const gchar *file_as;

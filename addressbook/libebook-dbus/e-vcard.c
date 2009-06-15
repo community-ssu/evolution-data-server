@@ -855,36 +855,36 @@ e_vcard_unescape_string (const char *s)
 	return g_string_free (str, FALSE);
 }
 
-void
+gboolean
 e_vcard_construct_with_uid (EVCard *evc, const char *str, const char *uid)
 {
-	g_return_if_fail (E_IS_VCARD (evc));
-	g_return_if_fail (str != NULL || !g_utf8_validate (str, -1, NULL));
+	g_return_val_if_fail (E_IS_VCARD (evc), FALSE);
+	g_return_val_if_fail (str != NULL && g_utf8_validate (str, -1, NULL), FALSE);
+	/* uid is optional, but if it is given, it must be valid utf-8 */
+	g_return_val_if_fail (uid == NULL || g_utf8_validate (uid, -1, NULL), NULL);
 
-	g_return_if_fail (NULL == evc->priv->vcard);
-	g_return_if_fail (NULL == evc->priv->attributes);
+	g_return_val_if_fail (NULL == evc->priv->vcard, FALSE);
+	g_return_val_if_fail (NULL == evc->priv->attributes, FALSE);
 
 	if (*str)
 		evc->priv->vcard = g_strdup (str);
 
-        if (uid) {
-		if (G_UNLIKELY (!g_utf8_validate (uid, -1, NULL))) {
-			g_warning ("%s: uid is not valid utf-8", G_STRFUNC);
-		} else {
-			EVCardAttribute *attr;
+	if (uid) {
+		EVCardAttribute *attr;
 
-			attr = e_vcard_attribute_new (NULL, EVC_UID);
-			e_vcard_attribute_add_value (attr, uid);
+		attr = e_vcard_attribute_new (NULL, EVC_UID);
+		e_vcard_attribute_add_value (attr, uid);
 
-			evc->priv->attributes = g_list_prepend (evc->priv->attributes, attr);
-		}
-        }
+		evc->priv->attributes = g_list_prepend (evc->priv->attributes, attr);
+	}
+
+	return TRUE;
 }
 
-void
+gboolean
 e_vcard_construct (EVCard *evc, const char *str)
 {
-        e_vcard_construct_with_uid (evc, str, NULL);
+        return e_vcard_construct_with_uid (evc, str, NULL);
 }
 
 /**
@@ -914,12 +914,14 @@ e_vcard_new_from_string (const char *str)
 {
 	EVCard *evc;
 
-	g_return_val_if_fail (str != NULL &&
-			      g_utf8_validate (str, -1, NULL), NULL);
+	g_return_val_if_fail (str != NULL, NULL);
 
 	evc = g_object_new (E_TYPE_VCARD, NULL);
 
-	e_vcard_construct (evc, str);
+	if (!e_vcard_construct (evc, str)) {
+		g_object_unref (evc);
+		return NULL;
+	}
 
 	return evc;
 }
