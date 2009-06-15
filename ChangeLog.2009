@@ -1,3 +1,13 @@
+2009-06-15  Mathias Hasselmann  <hasselmm@gnome.org>
+
+	Gracefully handle missing virtual methods.
+
+	* addressbook/libedata-book-dbus/e-book-backend.c:
+	* addressbook/libedata-book-dbus/e-book-backend-sync.c:
+	  Now gracefully handle all virtual methods.
+
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+
 2009-06-10  Mathias Hasselmann  <hasselmm@gnome.org>
 
 	Provide fallback for remove-all-contacts method (see NB#105728).

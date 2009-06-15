@@ -14,8 +14,8 @@
 
 #define E_BOOK_BACKEND_SYNC_CHECK_METHOD(backend, method) G_STMT_START{ \
 	if (!E_BOOK_BACKEND_SYNC_GET_CLASS ((backend))->method) { \
-		g_warning ("%s: unsupported method: %s (%s)", \
-			   G_STRFUNC, #method, G_OBJECT_TYPE_NAME ((backend))); \
+		g_warning ("%s: %s: unsupported method: %s", \
+			   G_STRFUNC, G_OBJECT_TYPE_NAME ((backend)), #method); \
 		return GNOME_Evolution_Addressbook_OtherError; \
 	} \
 }G_STMT_END
@@ -64,7 +64,7 @@ e_book_backend_sync_create_contact (EBookBackendSync *backend,
 	g_return_val_if_fail (vcard, GNOME_Evolution_Addressbook_OtherError);
 	g_return_val_if_fail (contact, GNOME_Evolution_Addressbook_OtherError);
 
-	g_assert (E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->create_contact_sync);
+	E_BOOK_BACKEND_SYNC_CHECK_METHOD (backend, create_contact_sync);
 
 	return (* E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->create_contact_sync) (backend, book, opid, vcard, contact);
 }
@@ -93,7 +93,7 @@ e_book_backend_sync_create_contacts (EBookBackendSync *backend,
 	g_return_val_if_fail (vcards, GNOME_Evolution_Addressbook_OtherError);
 	g_return_val_if_fail (contacts, GNOME_Evolution_Addressbook_OtherError);
 
-	g_assert (E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->create_contacts_sync);
+	E_BOOK_BACKEND_SYNC_CHECK_METHOD (backend, create_contacts_sync);
 
 	return (* E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->create_contacts_sync) (backend, book, opid, vcards, contacts);
 }
@@ -117,7 +117,7 @@ e_book_backend_sync_remove (EBookBackendSync *backend,
 	g_return_val_if_fail (E_IS_BOOK_BACKEND_SYNC (backend), GNOME_Evolution_Addressbook_OtherError);
 	g_return_val_if_fail (E_IS_DATA_BOOK (book), GNOME_Evolution_Addressbook_OtherError);
 
-	g_assert (E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->remove_sync);
+	E_BOOK_BACKEND_SYNC_CHECK_METHOD (backend, remove_sync);
 
 	return (* E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->remove_sync) (backend, book, opid);
 }
@@ -148,7 +148,7 @@ e_book_backend_sync_remove_contacts (EBookBackendSync *backend,
 	g_return_val_if_fail (id_list, GNOME_Evolution_Addressbook_OtherError);
 	g_return_val_if_fail (removed_ids, GNOME_Evolution_Addressbook_OtherError);
 
-	g_assert (E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->remove_contacts_sync);
+	E_BOOK_BACKEND_SYNC_CHECK_METHOD (backend, remove_contacts_sync);
 
 	return (* E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->remove_contacts_sync) (backend, book, opid, id_list, removed_ids);
 }
@@ -206,7 +206,7 @@ e_book_backend_sync_modify_contact (EBookBackendSync *backend,
 	g_return_val_if_fail (vcard, GNOME_Evolution_Addressbook_OtherError);
 	g_return_val_if_fail (contact, GNOME_Evolution_Addressbook_OtherError);
 
-	g_assert (E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->modify_contact_sync);
+	E_BOOK_BACKEND_SYNC_CHECK_METHOD (backend, modify_contact_sync);
 
 	return (* E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->modify_contact_sync) (backend, book, opid, vcard, contact);
 }
@@ -236,7 +236,7 @@ e_book_backend_sync_modify_contacts (EBookBackendSync *backend,
 	g_return_val_if_fail (vcards, GNOME_Evolution_Addressbook_OtherError);
 	g_return_val_if_fail (contacts, GNOME_Evolution_Addressbook_OtherError);
 
-	g_assert (E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->modify_contacts_sync);
+	E_BOOK_BACKEND_SYNC_CHECK_METHOD (backend, modify_contacts_sync);
 
 	return (* E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->modify_contacts_sync) (backend, book, opid, vcards, contacts);
 }
@@ -265,7 +265,7 @@ e_book_backend_sync_get_contact (EBookBackendSync *backend,
 	g_return_val_if_fail (id, GNOME_Evolution_Addressbook_OtherError);
 	g_return_val_if_fail (vcard, GNOME_Evolution_Addressbook_OtherError);
 
-	g_assert (E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->get_contact_sync);
+	E_BOOK_BACKEND_SYNC_CHECK_METHOD (backend, get_contact_sync);
 
 	return (* E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->get_contact_sync) (backend, book, opid, id, vcard);
 }
@@ -295,7 +295,7 @@ e_book_backend_sync_get_contact_list (EBookBackendSync *backend,
 	g_return_val_if_fail (query, GNOME_Evolution_Addressbook_OtherError);
 	g_return_val_if_fail (contacts, GNOME_Evolution_Addressbook_OtherError);
 
-	g_assert (E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->get_contact_list_sync);
+	E_BOOK_BACKEND_SYNC_CHECK_METHOD (backend, get_contact_list_sync);
 
 	return (* E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->get_contact_list_sync) (backend, book, opid, query, contacts);
 }
@@ -326,7 +326,7 @@ e_book_backend_sync_get_changes (EBookBackendSync *backend,
 	g_return_val_if_fail (change_id, GNOME_Evolution_Addressbook_OtherError);
 	g_return_val_if_fail (changes, GNOME_Evolution_Addressbook_OtherError);
 
-	g_assert (E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->get_changes_sync);
+	E_BOOK_BACKEND_SYNC_CHECK_METHOD (backend, get_changes_sync);
 
 	return (* E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->get_changes_sync) (backend, book, opid, change_id, changes);
 }
@@ -356,7 +356,7 @@ e_book_backend_sync_authenticate_user (EBookBackendSync *backend,
 	g_return_val_if_fail (E_IS_DATA_BOOK (book), GNOME_Evolution_Addressbook_OtherError);
 	g_return_val_if_fail (user && passwd && auth_method, GNOME_Evolution_Addressbook_OtherError);
 
-	g_assert (E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->authenticate_user_sync);
+	E_BOOK_BACKEND_SYNC_CHECK_METHOD (backend, authenticate_user_sync);
 
 	return (* E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->authenticate_user_sync) (backend, book, opid, user, passwd, auth_method);
 }
@@ -384,7 +384,7 @@ e_book_backend_sync_get_required_fields (EBookBackendSync *backend,
 	g_return_val_if_fail (E_IS_DATA_BOOK (book), GNOME_Evolution_Addressbook_OtherError);
 	g_return_val_if_fail (fields, GNOME_Evolution_Addressbook_OtherError);
 
-	g_assert (E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->get_required_fields_sync);
+	E_BOOK_BACKEND_SYNC_CHECK_METHOD (backend, get_required_fields_sync);
 
 	return (* E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->get_required_fields_sync) (backend, book, opid, fields);
 }
@@ -412,7 +412,7 @@ e_book_backend_sync_get_supported_fields (EBookBackendSync *backend,
 	g_return_val_if_fail (E_IS_DATA_BOOK (book), GNOME_Evolution_Addressbook_OtherError);
 	g_return_val_if_fail (fields, GNOME_Evolution_Addressbook_OtherError);
 
-	g_assert (E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->get_supported_fields_sync);
+	E_BOOK_BACKEND_SYNC_CHECK_METHOD (backend, get_supported_fields_sync);
 
 	return (* E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->get_supported_fields_sync) (backend, book, opid, fields);
 }
@@ -440,7 +440,7 @@ e_book_backend_sync_get_supported_auth_methods (EBookBackendSync *backend,
 	g_return_val_if_fail (E_IS_DATA_BOOK (book), GNOME_Evolution_Addressbook_OtherError);
 	g_return_val_if_fail (methods, GNOME_Evolution_Addressbook_OtherError);
 
-	g_assert (E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->get_supported_auth_methods_sync);
+	E_BOOK_BACKEND_SYNC_CHECK_METHOD (backend, get_supported_auth_methods_sync);
 
 	return (* E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->get_supported_auth_methods_sync) (backend, book, opid, methods);
 }
