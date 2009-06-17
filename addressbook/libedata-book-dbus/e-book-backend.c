@@ -20,6 +20,16 @@
 	} \
 }G_STMT_END
 
+#define E_BOOK_BACKEND_CHECK_FLAG(backend, flag, method, ...) G_STMT_START{ \
+	if (G_UNLIKELY (!(backend)->priv->flag)) { \
+		g_warning ("%s: %s: asserting failed: %s is not set", \
+				G_STRFUNC, G_OBJECT_TYPE_NAME ((backend)), #flag); \
+		e_data_book_respond_ ## method (book, opid, OtherError, ## __VA_ARGS__); \
+		return; \
+	} \
+}G_STMT_END
+
+
 /* define aliases for symbols with inconsistent name */
 #define e_data_book_respond_create_contact e_data_book_respond_create
 #define e_data_book_respond_modify_contact e_data_book_respond_modify
@@ -200,6 +210,9 @@ e_book_backend_create_contact (EBookBackend *backend,
 	/* wait till book is opened */
 	e_flag_wait (backend->priv->opened_flag);
 
+	/* don't bother the backend if it's not loaded */
+	E_BOOK_BACKEND_CHECK_FLAG (backend, loaded, create_contact, NULL);
+
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->create_contact) (backend, book, opid, vcard);
 }
 
@@ -226,6 +239,8 @@ e_book_backend_create_contacts (EBookBackend *backend,
 	E_BOOK_BACKEND_CHECK_METHOD (backend, create_contacts, NULL);
 
         e_flag_wait (backend->priv->opened_flag);
+
+	E_BOOK_BACKEND_CHECK_FLAG (backend, loaded, create_contacts, NULL);
 
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->create_contacts) (backend, book, opid, vcards);
 }
@@ -260,6 +275,8 @@ e_book_backend_remove_contacts (EBookBackend *backend,
 
         e_flag_wait (backend->priv->opened_flag);
 
+	E_BOOK_BACKEND_CHECK_FLAG (backend, loaded, remove_contacts, NULL);
+
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->remove_contacts) (backend, book, opid, id_list);
 }
 
@@ -283,6 +300,8 @@ e_book_backend_remove_all_contacts (EBookBackend *backend,
 	E_BOOK_BACKEND_CHECK_METHOD (backend, remove_all_contacts, NULL);
 
         e_flag_wait (backend->priv->opened_flag);
+
+	E_BOOK_BACKEND_CHECK_FLAG (backend, loaded, remove_all_contacts, NULL);
 
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->remove_all_contacts) (backend, book, opid);
 }
@@ -311,6 +330,8 @@ e_book_backend_modify_contact (EBookBackend *backend,
 
 	e_flag_wait (backend->priv->opened_flag);
 
+	E_BOOK_BACKEND_CHECK_FLAG (backend, loaded, modify_contact, NULL);
+
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->modify_contact) (backend, book, opid, vcard);
 }
 
@@ -337,6 +358,8 @@ e_book_backend_modify_contacts (EBookBackend *backend,
 	E_BOOK_BACKEND_CHECK_METHOD (backend, modify_contacts, NULL);
 
         e_flag_wait (backend->priv->opened_flag);
+
+	E_BOOK_BACKEND_CHECK_FLAG (backend, loaded, modify_contacts, NULL);
 
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->modify_contacts) (backend, book, opid, vcards);
 }
@@ -365,6 +388,8 @@ e_book_backend_get_contact (EBookBackend *backend,
 
         e_flag_wait (backend->priv->opened_flag);
 
+	E_BOOK_BACKEND_CHECK_FLAG (backend, loaded, get_contact, NULL);
+
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->get_contact) (backend, book, opid, id);
 }
 
@@ -392,6 +417,8 @@ e_book_backend_get_contact_list (EBookBackend *backend,
 
         e_flag_wait (backend->priv->opened_flag);
 
+	E_BOOK_BACKEND_CHECK_FLAG (backend, loaded, get_contact_list, NULL);
+
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->get_contact_list) (backend, book, opid, query);
 }
 
@@ -413,6 +440,8 @@ e_book_backend_start_book_view (EBookBackend  *backend,
 
         e_flag_wait (backend->priv->opened_flag);
 
+	g_return_if_fail (backend->priv->loaded);
+
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->start_book_view) (backend, book_view);
 }
 
@@ -433,6 +462,8 @@ e_book_backend_stop_book_view (EBookBackend  *backend,
 	g_return_if_fail (E_BOOK_BACKEND_GET_CLASS (backend)->stop_book_view);
 
         e_flag_wait (backend->priv->opened_flag);
+
+	g_return_if_fail (backend->priv->loaded);
 
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->stop_book_view) (backend, book_view);
 }
@@ -460,6 +491,8 @@ e_book_backend_get_changes (EBookBackend *backend,
 	E_BOOK_BACKEND_CHECK_METHOD (backend, get_changes, NULL);
 
         e_flag_wait (backend->priv->opened_flag);
+
+	E_BOOK_BACKEND_CHECK_FLAG (backend, loaded, get_changes, NULL);
 
 	(* E_BOOK_BACKEND_GET_CLASS (backend)->get_changes) (backend, book, opid, change_id);
 }

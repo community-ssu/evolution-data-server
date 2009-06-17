@@ -1,3 +1,14 @@
+2009-06-17  Robert Peto  <robert.peto@maemo.org>
+
+	Do not allow DB operations on a not loaded addressbook.
+
+	* addressbook/libebook-dbus/e-book.c: check if EBook is loaded before
+	calling its DB related methods.
+	* addressbook/libedata-book-dbus/e-book-backend.c: check if
+	EBookBackend is loaded before calling its DB related methods.
+
+	Reviewed-By: Mathias Hasselmann  <hasselmm@gnome.org>
+
 2009-06-10  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
 
 	Reviewed by Mathias Hasselmann  <mathias.hasselmann@maemo.org>
