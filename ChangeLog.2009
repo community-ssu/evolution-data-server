@@ -1,5 +1,18 @@
 2009-06-17  Robert Peto  <robert.peto@maemo.org>
 
+	Remove redundant writable checks from the file-backend of addressbook.
+
+	* addressbook/backends/file/e-book-backend-file.c
+	(e_book_backend_file_create_contact(),
+	 e_book_backend_file_create_contacts(),
+	 e_book_backend_file_remove_contacts(),
+	 e_book_backend_file_modify_contact(),
+	 e_book_backend_file_modify_contacts())
+
+	Reviewed-By: Mathias Hasselmann  <hasselmm@gnome.org>
+
+2009-06-17  Robert Peto  <robert.peto@maemo.org>
+
 	Do not allow DB modifications on a not writable addressbook.
 
 	* addressbook/libebook-dbus/e-book.c: chech if EBook if writable
