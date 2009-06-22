@@ -328,6 +328,10 @@ e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db,
   priv->db = db;
 
   db_error = db->get_env (db, &env);
+  if (db_error != 0) {
+    WARNING ("get_env failed: %s", db_strerror (db_error));
+    return FALSE;
+  }
 
   for (i = 0; i < G_N_ELEMENTS (indexes); i++)
   {
@@ -492,10 +496,11 @@ e_book_backend_file_index_get_ordered_ids (EBookBackendFileIndex *index, const g
 
   if (db_error != 0)
   {
-    WARNING ("db->state failed: %s", db_strerror (db_error));
+    WARNING ("db->stat failed: %s", db_strerror (db_error));
+    stat = NULL;
   }
 
-  if (stat->bt_ndata > 0)
+  if (stat && stat->bt_ndata > 0)
     ids = g_ptr_array_sized_new (stat->bt_ndata);
   else
     ids = g_ptr_array_sized_new (128);

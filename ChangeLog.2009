@@ -1,3 +1,12 @@
+2009-06-22  Robert Peto  <robert.peto>
+
+	* addressbook/backends/file/e-book-backend-file-index.c
+	(e_book_backend_file_index_setup_indicies(),
+	e_book_backend_file_index_get_ordered_ids()): handle db_error return
+	values.
+
+	Reviewed-By: Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
 2009-06-22  Robert Peto  <robert.peto@maemo.org>
 
 	Set up a panic callback for berkeley db in addressbook. If DB file
