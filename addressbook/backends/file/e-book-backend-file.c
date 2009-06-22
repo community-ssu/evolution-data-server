@@ -945,17 +945,11 @@ book_view_thread (gpointer data)
 				WARNING ("e_book_backend_file_search: error building list: %s",
 					   db_strerror (db_error));
 		}
-		else if (db_error == DB_RUNRECOVERY) {
-			WARNING ("e_book_backend_file_search: error getting the cursor for %s",
-				   bf->priv->filename);
-			abort ();
-		}
 	}
 
 	if (e_flag_is_set (closure->running))
 	{
 		e_data_book_view_notify_complete (book_view, GNOME_Evolution_Addressbook_Success);
-
 	}
 
 	/* unref the */
@@ -1385,6 +1379,14 @@ file_errcall (const char *buf1, char *buf2)
 	global_env.had_error = TRUE;
 }
 
+static void
+file_paniccall (DB_ENV *env, int errval)
+{
+	/* Berkeley DB needs recovery:
+	 * abort here and try to recover on the next start */
+	g_error ("Oops, db panic: %s", db_strerror (errval));
+}
+
 #define PREINSTALL_MD5FILE "md5sums"
 #define PREINSTALL_MD5DIR "evolution-data-server"
 #define PREINSTALL_DIR "/usr/share/evolution-data-server"
@@ -1634,6 +1636,11 @@ setup_global_env ()
 
 	/* set up our own error handler */
 	env->set_errcall (env, file_errcall);
+
+	if (env->set_paniccall (env, file_paniccall) != 0) {
+		WARNING ("set_paniccall failed with: %s", db_strerror (db_error));
+		goto error;
+	}
 
 	/* set the allocation routines to the non-aborting GLib functions */
 	db_error = env->set_alloc (env, (void *(*)(size_t))g_try_malloc,

@@ -1,3 +1,12 @@
+2009-06-22  Robert Peto  <robert.peto@maemo.org>
+
+	Set up a panic callback for berkeley db in addressbook. If DB file
+	gets corrupted (recovery is needed) E-D-S will abort immediately.
+
+	* addressbook/backends/file/e-book-backend-file.c
+
+	Reviewed-By: Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
 2009-06-17  Robert Peto  <robert.peto@maemo.org>
 
 	Remove redundant writable checks from the file-backend of addressbook.
