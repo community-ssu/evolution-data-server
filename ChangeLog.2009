@@ -4,6 +4,8 @@
 	(e_book_backend_file_load_source()): Unref bf->priv->index if
 	running_id couldn't be loaded.
 
+	Reviewed-By: Mathias Hasselmann  <hasselmm@gnome.org>
+
 2009-06-22  Robert Peto  <robert.peto>
 
 	* addressbook/backends/file/e-book-backend-file-index.c
