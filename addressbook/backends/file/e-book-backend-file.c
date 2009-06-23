@@ -1872,6 +1872,10 @@ e_book_backend_file_load_source (EBookBackend           *backend,
                 retval = e_book_backend_file_setup_running_ids (bf);
                 if (retval != GNOME_Evolution_Addressbook_Success) {
                         WARNING ("cannot setup the running id");
+			g_object_unref (bf->priv->index);
+			bf->priv->index = NULL;
+			db->close (db, 0);
+			bf->priv->file_db = NULL;
 			unref_global_env ();
                         return retval;
                 }

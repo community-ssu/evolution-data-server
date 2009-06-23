@@ -2,6 +2,7 @@ evolution-data-server (1.4.2.1-20090616.99) unstable; urgency=low
 
   * Fixes: NB#121289 - factory crashes when client tries to use a not loaded book
   * Set up a panic callback and handle libdb return values (see NB#113845)
+  * Fixes: NB#118071 - factory crashes when running_id is not usable
 
  -- Robert Peto <robert.peto@maemo.org>  Mon, 16 Jun 2009 10:58:05 +0100
 

@@ -1,3 +1,9 @@
+2009-06-23  Robert Peto  <robert.peto@maemo.org>
+
+	* addressbook/backends/file/e-book-backend-file.c
+	(e_book_backend_file_load_source()): Unref bf->priv->index if
+	running_id couldn't be loaded.
+
 2009-06-22  Robert Peto  <robert.peto>
 
 	* addressbook/backends/file/e-book-backend-file-index.c
