@@ -48,7 +48,7 @@ struct _EDataBookViewPrivate {
   int max_results;
 
   gboolean running;
-  GMutex *pending_mutex;
+  GStaticRecMutex pending_mutex;
 
   GPtrArray *adds;
   GPtrArray *changes;
@@ -58,7 +58,6 @@ struct _EDataBookViewPrivate {
   guint idle_id;
 
    guint thaw_idle_id;
-   GMutex *thaw_lock;
    GCond *thaw_cond;
    gboolean frozen;
    gboolean freezable;
@@ -156,7 +155,7 @@ e_data_book_view_init (EDataBookView *book_view)
   book_view->priv = priv;
 
   priv->running = FALSE;
-  priv->pending_mutex = g_mutex_new ();
+  g_static_rec_mutex_init (&priv->pending_mutex);
 
   /* THRESHOLD * 2: we store UID and vCard */
   priv->adds = g_ptr_array_sized_new (THRESHOLD * 2);
@@ -168,7 +167,6 @@ e_data_book_view_init (EDataBookView *book_view)
 
   priv->freezable = FALSE;
   priv->frozen = FALSE;
-  priv->thaw_lock = g_mutex_new ();
   priv->thaw_cond = g_cond_new ();
 }
 
@@ -307,9 +305,8 @@ e_data_book_view_finalize (GObject *object)
 
   g_free (priv->card_query);
 
-  g_mutex_free (priv->pending_mutex);
+  g_static_rec_mutex_free (&priv->pending_mutex);
 
-  g_mutex_free (priv->thaw_lock);
   g_cond_free (priv->thaw_cond);
 
   g_hash_table_destroy (priv->ids);
@@ -383,13 +380,13 @@ e_data_book_view_thaw (EDataBookView *view)
 {
   EDataBookViewPrivate *priv = view->priv;
 
-  g_mutex_lock (priv->thaw_lock);
+  g_static_rec_mutex_lock (&priv->pending_mutex);
   if (priv->frozen)
   {
     priv->frozen = FALSE;
     g_cond_signal (priv->thaw_cond);
   }
-  g_mutex_unlock (priv->thaw_lock);
+  g_static_rec_mutex_unlock (&priv->pending_mutex);
 }
 
 static gboolean
@@ -562,11 +559,11 @@ notify_add (EDataBookView *view, const char *id, char *vcard)
   if (priv->adds->len == 2 * THRESHOLD) {
     if (priv->freezable)
     {
-      g_mutex_lock (priv->thaw_lock);
+      g_static_rec_mutex_lock (&priv->pending_mutex);
       send_pending_adds (view);
       priv->frozen = TRUE;
-      g_cond_wait (priv->thaw_cond, priv->thaw_lock);
-      g_mutex_unlock (priv->thaw_lock);
+      g_cond_wait (priv->thaw_cond, g_static_mutex_get_mutex (&priv->pending_mutex.mutex));
+      g_static_rec_mutex_unlock (&priv->pending_mutex);
     } else {
       send_pending_adds (view);
     }
@@ -590,7 +587,7 @@ e_data_book_view_notify_update (EDataBookView *book_view, EContact *contact)
   if (!priv->running)
     return;
 
-  g_mutex_lock (priv->pending_mutex);
+  g_static_rec_mutex_lock (&priv->pending_mutex);
 
   id = e_contact_get_const (contact, E_CONTACT_UID);
 
@@ -613,7 +610,7 @@ e_data_book_view_notify_update (EDataBookView *book_view, EContact *contact)
     /* else nothing; we're removing a card that wasn't there */
   }
 
-  g_mutex_unlock (priv->pending_mutex);
+  g_static_rec_mutex_unlock (&priv->pending_mutex);
 }
 
 void
@@ -627,7 +624,7 @@ e_data_book_view_notify_update_vcard (EDataBookView *book_view, char *vcard)
   if (!priv->running)
     return;
 
-  g_mutex_lock (priv->pending_mutex);
+  g_static_rec_mutex_lock (&priv->pending_mutex);
 
   contact = e_contact_new_from_vcard (vcard);
   id = e_contact_get_const (contact, E_CONTACT_UID);
@@ -651,7 +648,7 @@ e_data_book_view_notify_update_vcard (EDataBookView *book_view, char *vcard)
   /* Do this last so that id is still valid when notify_ is called */
   g_object_unref (contact);
 
-  g_mutex_unlock (priv->pending_mutex);
+  g_static_rec_mutex_unlock (&priv->pending_mutex);
 }
 
 void
@@ -663,7 +660,7 @@ e_data_book_view_notify_update_prefiltered_vcard (EDataBookView *book_view, cons
   if (!priv->running)
     return;
 
-  g_mutex_lock (priv->pending_mutex);
+  g_static_rec_mutex_lock (&priv->pending_mutex);
 
   currently_in_view =
     g_hash_table_lookup (priv->ids, id) != NULL;
@@ -673,7 +670,7 @@ e_data_book_view_notify_update_prefiltered_vcard (EDataBookView *book_view, cons
   else
     notify_add (book_view, id, vcard);
 
-  g_mutex_unlock (priv->pending_mutex);
+  g_static_rec_mutex_unlock (&priv->pending_mutex);
 }
 
 void
@@ -684,12 +681,12 @@ e_data_book_view_notify_remove (EDataBookView *book_view, const char *id)
   if (!priv->running)
     return;
 
-  g_mutex_lock (priv->pending_mutex);
+  g_static_rec_mutex_lock (&priv->pending_mutex);
 
   if (g_hash_table_lookup (priv->ids, id))
     notify_remove (book_view, id);
-  
-  g_mutex_unlock (priv->pending_mutex);
+
+  g_static_rec_mutex_unlock (&priv->pending_mutex);
 }
 
 void
@@ -700,13 +697,13 @@ e_data_book_view_notify_complete (EDataBookView *book_view, EDataBookStatus stat
   if (!priv->running)
     return;
 
-  g_mutex_lock (priv->pending_mutex);
+  g_static_rec_mutex_lock (&priv->pending_mutex);
 
   send_pending_adds (book_view);
   send_pending_changes (book_view);
   send_pending_removes (book_view);
 
-  g_mutex_unlock (priv->pending_mutex);
+  g_static_rec_mutex_unlock (&priv->pending_mutex);
   
   /* We're done now, so tell the backend to stop?  TODO: this is a bit different to
      how the CORBA backend works... */

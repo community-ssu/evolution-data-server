@@ -1,10 +1,25 @@
+2009-06-26  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
+	NB#101759 - Contact editor dialog does not close after tapping on Save
+	button
+
+	* addressbook/libedata-book-dbus/e-data-book-view.c:
+	  Drop thaw_lock and use pending_mutex instead to avoid dead-looks.
+	  Expect for e_data_book_view_thaw() they are identical anyway, and
+	  for the thaw function it's acceptable to wait for pending_mutex.
+	  Turn pending_mutex into a GStaticRecMutex so that we can make sure
+	  to really have the lock in notify_add(). Reuse existing thaw idle
+	  handler to avoid needlessly defering thawing of the book view.
+
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+
 2009-06-23  Robert Peto  <robert.peto@maemo.org>
 
 	* addressbook/backends/file/e-book-backend-file.c
 	(e_book_backend_file_load_source()): Unref bf->priv->index if
 	running_id couldn't be loaded.
 
-	Reviewed-By: Mathias Hasselmann  <hasselmm@gnome.org>
+	Reviewed-By: Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
 2009-06-22  Robert Peto  <robert.peto>
 
@@ -35,7 +50,7 @@
 	 e_book_backend_file_modify_contact(),
 	 e_book_backend_file_modify_contacts())
 
-	Reviewed-By: Mathias Hasselmann  <hasselmm@gnome.org>
+	Reviewed-By: Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
 2009-06-17  Robert Peto  <robert.peto@maemo.org>
 
@@ -48,7 +63,7 @@
 	EBookBackend is writable before calling methods that doind DB
 	modifications.
 
-	Reviewed-By: Mathias Hasselmann  <hasselmm@gnome.org>
+	Reviewed-By: Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
 2009-06-17  Robert Peto  <robert.peto@maemo.org>
 
@@ -59,7 +74,7 @@
 	* addressbook/libedata-book-dbus/e-book-backend.c: check if
 	EBookBackend is loaded before calling its DB related methods.
 
-	Reviewed-By: Mathias Hasselmann  <hasselmm@gnome.org>
+	Reviewed-By: Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
 2009-06-10  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
 
@@ -94,7 +109,7 @@
 
 	Reviewed by Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
-2009-06-15  Mathias Hasselmann  <hasselmm@gnome.org>
+2009-06-15  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
 	Rewire im-gadugadu in SEXP handler.
 
@@ -103,7 +118,7 @@
 
 	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
 
-2009-06-15  Mathias Hasselmann  <hasselmm@gnome.org>
+2009-06-15  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
 	Gracefully handle missing virtual methods.
 
@@ -113,7 +128,7 @@
 
 	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
 
-2009-06-10  Mathias Hasselmann  <hasselmm@gnome.org>
+2009-06-10  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
 	Provide fallback for remove-all-contacts method (see NB#105728).
 
@@ -127,7 +142,7 @@
 
 	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
 
-2009-06-10  Mathias Hasselmann  <hasselmm@gnome.org>
+2009-06-10  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
 	Gracefully handle missing virtual methods (see NB#105728).
 
@@ -142,7 +157,7 @@
 
 	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
 
-2009-06-10  Mathias Hasselmann  <hasselmm@gnome.org>
+2009-06-10  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
 	NB#105728 - API change request: delete all contacts
 
@@ -176,7 +191,7 @@
 
 	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
 
-2009-06-08  Mathias Hasselmann  <hasselmm@gnome.org>
+2009-06-08  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
 	NB#97387 - Sometimes e_book_async_open() ends in Nirwana
 
@@ -186,7 +201,7 @@
 
 	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
 
-2009-06-09  Mathias Hasselmann  <hasselmm@gnome.org>
+2009-06-09  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
 	NB#97387 - Sometimes e_book_async_open() ends in Nirwana
 
@@ -710,7 +725,7 @@
 	* addressbook/libebook-dbus/e-book.c
 	 (e_book_add_contacts_by_threshold_limit(), e_book_add_contacts())
 
-2009-03-25  Mathias Hasselmann  <hasselmm@gnome.org>
+2009-03-25  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
 	Fix NB#107422, NB#107544, NB#107928 and hopefully many other
 	regressions.

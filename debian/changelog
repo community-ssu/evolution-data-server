@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20090623.99) unstable; urgency=low
+
+  * Fixes: NB#101759 - Contact editor dialog does not close after tapping on Save button
+
+ -- Robert Peto <robert.peto@maemo.org>  Tue, 23 Jun 2009 10:52:55 +0100
+
 evolution-data-server (1.4.2.1-20090623) unstable; urgency=low
 
   * Fixes: NB#121289 - factory crashes when client tries to use a not loaded book
