@@ -627,7 +627,7 @@ e_book_backend_file_modify_contact (EBookBackendSync *backend,
 {
 	EBookBackendSyncStatus status;
 	EBookBackendFile *bf = E_BOOK_BACKEND_FILE (backend);
-	int db_error;
+	int db_error = 0;
 
 	status = modify_contact (bf, vcard, contact);
 

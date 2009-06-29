@@ -2011,7 +2011,7 @@ e_book_remove_all_contacts_fallback (EBook *book, GError **error)
     GList *l;
 
     for (l = contacts; l; l = l->next)
-      uids = g_list_prepend (uids, e_contact_get_const (l->data, E_CONTACT_UID));
+      uids = g_list_prepend (uids, (gpointer) e_contact_get_const (l->data, E_CONTACT_UID));
 
     success = e_book_remove_contacts (book, uids, error);
 
@@ -2069,7 +2069,7 @@ remove_all_contacts_get_contacts_cb (EBook       *book,
     GList *l;
 
     for (l = contacts; l; l = l->next)
-      uids = g_list_prepend (uids, e_contact_get_const (l->data, E_CONTACT_UID));
+      uids = g_list_prepend (uids, (gpointer) e_contact_get_const (l->data, E_CONTACT_UID));
 
     if (e_book_async_remove_contacts (book, uids, cb, data->closure))
       status = E_BOOK_ERROR_OTHER_ERROR;

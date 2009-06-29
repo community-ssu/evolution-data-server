@@ -128,7 +128,7 @@ static void index_add_contact (EBookBackendFileIndex *index, EContact *contact,
     EBookBackendFileIndexData *data);
 static void index_remove_contact (EBookBackendFileIndex *index, EContact *contact, 
     EBookBackendFileIndexData *data);
-static void index_sync (EBookBackendFileIndex *index, EBookBackendFileIndexData *data);
+static void index_sync (EBookBackendFileIndex *index, const EBookBackendFileIndexData *data);
 static gboolean index_close_db_func (gpointer key, gpointer value, gpointer userdata);
 static void dbt_fill_with_string (DBT *dbt, gchar *str);
 
@@ -463,7 +463,7 @@ e_book_backend_file_index_sync (EBookBackendFileIndex *index)
   /* sync each index database */
   for (i = 0; i < G_N_ELEMENTS (indexes); i++)
   {
-    index_sync (index, (EBookBackendFileIndexData *)&indexes[i]);
+    index_sync (index, &indexes[i]);
   }
 }
 
@@ -1112,7 +1112,7 @@ index_add_contact (EBookBackendFileIndex *index, EContact *contact,
 }
 
 static void
-index_sync (EBookBackendFileIndex *index, EBookBackendFileIndexData *data)
+index_sync (EBookBackendFileIndex *index, const EBookBackendFileIndexData *data)
 {
   EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
   DB *db = NULL;

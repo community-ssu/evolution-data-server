@@ -1,3 +1,21 @@
+2009-06-29  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
+	Various build fixes to make -Werror pass again.
+
+	* addressbook/backends/file/e-book-backend-file-index.c
+	 (index_sync()): Mark data argument as immutable.
+	* addressbook/backends/file/e-book-backend-file.c
+	 (e_book_backend_file_modify_contact()): Initialize db_error.
+	* addressbook/libebook-dbus/e-book.c
+	 (e_book_remove_all_contacts_fallback(),
+	  remove_all_contacts_get_contacts_cb()): Make g_list_prepend() happy.
+	* addressbook/libebook-dbus/e-contact.c
+	 (e_contact_photo_convert_to_inlined()): Make g_content_type_guess() happy.
+	* addressbook/libebook-dbus/e-vcard.c (e_vcard_construct_with_uid()):
+	  Properly return FALSE instead of NULL on error.
+
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+
 2009-06-26  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
 	NB#101759 - Contact editor dialog does not close after tapping on Save

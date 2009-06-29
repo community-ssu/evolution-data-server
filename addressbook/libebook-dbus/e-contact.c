@@ -2133,8 +2133,7 @@ e_contact_photo_convert_to_inlined (EContactPhoto *photo)
 
         /* guess the mime-type
          * NOTE: if it's NULL X-EVOLUTION-UNKNOWN will be used in photo_setter */
-        content_type = g_content_type_guess (photo->data.uri, contents, length,
-                                             NULL);
+        content_type = g_content_type_guess (photo->data.uri, (gpointer) contents, length, NULL);
         if (content_type) {
                 mime_type = g_content_type_get_mime_type (content_type);
                 g_free (content_type);

@@ -861,7 +861,7 @@ e_vcard_construct_with_uid (EVCard *evc, const char *str, const char *uid)
 	g_return_val_if_fail (E_IS_VCARD (evc), FALSE);
 	g_return_val_if_fail (str != NULL && g_utf8_validate (str, -1, NULL), FALSE);
 	/* uid is optional, but if it is given, it must be valid utf-8 */
-	g_return_val_if_fail (uid == NULL || g_utf8_validate (uid, -1, NULL), NULL);
+	g_return_val_if_fail (uid == NULL || g_utf8_validate (uid, -1, NULL), FALSE);
 
 	g_return_val_if_fail (NULL == evc->priv->vcard, FALSE);
 	g_return_val_if_fail (NULL == evc->priv->attributes, FALSE);
