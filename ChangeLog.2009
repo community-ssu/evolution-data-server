@@ -1,5 +1,13 @@
 2009-06-29  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
+	Drop bogus AM_MAINTAINER_MODE.
+
+	* configure.in: See summary.
+
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+
+2009-06-29  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
 	Use proper callback for remove-all-contacts call.
 
 	* addressbook/libebook-dbus/e-book.c
