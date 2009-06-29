@@ -1078,7 +1078,7 @@ e_vcard_to_string_vcard_21 (EVCard *evc)
                         int l = 0;
 
                         do {
-                                /* insert line break */
+                                /* insert soft line break */
                                 if ((attr_str->len - l) > 75) {
                                         l += 75;
 
@@ -1088,10 +1088,14 @@ e_vcard_to_string_vcard_21 (EVCard *evc)
                                                         l -= 1;
                                                 else if (*(attr_str->str + l-2) == '=')
                                                         l -= 2;
-                                        }
 
-                                        g_string_insert_len (attr_str, l, CRLF" ", sizeof (CRLF" ") - 1);
-                                        l += sizeof (CRLF" ");
+                                                g_string_insert_len (attr_str, l, "="CRLF, sizeof ("="CRLF) - 1);
+                                                l += sizeof ("="CRLF); /* because of the inserted characters */
+                                        }
+                                        else {
+                                                g_string_insert_len (attr_str, l, CRLF" ", sizeof (CRLF" ") - 1);
+                                                l += sizeof (CRLF" ");
+                                        }
                                 }
                                 else {
                                         break;

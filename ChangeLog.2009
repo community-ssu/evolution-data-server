@@ -1,3 +1,23 @@
+2009-06-29  Marco Barisione  <marco.barisione@collabora.co.uk>
+
+	NB#121193 - First and last name show incorrect information from a
+	Me-card contact in certain conditions.
+
+	We used to split long lines encoded in quoted-printable using a soft
+	line break with a space at the beginning of new lines, i.e. "=\r\n ".
+	This was breaking some other parsers that were inserting an extra
+	whitespace instead of ignoring it, so in r570 we switched to use
+	normal line breaks ("\r\n ").
+	Some other parsers are not able to parse split lines that don't
+	terminate with a "=", so this commit switches to use "=\r\n", with no
+	extra whitespace.
+	When using base64 we just split using "\r\n " as usual.
+
+	* libebook-dbus/e-vcard.c (e_vcard_to_string_vcard_21): use "=\r\n" to
+	split long lines encoded with quoted-printable.
+
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+
 2009-06-29  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
 	NB#125020 - Contacts doesnt get synced when all data types are synced
