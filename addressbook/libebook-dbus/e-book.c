@@ -2140,7 +2140,7 @@ e_book_async_remove_all_contacts (EBook *book, EBookCallback cb, gpointer closur
   if (!e_book_check_static_capability (book, "remove-all-contacts"))
     return e_book_async_remove_all_contacts_fallback (book, cb, closure);
 
-  if (!org_gnome_evolution_dataserver_addressbook_Book_remove_all_contacts_async (book->priv->proxy, remove_contacts_reply, data))
+  if (!org_gnome_evolution_dataserver_addressbook_Book_remove_all_contacts_async (book->priv->proxy, remove_all_contacts_reply, data))
     cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, closure);
 
   return 0;

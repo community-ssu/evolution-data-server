@@ -1,5 +1,14 @@
 2009-06-29  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
+	Use proper callback for remove-all-contacts call.
+
+	* addressbook/libebook-dbus/e-book.c
+	 (e_book_async_remove_all_contacts()): See summary.
+
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+
+2009-06-29  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
 	Various build fixes to make -Werror pass again.
 
 	* addressbook/backends/file/e-book-backend-file-index.c
