@@ -560,11 +560,12 @@ e_book_open (EBook *book, gboolean only_if_exists, GError **error)
 {
   GError *err = NULL;
   EBookStatus status;
+  gboolean writable;
 
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
 
-  if (!org_gnome_evolution_dataserver_addressbook_Book_open (book->priv->proxy, only_if_exists, &err)) {
+  if (!org_gnome_evolution_dataserver_addressbook_Book_open (book->priv->proxy, only_if_exists, &writable, &err)) {
     g_propagate_error (error, err);
     return FALSE;
   }
@@ -573,6 +574,7 @@ e_book_open (EBook *book, gboolean only_if_exists, GError **error)
 
   if (status == E_BOOK_ERROR_OK) {
     book->priv->loaded = TRUE;
+    writable_cb (book->priv->proxy, writable, book);
     return TRUE;
   } else {
     g_propagate_error (error, err);
@@ -581,7 +583,7 @@ e_book_open (EBook *book, gboolean only_if_exists, GError **error)
 }
 
 static void
-open_reply(DBusGProxy *proxy, GError *error, gpointer user_data)
+open_reply(DBusGProxy *proxy, gboolean writable, GError *error, gpointer user_data)
 {
   AsyncData *data = user_data;
   EBookCallback cb = data->callback;
@@ -595,6 +597,9 @@ open_reply(DBusGProxy *proxy, GError *error, gpointer user_data)
 
   if (cb)
     cb (data->book, status, data->closure);
+  if (data->book->priv->loaded)
+    writable_cb (proxy, writable, data->book);
+
   async_data_free (data);
 }
 

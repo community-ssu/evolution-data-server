@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20090626.99) unstable; urgency=low
+
+  * Fixes: NB#125020 - Contacts doesnt get synced when all data types are synced from phone to rover.
+
+ -- Robert Peto <robert.peto@maemo.org>  Fri, 26 Jun 2009 15:25:55 +0100
+
 evolution-data-server (1.4.2.1-20090626) unstable; urgency=low
 
   * Fixes: NB#101759 - Contact editor dialog does not close after tapping on Save button

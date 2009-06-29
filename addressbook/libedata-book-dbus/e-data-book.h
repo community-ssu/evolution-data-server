@@ -59,7 +59,7 @@ ESource* e_data_book_get_source (EDataBook *book);
 EBookBackend* e_data_book_get_backend (EDataBook *book);
 
 /* Callbacks from the backends */
-void e_data_book_respond_open (EDataBook *book, guint opid, EDataBookStatus status);
+void e_data_book_respond_open (EDataBook *book, guint opid, EDataBookStatus status, gboolean writable);
 void e_data_book_respond_get_contact (EDataBook *book, guint32 opid, EDataBookStatus status, char *vcard);
 void e_data_book_respond_get_contact_list (EDataBook *book, guint32 opid, EDataBookStatus status, GList *cards);
 void e_data_book_respond_remove_contacts (EDataBook *book, guint32 opid, EDataBookStatus status, GList *ids);

@@ -1,5 +1,24 @@
 2009-06-29  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
+	NB#125020 - Contacts doesnt get synced when all data types are synced
+	from phone to rover.
+
+	* addressbook/libebook-dbus/e-book.c (e_book_open(), open_reply()):
+	* addressbook/libedata-book-dbus/e-book-backend.c (e_book_backend_open()):
+	* addressbook/libedata-book-dbus/e-data-book.c (DBusMethodReturnBoolData,
+	  dbus_method_return_bool_data_new(), dbus_method_return_bool_data_free(),
+	  idle_dbus_method_return_bool(), e_data_book_respond_open()):
+	* addressbook/libedata-book-dbus/e-data-book.h (e_data_book_respond_open()):
+	* addressbook/libedata-book-dbus/e-data-book.xml
+	 (org.gnome.evolution.dataserver.addressbook.Book.open()):
+	  Pass initial writable flag via open call response instead of using a
+	  separate signal to avoid latency and the need for connecting to
+	  writable-status signal.
+
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+
+2009-06-29  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
 	Drop bogus AM_MAINTAINER_MODE.
 
 	* configure.in: See summary.

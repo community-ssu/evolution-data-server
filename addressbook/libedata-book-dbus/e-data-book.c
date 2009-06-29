@@ -105,6 +105,39 @@ idle_dbus_method_return (gpointer user_data)
     return FALSE;
 }
 
+/* Infrastructure for returning a boolean in an idle handler via DBus */
+typedef struct {
+    DBusGMethodInvocation *context;
+    gboolean val;
+} DBusMethodReturnBoolData;
+
+static DBusMethodReturnBoolData*
+dbus_method_return_bool_data_new (DBusGMethodInvocation *context,
+                                  gboolean val)
+{
+    DBusMethodReturnBoolData* d = g_new0 (DBusMethodReturnBoolData, 1);
+    d->context = context;
+    d->val = val;
+
+    return d;
+}
+
+static void
+dbus_method_return_bool_data_free (DBusMethodReturnBoolData *data)
+{
+    g_free (data);
+}
+
+static gboolean
+idle_dbus_method_return_bool (gpointer user_data)
+{
+    DBusMethodReturnBoolData *data = user_data;
+    dbus_g_method_return (data->context, data->val);
+    dbus_method_return_bool_data_free (data);
+
+    return FALSE;
+}
+
 /* Infrastructure for returning a string in an idle handler via DBus */
 typedef struct {
     DBusGMethodInvocation *context;
@@ -477,7 +510,7 @@ impl_AddressBook_Book_open(EDataBook *book, gboolean only_if_exists, DBusGMethod
 }
 
 void
-e_data_book_respond_open (EDataBook *book, guint opid, EDataBookStatus status)
+e_data_book_respond_open (EDataBook *book, guint opid, EDataBookStatus status, gboolean writable)
 {
   DBusGMethodInvocation *context = opid_fetch (opid);
 
@@ -488,7 +521,8 @@ e_data_book_respond_open (EDataBook *book, guint opid, EDataBookStatus status)
                                                  _("Cannot open book")));
     g_idle_add (idle_dbus_return_error, data);
   } else {
-    g_idle_add (idle_dbus_method_return, context);
+    g_idle_add (idle_dbus_method_return_bool,
+                dbus_method_return_bool_data_new (context, writable));
   }
 }
 

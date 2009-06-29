@@ -22,6 +22,7 @@ Copyright (C) 2005 Opened Hand Ltd
       <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_AddressBook_Book_open"/>
       <annotation name="org.freedesktop.DBus.GLib.Async" value=""/>
       <arg name="only_if_exists" type="b" direction="in"/>
+      <arg name="writable" type="b" direction="out"/>
     </method>
 
     <method name="remove">
