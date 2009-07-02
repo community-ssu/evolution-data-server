@@ -72,8 +72,6 @@ struct _EDataBookFactoryPrivate {
   GMutex *connections_lock;
   /* This is a hash of client addresses to GList* of EDataBooks */
   GHashTable *connections;
-
-  guint exit_timeout;
 };
 
 /* Create the EDataBookFactory error quark */
@@ -195,10 +193,9 @@ static void my_remove (char *key, GObject *dead)
 
   g_free (key);
 
-  /* If there are no open books, start a timer to quit */
-  if (factory->priv->exit_timeout == 0 && g_hash_table_size (factory->priv->books) == 0) {
-    factory->priv->exit_timeout = g_timeout_add (10000, (GSourceFunc)g_main_loop_quit, loop);
-  }
+  /* in the past, we started a timer here to exit if there were no books open
+   * anymore, but since the device expects the addressbook to always be running,
+   * this just causes complexity, so just continue running. See NB#112135 */
 }
 
 static void
@@ -225,12 +222,6 @@ impl_BookFactory_getBook(EDataBookFactory *factory, const char *IN_uri, DBusGMet
     dbus_g_method_return_error (context, error);
     g_error_free (error);
     return;
-  }
-
-  /* Remove a pending exit */
-  if (priv->exit_timeout) {
-    g_source_remove (priv->exit_timeout);
-    priv->exit_timeout = 0;
   }
 
   g_mutex_lock (priv->books_lock);

@@ -1,3 +1,15 @@
+2009-07-01  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
+	Reviewed by Marco Barisione  <marco.barisione@maemo.org>
+
+	* libedata-book-dbus/e-data-book-factory.c:
+	(my_remove):
+	(impl_BookFactory_getBook): don't exit due to inactivity.  Under
+	normal operation on the device, e-d-s should never exit anyway
+	because addressbook will always be automatically re-started. So
+	the only thing the exit timeout does is make our lives more
+	difficult in the case that we are heavily loaded. Fixes NB#112135
+
 2009-06-29  Marco Barisione  <marco.barisione@collabora.co.uk>
 
 	NB#121193 - First and last name show incorrect information from a
