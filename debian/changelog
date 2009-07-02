@@ -1,9 +1,9 @@
-evolution-data-server (1.4.2.1-20090629.99) unstable; urgency=low
+evolution-data-server (1.4.2.1-20090702) unstable; urgency=low
 
   * Fixes: NB#121193 - First and last name show incorrect information from a Me-card contact in certain conditions
   * Fixes: NB#112135 - device boot up error banner displayed "Unable to perform operation, internal error"
 
- -- Robert Peto <robert.peto@maemo.org>  Mon, 29 Jun 2009 15:07:58 +0100
+ -- Jonathon Jongsma <jonathon.jongsma@maemo.org>  Thu, 02 Jul 2009 10:17:51 -0500
 
 evolution-data-server (1.4.2.1-20090629) unstable; urgency=low
 
