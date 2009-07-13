@@ -66,7 +66,7 @@
 #define d(x)
 
 #define CHANGES_DB_SUFFIX ".changes.db"
-#define RUNNING_ID_DB_NAME "running_id"
+#define RUNNING_ID_DB_NAME "running_id.db"
 #define RUNNING_ID_MAX 99999999
 
 #define E_BOOK_BACKEND_FILE_VERSION_NAME "PAS-DB-VERSION"
@@ -79,7 +79,6 @@ G_DEFINE_TYPE (EBookBackendFile, e_book_backend_file, E_TYPE_BOOK_BACKEND_SYNC);
 struct _EBookBackendFilePrivate {
 	char     *dirname;
 	char     *filename;
-	char     *index_filename;
 	DB       *file_db;
 	DB       *id_db;
 	DB_ENV   *env;
@@ -1559,6 +1558,7 @@ e_book_backend_file_setup_running_ids (EBookBackendFile *bf)
 	DB *sdb;
 	DB_ENV *env;
 	int db_error;
+	char *running_id_db = NULL;
 
 	DEBUG ("%s", G_STRFUNC);
         g_return_val_if_fail (bf->priv->file_db, GNOME_Evolution_Addressbook_OtherError);
@@ -1580,12 +1580,12 @@ e_book_backend_file_setup_running_ids (EBookBackendFile *bf)
 		goto error;
 	}
 
-
-	db_error = sdb->open (sdb, NULL, bf->priv->index_filename, RUNNING_ID_DB_NAME /*NULL*/, 
-			      DB_HASH, DB_CREATE | DB_EXCL | DB_THREAD, 0666);
+	running_id_db = g_build_filename (bf->priv->dirname, RUNNING_ID_DB_NAME, NULL);
+	db_error = sdb->open (sdb, NULL, running_id_db, NULL, DB_HASH, DB_THREAD, 0666);
 
 	if (db_error != 0) {
-		db_error = sdb->open (sdb, NULL, bf->priv->index_filename, RUNNING_ID_DB_NAME /*NULL*/,
+		DEBUG ("%s doesn't exist, try to create it", running_id_db);
+		db_error = sdb->open (sdb, NULL, running_id_db, NULL,
 				      DB_HASH, DB_CREATE | DB_THREAD, 0666);
 		if (db_error != 0) {
 			WARNING ("running index open failed with %s", db_strerror (db_error));
@@ -1596,6 +1596,8 @@ e_book_backend_file_setup_running_ids (EBookBackendFile *bf)
 
 	bf->priv->id_db = sdb;
 
+	g_free (running_id_db);
+
 	return GNOME_Evolution_Addressbook_Success;
 
  error:
@@ -1604,6 +1606,8 @@ e_book_backend_file_setup_running_ids (EBookBackendFile *bf)
 	g_free (bf->priv->filename);
 	bf->priv->file_db->close (bf->priv->file_db, 0);
 	bf->priv->file_db = NULL;
+
+	g_free (running_id_db);
 
 	return db_error_to_status (db_error);
 }
@@ -1862,12 +1866,10 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 	}
 	db_mtime = sb.st_mtime;
 
-	g_free (bf->priv->index_filename);
 	bf->priv->index = e_book_backend_file_index_new ();
-	bf->priv->index_filename = g_build_filename (bf->priv->dirname, "index.db", NULL);
 
 	if (TRUE == e_book_backend_file_index_setup_indicies (bf->priv->index, db,
-                                bf->priv->index_filename)) {
+                                bf->priv->dirname)) {
                 /* index file is usable */
                 retval = e_book_backend_file_setup_running_ids (bf);
                 if (retval != GNOME_Evolution_Addressbook_Success) {
@@ -1927,7 +1929,20 @@ e_book_backend_file_remove (EBookBackendSync *backend,
 {
 	EBookBackendFile *bf = E_BOOK_BACKEND_FILE (backend);
 	GDir *dir;
+	char *running_id_db;
+	int db_error;
 
+	/* close our main db */
+	if (bf->priv->file_db) {
+		db_error = bf->priv->file_db->close (bf->priv->file_db, 0);
+
+		if (db_error != 0)
+			WARNING ("db->close failed: %s", db_strerror (db_error));
+
+		bf->priv->file_db = NULL;
+	}
+
+	/* remove main db */
 	if (-1 == g_unlink (bf->priv->filename)) {
 		if (errno == EACCES || errno == EPERM)
 			return GNOME_Evolution_Addressbook_PermissionDenied;
@@ -1935,12 +1950,22 @@ e_book_backend_file_remove (EBookBackendSync *backend,
 			return GNOME_Evolution_Addressbook_OtherError;
 	}
 
-	/* unref the index before we remove the file so it's not written out again */
-	g_object_unref (bf->priv->index);
-	bf->priv->index = NULL;
-	if (-1 == g_unlink (bf->priv->index_filename))
-		WARNING ("failed to remove index file `%s`: %s", bf->priv->index_filename, strerror (errno));
+	/* delete index dbs */
+	e_book_backend_file_index_remove_dbs (bf->priv->index);
 
+	/* close running_id db */
+	db_error = bf->priv->id_db->close (bf->priv->id_db, 0);
+	if (db_error != 0)
+		WARNING ("db->close failed: %s", db_strerror (db_error));
+	bf->priv->id_db = NULL;
+
+	/* delete running_id.db */
+	running_id_db = g_build_filename (bf->priv->dirname, RUNNING_ID_DB_NAME, NULL);
+	if (-1 == g_unlink (running_id_db))
+		WARNING ("failed to remove %s: %s", running_id_db, strerror (errno));
+	g_free (running_id_db);
+
+	/* remove changes dbs */
 	dir = g_dir_open (bf->priv->dirname, 0, NULL);
 	if (dir) {
 		const char *name;
@@ -2075,7 +2100,6 @@ e_book_backend_file_finalize (GObject *object)
 
 	g_free (bf->priv->filename);
 	g_free (bf->priv->dirname);
-	g_free (bf->priv->index_filename);
 	g_free (bf->priv->sort_order);
 
 	g_free (bf->priv);

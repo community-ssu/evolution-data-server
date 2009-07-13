@@ -1,5 +1,16 @@
 2009-07-13  Robert Peto  <robert.peto@maemo.org>
 
+	Optimize file-backend's load_source. (related to NB#117500)
+
+	* addressbook/backends/file/e-book-backend-file.c: open
+	  running_id db in a separate file, remove priv->index_filename.
+	* addressbook/backends/file/e-book-backend-file-index.c: open index
+	  dbs in separate files, so in db->open doesn't need to sync them.
+
+	Reviewed-By: Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
+2009-07-13  Robert Peto  <robert.peto@maemo.org>
+
 	Fix memory leaks when converting photo types.
 
 	* addressbook/libebook-dbus/e-contact.c:

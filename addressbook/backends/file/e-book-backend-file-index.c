@@ -25,6 +25,7 @@
 
 #include "e-book-backend-file-log.h"
 
+#include <glib/gstdio.h>
 #include <string.h>
 #include <errno.h>
 
@@ -121,6 +122,7 @@ typedef struct _EBookBackendFileIndexPrivate EBookBackendFileIndexPrivate;
 struct _EBookBackendFileIndexPrivate {
   DB *db;  /* primary database */
   GHashTable *sdbs; /* mapping for query->term to database used for it */
+  char *index_dirname; /* dirname where the index dbs are stored */
 };
 
 static gboolean index_populate (EBookBackendFileIndex *index, GList *fields);
@@ -150,6 +152,7 @@ e_book_backend_file_index_dispose (GObject *object)
     priv->sdbs = NULL;
   }
 
+
   if (G_OBJECT_CLASS (e_book_backend_file_index_parent_class)->dispose)
     G_OBJECT_CLASS (e_book_backend_file_index_parent_class)->dispose (object);
 }
@@ -157,6 +160,9 @@ e_book_backend_file_index_dispose (GObject *object)
 static void
 e_book_backend_file_index_finalize (GObject *object)
 {
+  g_free (priv->index_dirname);
+  priv->index_dirname = NULL;
+
   if (G_OBJECT_CLASS (e_book_backend_file_index_parent_class)->finalize)
     G_OBJECT_CLASS (e_book_backend_file_index_parent_class)->finalize (object);
 }
@@ -302,16 +308,21 @@ e_book_backend_file_index_query (EBookBackendFileIndex *index, const gchar *quer
   return res;
 }
 
+static char *
+make_index_db_path (const char *index_dir, const char *index_name)
+{
+  return g_strdup_printf ("%s/index_%s.db", index_dir, index_name);
+}
+
 /* setup indicies in index_filename for the primary database db */
 gboolean
-e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db, 
-    const gchar *index_filename)
+e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db, const char *index_dirname)
 {
   EBookBackendFileIndexPrivate *priv;
 
   g_return_val_if_fail (E_IS_BOOK_BACKEND_FILE_INDEX (index), FALSE);
   g_return_val_if_fail (db != NULL, FALSE);
-  g_return_val_if_fail (index_filename != NULL, FALSE);
+  g_return_val_if_fail (index_dirname != NULL, FALSE);
 
   priv = GET_PRIVATE (index);
 
@@ -326,6 +337,7 @@ e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db,
    * create it anyway and add it for the list of databases to populate */
 
   priv->db = db;
+  priv->index_dirname = g_strdup (index_dirname);
 
   db_error = db->get_env (db, &env);
   if (db_error != 0) {
@@ -335,6 +347,8 @@ e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db,
 
   for (i = 0; i < G_N_ELEMENTS (indexes); i++)
   {
+    char *index_db_path;
+
     db_error = db_create (&sdb, env, 0);
 
     if (db_error != 0) {
@@ -353,36 +367,33 @@ e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db,
 
       if (db_error != 0)
       {
-        g_warning (G_STRLOC "set_bt_compare failed: %s", db_strerror (db_error));
+        WARNING ("set_bt_compare failed: %s", db_strerror (db_error));
       }
     }
 
-    db_error = sdb->open (sdb, NULL, index_filename, 
-        indexes[i].index_name, DB_BTREE, DB_CREATE | DB_EXCL | DB_THREAD, 0666);
+    index_db_path = make_index_db_path (index_dirname, indexes[i].index_name);
 
-    if (db_error == EEXIST) {
-
-      /* db already exists, try and open again, this time without exclusivity */
-      db_error = sdb->open (sdb, NULL, index_filename,
-          indexes[i].index_name, DB_BTREE, DB_CREATE | DB_THREAD, 0666);
+    /* we cannot pass DB_CREATE in the first time, because if index dbs aren't
+     * present we need to populate them */
+    db_error = sdb->open (sdb, NULL, index_db_path, NULL, DB_BTREE, DB_THREAD, 0666);
+    if (db_error != 0)
+    {
+      DEBUG ("%s doesn't exist, try to create it", index_db_path);
+      db_error = sdb->open (sdb, NULL, index_db_path, NULL, DB_BTREE, DB_CREATE | DB_THREAD, 0666);
 
       if (db_error != 0)
       {
-        WARNING ("open failed: %s", db_strerror (db_error));
+        WARNING ("creating %s failed: %s", index_db_path, db_strerror (db_error));
         sdb->close (sdb, 0);
+        g_free (index_db_path);
         return FALSE;
       }
-    } else if (db_error != 0) {
-      if (db_error != 0)
-      {
-        WARNING ("open failed: %s", db_strerror (db_error));
-        sdb->close (sdb, 0);
-        return FALSE;
-      }
-    } else {
+
       /* db didn't exist before, so we now need to populate this one */
       dbs_to_populate = g_list_prepend (dbs_to_populate, (gpointer)&(indexes[i]));
     }
+
+    g_free (index_db_path);
 
     /* add it to the hash table of mappings of query term to database */
     g_hash_table_insert (priv->sdbs, indexes[i].query_term, sdb);
@@ -543,6 +554,33 @@ e_book_backend_file_index_get_ordered_ids (EBookBackendFileIndex *index, const g
   }
 
   return ids;
+}
+
+void
+e_book_backend_file_index_remove_dbs (EBookBackendFileIndex *index)
+{
+  EBookBackendFileIndexPrivate *priv;
+  int i;
+
+  g_return_if_fail (E_IS_BOOK_BACKEND_FILE_INDEX (index));
+
+  priv = GET_PRIVATE (index);
+
+  /* close dbs first */
+  if (priv->sdbs) {
+    g_hash_table_foreach_remove (priv->sdbs, index_close_db_func, index);
+
+    g_hash_table_unref (priv->sdbs);
+    priv->sdbs = NULL;
+  }
+
+  /* remove files */
+  for (i = 0; i < G_N_ELEMENTS (indexes); i++) {
+    char *index_db_path = make_index_db_path (priv->index_dirname, indexes[i].index_name);
+    if (-1 == g_unlink (index_db_path))
+      WARNING ("failed to remove %s: %s", index_db_path, strerror (errno));
+    g_free (index_db_path);
+  }
 }
 
 /* functions used for testing whether we can use the index */
