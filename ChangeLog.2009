@@ -1,3 +1,14 @@
+2009-07-13  Robert Peto  <robert.peto@maemo.org>
+
+	Fix memory leaks when converting photo types.
+
+	* addressbook/libebook-dbus/e-contact.c:
+	 (e_contact_photo_convert_to_inlined(),
+	  e_contact_photo_convert_to_uri()): Free allocated memory in
+	photo->data.xxx when changing type.
+
+	Reviewed-By: Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
 2009-07-01  Jonathon Jongsma  <jonathon.jongsma@maemo.org>
 
 	Reviewed by Marco Barisione  <marco.barisione@maemo.org>

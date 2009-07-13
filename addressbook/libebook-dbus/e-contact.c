@@ -2139,6 +2139,9 @@ e_contact_photo_convert_to_inlined (EContactPhoto *photo)
                 g_free (content_type);
         }
 
+        /* free photo->data.uri before modifying photo->data */
+        g_free (photo->data.uri);
+
         photo->type = E_CONTACT_PHOTO_TYPE_INLINED;
         photo->data.inlined.data = (guchar *) contents;
         photo->data.inlined.length = length;
@@ -2197,6 +2200,10 @@ e_contact_photo_convert_to_uri (EContactPhoto *photo, const char *dir)
 
                 return FALSE;
         }
+
+        /* free photo->data.inlined struct before modifying photo->data */
+        g_free (photo->data.inlined.mime_type);
+        g_free (photo->data.inlined.data);
 
         photo->type = E_CONTACT_PHOTO_TYPE_URI;
         photo->data.uri = g_strdup_printf ("file://%s", path);
