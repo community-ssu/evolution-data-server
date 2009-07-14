@@ -1,3 +1,12 @@
+2009-07-14  Robert Peto  <robert.peto@maemo.org>
+
+	Optimize the check of pre-installed cards. (related to NB#117500)
+
+	* addressbook/backends/file/e-book-backend-file.c: Replace the old
+	  md5checksum mechanism with mtime checking.
+
+	Reviewed-By: Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
 2009-07-13  Robert Peto  <robert.peto@maemo.org>
 
 	Optimize file-backend's load_source. (related to NB#117500)
