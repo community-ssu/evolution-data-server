@@ -160,6 +160,8 @@ e_book_backend_file_index_dispose (GObject *object)
 static void
 e_book_backend_file_index_finalize (GObject *object)
 {
+  EBookBackendFileIndexPrivate *priv = GET_PRIVATE (E_BOOK_BACKEND_FILE_INDEX (object));
+
   g_free (priv->index_dirname);
   priv->index_dirname = NULL;
 
