@@ -318,11 +318,16 @@ read_attribute_value (EVCardAttribute *attr, const char **p, gboolean quoted_pri
 
                                 g_string_append_c (str, c);
 			}
-			else 
-				{
-					g_string_append_c (str, a);
-					g_string_append_c (str, b);
-				}
+			else if (a == '\n') {
+				/* bogus soft line break: "=\n", shouldn't increase lp */
+				continue;
+			}
+			else if (a != '\r' && b != '\n') {
+				/* only append if it is not a soft line-break
+				 * (soft-line breaks ("=\r\n") are skipped) */
+				g_string_append_c (str, a);
+				g_string_append_c (str, b);
+			}
 
 			lp++;
 		}

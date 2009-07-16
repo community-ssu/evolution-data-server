@@ -1,3 +1,10 @@
+2009-07-15  Robert Peto  <robert.peto@maemo.org>
+
+	* addressbook/libebook-dbus/e-vcard.c (read_attribute_value()): Skip
+	soft line breaks ("=\r\n") when parsing QP encoded values.
+
+	Reviewed-By: Marco Barisione  <marco.barisione@maemo.org>
+
 2009-07-14  Robert Peto  <robert.peto@maemo.org>
 
 	Optimize the check of pre-installed cards. (related to NB#117500)

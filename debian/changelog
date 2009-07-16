@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20090714.99) unstable; urgency=low
+
+  * Fixes: NB#116286 - Not able to import contact containing special characters
+
+ -- Robert Peto <robert.peto@maemo.org>  Tue, 14 Jul 2009 12:55:21 +0100
+
 evolution-data-server (1.4.2.1-20090714) unstable; urgency=low
 
   * Fixes: NB#126090 - photo->data.uri leaked in e_contact_photo_convert_to_inlined
