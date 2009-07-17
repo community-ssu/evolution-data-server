@@ -1,3 +1,18 @@
+2009-07-16  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
+	NB#122626 - Move EBookBackendSExp from libebook to cleanup layering.
+
+	* addressbook/libebook-dbus/Makefile.am:
+	* addressbook/libebook-dbus/e-book-sexp.c:
+	* addressbook/libebook-dbus/e-book-sexp.h:
+	  Add EBookSExp to libebook.
+
+	* addressbook/libedata-book-dbus/e-book-backend-sexp.c:
+	* addressbook/libedata-book-dbus/e-book-backend-sexp.h:
+	  Make EBookBackendSExp a wrapper for EBookSExp.
+
+	Reviewed-By: Marco Barisione  <marco.barisione@maemo.org>
+
 2009-07-15  Robert Peto  <robert.peto@maemo.org>
 
 	* addressbook/libebook-dbus/e-vcard.c (read_attribute_value()): Skip

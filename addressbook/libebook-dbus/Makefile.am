@@ -19,6 +19,7 @@ libebook_1_2_la_SOURCES =					\
 	$(DBUS_GENERATED_H)				\
 	e-address-western.c				\
 	e-book-query.c					\
+	e-book-sexp.c					\
 	e-book-view.c					\
 	e-book-view-private.h				\
 	e-book.c					\
@@ -41,6 +42,7 @@ libebookincludedir = $(privincludedir)/libebook
 libebookinclude_HEADERS =				\
 	e-address-western.h				\
 	e-book-query.h					\
+	e-book-sexp.h					\
 	e-book-view.h					\
 	e-book-types.h					\
 	e-book.h					\
