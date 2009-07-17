@@ -1008,7 +1008,7 @@ generic_field_add (EBookBackendFileIndex *index, EContact *contact,
           g_free (tmp);
           tmp = reversed;
         }
-        dbt_fill_with_string (&index_dbt, tmp);
+        dbt_fill_with_string (&index_dbt, g_strstrip (tmp));
 
         DEBUG ("adding to index with key %s and data %s", 
             (gchar *)index_dbt.data, (gchar *)id_dbt.data);
@@ -1066,7 +1066,7 @@ generic_field_remove (EBookBackendFileIndex *index, EContact *contact,
           g_free (tmp);
           tmp = reversed;
         }
-        dbt_fill_with_string (&index_dbt, tmp);
+        dbt_fill_with_string (&index_dbt, g_strstrip (tmp));
 
         DEBUG ("removing from index with key %s and data %s", 
             (gchar *)index_dbt.data, (gchar *)id_dbt.data);
@@ -1321,7 +1321,7 @@ real_query (gboolean vcard_query, gboolean endswith_query, ESExp *sexp, gint arg
       g_free (query_key);
       query_key = reversed;
     }
-    dbt_fill_with_string (&index_dbt, query_key);
+    dbt_fill_with_string (&index_dbt, g_strstrip (query_key));
 
     /* we want bdb to use g_malloc this memory for us */
     memset (&id_dbt, 0, sizeof (id_dbt));

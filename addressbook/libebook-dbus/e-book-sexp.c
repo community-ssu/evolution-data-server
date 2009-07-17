@@ -19,6 +19,7 @@
  */
 
 #include "e-book-sexp.h"
+#include "e-book-util.h"
 
 #include "libedataserver/e-sexp.h"
 #include "libedataserver/e-data-server-util.h"
@@ -26,6 +27,9 @@
 #include <string.h>
 
 static GObjectClass *parent_class;
+
+typedef char * (* CompareFunc)   (const char *a, const char *b);
+typedef char * (* NormalizeFunc) (const char *str);
 
 typedef struct _SearchContext SearchContext;
 
@@ -38,166 +42,197 @@ struct _SearchContext {
 	EContact *contact;
 };
 
-static gboolean
-compare_im (EContact *contact, const char *str,
-	    char *(*compare)(const char*, const char*),
-	    EContactField im_field)
+static char *
+normalize_spaces (const char *str)
 {
-	GList    *aims, *l;
-	gboolean  found_it = FALSE;
+	if (str)
+		return g_strstrip (g_strdup (str));
 
-	aims = e_contact_get (contact, im_field);
+	return NULL;
+}
 
-	for (l = aims; l != NULL; l = l->next) {
-		char *im = (char *) l->data;
+static char *
+normalize_phone_number (const char *str)
+{
+	if (str)
+		return e_normalize_phone_number (str);
 
-		if (im && compare (im, str)) {
-			found_it = TRUE;
-			break;
-		}
-	}
-
-	g_list_foreach (aims, (GFunc)g_free, NULL);
-	g_list_free (aims);
-
-	return found_it;
+	return NULL;
 }
 
 static gboolean
-compare_im_aim (EContact *contact, const char *str,
-		char *(*compare)(const char*, const char*))
+compare_list (EContact *contact, const char *str, CompareFunc compare,
+	      EContactField field, NormalizeFunc normalize)
+{
+	char     *needle = normalize (str);
+	gboolean  rv = FALSE;
+	GList    *values, *l;
+
+	values = e_contact_get (contact, field);
+
+	for (l = values; l != NULL; l = l->next) {
+		char *value = normalize (l->data);
+
+		if (value && compare (value, needle)) {
+			g_free (value);
+			rv = TRUE;
+			break;
+		}
+
+		g_free (value);
+	}
+
+	g_list_foreach (values, (GFunc) g_free, NULL);
+	g_list_free (values);
+
+	return rv;
+}
+
+static gboolean
+compare_im (EContact *contact, const char *str,
+	    CompareFunc compare, EContactField field)
+{
+	return compare_list (contact, str, compare, field, normalize_spaces);
+}
+
+static gboolean
+compare_im_aim (EContact *contact, const char *str, CompareFunc compare)
 {
 	return compare_im (contact, str, compare, E_CONTACT_IM_AIM);
 }
 
 static gboolean
-compare_im_msn (EContact *contact, const char *str,
-		char *(*compare)(const char*, const char*))
+compare_im_msn (EContact *contact, const char *str, CompareFunc compare)
 {
 	return compare_im (contact, str, compare, E_CONTACT_IM_MSN);
 }
 
 static gboolean
-compare_im_icq (EContact *contact, const char *str,
-		char *(*compare)(const char*, const char*))
+compare_im_icq (EContact *contact, const char *str, CompareFunc compare)
 {
 	return compare_im (contact, str, compare, E_CONTACT_IM_ICQ);
 }
 
 static gboolean
-compare_im_yahoo (EContact *contact, const char *str,
-		  char *(*compare)(const char*, const char*))
+compare_im_yahoo (EContact *contact, const char *str, CompareFunc compare)
 {
 	return compare_im (contact, str, compare, E_CONTACT_IM_YAHOO);
 }
 
 static gboolean
-compare_im_gadugadu (EContact *contact, const char *str,
-		  char *(*compare)(const char*, const char*))
+compare_im_gadugadu (EContact *contact, const char *str, CompareFunc compare)
 {
 	return compare_im (contact, str, compare, E_CONTACT_IM_GADUGADU);
 }
 
 
 static gboolean
-compare_im_jabber (EContact *contact, const char *str,
-		   char *(*compare)(const char*, const char*))
+compare_im_jabber (EContact *contact, const char *str, CompareFunc compare)
 {
 	return compare_im (contact, str, compare, E_CONTACT_IM_JABBER);
 }
 
 static gboolean
-compare_im_groupwise (EContact *contact, const char *str,
-		      char *(*compare)(const char*, const char*))
+compare_im_groupwise (EContact *contact, const char *str, CompareFunc compare)
 {
 	return compare_im (contact, str, compare, E_CONTACT_IM_GROUPWISE);
 }
 
 static gboolean
-compare_im_skype (EContact *contact, const char *str,
-		      char *(*compare)(const char*, const char*))
+compare_im_skype (EContact *contact, const char *str, CompareFunc compare)
 {
 	return compare_im (contact, str, compare, E_CONTACT_IM_SKYPE);
 }
 
 static gboolean
-compare_email (EContact *contact, const char *str,
-	       char *(*compare)(const char*, const char*))
+compare_email (EContact *contact, const char *str, CompareFunc compare)
 {
-	int i;
+	gboolean  rv = FALSE;
+	char     *needle = normalize_spaces (str);
+	int       i;
 
 	for (i = E_CONTACT_EMAIL_1; i <= E_CONTACT_EMAIL_4; i ++) {
-		const char *email = e_contact_get_const (contact, i);
+		char *email = normalize_spaces (e_contact_get_const (contact, i));
 
-		if (email && compare(email, str))
-			return TRUE;
+		if (email && compare(email, needle)) {
+			g_free (email);
+			rv = TRUE;
+			break;
+		}
+
+		g_free (email);
 	}
 
-	return FALSE;
-}
-
-static gboolean
-compare_phone (EContact *contact, const char *str,
-	       char *(*compare)(const char*, const char*))
-{
-	GList *phones;
-	gboolean rv = FALSE;
-
-	phones = e_contact_get (contact, E_CONTACT_TEL);
-	while (phones) {
-		char *phone = phones->data;
-
-		phones = g_list_delete_link(phones, phones);
-		rv = rv || (phone && compare(phone, str));
-		g_free(phone);
-	}
+	g_free (needle);
 
 	return rv;
 }
 
 static gboolean
-compare_name (EContact *contact, const char *str,
-	      char *(*compare)(const char*, const char*))
+compare_phone (EContact *contact, const char *str, CompareFunc compare)
 {
-	const char *name;
-
-	name = e_contact_get_const (contact, E_CONTACT_FULL_NAME);
-	if (name && compare (name, str))
-		return TRUE;
-
-	name = e_contact_get_const (contact, E_CONTACT_FAMILY_NAME);
-	if (name && compare (name, str))
-		return TRUE;
-
-	name = e_contact_get_const (contact, E_CONTACT_GIVEN_NAME);
-	if (name && compare (name, str))
-		return TRUE;
-
-	name = e_contact_get_const (contact, E_CONTACT_NICKNAME);
-	if (name && compare (name, str))
-		return TRUE;
-
-	return FALSE;
+	return compare_list (contact, str, compare, E_CONTACT_TEL, normalize_phone_number);
 }
 
 static gboolean
-compare_address (EContact *contact, const char *str,
-		 char *(*compare)(const char*, const char*))
+compare_name (EContact *contact, const char *str, CompareFunc compare)
 {
+	EContactField fields[] = {
+		E_CONTACT_FULL_NAME,
+		E_CONTACT_FAMILY_NAME,
+		E_CONTACT_GIVEN_NAME,
+		E_CONTACT_NICKNAME,
+	};
 
-	int i;
-	gboolean rv = FALSE;
+	gboolean  rv = FALSE;
+	char     *needle = normalize_spaces (str);
+	int       i;
+
+	for (i = 0; i < G_N_ELEMENTS (fields); ++i) {
+		char *name = normalize_spaces (e_contact_get_const (contact, fields[i]));
+
+		if (name && compare (name, needle)) {
+			g_free (name);
+			rv = TRUE;
+			break;
+		}
+
+		g_free (name);
+	}
+
+	g_free (needle);
+
+	return rv;
+}
+
+static gboolean
+compare_address (EContact *contact, const char *str, CompareFunc compare)
+{
+	char     *needle = normalize_spaces (str);
+	gboolean  rv = FALSE;
+	int       i;
 
 	for (i = E_CONTACT_FIRST_ADDRESS_ID; i <= E_CONTACT_LAST_ADDRESS_ID; i ++) {
 		EContactAddress *address = e_contact_get (contact, i);
+
 		if (address) {
-			rv =  (address->po && compare(address->po, str)) ||
-				(address->street && compare(address->street, str)) ||
-				(address->ext && compare(address->ext, str)) ||
-				(address->locality && compare(address->locality, str)) ||
-				(address->region && compare(address->region, str)) ||
-				(address->code && compare(address->code, str)) ||
-				(address->country && compare(address->country, str));
+			const char *address_values[] = {
+				address->po, address->street, address->ext,
+				address->locality, address->region,
+				address->code, address->country
+			};
+
+			for (i = 0; i < G_N_ELEMENTS (address_values); ++i) {
+				char *value = normalize_spaces (address_values[i]);
+
+				if (value && compare (value, needle)) {
+					g_free (value);
+					rv = TRUE;
+					break;
+				}
+
+				g_free (value);
+			}
 
 			e_contact_address_free (address);
 
@@ -206,38 +241,43 @@ compare_address (EContact *contact, const char *str,
 		}
 	}
 
+	g_free (needle);
+
 	return rv;
 
 }
 
 static gboolean
-compare_category (EContact *contact, const char *str,
-		  char *(*compare)(const char*, const char*))
+compare_category (EContact *contact, const char *str, CompareFunc compare)
 {
+	char *needle = normalize_spaces (str);
+	gboolean rv = FALSE;
 	GList *categories;
 	GList *iterator;
-	gboolean ret_val = FALSE;
 
 	categories = e_contact_get (contact, E_CONTACT_CATEGORY_LIST);
 
 	for (iterator = categories; iterator; iterator = iterator->next) {
-		const char *category = iterator->data;
+		char *category = normalize_spaces (iterator->data);
 
-		if (compare(category, str)) {
-			ret_val = TRUE;
+		if (compare (category, needle)) {
+			g_free (category);
+			rv = TRUE;
 			break;
 		}
+
+		g_free (category);
 	}
 
 	g_list_foreach (categories, (GFunc)g_free, NULL);
 	g_list_free (categories);
+	g_free (needle);
 
-	return ret_val;
+	return rv;
 }
 
 static gboolean
-compare_sip (EContact *contact, const char *str,
-	     char *(*compare)(const char*, const char*))
+compare_sip (EContact *contact, const char *str, CompareFunc compare)
 {
 	return compare_im (contact, str, compare, E_CONTACT_SIP);
 }
@@ -250,8 +290,7 @@ static struct prop_info {
 	EContactField field_id;
 	const char *query_prop;
 	enum prop_type prop_type;
-	gboolean (*list_compare)(EContact *contact, const char *str,
-				 char *(*compare)(const char*, const char*));
+	gboolean (*list_compare)(EContact *contact, const char *str, CompareFunc compare);
 
 } prop_info_table[] = {
 #define NORMAL_PROP(f,q) {f, q, PROP_TYPE_NORMAL, NULL}
@@ -297,7 +336,7 @@ static struct prop_info {
 static ESExpResult *
 entry_compare(SearchContext *ctx, struct _ESExp *f,
 	      int argc, struct _ESExpResult **argv,
-	      char *(*compare)(const char*, const char*))
+	      CompareFunc compare)
 {
 	ESExpResult *r;
 	int truth = FALSE;
@@ -326,17 +365,17 @@ entry_compare(SearchContext *ctx, struct _ESExp *f,
 					truth = FALSE;
 				}
 				else if (info->prop_type == PROP_TYPE_NORMAL) {
-					const char *prop = NULL;
+					char *needle, *prop;
 					/* straight string property matches */
 
-					prop = e_contact_get_const (ctx->contact, info->field_id);
+					needle = normalize_spaces (argv[1]->value.string);
+					prop = normalize_spaces (e_contact_get_const (ctx->contact, info->field_id));
 
-					if (prop && compare(prop, argv[1]->value.string)) {
+					if (compare (prop ? prop : "", needle))
 						truth = TRUE;
-					}
-					if ((!prop) && compare("", argv[1]->value.string)) {
-						truth = TRUE;
-					}
+
+					g_free (needle);
+					g_free (prop);
 				}
 				else if (info->prop_type == PROP_TYPE_LIST) {
 					/* the special searches that match any of the list elements */
@@ -360,9 +399,9 @@ entry_compare(SearchContext *ctx, struct _ESExp *f,
 }
 
 static ESExpResult *
-vcard_compare(SearchContext *ctx, struct _ESExp *f,
-	      int argc, struct _ESExpResult **argv,
-	      char *(*compare)(const char*, const char*))
+vcard_compare (SearchContext *ctx, struct _ESExp *f,
+	       int argc, struct _ESExpResult **argv,
+	       CompareFunc compare)
 {
 	ESExpResult *r;
 	int truth = FALSE;
@@ -370,11 +409,17 @@ vcard_compare(SearchContext *ctx, struct _ESExp *f,
 	if (argc == 2 &&
 	    argv[0]->type == ESEXP_RES_STRING &&
 	    argv[1]->type == ESEXP_RES_STRING) {
+		NormalizeFunc normalize = normalize_spaces;
+		const char *field;
+		char *needle;
 		GList *attrs;
-		const char *field, *needle;;
 
 		field = argv[0]->value.string;
-		needle = argv[1]->value.string;
+
+		if (!g_ascii_strcasecmp (field, EVC_TEL))
+			normalize = normalize_phone_number;
+
+		needle = normalize (argv[1]->value.string);
 
 		for (attrs = e_vcard_get_attributes (E_VCARD (ctx->contact)); attrs; attrs = attrs->next) {
 			EVCardAttribute *attr = attrs->data;
@@ -384,14 +429,19 @@ vcard_compare(SearchContext *ctx, struct _ESExp *f,
 
 			values = e_vcard_attribute_get_values (attr);
 			for (; values; values = values->next) {
-				const char *value = values->data;
+				char *value = normalize (values->data);
+
 				if (compare (value, needle)) {
+					g_free (value);
 					truth = TRUE;
 					break;
 				}
+
+				g_free (value);
 			}
 		}
 
+		g_free (needle);
 	}
 	r = e_sexp_result_new(f, ESEXP_RES_BOOL);
 	r->value.bool = truth;
@@ -404,7 +454,7 @@ func_contains(struct _ESExp *f, int argc, struct _ESExpResult **argv, void *data
 {
 	SearchContext *ctx = data;
 
-	return entry_compare (ctx, f, argc, argv, (char *(*)(const char*, const char*)) e_util_utf8_strstrcase);
+	return entry_compare (ctx, f, argc, argv, (CompareFunc) e_util_utf8_strstrcase);
 }
 
 static ESExpResult *
@@ -412,7 +462,7 @@ func_contains_vcard(struct _ESExp *f, int argc, struct _ESExpResult **argv, void
 {
 	SearchContext *ctx = data;
 
-	return vcard_compare (ctx, f, argc, argv, (char *(*)(const char*, const char*)) e_util_utf8_strstrcase);
+	return vcard_compare (ctx, f, argc, argv, (CompareFunc) e_util_utf8_strstrcase);
 }
 
 static char *

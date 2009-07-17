@@ -2,6 +2,7 @@ evolution-data-server (1.4.2.1-20090714.99) unstable; urgency=low
 
   * Fixes: NB#116286 - Not able to import contact containing special characters
   * Move EBookBackendSExp to libebook
+  * Fixes: NB#122626 - Phone number lookup fails on trailing whitespace
 
  -- Robert Peto <robert.peto@maemo.org>  Tue, 14 Jul 2009 12:55:21 +0100
 
