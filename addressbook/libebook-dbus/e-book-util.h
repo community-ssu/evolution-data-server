@@ -6,14 +6,19 @@
 
 G_BEGIN_DECLS
 
-void            e_book_util_remove_duplicates            (GList  *haystack,
-                                                          GList **needles,
-                                                          GList **duplicate_ids);
+void
+e_book_util_remove_duplicates            (GList      *haystack,
+                                          GList     **needles,
+                                          GList     **duplicate_ids);
 
-gboolean        e_book_util_remove_duplicates_using_book (EBook   *book,
-                                                          GList  **contacts,
-                                                          GList  **duplicate_ids,
-                                                          GError **error);
+gboolean
+e_book_util_remove_duplicates_using_book (EBook      *book,
+                                          GList     **contacts,
+                                          GList     **duplicate_ids,
+                                          GError    **error);
+char *
+e_normalize_phone_number                 (const char *phone_number)
+                                          G_GNUC_WARN_UNUSED_RESULT;
 
 G_END_DECLS
 

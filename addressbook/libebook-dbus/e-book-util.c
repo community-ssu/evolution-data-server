@@ -1,5 +1,7 @@
 #include "e-book-util.h"
 
+#include <string.h>
+
 static void
 list_free (gpointer data)
 {
@@ -249,3 +251,65 @@ e_book_util_remove_duplicates_using_book (EBook   *book,
         return TRUE;
 }
 
+/**
+ * e_normalize_phone_number:
+ * @phone_number: the phone number
+ *
+ * Normalizes @phone_number: All characters but digits and DTMF codes are
+ * stipped. A plus only is valid at the beginning, or after a number
+ * suppression prefix ("*31#", "#31#").
+ *
+ * Returns: A newly allocated string.
+ */
+char *
+e_normalize_phone_number (const char *phone_number)
+{
+        GString *result;
+        const char *p;
+
+        /* see cui_utils_normalize_number() of rtcom-call-ui for reference */
+        g_return_val_if_fail (NULL != phone_number, NULL);
+
+        result = g_string_new (NULL);
+
+        for (p = phone_number; *p; ++p) {
+                switch (*p) {
+                case '#': case '*':
+                case '0': case '1': case '2': case '3': case '4':
+                case '5': case '6': case '7': case '8': case '9':
+                        /* Directly accept this common characters. */
+                        g_string_append_c (result, *p);
+                        break;
+
+                case 'p': case 'P':
+                        /* Normalize this characters to P -
+                         * pause for one second. */
+                        g_string_append_c (result, 'P');
+                        break;
+
+                case 'w': case 'W':
+                        /* Normalize this characters to W -
+                         * wait until confirmation. */
+                        g_string_append_c (result, 'W');
+                        break;
+
+                case 'x': case 'X':
+                        /* Normalize this characters to X -
+                         * alias for 'W' it seems */
+                        g_string_append_c (result, 'X');
+                        break;
+
+                 case '+':
+                        /* Plus only is valid on begin of phone numbers and
+                         * after number suppression prefix */
+                        if (0 == result->len ||
+                            strcmp (result->str, "*31#") ||
+                            strcmp (result->str, "#31#"))
+                                g_string_append_c (result, *p);
+
+                        break;
+                }
+        }
+
+        return g_string_free (result, FALSE);
+}
