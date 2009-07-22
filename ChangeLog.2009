@@ -1,3 +1,12 @@
+2009-07-22  Robert Peto  <robert.peto@maemo.org>
+
+	NB#129181 - Edited Contact is not reflected in all contacts view.
+
+	* addressbook/backends/file/e-book-backend-file.c (sync_dbs()):
+	  sync id_db when other dbs are synced.
+
+	Reviewed-By: Marco Barisione  <marco.barisione@maemo.org>
+
 2009-07-17  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
 	NB#122626 - Normalize attribute values during queries

@@ -152,6 +152,7 @@ static int
 sync_dbs (EBookBackendFile *bf)
 {
         int db_error;
+        int retval = 0;
 
         global_env.had_error = FALSE;
 
@@ -159,16 +160,26 @@ sync_dbs (EBookBackendFile *bf)
         if (bf->priv->index)
                 e_book_backend_file_index_sync (bf->priv->index);
 
-        /* sync the main db */
-        db_error = bf->priv->file_db->sync (bf->priv->file_db, 0);
-        if (db_error != 0)
-                WARNING ("db->sync failed with %s", db_strerror (db_error));
-        else if (global_env.had_error) {
-                WARNING ("db->sync failed: global env error");
-                db_error = ENOSPC;
+        /* sync the id db */
+        db_error = bf->priv->id_db->sync (bf->priv->id_db, 0);
+        if (db_error != 0) {
+                WARNING ("id_db->sync failed with %s", db_strerror (db_error));
+                retval = db_error;
+                /* try to sync the main db even if id_db->sync has been failed */
         }
 
-        return db_error;
+        /* sync the main db */
+        db_error = bf->priv->file_db->sync (bf->priv->file_db, 0);
+        if (db_error != 0) {
+                WARNING ("file_db->sync failed with %s", db_strerror (db_error));
+                retval = db_error;
+        }
+        else if (global_env.had_error) {
+                WARNING ("db->sync failed: global env error");
+                retval = ENOSPC;
+        }
+
+        return retval;
 }
 
 static void

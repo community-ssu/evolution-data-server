@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20090722) unstable; urgency=low
+
+  * Fixes: NB#129181 - Edited Contact is not reflected in all contacts view
+
+ -- Robert Peto <robert.peto@maemo.org>  Wed, 22 Jul 2009 10:02:04 +0100
+
 evolution-data-server (1.4.2.1-20090717) unstable; urgency=low
 
   * Fixes: NB#116286 - Not able to import contact containing special characters
