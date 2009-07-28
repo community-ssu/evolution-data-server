@@ -89,13 +89,6 @@ struct _EBookBackendFilePrivate {
 	int       running_id;
 };
 
-G_LOCK_DEFINE_STATIC (global_env);
-static struct {
-	int ref_count;
-	DB_ENV *env;
-	gboolean had_error;
-} global_env;
-
 G_LOCK_DEFINE_STATIC (running_id);
 
 static EBookBackendSyncStatus
@@ -156,8 +149,6 @@ sync_dbs (EBookBackendFile *bf)
         int db_error;
         int retval = 0;
 
-        global_env.had_error = FALSE;
-
         /* sync the index file if available */
         if (bf->priv->index)
                 e_book_backend_file_index_sync (bf->priv->index);
@@ -175,10 +166,6 @@ sync_dbs (EBookBackendFile *bf)
         if (db_error != 0) {
                 WARNING ("file_db->sync failed with %s", db_strerror (db_error));
                 retval = db_error;
-        }
-        else if (global_env.had_error) {
-                WARNING ("db->sync failed: global env error");
-                retval = ENOSPC;
         }
 
         return retval;
@@ -260,17 +247,12 @@ e_book_backend_file_store_unique_id (EBookBackendFile *bf)
 	uid = unique_id_to_string (bf->priv->running_id);
 	string_to_dbt((const char *)uid, &id_dbt);
 
-        global_env.had_error = FALSE;
 	db_error = db->put (db, NULL, &rid_dbt, &id_dbt, 0);
 	g_free (uid);
  	if (db_error != 0) {
 		WARNING ("put failed: %s", db_strerror (db_error));
 		return FALSE;
 	}
-        else if (global_env.had_error == TRUE) {
-                WARNING ("global env error");
-                return FALSE;
-        }
 
         return TRUE;
 }
@@ -386,10 +368,7 @@ insert_contact (EBookBackendFile *bf,
         /* put the vcard to db */
         string_to_dbt (vcard, &vcard_dbt);
 
-        global_env.had_error = FALSE;
         db_error = db->put (db, NULL, &id_dbt, &vcard_dbt, 0);
-        if (global_env.had_error)
-                db_error = ENOSPC;
 
 	g_free (vcard);
         g_free (id);
@@ -613,9 +592,7 @@ modify_contact (EBookBackendFile *bf, const char *vcard, EContact **contact)
 	g_free (vcard_dbt.data);
 	string_to_dbt (vcard_with_rev, &vcard_dbt);
 
-	global_env.had_error = FALSE;
 	db_error = db->put (db, NULL, &id_dbt, &vcard_dbt, 0);
-	if (global_env.had_error) db_error = ENOSPC;
 
 	g_free (vcard_with_rev);
 	
@@ -1388,7 +1365,6 @@ file_errcall (const char *buf1, char *buf2)
 #endif
 {
 	WARNING ("libdb error: %s", buf2);
-	global_env.had_error = TRUE;
 }
 
 static void
@@ -1686,29 +1662,19 @@ install_pre_installed_vcards (EBookBackend *backend)
 	}
 }
 
-static GNOME_Evolution_Addressbook_CallStatus
+static int
 e_book_backend_file_setup_running_ids (EBookBackendFile *bf)
 {
 	DB *sdb;
-	DB_ENV *env;
 	int db_error;
 	char *running_id_db = NULL;
 
 	DEBUG ("%s", G_STRFUNC);
-        g_return_val_if_fail (bf->priv->file_db, GNOME_Evolution_Addressbook_OtherError);
+	g_return_val_if_fail (bf->priv->file_db, EINVAL);
 
-        if (bf->priv->index == NULL) {
-                WARNING ("no index.db => no running id");
-                return GNOME_Evolution_Addressbook_OtherError;
-        }
+	/* NOTE: running_id isn't stored in index.db anymore */
 
-	db_error = bf->priv->file_db->get_env (bf->priv->file_db, &env);
-	if (db_error != 0) {
-		WARNING ("getting env failed with %s", db_strerror (db_error));
-		goto error;
-	}
-
-	db_error = db_create (&sdb, env, 0);
+	db_error = db_create (&sdb, bf->priv->env, 0);
 	if (db_error != 0) {
 		WARNING ("running index db_create failed with %s", db_strerror (db_error));
 		goto error;
@@ -1732,38 +1698,45 @@ e_book_backend_file_setup_running_ids (EBookBackendFile *bf)
 
 	g_free (running_id_db);
 
-	return GNOME_Evolution_Addressbook_Success;
+	return 0;
 
- error:
-	/* XXX: dispose should do this kind of clean up */
-	g_free (bf->priv->dirname);
-	g_free (bf->priv->filename);
-	bf->priv->file_db->close (bf->priv->file_db, 0);
-	bf->priv->file_db = NULL;
-
+error:
 	g_free (running_id_db);
 
-	return db_error_to_status (db_error);
+	return db_error;
 }
 
-/* creates the global database environment if it hasn't been created already
- * returns non-zero on failure */
+/* set up our db_env, it return 0 on success, db_error otherwise */
 static int
-setup_global_env (const char *db_home, gboolean only_if_exists)
+e_book_backend_file_setup_db_env (EBookBackendFile *bf, gboolean only_if_exists)
 {
-	int db_error;
 	DB_ENV *env = NULL;
+	int db_error;
+	char *db_home;
 
-	G_LOCK (global_env);
+	g_return_val_if_fail (E_IS_BOOK_BACKEND_FILE (bf), EINVAL);
+	/* opening an already opened env could lead into a serious problem */
+	g_return_val_if_fail (bf->priv->env == NULL, EINVAL);
+	/* we have to have a dirname */
+	g_return_val_if_fail (bf->priv->dirname, EINVAL);
 
-	/* if global env has been already created: increase the ref_count */
-	if (global_env.ref_count > 0) {
-		global_env.ref_count++;
-		G_UNLOCK (global_env);
-		return 0;
+	db_home = bf->priv->dirname;
+
+	DEBUG ("setting up db_env in '%s'", db_home);
+
+	/* create db_home directory if it does not exist */
+	if (!g_file_test (db_home, G_FILE_TEST_IS_DIR)) {
+		if (only_if_exists) {
+			WARNING ("dir does not exist and only_if_exist is requested");
+			db_error = EACCES;
+			goto error;
+		}
+		if (g_mkdir_with_parents (db_home, S_IRUSR | S_IWUSR | S_IXUSR) != 0) {
+			WARNING ("cannot create dir '%s': %s", db_home, strerror (errno));
+			db_error = errno;
+			goto error;
+		}
 	}
-
-	MESSAGE ("setting up global database environment");
 
 	/* create the environment */
 	db_error = db_env_create (&env, 0);
@@ -1773,9 +1746,12 @@ setup_global_env (const char *db_home, gboolean only_if_exists)
 	}
 
 	/* set up our own error handler */
+	/* NOTE: this function does not have any return value */
 	env->set_errcall (env, file_errcall);
 
-	if (env->set_paniccall (env, file_paniccall) != 0) {
+	/* set up our panic callback */
+	db_error = env->set_paniccall (env, file_paniccall);
+	if (db_error != 0) {
 		WARNING ("set_paniccall failed with: %s", db_strerror (db_error));
 		goto error;
 	}
@@ -1796,20 +1772,6 @@ setup_global_env (const char *db_home, gboolean only_if_exists)
 		goto error;
 	}
 
-	/* create db_home directory if it does not exist */
-	if (!g_file_test (db_home, G_FILE_TEST_IS_DIR)) {
-		if (only_if_exists) {
-			WARNING ("dir does not exist and only_if_exist is requested");
-			db_error = EACCES;
-			goto error;
-		}
-		if (g_mkdir_with_parents (db_home, S_IRUSR | S_IWUSR | S_IXUSR) != 0) {
-			WARNING ("cannot create dir '%s': %s", db_home, strerror (errno));
-			db_error = errno;
-			goto error;
-		}
-	}
-
 	/* open the environment for use */
 	db_error = env->open (env, db_home, DB_CREATE | DB_INIT_MPOOL | DB_PRIVATE
 			| DB_THREAD | DB_INIT_LOCK, 0);
@@ -1818,34 +1780,15 @@ setup_global_env (const char *db_home, gboolean only_if_exists)
 		goto error;
 	}
 
-	global_env.env = env;
-	global_env.had_error = FALSE;
-	global_env.ref_count = 1;
+	bf->priv->env = env;
 
-	G_UNLOCK (global_env);
-
-	return 0;
+	return db_error;
 
 error:
-	G_UNLOCK (global_env);
 	if (env)
 		env->close(env, 0);
 
 	return db_error;
-}
-
-/* decrease global_env's ref_count, close it if it is zero. */
-static void
-unref_global_env ()
-{
-	G_LOCK (global_env);
-	if (--(global_env.ref_count) <= 0) {
-		MESSAGE ("closing global database environment");
-
-		global_env.env->close (global_env.env, 0);
-		global_env.env = NULL;
-	}
-	G_UNLOCK (global_env);
 }
 
 static gboolean
@@ -1908,12 +1851,11 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 	EBookBackendFile *bf = E_BOOK_BACKEND_FILE (backend);
 	char           *dirname, *filename;
 	gboolean        writable = FALSE;
-	int             db_error;
+	int             db_error = 0;
 	DB *db;
 	time_t db_mtime;
 	struct stat sb;
 	gchar *uri;
-        GNOME_Evolution_Addressbook_CallStatus retval;
 
 	uri = e_source_get_uri (source);
 
@@ -1923,38 +1865,38 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 	filename = g_build_filename (dirname, "addressbook.db", NULL);
 	g_free (uri);
 
+	bf->priv->dirname = dirname;
+	bf->priv->filename = filename;
+
+	/* recover from a corrupted DB */
+	/* NOTE: currently it only removes the directory,
+	 *       later this should run the real recovery when transactions
+	 *       are introduced */
 	if (!e_book_backend_file_maybe_recover (dirname)) {
-		WARNING ("cannot recover");
-		g_free (dirname);
-		g_free (filename);
-		return GNOME_Evolution_Addressbook_OtherError;
+		WARNING ("cannot recover dir '%s'", dirname);
+		goto error;
 	}
 
+	/* continue an aborted db_upgrade (this won't happen in our case) */
 	db_error = e_db3_utils_maybe_recover (filename);
 	if (db_error != 0) {
 		WARNING ("db recovery failed with %s", db_strerror (db_error));
-		g_free (dirname);
-		g_free (filename);
-		return db_error_to_status (db_error);
+		goto error;
 	}
 
-	db_error = setup_global_env (dirname, only_if_exists);
+	/* setup db_env, create the directory if needed */
+	db_error = e_book_backend_file_setup_db_env (bf, only_if_exists);
 	if (db_error != 0) {
-		/* should not unref global_env here, because it wasn't created */
-		g_free (dirname);
-		g_free (filename);
-		return db_error_to_status (db_error);
+		WARNING ("cannot setup db_env to %s", dirname);
+		goto error;
 	}
 
-	bf->priv->env = global_env.env;
-
+	/* setup our DBs */
+	/* TODO: create a function for this */
 	db_error = db_create (&db, bf->priv->env, 0);
 	if (db_error != 0) {
 		WARNING ("db_create failed with %s", db_strerror (db_error));
-		unref_global_env ();
-		g_free (dirname);
-		g_free (filename);
-		return db_error_to_status (db_error);
+		goto error;
 	}
 
 	db_error = (*db->open) (db, NULL, filename, NULL, DB_HASH, DB_THREAD, 0666);
@@ -1964,10 +1906,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 
 		if (db_error != 0) {
 			WARNING ("db format upgrade failed with %s", db_strerror (db_error));
-			unref_global_env ();
-			g_free (dirname);
-			g_free (filename);
-			return db_error_to_status (db_error);
+			goto error;
 		}
 
 		db_error = (*db->open) (db, NULL, filename, NULL, DB_HASH, DB_THREAD, 0666);
@@ -1981,10 +1920,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 		db_error = db_create (&db, bf->priv->env, 0);
         	if (db_error != 0) {
                 	WARNING ("db_create failed with %s", db_strerror (db_error));
-			unref_global_env ();
-                	g_free (dirname);
-                	g_free (filename);
-                	return GNOME_Evolution_Addressbook_OtherError;
+			goto error;
         	}
 		db_error = (*db->open) (db, NULL, filename, NULL, DB_HASH, DB_RDONLY | DB_THREAD, 0666);
 
@@ -1995,10 +1931,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 			db_error = db_create (&db, bf->priv->env, 0);
 			if (db_error != 0) {
  				WARNING ("db_create failed with %s", db_strerror (db_error));
-				unref_global_env ();
-				g_free (dirname);
-				g_free (filename);
-				return GNOME_Evolution_Addressbook_OtherError;
+				goto error;
 			}
 
 			db_error = (*db->open) (db, NULL, filename, NULL, DB_HASH, DB_CREATE | DB_THREAD, 0666);
@@ -2025,35 +1958,19 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 
 	if (db_error != 0) {
 		bf->priv->file_db = NULL;
-		unref_global_env ();
-		g_free (dirname);
-		g_free (filename);
-		return db_error_to_status (db_error);
+		goto error;
 	}
 
 	bf->priv->file_db = db;
 
 	if (!e_book_backend_file_maybe_upgrade_db (bf)) {
-		db->close (db, 0);
-		bf->priv->file_db = NULL;
 		WARNING ("e_book_backend_file_maybe_upgrade_db failed");
-		unref_global_env ();
-		g_free (dirname);
-		g_free (filename);
-		return GNOME_Evolution_Addressbook_OtherError;
+		goto error;
 	}
 
-	g_free (bf->priv->dirname);
-	g_free (bf->priv->filename);
-	bf->priv->dirname = dirname;
-	bf->priv->filename = filename;
-
 	if (g_stat (bf->priv->filename, &sb) == -1) {
-		db->close (db, 0);
-		bf->priv->file_db = NULL;
 		WARNING ("stat(%s) failed", bf->priv->filename);
-		unref_global_env ();
-		return GNOME_Evolution_Addressbook_OtherError;
+		goto error;
 	}
 	db_mtime = sb.st_mtime;
 
@@ -2062,15 +1979,10 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 	if (TRUE == e_book_backend_file_index_setup_indicies (bf->priv->index, db,
                                 bf->priv->dirname)) {
                 /* index file is usable */
-                retval = e_book_backend_file_setup_running_ids (bf);
-                if (retval != GNOME_Evolution_Addressbook_Success) {
-                        WARNING ("cannot setup the running id");
-			g_object_unref (bf->priv->index);
-			bf->priv->index = NULL;
-			db->close (db, 0);
-			bf->priv->file_db = NULL;
-			unref_global_env ();
-                        return retval;
+                db_error = e_book_backend_file_setup_running_ids (bf);
+                if (db_error != 0) {
+                        WARNING ("cannot setup the running_id");
+			goto error;
                 }
 
                 install_pre_installed_vcards (backend);
@@ -2078,8 +1990,8 @@ e_book_backend_file_load_source (EBookBackend           *backend,
         else {
                 /* index file is not usable, we must operate in read-only mode
                  * since running_id is stored in index.db as well */
-                WARNING (G_STRLOC ": setup indices failed, "
-                                "index is not usable. try to live without them");
+                WARNING ("setup indices failed, index is not usable. "
+				"try to live without them");
                 writable = FALSE;
 
                 /* unref the index object */
@@ -2090,9 +2002,44 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 	e_book_backend_set_is_loaded (backend, TRUE);
 	e_book_backend_set_is_writable (backend, writable);
 
-	MESSAGE ("book %p has been loaded successfully", backend);
+	MESSAGE ("book %p has been loaded successfully", bf);
 
 	return GNOME_Evolution_Addressbook_Success;
+
+error:
+	/* we have to do cleanup here, since if this operation fails and a
+	 * dummy client tries to open the book again then we would leak memory */
+
+	g_free (bf->priv->dirname);
+	bf->priv->dirname = NULL;
+
+	g_free (bf->priv->filename);
+	bf->priv->filename = NULL;
+
+	if (bf->priv->index) {
+		g_object_unref (bf->priv->index);
+		bf->priv->index = NULL;
+	}
+
+	if (bf->priv->file_db) {
+		bf->priv->file_db->close (bf->priv->file_db, 0);
+		bf->priv->file_db = NULL;
+	}
+
+	if (bf->priv->id_db) {
+		bf->priv->id_db->close (bf->priv->id_db, 0);
+		bf->priv->id_db = NULL;
+	}
+
+	if (bf->priv->env) {
+		bf->priv->env->close (bf->priv->env, 0);
+		bf->priv->env = NULL;
+	}
+
+	if (db_error == 0)
+		return GNOME_Evolution_Addressbook_OtherError;
+
+	return db_error_to_status (db_error);
 }
 
 static gboolean
@@ -2259,6 +2206,8 @@ e_book_backend_file_dispose (GObject *object)
 
 	bf = E_BOOK_BACKEND_FILE (object);
 
+	MESSAGE ("disposing book at %p", bf);
+
 	if (bf->priv->id_db) {
 		bf->priv->id_db->close (bf->priv->id_db, 0);
 		bf->priv->id_db = NULL;
@@ -2274,12 +2223,12 @@ e_book_backend_file_dispose (GObject *object)
 		bf->priv->index = NULL;
 	}
 
-	if (e_book_backend_is_loaded (E_BOOK_BACKEND (bf))) {
-		MESSAGE ("book %p has been gone", E_BOOK_BACKEND (bf));
-		unref_global_env ();
+	if (bf->priv->env) {
+		bf->priv->env->close (bf->priv->env, 0);
+		bf->priv->env = NULL;
 	}
 
-	G_OBJECT_CLASS (e_book_backend_file_parent_class)->dispose (object);	
+	G_OBJECT_CLASS (e_book_backend_file_parent_class)->dispose (object);
 }
 
 static void

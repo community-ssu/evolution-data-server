@@ -1,5 +1,25 @@
 2009-07-28  Robert Peto  <robert.peto@maemo.org>
 
+	Code cleanup.
+
+	* addressbook/backends/file/e-book-backend-file.c: Remove global_env
+	  struct and all related methods, since it can cause trouble with the
+	  previously added changes.
+
+	  e_book_backend_file_setup_running_ids(): cleanup, modify the return
+	  value to int, to be consistent with the libdb functions.
+
+	  e_book_backend_file_setup_db_env(): refactored from
+	  setup_global_env(), all db_envs are EBookBackendFile specific.
+
+	  e_book_backend_file_load_source(): follow the "exception pattern",
+	  cleanup object's private variables under the error label in the end
+	  of the function.
+
+	  e_book_backend_file_dispose(): close the db_env as well.
+
+2009-07-28  Robert Peto  <robert.peto@maemo.org>
+
 	If the DB environment got corrupted then abort and the next start
 	remove the corrupted DB, so we can start with an empty one.
 	(See: NB#114835)
