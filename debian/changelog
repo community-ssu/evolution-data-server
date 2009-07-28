@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20090728.99) unstable; urgency=low
+
+  * Remove corrupted DB when DB_RUNRECOVERY is returned from libdb. (see NB#114835)
+
+ -- Robert Peto <robert.peto@maemo.org>  Tue, 28 Jul 2009 20:23:28 +0100
+
 evolution-data-server (1.4.2.1-20090722) unstable; urgency=low
 
   * Fixes: NB#129181 - Edited Contact is not reflected in all contacts view

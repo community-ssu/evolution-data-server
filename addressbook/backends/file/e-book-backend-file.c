@@ -74,6 +74,8 @@
 
 #define PAS_ID_PREFIX "pas-id-"
 
+#define RUNREC_FILE "runrec"
+
 G_DEFINE_TYPE (EBookBackendFile, e_book_backend_file, E_TYPE_BOOK_BACKEND_SYNC);
 
 struct _EBookBackendFilePrivate {
@@ -1392,8 +1394,32 @@ file_errcall (const char *buf1, char *buf2)
 static void
 file_paniccall (DB_ENV *env, int errval)
 {
-	/* Berkeley DB needs recovery:
-	 * abort here and try to recover on the next start */
+	const char *db_home;
+	char *filename = NULL;
+	int fd = -1;
+	int db_error;
+
+	/* create the runrec file */
+	db_error = env->get_home (env, &db_home);
+	if (db_error != 0 || db_home == NULL) {
+		WARNING ("cannot get db_home: %s", db_strerror (db_error));
+		goto out;
+	}
+	filename = g_build_filename (db_home, RUNREC_FILE, NULL);
+
+	fd = g_open (filename, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
+	if (G_UNLIKELY (fd == -1)) {
+		WARNING ("cannot create %s: %s", filename, strerror (errno));
+		goto out;
+	}
+
+out:
+	if (-1 != fd)
+		close (fd);
+
+	g_free (filename);
+
+	/* abort here, try to recover on the next start */
 	g_error ("Oops, db panic: %s", db_strerror (errval));
 }
 
@@ -1723,7 +1749,7 @@ e_book_backend_file_setup_running_ids (EBookBackendFile *bf)
 /* creates the global database environment if it hasn't been created already
  * returns non-zero on failure */
 static int
-setup_global_env ()
+setup_global_env (const char *db_home, gboolean only_if_exists)
 {
 	int db_error;
 	DB_ENV *env = NULL;
@@ -1770,8 +1796,22 @@ setup_global_env ()
 		goto error;
 	}
 
+	/* create db_home directory if it does not exist */
+	if (!g_file_test (db_home, G_FILE_TEST_IS_DIR)) {
+		if (only_if_exists) {
+			WARNING ("dir does not exist and only_if_exist is requested");
+			db_error = EACCES;
+			goto error;
+		}
+		if (g_mkdir_with_parents (db_home, S_IRUSR | S_IWUSR | S_IXUSR) != 0) {
+			WARNING ("cannot create dir '%s': %s", db_home, strerror (errno));
+			db_error = errno;
+			goto error;
+		}
+	}
+
 	/* open the environment for use */
-	db_error = env->open (env, NULL, DB_CREATE | DB_INIT_MPOOL | DB_PRIVATE
+	db_error = env->open (env, db_home, DB_CREATE | DB_INIT_MPOOL | DB_PRIVATE
 			| DB_THREAD | DB_INIT_LOCK, 0);
 	if (db_error != 0) {
 		WARNING ("db_env_open failed with %s", db_strerror (db_error));
@@ -1808,6 +1848,58 @@ unref_global_env ()
 	G_UNLOCK (global_env);
 }
 
+static gboolean
+e_book_backend_file_maybe_recover (const char *dirname)
+{
+	char *recfile;
+	const char *filename;
+	GDir *dir;
+
+	recfile = g_build_filename (dirname, RUNREC_FILE, NULL);
+	if (!g_file_test (recfile, G_FILE_TEST_IS_REGULAR)) {
+		DEBUG ("recovery is not needed");
+		g_free (recfile);
+		return TRUE;
+	}
+	g_free (recfile);
+
+	MESSAGE ("recovery is needed, removing corrupted files");
+
+	/* TODO: make a backup from the old contents,
+	 * maybe it is possible to recover some data from it */
+
+	/* remove the old damaged directory */
+	dir = g_dir_open (dirname, 0, NULL);
+	if (!dir) {
+		WARNING ("cannot open direcotory %s", dirname);
+		return FALSE;
+	}
+
+	while ((filename = g_dir_read_name (dir))) {
+		char *rm_file;
+
+		rm_file = g_build_filename (dirname, filename, NULL);
+
+		if (g_remove (rm_file) != 0) {
+			WARNING ("cannot remove file '%s': %s", filename, strerror (errno));
+			g_free (rm_file);
+			g_dir_close (dir);
+			return FALSE;
+		}
+
+		g_free (rm_file);
+	}
+	g_dir_close (dir);
+
+	if (g_remove (dirname) != 0) {
+		WARNING ("cannot remove directory: %s", strerror (errno));
+		return FALSE;
+	}
+
+	/* recovery procedure was successful */
+	return TRUE;
+}
+
 static GNOME_Evolution_Addressbook_CallStatus
 e_book_backend_file_load_source (EBookBackend           *backend,
 				 ESource                *source,
@@ -1831,6 +1923,13 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 	filename = g_build_filename (dirname, "addressbook.db", NULL);
 	g_free (uri);
 
+	if (!e_book_backend_file_maybe_recover (dirname)) {
+		WARNING ("cannot recover");
+		g_free (dirname);
+		g_free (filename);
+		return GNOME_Evolution_Addressbook_OtherError;
+	}
+
 	db_error = e_db3_utils_maybe_recover (filename);
 	if (db_error != 0) {
 		WARNING ("db recovery failed with %s", db_strerror (db_error));
@@ -1839,7 +1938,7 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 		return db_error_to_status (db_error);
 	}
 
-	db_error = setup_global_env ();
+	db_error = setup_global_env (dirname, only_if_exists);
 	if (db_error != 0) {
 		/* should not unref global_env here, because it wasn't created */
 		g_free (dirname);
@@ -1890,24 +1989,8 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 		db_error = (*db->open) (db, NULL, filename, NULL, DB_HASH, DB_RDONLY | DB_THREAD, 0666);
 
 		if (db_error != 0 && !only_if_exists) {
-			int rv;
-
-			/* the database didn't exist, so we create the
-			   directory then the .db */
+			/* the database didn't exist, so we create the db */
 			db->close (db, 0);
-			rv = g_mkdir_with_parents (dirname, 0777);
-			if (rv == -1 && errno != EEXIST) {
-				WARNING ("failed to make directory %s: %s", dirname, strerror (errno));
-				unref_global_env ();
-				g_free (dirname);
-				g_free (filename);
-				if (errno == EACCES || errno == EPERM)
-					return GNOME_Evolution_Addressbook_PermissionDenied;
-				else if (errno == ENOSPC)
-					return GNOME_Evolution_Addressbook_NoSpace;
-				else
-					return GNOME_Evolution_Addressbook_OtherError;
-			}
 
 			db_error = db_create (&db, bf->priv->env, 0);
 			if (db_error != 0) {

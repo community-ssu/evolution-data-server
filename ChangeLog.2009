@@ -1,3 +1,21 @@
+2009-07-28  Robert Peto  <robert.peto@maemo.org>
+
+	If the DB environment got corrupted then abort and the next start
+	remove the corrupted DB, so we can start with an empty one.
+	(See: NB#114835)
+
+	* addressbook/backends/file/e-book-backend-file.c:
+	  file_paniccall(): create a temp file in the db_home of the
+	  environment.
+
+	  setup_global_env(): create the db_home directory if it does not
+	  exists already, open the env with this directory
+
+	  e_book_backend_file_maybe_recover(): use this function to check and
+	  recover if needed
+
+	  e_book_backend_file_load_source(): remove redundant code.
+
 2009-07-22  Robert Peto  <robert.peto@maemo.org>
 
 	NB#129181 - Edited Contact is not reflected in all contacts view.
