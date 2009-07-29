@@ -1907,29 +1907,49 @@ e_contact_name_get_type (void)
 EContactDate*
 e_contact_date_from_string (const char *str)
 {
+	static GRegex *regex = NULL;
+	GMatchInfo *match_info;
 	EContactDate* date;
-	int length;
-	char *t;
+	char *s;
 
 	g_return_val_if_fail (str != NULL, NULL);
 
 	date = e_contact_date_new();
-	/* ignore time part */
-	if ((t = strchr (str, 'T')) != NULL)
-		length = t - str;
-	else
-		length = strlen(str);
-	
-	if (length == 10 ) {
-		date->year = str[0] * 1000 + str[1] * 100 + str[2] * 10 + str[3] - '0' * 1111;
-		date->month = str[5] * 10 + str[6] - '0' * 11;
-		date->day = str[8] * 10 + str[9] - '0' * 11;
-	} else if ( length == 8 ) {
-		date->year = str[0] * 1000 + str[1] * 100 + str[2] * 10 + str[3] - '0' * 1111;
-		date->month = str[4] * 10 + str[5] - '0' * 11;
-		date->day = str[6] * 10 + str[7] - '0' * 11;
+
+	if (!regex)
+		regex = g_regex_new ("^\\s*(\\d{1,4})-?(\\d{1,2})-?(\\d{1,2})(T.*|\\s*)$",
+				     G_REGEX_OPTIMIZE, 0, NULL);
+
+	g_regex_match (regex, str, 0, &match_info);
+
+	if (g_match_info_matches (match_info)) {
+		static const int days_in_month[2][13] = {
+			{  0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 },
+			{  0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 } /* leap year */
+		};
+
+		s = g_match_info_fetch (match_info, 1);
+		date->year = atoi (s);
+		g_free (s);
+
+		s = g_match_info_fetch (match_info, 2);
+		date->month = atoi (s);
+		g_free (s);
+
+		s = g_match_info_fetch (match_info, 3);
+		date->day = atoi (s);
+		g_free (s);
+
+		if (date->year < 100)
+			date->year += (date->year < 30 ? 2000 : 1900);
+
+		date->year  = CLAMP (date->year, 1900, 2100);
+		date->month = CLAMP (date->month, 1, 12);
+		date->day   = CLAMP (date->day, 1, days_in_month[g_date_is_leap_year (date->year) ? 1 : 0][date->month]);
 	}
-	
+
+	g_match_info_free (match_info);
+
 	return date;
 }
 

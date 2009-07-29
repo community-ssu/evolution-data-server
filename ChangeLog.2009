@@ -1,3 +1,13 @@
+2009-07-29  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
+	NB#128596 - Improve robustness of e_contact_date_from_string()
+
+	* addressbook/libebook-dbus/e-contact.c (e_contact_date_from_string()):
+	  Use regular expression to accept wider range of date strings and to
+	  improve error detection. Normalize parsed dates to sane values.
+
+	Reviewed-By: Xavier Claessens  <xavier.claessens@maemo.org>
+
 2009-07-28  Robert Peto  <robert.peto@maemo.org>
 
 	Code cleanup.
