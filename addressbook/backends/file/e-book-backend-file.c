@@ -1052,6 +1052,7 @@ e_book_backend_file_get_changes (EBookBackendSync *backend,
 	DBT     id_dbt, vcard_dbt;
 	char    *filename;
 	EDbHash *ehash;
+	int     fd;
 	GList *i, *v;
 	DB      *db = bf->priv->file_db;
 	DBC *dbc;
@@ -1068,8 +1069,17 @@ e_book_backend_file_get_changes (EBookBackendSync *backend,
 
 	/* Find the changed ids */
 	filename = g_strdup_printf ("%s/%s" CHANGES_DB_SUFFIX, bf->priv->dirname, change_id);
+
 	ehash = e_dbhash_new (filename);
-	g_free (filename);
+
+	/* We lock the file so that the backup script doesn't save it
+	 * while we are modifying it.
+	 * We could use the file descriptor returned by db->fd() but
+	 * there is no guarantee that the returned file descriptor
+	 * corresponds to this file */
+	fd = open (filename, O_RDONLY);
+	if (fd >= 0)
+		flock (fd, LOCK_EX);
 
 	db_error = db->cursor (db, NULL, &dbc, 0);
 
@@ -1170,7 +1180,13 @@ e_book_backend_file_get_changes (EBookBackendSync *backend,
 		*changes_out = changes;
 	}
 
+	if (fd >= 0) {
+		flock (fd, LOCK_UN);
+		close (fd);
+	}
+
 	e_dbhash_destroy (ehash);
+	g_free (filename);
 
 	return result;
 }
