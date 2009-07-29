@@ -1172,7 +1172,7 @@ e_book_backend_file_get_changes (EBookBackendSync *backend,
 
 	e_dbhash_destroy (ehash);
 
-	return GNOME_Evolution_Addressbook_Success;
+	return result;
 }
 
 static char *

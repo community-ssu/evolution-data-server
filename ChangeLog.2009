@@ -1,3 +1,14 @@
+2009-07-29  Marco Barisione  <marco.barisione@collabora.co.uk>
+
+	Return an error code if an error occurs in
+	e_book_backend_file_get_changes instead of always returning a success
+	code.
+
+	* backends/file/e-book-backend-file.c
+	(e_book_backend_file_get_changes):
+
+	Reviewed-By: Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
 2009-07-29  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
 	NB#128596 - Improve robustness of e_contact_date_from_string()
