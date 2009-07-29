@@ -1,8 +1,9 @@
-evolution-data-server (1.4.2.1-20090728.99) unstable; urgency=low
+evolution-data-server (1.4.2.1-20090729) unstable; urgency=low
 
   * Improve robustness of e_contact_date_from_string() (see NB#128596)
+  * Lock changes database during update (see NB128843).
 
- -- Robert Peto <robert.peto@maemo.org>  Tue, 28 Jul 2009 20:32:29 +0100
+ -- Mathias Hasselmann <mathias.hasselmann@maemo.org>  Wed, 29 Jul 2009 11:30:32 +0300
 
 evolution-data-server (1.4.2.1-20090728) unstable; urgency=low
 
