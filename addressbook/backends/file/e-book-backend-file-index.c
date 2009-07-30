@@ -316,6 +316,44 @@ make_index_db_path (const char *index_dir, const char *index_name)
   return g_strdup_printf ("%s/index_%s.db", index_dir, index_name);
 }
 
+/* create and set up a DB object for an index db */
+static int
+create_index_db (DB_ENV *env, DB **dbp, EBookBackendFileIndexOrderFunc order_func)
+{
+  int db_error;
+  DB *db = NULL;
+
+  g_return_val_if_fail (env != NULL, EINVAL);
+
+  db_error = db_create (&db, env, 0);
+  if (db_error != 0) {
+    WARNING ("db_create failed: %s", db_strerror (db_error));
+    goto err;
+  }
+
+  db_error = db->set_flags (db, DB_DUP | DB_DUPSORT);
+  if (db_error != 0) {
+    WARNING ("set_flags failed: %s", db_strerror (db_error));
+    goto err;
+  }
+
+  if (order_func) {
+    db_error = db->set_bt_compare (db, order_func);
+    if (db_error != 0) {
+      WARNING ("set_bt_compare failed: %s", db_strerror (db_error));
+      goto err;
+    }
+  }
+
+  *dbp = db;
+  return 0;
+
+err:
+  if (db)
+    db->close (db, 0);
+  return db_error;
+}
+
 /* setup indicies in index_filename for the primary database db */
 gboolean
 e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db, const char *index_dirname)
@@ -351,26 +389,9 @@ e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db, 
   {
     char *index_db_path;
 
-    db_error = db_create (&sdb, env, 0);
-
+    db_error = create_index_db (env, &sdb, indexes[i].order_func);
     if (db_error != 0) {
-      WARNING ("db_create failed: %s", db_strerror (db_error));
       return FALSE;
-    }
-
-    db_error = sdb->set_flags(sdb, DB_DUP | DB_DUPSORT);
-    if (db_error != 0) {
-      WARNING ("set_flags failed: %s", db_strerror (db_error));
-    }
-
-    if (indexes[i].order_func)
-    {
-      db_error = sdb->set_bt_compare (sdb, indexes[i].order_func);
-
-      if (db_error != 0)
-      {
-        WARNING ("set_bt_compare failed: %s", db_strerror (db_error));
-      }
     }
 
     index_db_path = make_index_db_path (index_dirname, indexes[i].index_name);
@@ -381,8 +402,17 @@ e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db, 
     if (db_error != 0)
     {
       DEBUG ("%s doesn't exist, try to create it", index_db_path);
-      db_error = sdb->open (sdb, NULL, index_db_path, NULL, DB_BTREE, DB_CREATE | DB_THREAD, 0666);
 
+      /* close and create the DB object again to avoid memleak */
+      sdb->close (sdb, 0);
+      db_error = create_index_db (env, &sdb, indexes[i].order_func);
+      if (db_error != 0)
+      {
+        g_free (index_db_path);
+        return FALSE;
+      }
+
+      db_error = sdb->open (sdb, NULL, index_db_path, NULL, DB_BTREE, DB_CREATE | DB_THREAD, 0666);
       if (db_error != 0)
       {
         WARNING ("creating %s failed: %s", index_db_path, db_strerror (db_error));

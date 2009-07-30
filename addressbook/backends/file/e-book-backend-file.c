@@ -1701,6 +1701,15 @@ e_book_backend_file_setup_running_ids (EBookBackendFile *bf)
 
 	if (db_error != 0) {
 		DEBUG ("%s doesn't exist, try to create it", running_id_db);
+
+		/* close and create the DB object again to free up the allocated memory */
+		sdb->close (sdb, 0);
+		db_error = db_create (&sdb, env, 0);
+		if (db_error != 0) {
+			WARNING ("running index db_create failed with %s", db_strerror (db_error));
+			goto error;
+		}
+
 		db_error = sdb->open (sdb, NULL, running_id_db, NULL,
 				      DB_HASH, DB_CREATE | DB_THREAD, 0666);
 		if (db_error != 0) {

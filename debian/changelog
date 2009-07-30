@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20090729.99) unstable; urgency=low
+
+  * Fixes: NB#130124 - file-backend leaks memory when dbs are opened in the first time
+
+ -- Robert Peto <robert.peto@maemo.org>  Thu, 30 Jul 2009 15:06:29 +0100
+
 evolution-data-server (1.4.2.1-20090729) unstable; urgency=low
 
   * Improve robustness of e_contact_date_from_string() (see NB#128596)

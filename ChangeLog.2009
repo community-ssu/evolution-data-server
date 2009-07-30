@@ -1,3 +1,19 @@
+2009-07-30  Robert Peto  <robert.peto@maemo.org>
+
+	Close wrongly opened dbs before trying to open them again.
+
+	* addressbook/backends/file/e-book-backend-file-index.c
+	 (create_index_db()): cut out the creation and setup of DB object into
+	  a separate function.
+	 (e_book_backend_file_index_setup_indicies()): close and recreate the
+	  DB object when trying to open 2nd time to avoid memleak.
+
+	* addressbook/backends/file/e-book-backend-file.c
+	 (e_book_backend_file_setup_running_ids()): close and recreate the DB
+	  object when trying to open 2nd time to avoid memleak.
+
+	Reviewed-By: Marco Barisione  <marco.barisione@maemo.org>
+
 2009-07-29  Marco Barisione  <marco.barisione@collabora.co.uk>
 
 	Lock the .changes.db file while using it so that the backup scripts
