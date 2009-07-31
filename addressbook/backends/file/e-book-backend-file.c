@@ -38,6 +38,7 @@
 #include <time.h>
 #include <errno.h>
 #include "db.h"
+#include <sys/file.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 
@@ -1704,7 +1705,7 @@ e_book_backend_file_setup_running_ids (EBookBackendFile *bf)
 
 		/* close and create the DB object again to free up the allocated memory */
 		sdb->close (sdb, 0);
-		db_error = db_create (&sdb, env, 0);
+		db_error = db_create (&sdb, bf->priv->env, 0);
 		if (db_error != 0) {
 			WARNING ("running index db_create failed with %s", db_strerror (db_error));
 			goto error;
