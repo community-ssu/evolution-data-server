@@ -192,6 +192,20 @@ book_destroyed_cb (gpointer data, GObject *dead)
 #define _DBUS_POINTER_SHIFT(p)   ((void*) (((char*)p) + sizeof (void*)))
 #define DBUS_G_CONNECTION_FROM_CONNECTION(x)     ((DBusGConnection*) _DBUS_POINTER_SHIFT(x))
 
+static DBusHandlerResult
+dbus_signal_filter_cb (DBusConnection *connection, DBusMessage *message, void *user_data)
+{
+  if (dbus_message_is_signal (message, DBUS_INTERFACE_LOCAL, "Disconnected")) {
+    /* client disconnected abruptly without disposing or stopping the view,
+     * we have to dispose the dangling object to avoid memleak */
+    EDataBookView *view = user_data;
+
+    g_object_unref (view);
+  }
+
+  return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+}
+
 static void
 new_connection_func (DBusServer *server, DBusConnection *conn, gpointer user_data)
 {
@@ -202,10 +216,11 @@ new_connection_func (DBusServer *server, DBusConnection *conn, gpointer user_dat
 
   dbus_g_connection_register_g_object
     (DBUS_G_CONNECTION_FROM_CONNECTION (conn), "/", G_OBJECT (view));
+  dbus_connection_add_filter (conn, dbus_signal_filter_cb, view, NULL);
 
   /* This is a one-shot server */
-  dbus_server_unref (server);
   dbus_server_disconnect (server);
+  dbus_server_unref (server);
 
   view->priv->conn = conn;
 }
@@ -269,12 +284,19 @@ e_data_book_view_dispose (GObject *object)
     priv->book = NULL;
   }
 
+  if (priv->running) {
+    /* stop the book view if it is still running */
+    e_data_book_view_thaw (book_view);
+    e_book_backend_stop_book_view (priv->backend, book_view);
+    priv->running = FALSE;
+  }
+
   if (priv->backend) {
     e_book_backend_remove_book_view (priv->backend, book_view);
     g_object_unref (priv->backend);
     priv->backend = NULL;
   }
-  
+
   if (priv->card_sexp) {
     g_object_unref (priv->card_sexp);
     priv->card_sexp = NULL;
@@ -289,6 +311,16 @@ e_data_book_view_dispose (GObject *object)
 }
 
 static void reset_array (GPtrArray *array);
+
+static gboolean
+unref_dbus_connection_cb (gpointer data)
+{
+  DBusConnection *conn = data;
+
+  dbus_connection_unref (conn);
+
+  return FALSE;
+}
 
 static void
 e_data_book_view_finalize (GObject *object)
@@ -313,6 +345,11 @@ e_data_book_view_finalize (GObject *object)
 
   if (priv->conn) {
     dbus_connection_close (priv->conn);
+    /* Sometimes EDS crashes when dbus_connection_unref is called directly,
+     * because there can be unprocessed data on the connection, and g_main_loop
+     * runs the dbus_connection_dispach function. In this way we ensure that the
+     * unref gets called after dispatch. */
+    g_idle_add_full (G_PRIORITY_LOW, (GSourceFunc)unref_dbus_connection_cb, priv->conn, NULL);
   }
 
   G_OBJECT_CLASS (e_data_book_view_parent_class)->finalize (object);
@@ -370,8 +407,11 @@ impl_BookView_stop (EDataBookView *book_view, GError **error)
 static gboolean
 impl_BookView_dispose (EDataBookView *book_view, GError **eror)
 {
+  /* sometimes we get RemoveMatch and Disconnected signals after this function
+   * gets called, but we don't want that, so we have to remove the connection filter */
+  dbus_connection_remove_filter (book_view->priv->conn, dbus_signal_filter_cb, book_view);
   g_object_unref (book_view);
-  
+
   return TRUE;
 }
 

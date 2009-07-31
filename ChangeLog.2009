@@ -1,3 +1,24 @@
+2009-07-31  Robert Peto  <robert.peto@maemo.org>
+
+	Free the DBusConnection properly when client is disconnected.
+
+	* addressbook/libedata-book-dbus/e-data-book-view.c
+
+	 (dbus_signal_filter_cb()): Add a signal handler for dbus connection
+	  to check if the client is disconnected abruptly. It it did, then
+	  dispose the book view object.
+
+	 (impl_BookView_dispose()): Remove the signal filter function to
+	  prevent getting dbus signals when we run the dispose.
+
+	 (e_data_book_view_dispose()): Stop the book view if it is till running
+	  when disposing.
+
+	 (e_data_book_view_finalize(), unref_dbus_connection_cb()):
+	  Unref the DBus connection in an idle handler.
+
+	Reviewed-By: Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
 2009-07-30  Robert Peto  <robert.peto@maemo.org>
 
 	Close wrongly opened dbs before trying to open them again.
