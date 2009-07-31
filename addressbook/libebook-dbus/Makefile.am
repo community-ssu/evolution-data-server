@@ -81,3 +81,5 @@ test_suite_SOURCES = test-main.c test-econtact.c test-commit.c
 test_suite_LDADD = ./libebook-1.2.la -lcheck
 
 TESTS = test-suite
+
+-include $(top_srcdir)/Makefile.local

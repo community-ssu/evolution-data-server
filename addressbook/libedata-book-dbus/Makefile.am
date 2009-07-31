@@ -99,3 +99,5 @@ e_addressbook_factory_SOURCES = e-data-book-factory.c e-data-book-factory.h
 e_addressbook_factory_LDADD = 				\
 	libedata-book-1.2.la \
 	$(top_builddir)/libedataserver/libedataserver-$(API_VERSION).la
+
+-include $(top_srcdir)/Makefile.local

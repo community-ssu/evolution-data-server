@@ -91,3 +91,5 @@ evolution-data-server.pure: evolution-data-server
 	$(PLINK) $(evolution_data_server_LDFLAGS) $(evolution_data_server_OBJECTS) $(evolution_data_server_LDADD) $(LIBS)
 
 endif
+
+-include $(top_srcdir)/Makefile.local

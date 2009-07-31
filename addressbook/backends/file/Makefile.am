@@ -30,3 +30,5 @@ libebookbackendfile_la_LIBADD =						\
 
 libebookbackendfile_la_LDFLAGS =	\
 	-module -avoid-version $(NO_UNDEFINED)
+
+-include $(top_srcdir)/Makefile.local
