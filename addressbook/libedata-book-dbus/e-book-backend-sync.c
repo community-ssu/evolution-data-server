@@ -585,6 +585,8 @@ _e_book_backend_get_contact_list (EBookBackend *backend,
 	status = e_book_backend_sync_get_contact_list (E_BOOK_BACKEND_SYNC (backend), book, opid, query, &cards);
 
 	e_data_book_respond_get_contact_list (book, opid, status, cards);
+
+	g_list_free (cards);
 }
 
 static void
