@@ -25,9 +25,11 @@ ht_add (GHashTable *ht, char *key, EContact *contact)
         GList *list = NULL;
         char *old_key = NULL;
 
-        g_hash_table_lookup_extended (ht, key, (gpointer)&old_key, (gpointer)&list);
-        g_hash_table_steal (ht, key);
-        g_free (old_key);
+        if (g_hash_table_lookup_extended (ht, key, (gpointer)&old_key, (gpointer)&list)) {
+                g_hash_table_steal (ht, key);
+                g_free (old_key);
+        }
+
         list = g_list_prepend (list, g_object_ref (contact));
         g_hash_table_insert (ht, key, list);
 }
@@ -120,7 +122,7 @@ contact_compare (EContact *a, EContact *b)
                         ht_add (ht, serialized, a);
                 }
         }
-    
+
         for (attribs = e_vcard_get_attributes (E_VCARD (b));
              attribs;
              attribs = attribs->next) {
