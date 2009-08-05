@@ -749,12 +749,16 @@ e_book_query_from_string  (const char *query_string)
 	}
 
 	e_sexp_input_text(sexp, query_string, strlen(query_string));
-	e_sexp_parse(sexp);
+	if (e_sexp_parse(sexp) == -1) {
+		g_warning ("parsing %s failed", query_string);
+		g_list_foreach (list, (GFunc)e_book_query_unref, NULL);
+		retval = NULL;
+		goto out;
+	}
 
 	r = e_sexp_eval(sexp);
 
 	e_sexp_result_free(sexp, r);
-	e_sexp_unref (sexp);
 
 	if (list) {
 		if (list->next) {
@@ -770,7 +774,8 @@ e_book_query_from_string  (const char *query_string)
 		g_warning ("conversion to EBookQuery failed");
 		retval = NULL;
 	}
-
+out:
+	e_sexp_unref (sexp);
 	g_list_free (list);
 	return retval;
 }

@@ -1,5 +1,15 @@
 2009-08-05  Robert Peto  <robert.peto@maemo.org>
 
+	Fix CHECKED_RETURN issue in e_book_query_from_string()
+
+	* addressbook/libebook-dbus/e-book-query.c
+	  (e_book_query_from_string()): check the return value of
+	  e_sexp_parse().
+
+	Reviewed-By: Xavier Claessens  <xavier.claessens@maemo.org>
+
+2009-08-05  Robert Peto  <robert.peto@maemo.org>
+
 	Fix CHECKED_RETURN issue in e-book-util.c
 
 	* addressbook/libebook-dbus/e-book-util.c (ht_add()): check return
