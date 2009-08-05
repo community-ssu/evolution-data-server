@@ -1,5 +1,15 @@
 2009-08-05  Robert Peto  <robert.peto@maemo.org>
 
+	Fix FORWARD_NULL issue reported by coverity in EBook.
+
+	* addressbook/libebook-dbus/e-book.c (e_book_e_list_reply(),
+	  get_required_fields_reply(), e_book_get_supported_fields(),
+	  e_book_get_supported_auth_methods()): See summary.
+
+	Reviewed-By: Xavier Claessens  <xavier.claessens@maemo.org>
+
+2009-08-05  Robert Peto  <robert.peto@maemo.org>
+
 	Fix VARARGS issue reported by coverity in EBookQuery.
 
 	* addressbook/libebook-dbus/e-book-query.c (conjoinv(),

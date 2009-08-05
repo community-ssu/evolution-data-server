@@ -42,6 +42,7 @@ static char** flatten_stringlist(GList *list);
 static GList *array_to_stringlist (char **list);
 static gboolean unwrap_gerror(GError *error, GError **client_error);
 static EBookStatus get_status_from_error (GError *error);
+static void e_book_e_list_reply(DBusGProxy *proxy, char **fields, GError *error, gpointer user_data);
 
 G_DEFINE_TYPE(EBook, e_book, G_TYPE_OBJECT)
 #define E_BOOK_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), E_TYPE_BOOK, EBookPrivate))
@@ -726,31 +727,7 @@ e_book_get_required_fields (EBook *book, GList **fields, GError **error)
 static void
 get_required_fields_reply(DBusGProxy *proxy, char **fields, GError *error, gpointer user_data)
 {
-  AsyncData *data = user_data;
-  EBookEListCallback cb = data->callback;
-  char **i;
-  EList *efields = e_list_new (NULL,
-                               (EListFreeFunc) g_free,
-                               NULL);
-
-  if (error)
-    fields = NULL;
-
-  i = fields;
-  while (*i != NULL) {
-    e_list_append (efields, (*i++));
-  }
-
-  if (cb)
-    cb (data->book, get_status_from_error (error), efields, data->closure);
-
-  if (error)
-    g_error_free (error);
-
-  g_object_unref (efields);
-  g_free (fields);
-
-  async_data_free (data);
+  e_book_e_list_reply (proxy, fields, error, user_data);
 }
 
 /**
@@ -811,33 +788,40 @@ e_book_get_supported_fields (EBook *book, GList **fields, GError **error)
   }
 }
 
-/* FIXME: this function is identical to get_required_fields_reply */
 static void
-get_supported_fields_reply(DBusGProxy *proxy, char **fields, GError *error, gpointer user_data)
+e_book_e_list_reply (DBusGProxy *proxy, char **fields, GError *error, gpointer user_data)
 {
   AsyncData *data = user_data;
   EBookEListCallback cb = data->callback;
-  char **i;
-  EList *efields = e_list_new (NULL,  (EListFreeFunc) g_free, NULL);
+  EList *efields = NULL;
+  EBookStatus status = get_status_from_error (error);
 
-  if (error)
+  if (!error) {
+    char **i = fields;
+
+    efields = e_list_new (NULL, (EListFreeFunc) g_free, NULL);
+    while (i && *i) {
+      e_list_append (efields, (*i++));
+    }
+  } else {
     fields = NULL;
-
-  i = fields;
-  while (*i != NULL) {
-    e_list_append (efields, (*i++));
+    g_error_free (error);
   }
 
   if (cb)
-    cb (data->book, get_status_from_error (error), efields, data->closure);
+    cb (data->book, status, efields, data->closure);
 
-  if (error)
-    g_error_free (error);
-
-  g_object_unref (efields);
+  if (efields)
+    g_object_unref (efields);
   g_free (fields);
 
   async_data_free (data);
+}
+
+static void
+get_supported_fields_reply(DBusGProxy *proxy, char **fields, GError *error, gpointer user_data)
+{
+  e_book_e_list_reply (proxy, fields, error, user_data);
 }
 
 /**
@@ -898,35 +882,10 @@ e_book_get_supported_auth_methods (EBook *book, GList **auth_methods, GError **e
   }
 }
 
-/* FIXME: this function is also identical to get_required_fields_reply */
 static void
 get_supported_auth_methods_reply(DBusGProxy *proxy, char **methods, GError *error, gpointer user_data)
 {
-  AsyncData *data = user_data;
-  EBookEListCallback cb = data->callback;
-  char **i;
-  EList *emethods = e_list_new (NULL,
-                                (EListFreeFunc) g_free,
-                                NULL);
-
-  if (error)
-    methods = NULL;
-
-  i = methods;
-  while (*i != NULL) {
-    e_list_append (emethods, (*i++));
-  }
-
-  if (cb)
-    cb (data->book, get_status_from_error (error), emethods, data->closure);
-
-  if (error)
-    g_error_free (error);
-
-  g_object_unref (emethods);
-  g_free (methods);
-
-  async_data_free (data);
+  e_book_e_list_reply (proxy, methods, error, user_data);
 }
 
 /**
