@@ -236,11 +236,11 @@ e_book_util_remove_duplicates_using_book (EBook   *book,
         g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
         query = e_book_query_any_field_contains ("");
-        e_book_get_contacts (book, query, &local_contacts, error);
-        e_book_query_unref (query);
-        if (error && *error) {
+        if (!e_book_get_contacts (book, query, &local_contacts, error)) {
+                e_book_query_unref (query);
                 return FALSE;
         }
+        e_book_query_unref (query);
 
         e_book_util_remove_duplicates (local_contacts, contacts, duplicate_ids);
         while (local_contacts) {

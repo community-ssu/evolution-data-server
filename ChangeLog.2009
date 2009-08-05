@@ -1,5 +1,15 @@
 2009-08-05  Robert Peto  <robert.peto@maemo.org>
 
+	Fix CHECKED_RETURN issue in e-book-util.c
+
+	* addressbook/libebook-dbus/e-book-util.c
+	  (e_book_util_remove_duplicates_using_book()): check return value of
+	  e_book_get_contacts().
+
+	Reviewed-By: Xavier Claessens  <xavier.claessens@maemo.org>
+
+2009-08-05  Robert Peto  <robert.peto@maemo.org>
+
 	Fix CHECKED_RETURN issue in EBookBackendFileIndex.
 
 	* addressbook/backends/file/e-book-backend-file-index.c
