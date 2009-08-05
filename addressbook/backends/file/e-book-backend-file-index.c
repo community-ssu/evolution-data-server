@@ -847,8 +847,12 @@ get_key_attribute (EContact *contact)
     gpointer value;
 
     g_hash_table_iter_init (&iter, ht);
-    g_hash_table_iter_next (&iter, NULL, &value);
-    key_attr = (EVCardAttribute *) value;
+    if (g_hash_table_iter_next (&iter, NULL, &value))
+      key_attr = (EVCardAttribute *) value;
+    else {
+      WARNING ("cannot obtain key_attr");
+      key_attr = NULL;
+    }
   }
 
   g_hash_table_destroy (ht);

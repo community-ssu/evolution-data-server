@@ -1,5 +1,14 @@
 2009-08-05  Robert Peto  <robert.peto@maemo.org>
 
+	Fix CHECKED_RETURN issue in EBookBackendFileIndex.
+
+	* addressbook/backends/file/e-book-backend-file-index.c
+	(get_key_attribute()): check return value of g_hash_table_iter_next()
+
+	Reviewed-By: Xavier Claessens  <xavier.claessens@maemo.org>
+
+2009-08-05  Robert Peto  <robert.peto@maemo.org>
+
 	Fix FORWARD_NULL issue reported by coverity in EBook.
 
 	* addressbook/libebook-dbus/e-book.c (e_book_e_list_reply(),
