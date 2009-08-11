@@ -1,3 +1,14 @@
+2009-08-10  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
+	NB#130184 - Introduce e_vcard_attribute_equal().
+
+	* addressbook/libebook-dbus/e-vcard.c
+	  string_list_compare(), e_vcard_attribute_equal()):
+	* addressbook/libebook-dbus/e-vcard.h (e_vcard_attribute_equal()):
+	  Introduce function to compare vcard attributes by value.
+
+	Reviewed-By: Xavier Claessens  <xavier.claessens@maemo.org>
+
 2009-08-05  Robert Peto  <robert.peto@maemo.org>
 
 	Fix CHECKED_RETURN issue in e_book_query_from_string()

@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20090805.99) unstable; urgency=low
+
+  * Introduce e_vcard_attribute_equal().
+
+ -- Robert Peto <robert.peto@maemo.org>  Wed, 05 Jul 2009 20:47:03 +0100
+
 evolution-data-server (1.4.2.1-20090805) unstable; urgency=low
 
   * Fixes: NB#126525 - <coverity> some FORWARD_NULL and VARARGS checkers

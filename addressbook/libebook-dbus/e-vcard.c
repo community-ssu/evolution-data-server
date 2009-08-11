@@ -1444,6 +1444,82 @@ e_vcard_attribute_copy (EVCardAttribute *attr)
 	return a;
 }
 
+static int
+string_list_compare (GList *a, GList *b)
+{
+        int cmp;
+
+        while (a && b) {
+                cmp = g_strcmp0 (a->data, b->data);
+
+                if (0 != cmp)
+                        return cmp;
+
+                a = a->next;
+                b = b->next;
+        }
+
+        return (NULL != a ? +1 :
+                NULL != b ? -1 : 0);
+}
+
+/**
+ * e_vcard_attribute_equal:
+ * @attr_a: first #EVCardAttribute
+ * @attr_b: second #EVCardAttribute
+ *
+ * Checks if @attr_a and @attr_b are equal by value. This function considers
+ * attibute names, values and parameters. It is save to pass %NULL to its
+ * arguments.
+ *
+ * Return value: Returns %TRUE when both attributes are equal,
+ * and %FALSE otherwise.
+ **/
+gboolean
+e_vcard_attribute_equal (EVCardAttribute *attr_a, EVCardAttribute *attr_b)
+{
+        EVCardAttributeParam *param_a, *param_b;
+        GList *param_list_a, *param_list_b;
+
+        if (!attr_a)
+                return !attr_b;
+        if (!attr_b)
+                return FALSE;
+
+        if (g_strcmp0
+                (e_vcard_attribute_get_name (attr_a),
+                 e_vcard_attribute_get_name (attr_b)))
+                return FALSE;
+
+        if (string_list_compare
+                (e_vcard_attribute_get_values (attr_a),
+                 e_vcard_attribute_get_values (attr_b)))
+                return FALSE;
+
+        param_list_a = e_vcard_attribute_get_params (attr_a);
+        param_list_b = e_vcard_attribute_get_params (attr_b);
+
+        while (param_list_a && param_list_b) {
+                param_a = param_list_a->data;
+                param_b = param_list_b->data;
+
+                if (g_strcmp0
+                        (e_vcard_attribute_param_get_name (param_a),
+                         e_vcard_attribute_param_get_name (param_b)))
+                        return FALSE;
+
+                if (string_list_compare
+                        (e_vcard_attribute_param_get_values (param_a),
+                         e_vcard_attribute_param_get_values (param_b)))
+                        return FALSE;
+
+                param_list_a = param_list_a->next;
+                param_list_b = param_list_b->next;
+        }
+
+        return !param_list_a && !param_list_b;
+}
+
 /**
  * e_vcard_remove_attributes:
  * @evc: vcard object

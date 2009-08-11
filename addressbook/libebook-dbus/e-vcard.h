@@ -152,6 +152,8 @@ GType            e_vcard_attribute_get_type          (void) G_GNUC_CONST;
 EVCardAttribute *e_vcard_attribute_new               (const char *attr_group, const char *attr_name);
 void             e_vcard_attribute_free              (EVCardAttribute *attr);
 EVCardAttribute *e_vcard_attribute_copy              (EVCardAttribute *attr);
+gboolean         e_vcard_attribute_equal             (EVCardAttribute *attr_a, EVCardAttribute *attr_b);
+
 void             e_vcard_remove_attributes           (EVCard *evc, const char *attr_group, const char *attr_name);
 void             e_vcard_remove_attribute            (EVCard *evc, EVCardAttribute *attr);
 void             e_vcard_add_attribute               (EVCard *evc, EVCardAttribute *attr);
