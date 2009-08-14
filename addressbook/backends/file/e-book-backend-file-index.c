@@ -18,12 +18,13 @@
  */
 
 #include "e-book-backend-file-index.h"
+#include "e-book-backend-file-log.h"
+
 #include "libedataserver/e-sexp.h"
 #include "libebook/e-contact.h"
+#include "libebook/e-book-util.h"
 
 #include "db.h"
-
-#include "e-book-backend-file-log.h"
 
 #include <glib/gstdio.h>
 #include <string.h>
@@ -111,7 +112,7 @@ static int lexical_ordering_cb (DB *secondary, const DBT *akey, const DBT *bkey)
 static const EBookBackendFileIndexData indexes[] = {
   {"full-name", "full_name", FALSE, NULL, NULL, EVC_FN, lexical_ordering_cb},
   {"im-jabber", "im_jabber", FALSE, NULL, NULL, EVC_X_JABBER, NULL},
-  {"tel", "tel", TRUE, NULL, NULL, EVC_TEL, NULL},
+  {"phone", "phone", TRUE, NULL, NULL, EVC_TEL, NULL},
   {"email", "email", FALSE, NULL, NULL, EVC_EMAIL, NULL},
   {"first-last", "first_last", FALSE, first_last_add_cb, first_last_remove_cb, NULL, lexical_ordering_cb},
   {"last-first", "last_first", FALSE, last_first_add_cb, last_first_remove_cb, NULL, lexical_ordering_cb},
@@ -241,7 +242,7 @@ e_book_backend_file_index_is_usable (EBookBackendFileIndex *index, const gchar *
   e_sexp_result_free (sexp, sexp_result);
   e_sexp_unref (sexp);
 
-  DEBUG ("able to use index %s", res ? "yes": "no");
+  DEBUG ("able to use index: %s", res ? "yes": "no");
 
   return res;
 }
@@ -1034,7 +1035,17 @@ generic_field_add (EBookBackendFileIndex *index, EContact *contact,
           values != NULL; 
           values = values->next)
       {
-        tmp = g_utf8_casefold (values->data, -1);
+        /* normalize the phone number before we add it to db */
+        if (g_str_equal (data->vfield, EVC_TEL))
+        {
+          char *normalized;
+          normalized = e_normalize_phone_number (values->data);
+          tmp = g_utf8_casefold (normalized, -1);
+          g_free (normalized);
+        }
+        else {
+          tmp = g_utf8_casefold (values->data, -1);
+        }
         if (data->suffix)
         {
           gchar *reversed;
@@ -1044,7 +1055,7 @@ generic_field_add (EBookBackendFileIndex *index, EContact *contact,
         }
         dbt_fill_with_string (&index_dbt, g_strstrip (tmp));
 
-        DEBUG ("adding to index with key %s and data %s", 
+        DEBUG ("adding to index '%s' with key %s and data %s", data->index_name,
             (gchar *)index_dbt.data, (gchar *)id_dbt.data);
 
         db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
@@ -1092,7 +1103,17 @@ generic_field_remove (EBookBackendFileIndex *index, EContact *contact,
           values != NULL; 
           values = values->next)
       {
-        tmp = g_utf8_casefold (values->data, -1);
+        /* normalize phone number before we remove it, otherwise we won't find it */
+        if (g_str_equal (data->vfield, EVC_TEL))
+        {
+          char *normalized = e_normalize_phone_number (values->data);
+          tmp = g_utf8_casefold (normalized, -1);
+          g_free (normalized);
+        }
+        else {
+          tmp = g_utf8_casefold (values->data, -1);
+        }
+
         if (data->suffix)
         {
           gchar *reversed;
@@ -1102,7 +1123,7 @@ generic_field_remove (EBookBackendFileIndex *index, EContact *contact,
         }
         dbt_fill_with_string (&index_dbt, g_strstrip (tmp));
 
-        DEBUG ("removing from index with key %s and data %s", 
+        DEBUG ("removing from index '%s' with key %s and data %s", data->index_name,
             (gchar *)index_dbt.data, (gchar *)id_dbt.data);
 
         id_dbt.flags = 0;
@@ -1208,7 +1229,7 @@ find_query_term_for_vfield (const char *vfield)
   int i;
   for (i = 0; i < G_N_ELEMENTS (indexes); i++)
   {
-    if (0 == g_str_equal (vfield, indexes[i].vfield))
+    if (0 == g_ascii_strcasecmp (vfield, indexes[i].vfield))
     {
       return indexes[i].query_term;
     }
@@ -1346,8 +1367,16 @@ real_query (gboolean vcard_query, gboolean endswith_query, ESExp *sexp, gint arg
     }
     db = g_hash_table_lookup (priv->sdbs, query_term);
 
-    /* populate a dbt for looking up in the index */
-    query_key = g_utf8_casefold (argv[1]->value.string, -1);
+    /* if the query contains a phone number then normalize it */
+    if (g_str_equal (query_term, "phone")) {
+      char *normalized = e_normalize_phone_number (argv[1]->value.string);
+      query_key = g_utf8_casefold (normalized, -1);
+      g_free (normalized);
+    }
+    else
+    {
+      query_key = g_utf8_casefold (argv[1]->value.string, -1);
+    }
     if (endswith_query)
     {
       gchar *reversed;
@@ -1355,6 +1384,8 @@ real_query (gboolean vcard_query, gboolean endswith_query, ESExp *sexp, gint arg
       g_free (query_key);
       query_key = reversed;
     }
+
+    /* populate a dbt for looking up in the index */
     dbt_fill_with_string (&index_dbt, g_strstrip (query_key));
 
     /* we want bdb to use g_malloc this memory for us */
@@ -1434,13 +1465,13 @@ beginswith_vcard_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer use
 static ESExpResult *
 endswith_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
 {
-  return real_query (FALSE, FALSE, sexp, argc, argv, userdata);
+  return real_query (FALSE, TRUE, sexp, argc, argv, userdata);
 }
 
 static ESExpResult *
 endswith_vcard_query (ESExp *sexp, gint argc, ESExpResult **argv, gpointer userdata)
 {
-  return real_query (TRUE, FALSE, sexp, argc, argv, userdata);
+  return real_query (TRUE, TRUE, sexp, argc, argv, userdata);
 }
 
 

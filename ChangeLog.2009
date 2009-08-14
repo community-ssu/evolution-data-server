@@ -1,3 +1,14 @@
+2009-08-14  Robert Peto  <robert.peto@maemo.org>
+
+	Fix phone phone number queries. See NB#126480
+
+	* addressbook/backends/file/e-book-backend-file-index.c
+	  generic_field_add(): normalize phone numbers before put them to
+	  index db.
+	  generic_field_remove(): normalize phone numbers before remove from
+	  phone index db.
+	  real_query(): normalize phone numbers in queries.
+
 2009-08-14  Mukund Sivaraman  <mukund.sivaraman@maemo.org>
 
 	* addressbook/libebook-dbus/e-book-util.c:
