@@ -1869,6 +1869,57 @@ e_book_backend_file_maybe_recover (const char *dirname)
 	return TRUE;
 }
 
+/* Check if there is any lock file left behind, if yes try to remove them.
+ * NOTE: lock files only can be left on filesystem when process exits
+ *       while the db->open() runs. Removing of these file is safe because
+ *       only one backend object per source exists, so it is not possible
+ *       that another backend object is using the same environment. */
+static gboolean
+e_book_backend_file_remove_db_locks (const char *dirname)
+{
+	const char *filename;
+	GDir *dir;
+	GError *error = NULL;
+
+	dir = g_dir_open (dirname, 0, &error);
+	if (error) {
+		if (g_error_matches (error, G_FILE_ERROR, G_FILE_ERROR_NOENT)) {
+			/* there is no such directory, so there can't be any lock file */
+			DEBUG ("%s", error->message);
+			g_error_free (error);
+			return TRUE;
+		}
+		else {
+			WARNING ("%s", error->message);
+			g_error_free (error);
+			return FALSE;
+		}
+	}
+
+	while ((filename = g_dir_read_name (dir))) {
+		if (g_str_has_prefix (filename, "__db.")) {
+			char *rm_file;
+
+			rm_file = g_build_filename (dirname, filename, NULL);
+			WARNING ("lockfile found: %s", rm_file);
+
+			if (g_remove (rm_file) != 0) {
+				g_critical ("cannot remove lockfile '%s': %s",
+						filename, strerror (errno));
+				g_free (rm_file);
+				g_dir_close (dir);
+				return FALSE;
+			}
+
+			g_free (rm_file);
+		}
+	}
+
+	g_dir_close (dir);
+
+	return TRUE;
+}
+
 static GNOME_Evolution_Addressbook_CallStatus
 e_book_backend_file_load_source (EBookBackend           *backend,
 				 ESource                *source,
@@ -1900,6 +1951,11 @@ e_book_backend_file_load_source (EBookBackend           *backend,
 	 *       are introduced */
 	if (!e_book_backend_file_maybe_recover (dirname)) {
 		WARNING ("cannot recover dir '%s'", dirname);
+		goto error;
+	}
+
+	/* remove libdb's lock files if there is any */
+	if (!e_book_backend_file_remove_db_locks (dirname)) {
 		goto error;
 	}
 

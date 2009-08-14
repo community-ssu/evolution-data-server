@@ -1,5 +1,15 @@
 2009-08-14  Robert Peto  <robert.peto@maemo.org>
 
+	Remove libdb's lock file if it was left behind from a previous run.
+	Otherwise libdb's open method would block, and we would be in an
+	unusable environment. See NB#126480
+
+	* addressbook/backends/file/e-book-backend-file.c
+	 (e_book_backend_file_remove_db_locks(),
+	  e_book_backend_file_load_source()): see summary.
+
+2009-08-14  Robert Peto  <robert.peto@maemo.org>
+
 	Fix phone phone number queries. See NB#126480
 
 	* addressbook/backends/file/e-book-backend-file-index.c
