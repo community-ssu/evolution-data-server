@@ -1,3 +1,9 @@
+2009-08-14  Mukund Sivaraman  <mukund.sivaraman@maemo.org>
+
+	* addressbook/libebook-dbus/e-book-util.c:
+	  Make e_normalize_phone_number() passthrough chars it doesn't know
+	  about
+
 2009-08-10  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
 	NB#130184 - Introduce e_vcard_attribute_equal().

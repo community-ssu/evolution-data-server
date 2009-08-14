@@ -276,13 +276,6 @@ e_normalize_phone_number (const char *phone_number)
 
         for (p = phone_number; *p; ++p) {
                 switch (*p) {
-                case '#': case '*':
-                case '0': case '1': case '2': case '3': case '4':
-                case '5': case '6': case '7': case '8': case '9':
-                        /* Directly accept this common characters. */
-                        g_string_append_c (result, *p);
-                        break;
-
                 case 'p': case 'P':
                         /* Normalize this characters to P -
                          * pause for one second. */
@@ -301,7 +294,7 @@ e_normalize_phone_number (const char *phone_number)
                         g_string_append_c (result, 'X');
                         break;
 
-                 case '+':
+                case '+':
                         /* Plus only is valid on begin of phone numbers and
                          * after number suppression prefix */
                         if (0 == result->len ||
@@ -310,6 +303,20 @@ e_normalize_phone_number (const char *phone_number)
                                 g_string_append_c (result, *p);
 
                         break;
+
+                case ',': case '.': case '(': case ')':
+                case '-': case ' ': case '\t': case '/':
+                        /* Skip commonly used delimiters */
+                        break;
+
+                case '#': case '*':
+                case '0': case '1': case '2': case '3': case '4':
+                case '5': case '6': case '7': case '8': case '9':
+		default:
+                        /* Directly accept all other characters. */
+                        g_string_append_c (result, *p);
+                        break;
+
                 }
         }
 
