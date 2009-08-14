@@ -257,11 +257,14 @@ e_book_util_remove_duplicates_using_book (EBook   *book,
  * e_normalize_phone_number:
  * @phone_number: the phone number
  *
- * Normalizes @phone_number: All characters but digits and DTMF codes are
- * stipped. A plus only is valid at the beginning, or after a number
- * suppression prefix ("*31#", "#31#").
+ * Normalizes @phone_number. Comma, period, parentheses, hyphen, space,
+ * tab and forward-slash characters are stripped. The characters 'p',
+ * 'w' and 'x' are copied in uppercase. A plus only is valid at the
+ * beginning, or after a number suppression prefix ("*31#", "#31#"). All
+ * other characters are copied verbatim.
  *
- * Returns: A newly allocated string.
+ * Returns: A newly allocated string containing the normalized phone
+ * number.
  */
 char *
 e_normalize_phone_number (const char *phone_number)
