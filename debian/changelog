@@ -1,3 +1,10 @@
+evolution-data-server (1.4.2.1.99-20090814) unstable; urgency=low
+
+  * Fixes: NB#132461 - e-addressbook-factory subscribed to D-Bus signal
+    NameOwnerChanged
+
+ -- Robert Peto <robert.peto@maemo.org>  Fri, 14 Jul 2009 14:42:49 +0100
+
 evolution-data-server (1.4.2.1-20090814) unstable; urgency=low
 
   * Fixes: NB#132326 - Eventlogger sometimes shows wrong person for received message

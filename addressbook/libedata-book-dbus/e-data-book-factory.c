@@ -42,7 +42,9 @@ static gchar *nm_dbus_escape_object_path (const gchar *utf8_string);
 
 static GMainLoop *loop;
 static EDataBookFactory *factory;
-static DBusGProxy *bus_proxy, *backup_proxy;
+static DBusGProxy *backup_proxy;
+static GQuark dbus_interface_quark = 0;
+static GQuark name_owner_changed_signal_quark = 0;
 
 DBusGConnection *connection;
 
@@ -208,6 +210,52 @@ book_closed_cb (EDataBook *book, const char *client)
   g_hash_table_insert (factory->priv->connections, g_strdup (client), list);
 }
 
+static gchar *
+get_name_owner_changed_match_rule (const gchar *name)
+{
+  return g_strdup_printf (
+         "type='signal',"
+         "sender='" DBUS_SERVICE_DBUS "',"
+         "interface='" DBUS_INTERFACE_DBUS "',"
+         "path='" DBUS_PATH_DBUS "',"
+         "member='NameOwnerChanged',"
+         "arg0='%s'",
+         name);
+}
+
+static void
+name_owner_changed (const char *name,
+                    const char *prev_owner,
+                    const char *new_owner,
+                    EDataBookFactory *factory)
+{
+  char *key;
+  GList *list;
+
+  if (strcmp (new_owner, "") != 0 || strcmp (name, prev_owner) != 0)
+    return;
+
+  /* "name" disappeared from the bus */
+
+  g_mutex_lock (factory->priv->connections_lock);
+
+  if (g_hash_table_lookup_extended (factory->priv->connections, prev_owner,
+                                    (gpointer)&key, (gpointer)&list)) {
+    gchar *match_rule;
+
+    g_list_foreach (list, (GFunc)g_object_unref, NULL);
+    g_list_free (list);
+    g_hash_table_remove (factory->priv->connections, prev_owner);
+
+    match_rule = get_name_owner_changed_match_rule (name);
+    dbus_bus_remove_match (dbus_g_connection_get_connection (connection),
+                           match_rule, NULL);
+    g_free (match_rule);
+  }
+
+  g_mutex_unlock (factory->priv->connections_lock);
+}
+
 static void
 impl_BookFactory_getBook(EDataBookFactory *factory, const char *IN_uri, DBusGMethodInvocation *context)
 {
@@ -243,12 +291,30 @@ impl_BookFactory_getBook(EDataBookFactory *factory, const char *IN_uri, DBusGMet
   }
   g_object_unref (source);
 
-  /* Update the hash of open connections */
   g_mutex_lock (priv->connections_lock);
+
+  /* Add a match rule to know if the client disappears from the bus */
   sender = dbus_g_method_get_sender (context);
+  if (!g_hash_table_lookup (priv->connections, sender)) {
+    gchar *match_rule = get_name_owner_changed_match_rule (sender);
+    dbus_bus_add_match (dbus_g_connection_get_connection (connection),
+                        match_rule, NULL);
+
+    if (!dbus_bus_name_has_owner (dbus_g_connection_get_connection (connection),
+                                  sender, NULL)) {
+      /* Ops, the name went away before we could receive NameOwnerChanged
+       * for it */
+      name_owner_changed ("", sender, sender, factory);
+    }
+
+    g_free (match_rule);
+  }
+
+  /* Update the hash of open connections */
   list = g_hash_table_lookup (priv->connections, sender);
   list = g_list_prepend (list, book);
-  g_hash_table_insert (priv->connections, sender, list);
+  g_hash_table_insert (priv->connections, sender, list); /* Leave ownership */
+
   g_mutex_unlock (priv->connections_lock);
 
   g_mutex_unlock (priv->books_lock);
@@ -258,24 +324,37 @@ impl_BookFactory_getBook(EDataBookFactory *factory, const char *IN_uri, DBusGMet
   g_free (path);
 }
 
-static void
-name_owner_changed (DBusGProxy *proxy,
-                    const char *name,
-                    const char *prev_owner,
-                    const char *new_owner,
-                    EDataBookFactory *factory)
+static DBusHandlerResult
+message_filter (DBusConnection *connection,
+                DBusMessage    *message,
+                gpointer        user_data)
 {
-  if (strcmp (new_owner, "") == 0 && strcmp (name, prev_owner) == 0) {
-    char *key;
-    GList *list = NULL;
-    g_mutex_lock (factory->priv->connections_lock);
-    if (g_hash_table_lookup_extended (factory->priv->connections, prev_owner, (gpointer)&key, (gpointer)&list)) {
-      g_list_foreach (list, (GFunc)g_object_unref, NULL);
-      g_list_free (list);
-      g_hash_table_remove (factory->priv->connections, prev_owner);
+  const char *tmp;
+  GQuark interface, member;
+  int message_type;
+
+  tmp = dbus_message_get_interface (message);
+  interface = tmp ? g_quark_try_string (tmp) : 0;
+
+  tmp = dbus_message_get_member (message);
+  member = tmp ? g_quark_try_string (tmp) : 0;
+
+  message_type = dbus_message_get_type (message);
+
+  if (interface == dbus_interface_quark &&
+      message_type == DBUS_MESSAGE_TYPE_SIGNAL &&
+      member == name_owner_changed_signal_quark) {
+    const gchar *name, *prev_owner, *new_owner;
+    if (dbus_message_get_args (message, NULL,
+                               DBUS_TYPE_STRING, &name,
+                               DBUS_TYPE_STRING, &prev_owner,
+                               DBUS_TYPE_STRING, &new_owner,
+                               DBUS_TYPE_INVALID)) {
+      name_owner_changed (name, prev_owner, new_owner, user_data);
     }
-    g_mutex_unlock (factory->priv->connections_lock);
   }
+
+  return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 }
 
 /* Convenience function to print an error and exit */
@@ -309,6 +388,7 @@ int
 main (int argc, char **argv)
 {
   GError *error = NULL;
+  DBusGProxy *bus_proxy;
   guint32 request_name_ret;
 
   g_type_init ();
@@ -334,6 +414,8 @@ main (int argc, char **argv)
 					  0, &request_name_ret, &error))
     die ("Failed to get name", error);
 
+  g_object_unref (bus_proxy);
+
   if (request_name_ret != DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER) {
     g_error ("Got result code %u from requesting name", request_name_ret);
     exit (1);
@@ -344,9 +426,13 @@ main (int argc, char **argv)
                                        "/org/gnome/evolution/dataserver/addressbook/BookFactory",
                                        G_OBJECT (factory));
 
-  dbus_g_proxy_add_signal (bus_proxy, "NameOwnerChanged",
-                           G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INVALID);
-  dbus_g_proxy_connect_signal (bus_proxy, "NameOwnerChanged", G_CALLBACK (name_owner_changed), factory, NULL);
+
+  dbus_interface_quark = g_quark_from_static_string ("org.freedesktop.DBus");
+  name_owner_changed_signal_quark = g_quark_from_static_string (
+      "NameOwnerChanged");
+
+  dbus_connection_add_filter (dbus_g_connection_get_connection (connection),
+                              message_filter, factory, NULL);
 
   /* Nokia 770 specific code: listen for backup starting signals */
   backup_proxy = dbus_g_proxy_new_for_name (connection,

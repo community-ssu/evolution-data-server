@@ -1,3 +1,16 @@
+2009-08-17  Marco Barisione  <marco.barisione@collabora.co.uk>
+
+	Use libdbus directly and not dbus-glib to get the NameOwnerChanged
+	signal, this way we can be woken up only for the NameOwnerChanged
+	signals we really care about and not for every name change on the
+	session bus.
+
+	* libedata-book-dbus/e-data-book-factory.c
+	(get_name_owner_changed_match_rule), (name_owner_changed),
+	(impl_BookFactory_getBook), (message_filter), (main):
+
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+
 2009-08-14  Robert Peto  <robert.peto@maemo.org>
 
 	Remove libdb's lock file if it was left behind from a previous run.
