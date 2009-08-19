@@ -1,9 +1,9 @@
-evolution-data-server (1.4.2.1.99-20090814) unstable; urgency=low
+evolution-data-server (1.4.2.1.99-20090819) unstable; urgency=low
 
   * Fixes: NB#132461 - e-addressbook-factory subscribed to D-Bus signal
     NameOwnerChanged
 
- -- Robert Peto <robert.peto@maemo.org>  Fri, 14 Jul 2009 14:42:49 +0100
+ -- Robert Peto <robert.peto@maemo.org>  Wed, 19 Jul 2009 16:37:00 +0100
 
 evolution-data-server (1.4.2.1-20090814) unstable; urgency=low
 
