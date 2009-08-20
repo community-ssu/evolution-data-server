@@ -1,4 +1,4 @@
-evolution-data-server (1.4.2.1.99-20090819) unstable; urgency=low
+evolution-data-server (1.4.2.1-20090819) unstable; urgency=low
 
   * Fixes: NB#132461 - e-addressbook-factory subscribed to D-Bus signal
     NameOwnerChanged
