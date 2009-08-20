@@ -1,4 +1,4 @@
-evolution-data-server (1.4.2.1-20090819.99) unstable; urgency=low
+evolution-data-server (1.4.2.1-20090820) unstable; urgency=low
 
   * Fixes: NB#132074 - Crash when deleting contacts locally in mentioned senario
 
