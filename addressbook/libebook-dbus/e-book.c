@@ -1947,7 +1947,9 @@ e_book_async_remove_contacts (EBook *book, GList *id_list, EBookCallback cb, gpo
   }
 
   for (id = id_list; id; id = id->next) {
-    e_return_async_error_if_fail (g_utf8_validate (id->data, -1, NULL), E_BOOK_ERROR_INVALID_ARG);
+    e_return_async_error_if_fail (id->data, E_BOOK_ERROR_INVALID_ARG);
+    e_return_async_error_if_fail (g_utf8_validate (id->data, -1, NULL),
+                                  E_BOOK_ERROR_INVALID_ARG);
   }
 
   l = flatten_stringlist (id_list);
