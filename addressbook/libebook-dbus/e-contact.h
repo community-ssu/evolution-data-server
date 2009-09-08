@@ -16,6 +16,18 @@
 
 G_BEGIN_DECLS
 
+/**
+ * SECTION: e-contact
+ * @title: EContact
+ * @short_description: a Contact
+ * @see_also: #EVCard
+ *
+ * #EContact is a contact in the address book. It is meant to be a simpler
+ * way to access contact attributes than #EVCard (which #EContact<!-- -->s are a
+ * subclass of). This simplification comes at a cost of
+ * flexibility (particularly for non-trivial fields, like the structured name).
+ */
+
 #define E_TYPE_CONTACT            (e_contact_get_type ())
 #define E_CONTACT(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), E_TYPE_CONTACT, EContact))
 #define E_CONTACT_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), E_TYPE_CONTACT, EContactClass))
@@ -33,6 +45,9 @@ typedef struct _EContact EContact;
 typedef struct _EContactClass EContactClass;
 typedef struct _EContactPrivate EContactPrivate;
 
+/* This is intentionally left un-gtk-doc'd, because it'd take up a lot of
+ * duplicate space (both here and in the final document), and because it
+ * wouldn't add much value */
 typedef enum {
 
 	E_CONTACT_UID = 1,     	 /* string field */
@@ -225,6 +240,16 @@ typedef enum {
 
 } EContactField;
 
+/**
+ * EContactName:
+ * @family: family name/surname/last name
+ * @given: given name/first name
+ * @additional: middle name(s)
+ * @prefixes: honorific prefixes (e.g., "Mr.", "Ms.", "Dr.")
+ * @suffixes: honorific suffixes (e.g., "M.D.", "Ph.D.")
+ *
+ * A structured name field, related to the vCard "N" field.
+ **/
 typedef struct {
 	char *family;
 	char *given;
@@ -233,16 +258,48 @@ typedef struct {
 	char *suffixes;
 } EContactName;
 
+/**
+ * EContactGeo:
+ * @latitude: the latitude, in decimal degrees
+ * @longitude: the longitude, in decimal degrees
+ *
+ * A pair of geographic coordinates.
+ **/
 typedef struct {
 	double latitude;
 	double longitude;
 } EContactGeo;
 
+/**
+ * EContactPhotoType:
+ * @E_CONTACT_PHOTO_TYPE_INLINED: photo is stored directly in the PHOTO field
+ * encoded in base64
+ * @E_CONTACT_PHOTO_TYPE_URI: photo is stored in a separate file, and the URI
+ * for the file is stored in the PHOTO field
+ *
+ * The storage scheme for the contact's PHOTO fields.
+ **/
 typedef enum {
 	E_CONTACT_PHOTO_TYPE_INLINED,
 	E_CONTACT_PHOTO_TYPE_URI
 } EContactPhotoType;
 
+/* XXX: gtk-doc doesn't seem to like this complex structure, so this comment
+ * block is a little non-traditional */
+/**
+ * EContactPhoto:
+ * @type: the #EContactPhotoType
+ * @uri: the URI for a non-inlined photo file (if @type =
+ * @E_CONTACT_PHOTO_TYPE_URI)
+ *
+ * A structured representation of the contact's PHOTO vCard field.
+ *
+ * The @type determines whether an instance contains @data.inlined OR @data.uri.
+ *
+ * The @data.inlined.mime_type is the MIME type of the photo data. The
+ * @data.inlined.length is the length of the photo data. The @data.inlined.data
+ * is the photo's data, as encoded by @data.inlined.mime_type.
+ **/
 typedef struct {
 	EContactPhotoType type;
 	union {
@@ -255,10 +312,23 @@ typedef struct {
 	} data;
 } EContactPhoto;
 
+/**
+ * EContactAddress:
+ * @address_format: the two letter country code that determines the
+ * format/meaning of the following fields
+ * @po: the post office box
+ * @ext: an extra line for the address (e.g., "Apt. #101", "c/o John Doe").
+ * Locale-specific.
+ * @street: the street and number
+ * @locality: usually "city", though this depends upon the locale
+ * @region: region, province, or state (locale-specific)
+ * @code: postal/zip code
+ * @country: country
+ *
+ * A structured representation of the contact's ADR vCard field.
+ **/
 typedef struct {
-	char *address_format; /* the two letter country code that
-				 determines the format/meaning of the
-				 following fields */
+	char *address_format;
 	char *po;
 	char *ext;
 	char *street;
@@ -268,17 +338,38 @@ typedef struct {
 	char *country;
 } EContactAddress;
 
+/**
+ * EContactDate:
+ * @year: the year
+ * @month: the month
+ * @day: the day
+ *
+ * A structured date field.
+ **/
 typedef struct {
 	unsigned int year;
 	unsigned int month;
 	unsigned int day;
 } EContactDate;
 
+/**
+ * EContactCert:
+ * @length: the length of the certificate
+ * @data: the actual data
+ *
+ * A structured field for an X.509 certificate.
+ **/
 typedef struct {
 	gsize length;
 	char *data;
 } EContactCert;
 
+/**
+ * EContact:
+ *
+ * All the fields of this structure are private to the object's implementation
+ * and should never be accessed directly.
+ **/
 struct _EContact {
 	EVCard parent;
 	/*< private >*/
@@ -348,7 +439,7 @@ const char*             e_contact_vcard_attribute  (EContactField field_id);
 EContactField           e_contact_field_id         (const char *field_name);
 EContactField           e_contact_field_id_from_vcard (const char *vcard_field);
 
-gboolean                e_contact_is_syncable      (EContact *);
+gboolean                e_contact_is_syncable      (EContact *contact);
 
 gboolean                e_contact_persist_data     (EContact *contact,
                                                     const char *dir);

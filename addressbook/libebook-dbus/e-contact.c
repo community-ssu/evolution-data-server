@@ -1415,6 +1415,16 @@ e_contact_field_id (const char *field_name)
 	return 0;
 }
 
+/**
+ * e_contact_field_id_from_vcard:
+ * @vcard_field: a string representing a contact field
+ * 
+ * Gets the #EContactField corresponding to the vCard field name in
+ * @vcard_field.
+ *
+ * Return value: An #EContactField corresponding to @vcard_field, or %0 if it
+ * doesn't exist.
+ **/
 EContactField
 e_contact_field_id_from_vcard (const char *vcard_field)
 {
@@ -2364,7 +2374,11 @@ e_contact_cert_get_type (void)
  * e_contact_is_syncable:
  * @contact: an #Econtact
  *
- * Retrieves whether a contact should be included in synchronisation process.
+ * Retrieves whether a contact should be included in the synchronisation
+ * process.
+ *
+ * Return value: %TRUE if a contact should be included in the synchronisation
+ * process
  **/
 gboolean
 e_contact_is_syncable (EContact *contact)

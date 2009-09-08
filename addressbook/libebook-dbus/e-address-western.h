@@ -3,14 +3,25 @@
 
 G_BEGIN_DECLS
 
+/**
+ * EAddressWestern:
+ * @po_box: the post office box
+ * @extended: an extra line for the address (e.g., "Apt. #101", "c/o John Doe").
+ * Locale-specific.
+ * @street: the street and number
+ * @locality: usually "city", though this depends upon the locale
+ * @region: region, province, or state (locale-specific)
+ * @postal_code: postal/zip code
+ * @country: country
+ *
+ * A structured representation of the contact's ADR vCard field.
+ **/
 typedef struct {
-	
-	/* Public */
 	char *po_box;
-	char *extended;  /* I'm not sure what this is. */
+	char *extended;
 	char *street;
-	char *locality;  /* For example, the city or town. */
-	char *region;	/* The state or province. */
+	char *locality;
+	char *region;
 	char *postal_code;
 	char *country;
 } EAddressWestern;

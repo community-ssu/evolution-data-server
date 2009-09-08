@@ -34,12 +34,33 @@
 
 G_BEGIN_DECLS
 
+/**
+ * SECTION: e-book-view
+ * @title: EBookView
+ * @short_description: A view of the contacts in an #EBook
+ * @see_also: #EBook, #EContact, #EVCard
+ *
+ * #EBookView is a (potentially-filtered) view of the contacts in an #EBook. It
+ * provides signals for acting upon the addition, removal, or modification of
+ * contacts.
+ *
+ * Instead of creating a new #EBookView directly, you must retrieve it from an
+ * #EBook with e_book_async_get_book_view() (or e_book_get_book_view() if
+ * blocking is acceptable).
+ */
+
 typedef struct _EBookView        EBookView;
 typedef struct _EBookViewClass   EBookViewClass;
 typedef struct _EBookViewPrivate EBookViewPrivate;
 
 struct _EBook;  /* Forward reference */
 
+/**
+ * EBookView:
+ *
+ * All the fields of this structure are private to the object's implementation
+ * and should never be accessed directly.
+ **/
 struct _EBookView {
 	GObject     parent;
 	/*< private >*/
@@ -78,7 +99,7 @@ struct EBookQuery *e_book_view_get_query              (EBookView *book_view);
 void               e_book_view_set_freezable          (EBookView *book_view, gboolean freezable);
 gboolean           e_book_view_is_freezable           (EBookView *book_view);
 
-void               e_book_view_set_parse_vcards       (EBookView *book_view, gboolean emit_vcards);
+void               e_book_view_set_parse_vcards       (EBookView *book_view, gboolean parse_vcards);
 gboolean           e_book_view_get_parse_vcards       (EBookView *book_view);
 
 void               e_book_view_set_sort_order         (EBookView *book_view, const gchar *query_term);

@@ -17,10 +17,63 @@
 
 G_BEGIN_DECLS
 
+/**
+ * E_BOOK_ERROR:
+ *
+ * Error domain for #EBook. See #GError for more information.
+ */
 #define E_BOOK_ERROR e_book_error_quark()
 
+/**
+ * e_book_error_quark:
+ *
+ * The implementation of the E_BOOK_ERROR error domain. See #GError for more
+ * information.
+ *
+ * Return value: the associated #GQuark
+ */
 GQuark e_book_error_quark (void) G_GNUC_CONST;
 
+/**
+ * EBookStatus:
+ * @E_BOOK_ERROR_OK: there were no errors with the last operation
+ * @E_BOOK_ERROR_INVALID_ARG: invalid argument
+ * @E_BOOK_ERROR_BUSY: the back-end was busy and could not respond
+ * @E_BOOK_ERROR_REPOSITORY_OFFLINE: the back-end could not be reached
+ * @E_BOOK_ERROR_NO_SUCH_BOOK: the provided book could not be found
+ * @E_BOOK_ERROR_NO_SELF_CONTACT: there was no contact in the book marked as the
+ * owner of the book ("self-contact")
+ * @E_BOOK_ERROR_SOURCE_NOT_LOADED: the book has not been opened
+ * @E_BOOK_ERROR_SOURCE_ALREADY_LOADED: the book is already open (and cannot be
+ * re-opened)
+ * @E_BOOK_ERROR_PERMISSION_DENIED: permission denied for this book
+ * @E_BOOK_ERROR_CONTACT_NOT_FOUND: the specified contact does not exist in this
+ * book
+ * @E_BOOK_ERROR_CONTACT_ID_ALREADY_EXISTS: the provided UID already exists for
+ * a different contact
+ * @E_BOOK_ERROR_PROTOCOL_NOT_SUPPORTED: the back-end had a protocol mis-match
+ * with the server
+ * @E_BOOK_ERROR_CANCELLED: the operation was cancelled before it completed
+ * @E_BOOK_ERROR_COULD_NOT_CANCEL: the operation could not be cancelled
+ * @E_BOOK_ERROR_AUTHENTICATION_FAILED: authentication with the server failed
+ * @E_BOOK_ERROR_AUTHENTICATION_REQUIRED: authentication is required by the
+ * server, but was not provided
+ * @E_BOOK_ERROR_TLS_NOT_AVAILABLE: the back-end or server does not support TLS
+ * encryption
+ * @E_BOOK_ERROR_CORBA_EXCEPTION: there was D-Bus-specific error
+ * @E_BOOK_ERROR_NO_SUCH_SOURCE: the #ESource does not exist
+ * @E_BOOK_ERROR_OFFLINE_UNAVAILABLE: the server is in the process of going
+ * offline and is refusing new operations
+ * @E_BOOK_ERROR_OTHER_ERROR: there was an error of undetermined nature
+ * @E_BOOK_ERROR_INVALID_SERVER_VERSION: the specific versions of the protocol
+ * supported by the back-end and server are mis-matched
+ * @E_BOOK_ERROR_NO_SPACE: the last operation could not be completed because the
+ * required storage space was not available
+ * @E_BOOK_ERROR_INVALID_FIELD: one or more of the fields involved is confirmed
+ * invalid
+ *
+ * The final status of the corresponding #EBook operation.
+ **/
 typedef enum {
 	E_BOOK_ERROR_OK,
 	E_BOOK_ERROR_INVALID_ARG,
@@ -48,7 +101,20 @@ typedef enum {
 	E_BOOK_ERROR_INVALID_FIELD
 } EBookStatus;
 
-
+/**
+ * EBookViewStatus:
+ * @E_BOOK_VIEW_STATUS_OK: there were no errors with the last operation
+ * @E_BOOK_VIEW_STATUS_TIME_LIMIT_EXCEEDED: the operation timed out
+ * @E_BOOK_VIEW_STATUS_SIZE_LIMIT_EXCEEDED: the search results were too large to
+ * return
+ * @E_BOOK_VIEW_ERROR_INVALID_QUERY: invalid query
+ * @E_BOOK_VIEW_ERROR_QUERY_REFUSED: the query was refused by the
+ * back-end/server
+ * @E_BOOK_VIEW_ERROR_OTHER_ERROR: the last operation failed for an undetermined
+ * reason
+ *
+ * The final status of the corresponding #EBookView operation.
+ **/
 typedef enum {
 	E_BOOK_VIEW_STATUS_OK,
 	E_BOOK_VIEW_STATUS_TIME_LIMIT_EXCEEDED,

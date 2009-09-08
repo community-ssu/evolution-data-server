@@ -31,22 +31,118 @@
 
 G_BEGIN_DECLS
 
+/**
+ * SECTION: e-book
+ * @title: EBook
+ * @short_description: An address book containing #EContact<!-- -->s
+ * @see_also: #EBookView, #EContact, #EVCard
+ *
+ * #EBook is the GObject-level representation of an address book backing store.
+ * It contains any number of #EContacts and provides functions to add, remove,
+ * and modify contacts.
+ *
+ * #EBook also provides a means to get an #EBookView filtered by an #EBookQuery
+ * -- e_book_async_get_book_view() (or e_book_get_book_view(), if blocking is
+ *  acceptable).
+ */
+
 typedef struct _EBook        EBook;
 typedef struct _EBookClass   EBookClass;
 typedef struct _EBookPrivate EBookPrivate;
 
+/**
+ * EBookCallback:
+ * @book: an #EBook
+ * @status: an #EBookStatus
+ * @closure: the user-provided data
+ *
+ * Specifies the type of function passed to many asynchronous #EBook functions
+ * and used as a callback.
+ */
 typedef void (*EBookCallback) (EBook *book, EBookStatus status, gpointer closure);
+
+/* FIXME: cut this typedef, since it isn't used */
+/**
+ * EBookOpenProgressCallback:
+ * @book: an #EBook
+ * @status_message: string for the current status
+ * @percent: the percent complete
+ * @closure: the user-provided data
+ *
+ * Specifies the type of function passed some #EBook functions, hypothetically.
+ * Not actually used.
+ */
 typedef void (*EBookOpenProgressCallback)     (EBook          *book,
 					       const char     *status_message,
 					       short           percent,
 					       gpointer        closure);
+
+/**
+ * EBookIdCallback:
+ * @book: an #EBook
+ * @status: an #EBookStatus
+ * @id: the UID of the relevant contact
+ * @closure: the user-provided data
+ *
+ * Specifies the type of function passed to e_book_async_add_contact()
+ * and used as a callback.
+ */
 typedef void (*EBookIdCallback)       (EBook *book, EBookStatus status, const char *id, gpointer closure);
+
+/**
+ * EBookContactCallback:
+ * @book: an #EBook
+ * @status: an #EBookStatus
+ * @contact: the relevant #EContact
+ * @closure: the user-provided data
+ *
+ * Specifies the type of function passed to e_book_async_get_contact()
+ * and used as a callback.
+ */
 typedef void (*EBookContactCallback)  (EBook *book, EBookStatus status, EContact *contact, gpointer closure);
+
+/**
+ * EBookListCallback:
+ * @book: an #EBook
+ * @status: an #EBookStatus
+ * @list: a #GList of #EContacts
+ * @closure: the user-provided data
+ *
+ * Specifies the type of function passed to e_book_async_get_changes() and
+ * e_book_async_get_contacts() and used as a callback.
+ */
 typedef void (*EBookListCallback)     (EBook *book, EBookStatus status, GList *list, gpointer closure);
+
+/**
+ * EBookBookViewCallback:
+ * @book: an #EBook
+ * @status: an #EBookStatus
+ * @book_view: the relevant #EBookView
+ * @closure: the user-provided data
+ *
+ * Specifies the type of function passed to e_book_async_get_book_view() and
+ * used as a callback.
+ */
 typedef void (*EBookBookViewCallback) (EBook *book, EBookStatus status, EBookView *book_view, gpointer closure);
+
+/**
+ * EBookEListCallback:
+ * @book: an #EBook
+ * @status: an #EBookStatus
+ * @list: an #EList of vCard field names
+ * @closure: the user-provided data
+ *
+ * Specifies the type of function passed to a few asynchronous #EBook functions
+ * and used as a callback.
+ */
 typedef void (*EBookEListCallback)   (EBook *book, EBookStatus status, EList *list, gpointer closure);
 
-
+/**
+ * EBook:
+ *
+ * All the fields of this structure are private to the object's
+ * implementation and should never be accessed directly.
+ */
 struct _EBook {
 	GObject       parent;
 	/*< private >*/

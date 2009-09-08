@@ -85,6 +85,18 @@ e_book_view_class_init (EBookViewClass *klass)
 
   g_type_class_add_private (klass, sizeof (EBookViewPrivate));
 
+  /**
+   * EBookView::contacts-changed:
+   * @view: an #EBookView
+   * @vcards: a %NULL-terminated array of vCard strings (which must not be
+   * altered or freed)
+   *
+   * This signal is emitted when contacts in the addressbook are modified. A
+   * batch of contacts may be split into several emissions. When a large number
+   * of contacts are changed at once, the change notifications may be split up
+   * into smaller batches. When the final batch notification is sent,
+   * #EBookView::sequence-complete will be emitted.
+   */
   signals [CONTACTS_CHANGED] = g_signal_new ("contacts_changed",
                                              G_OBJECT_CLASS_TYPE (object_class),
                                              G_SIGNAL_RUN_LAST,
@@ -92,6 +104,17 @@ e_book_view_class_init (EBookViewClass *klass)
                                              NULL, NULL,
                                              e_book_marshal_NONE__POINTER,
                                              G_TYPE_NONE, 1, G_TYPE_POINTER);
+  /**
+   * EBookView::contacts-removed:
+   * @view: an #EBookView
+   * @ids: a %NULL-terminated array of contact UID strings (which must not be
+   * altered or freed)
+   *
+   * This signal is emitted when contacts are removed from the addressbook. When
+   * a large number of contacts are changed at once, the change notifications
+   * may be split up into smaller batches. When the final batch notification is
+   * sent, #EBookView::sequence-complete will be emitted.
+   */
   signals [CONTACTS_REMOVED] = g_signal_new ("contacts_removed",
                                              G_OBJECT_CLASS_TYPE (object_class),
                                              G_SIGNAL_RUN_LAST,
@@ -99,6 +122,18 @@ e_book_view_class_init (EBookViewClass *klass)
                                              NULL, NULL,
                                              e_book_marshal_NONE__POINTER,
                                              G_TYPE_NONE, 1, G_TYPE_POINTER);
+
+  /**
+   * EBookView::contacts-added:
+   * @view: an #EBookView
+   * @vcards: a %NULL-terminated array of vCard strings (which must not be
+   * altered or freed)
+   *
+   * This signal is emitted when contacts are added to the addressbook. When
+   * a large number of contacts are changed at once, the change notifications
+   * may be split up into smaller batches. When the final batch notification is
+   * sent, #EBookView::sequence-complete will be emitted.
+   */
   signals [CONTACTS_ADDED] = g_signal_new ("contacts_added",
                                            G_OBJECT_CLASS_TYPE (object_class),
                                            G_SIGNAL_RUN_LAST,
@@ -106,6 +141,16 @@ e_book_view_class_init (EBookViewClass *klass)
                                            NULL, NULL,
                                            e_book_marshal_NONE__POINTER,
                                            G_TYPE_NONE, 1, G_TYPE_POINTER);
+
+  /**
+   * EBookView::sequence-complete:
+   * @view: an #EBookView
+   * @status: the #EBookViewStatus of the sequence transmission
+   *
+   * This signal is emitted when the view has finished transmitting contacts for
+   * #EBookView::contacts-added, #EBookView::contacts-changed, or
+   * #EBookView::contacts-removed sequences.
+   */
   signals [SEQUENCE_COMPLETE] = g_signal_new ("sequence_complete",
                                               G_OBJECT_CLASS_TYPE (object_class),
                                               G_SIGNAL_RUN_LAST,
@@ -113,6 +158,16 @@ e_book_view_class_init (EBookViewClass *klass)
                                               NULL, NULL,
                                               e_book_marshal_NONE__INT,
                                               G_TYPE_NONE, 1, G_TYPE_INT);
+  /**
+   * EBookView::status-message:
+   * @view: an #EBookView
+   * @message: a string containing the message
+   *
+   * This signal is emitted when the back-end sends a status message (such as
+   * "Loading...").
+   *
+   * It is not generally useful, and can safely be ignored.
+   */
   signals [STATUS_MESSAGE] = g_signal_new ("status_message",
                                            G_OBJECT_CLASS_TYPE (object_class),
                                            G_SIGNAL_RUN_LAST,
@@ -222,6 +277,7 @@ complete_cb (DBusGProxy *proxy, guint status, EBookView *book_view)
 /**
  * e_book_view_new:
  * @book: an #EBook
+ * @query: an #EBookQuery upon which the view is based
  * @view_proxy: The #DBusGProxy to get signals from
  *
  * Creates a new #EBookView based on #EBook and listening to @view_proxy.  This
@@ -260,6 +316,15 @@ e_book_view_new (EBook *book, EBookQuery *query, DBusGProxy *view_proxy)
   return view;
 }
 
+/**
+ * e_book_view_get_book:
+ * @book_view: an #EBookView
+ *
+ * Retrieves @book_view's parent #EBook. This is owned by the #EBookView, so use
+ * g_object_ref() and g_object_unref() as necessary.
+ *
+ * Return value: @book_view's parent #EBook.
+ */
 EBook *
 e_book_view_get_book (EBookView *book_view)
 {
@@ -268,6 +333,15 @@ e_book_view_get_book (EBookView *book_view)
   return book_view->priv->book;
 }
 
+/**
+ * e_book_view_get_query:
+ * @book_view: an #EBookView
+ *
+ * Retrieves @book_view's #EBookQuery. This is owned by the #EBookView, so use
+ * g_object_ref() and g_object_unref() as necessary.
+ *
+ * Return value: @book_view's #EBookQuery.
+ */
 EBookQuery *
 e_book_view_get_query (EBookView *book_view)
 {
@@ -330,6 +404,20 @@ e_book_view_stop (EBookView *book_view)
   }
 }
 
+/**
+ * e_book_view_set_freezable:
+ * @book_view: an #EBookView
+ * @freezable: %TRUE to make @book_view freezable, %FALSE to make it unfreezable
+ *
+ * If @freezable is %TRUE and the back-end supports being frozen, this will
+ * prevent @book_view's subsequent EBookView::contacts-added signals from being
+ * emitted. Once e_book_view_thaw() is called on @book_view, these signals will
+ * be emitted at once.
+ *
+ * Note that @book_view will continue "freezing" until
+ * e_book_view_set_freezable() is called with @freezable set to %FALSE, even if
+ * you call e_book_view_thaw() on it.
+ **/
 void
 e_book_view_set_freezable (EBookView *book_view, gboolean freezable)
 {
@@ -355,6 +443,14 @@ e_book_view_set_freezable (EBookView *book_view, gboolean freezable)
   }
 }
 
+/**
+ * e_book_view_is_freezable:
+ * @book_view: an #EBookView
+ *
+ * Describes whether @book_view is freezable. See e_book_view_set_freezable().
+ *
+ * Return value: %TRUE if @book_view is freezable.
+ **/
 gboolean
 e_book_view_is_freezable (EBookView *book_view)
 {
@@ -362,6 +458,13 @@ e_book_view_is_freezable (EBookView *book_view)
   return book_view->priv->freezable;
 }
 
+/**
+ * e_book_view_thaw:
+ * @book_view: an #EBookView
+ *
+ * Enables notifications from @book_view and emits all the signals that were
+ * halted while @book_view was frozen. See e_book_view_set_freezable().
+ **/
 void
 e_book_view_thaw (EBookView *book_view)
 {
@@ -379,7 +482,14 @@ e_book_view_thaw (EBookView *book_view)
   }
 }
 
-
+/**
+ * e_book_view_set_sort_order:
+ * @book_view: an #EBookView
+ * @query_term: the name of the field to order the view by
+ *
+ * Sets the retrieval ordering of the book view to be based on the provided
+ * @query_term.
+ **/
 void
 e_book_view_set_sort_order (EBookView *book_view, const gchar *query_term)
 {
@@ -414,6 +524,15 @@ e_book_view_set_parse_vcards (EBookView *book_view, gboolean parse_vcards)
   book_view->priv->parse_vcards = parse_vcards;
 }
 
+/**
+ * e_book_view_get_parse_vcards:
+ * @book_view: an #EBookView
+ *
+ * Describes whether @book_view parses contact vCards into #EContact objects.
+ * See e_book_view_set_parse_vcards().
+ *
+ * Return value: %TRUE if @book_view parses vCards into #EContact objects
+ */
 gboolean
 e_book_view_get_parse_vcards (EBookView *book_view)
 {

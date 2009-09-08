@@ -176,6 +176,14 @@ e_book_class_init (EBookClass *e_book_class)
 {
   GObjectClass *gobject_class = G_OBJECT_CLASS (e_book_class);
 
+  /**
+   * EBook::writable-status:
+   * @book: an #EBook
+   * @writable: %TRUE if now writable
+   *
+   * This signal is emitted when the back-end for the book becomes writable or
+   * unwritable.
+   */
   e_book_signals [WRITABLE_STATUS] =
 		g_signal_new ("writable_status",
 			      G_OBJECT_CLASS_TYPE (gobject_class),
@@ -186,6 +194,14 @@ e_book_class_init (EBookClass *e_book_class)
 			      G_TYPE_NONE, 1,
 			      G_TYPE_BOOLEAN);
 
+  /**
+   * EBook::connection-status:
+   * @book: an #EBook
+   * @connected: %TRUE if now connected
+   *
+   * This signal is emitted when the back-end for the book's connection changes
+   * status.
+   */
   e_book_signals [CONNECTION_STATUS] =
     g_signal_new ("connection_status",
                   G_OBJECT_CLASS_TYPE (gobject_class),
@@ -196,6 +212,13 @@ e_book_class_init (EBookClass *e_book_class)
                   G_TYPE_NONE, 1,
                   G_TYPE_BOOLEAN);
 
+  /**
+   * EBook::auth-required:
+   * @book: an #EBook
+   *
+   * This signal is emitted when the back-end for the book requires
+   * authentication to connect to the database.
+   */
   e_book_signals [AUTH_REQUIRED] =
     g_signal_new ("auth_required",
                   G_OBJECT_CLASS_TYPE (gobject_class),
@@ -205,6 +228,13 @@ e_book_class_init (EBookClass *e_book_class)
                   e_book_marshal_NONE__NONE,
                   G_TYPE_NONE, 0);
 
+  /**
+   * EBook::backend-died:
+   * @book: an #EBook
+   *
+   * This signal is emitted when the back-end for the book disappeared for some
+   * reason (eg, it crashed).
+   */
   e_book_signals [BACKEND_DIED] =
     g_signal_new ("backend_died",
                   G_OBJECT_CLASS_TYPE (gobject_class),
@@ -419,7 +449,6 @@ e_book_new_from_uri (const char *uri, GError **error)
 
 /**
  * e_book_new_system_addressbook:
- * @uri: the URI to load
  * @error: A #GError pointer
  *
  * Creates a new #EBook corresponding to the user's system
@@ -483,7 +512,6 @@ e_book_new_system_addressbook (GError **error)
 
 /**
  * e_book_new_default_addressbook:
- * @uri: the URI to load
  * @error: A #GError pointer
  *
  * Creates a new #EBook corresponding to the user's default
@@ -1661,6 +1689,16 @@ e_book_async_commit_contact (EBook *book, EContact *contact, EBookCallback cb, g
   return 0;
 }
 
+/**
+ * e_book_commit_contacts:
+ * @book: an #EBook
+ * @contacts: a #GList of #EContact<!-- -->s
+ * @error: a #GError to set on failure
+ *
+ * Applies the changes made to @contacts to the stored versions in @book.
+ *
+ * Return value: %TRUE if successful, %FALSE otherwise
+ **/
 gboolean
 e_book_commit_contacts (EBook *book, GList *contacts, GError **error)
 {
@@ -1704,6 +1742,18 @@ modify_contacts_reply (DBusGProxy *proxy, GError *error, gpointer user_data)
   async_data_free (data);
 }
 
+/**
+ * e_book_async_commit_contacts:
+ * @book: an #EBook
+ * @contacts: a #GList of #EContact<!-- -->s
+ * @cb: function to call when the operation finishes
+ * @closure: data to pass to callback function
+ *
+ * Applies the changes made to @contacts to the stored versions in
+ * @book without blocking.
+ *
+ * Return value: %TRUE if the operation was started, %FALSE otherwise.
+ **/
 guint
 e_book_async_commit_contacts (EBook *book, GList *contacts, EBookCallback cb, gpointer closure)
 {
@@ -2591,7 +2641,7 @@ e_book_check_static_capability (EBook *book, const char *cap)
   return FALSE;
 }
 
-/**
+/*
  * If the specified GError is a remote error, then create a new error
  * representing the remote error.  If the error is anything else, then leave it
  * alone.
@@ -2618,7 +2668,7 @@ unwrap_gerror (GError *error, GError **client_error)
   return FALSE;
 }
 
-/**
+/*
  * If the GError is a remote error, extract the EBookStatus embedded inside.
  * Otherwise return CORBA_EXCEPTION (I know this is DBus...).
  */

@@ -146,10 +146,10 @@ contact_compare (EContact *a, EContact *b)
  * e_book_util_remove_duplicates:
  * @haystack: #GList of #EContacts
  * @needles: #GList of #EContacts
- * @duplicate_ids: #GList of ids which are removed from @needles
+ * @duplicate_ids: #GList of UIDs which are removed from @needles
  *
- * Searches duplicates of contacts from needles in haystack. Duplicates are
- * removed from needles, they uids are put to duplicate_ids.
+ * Searches duplicates of contacts from @needles in @haystack. Duplicates are
+ * removed from @needles and their UIDs are put copied into @duplicate_ids.
  */
 void
 e_book_util_remove_duplicates (GList  *haystack,
@@ -210,7 +210,6 @@ e_book_util_remove_duplicates (GList  *haystack,
 
 /**
  * e_book_util_remove_duplicates_using_book:
- *
  * @book: an #EBook
  * @contacts: a #GList of #EContacts
  * @duplicate_ids: a #GList of ids which are removed from @contacts

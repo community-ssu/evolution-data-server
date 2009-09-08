@@ -723,6 +723,15 @@ e_book_sexp_new (const char *text)
 	return sexp;
 }
 
+/**
+ * e_book_sexp_parse:
+ * @sexp: an #EBookSexp to parse the text into
+ * @text: an s-expression to parse
+ *
+ * Replaces the internal state of @sexp with one based upon @text.
+ *
+ * Return value: %TRUE if the text was successfully parsed.
+ **/
 gboolean
 e_book_sexp_parse (EBookSExp  *sexp,
 		   const char *text)

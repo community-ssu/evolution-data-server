@@ -107,7 +107,7 @@ sgml-build.stamp: tmpl.stamp $(CFILE_GLOB) $(srcdir)/tmpl/*.sgml
 	@echo '*** Building XML ***'
 	@-chmod -R u+w $(srcdir)
 	cd $(srcdir) && \
-	gtkdoc-mkdb --module=$(DOC_MODULE) --source-dir=$(DOC_SOURCE_DIR) --output-format=xml $(MKDB_OPTIONS)
+	gtkdoc-mkdb --module=$(DOC_MODULE) --source-dir=$(DOC_SOURCE_DIR) --output-format=xml --sgml-mode $(MKDB_OPTIONS)
 	touch sgml-build.stamp
 
 sgml.stamp: sgml-build.stamp

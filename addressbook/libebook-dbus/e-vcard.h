@@ -28,37 +28,162 @@
 
 G_BEGIN_DECLS
 
+/**
+ * SECTION: e-vcard
+ * @title: EVCard
+ * @short_description: Contact vCard representation
+ * @see_also: #EContact
+ *
+ * #EVCard is an object representation of a contact's vCard and includes
+ * extensive support for manipulating vCards and their attributes and their
+ * parameters.
+ *
+ * Typically, you will only use #EContact contacts, and not "plain" #EVCard
+ * objects.
+ *
+ * Example for adding an XMPP username to a contact:
+ *
+ * |[
+ * void
+ * add_xmpp_username (EContact *contact, const char *username)
+ * {
+ *      EVCardAttribute *attr;
+ *      EVCardAttributeParam *param;
+ *
+ *      attr = e_vcard_attribute_new (NULL, EVC_X_JABBER);
+ *
+ *      /<!-- -->* Optionally specifying the real-life context for this username
+ *      ("work"); see RFC 2426 for valid values *<!-- -->/
+ *      param = e_vcard_attribute_param_new (EVC_TYPE);
+ *      e_vcard_attribute_add_param_with_value (attr, param, "WORK");
+ *
+ *      e_vcard_add_attribute_with_value (E_VCARD (contact), attr, username);
+ * }
+ * ]|
+ */
+
+/**
+ * EVC_ADR:
+ *
+ * Postal/mailing address
+ */
 #define EVC_ADR             "ADR"
+/**
+ * EVC_BDAY:
+ *
+ * Birthdate in ISO 8601 date or combined-date-and-time (in UTC or
+ * UTC-with-offset) format.
+ */
 #define EVC_BDAY            "BDAY"
 #define EVC_CALURI          "CALURI"
 #define EVC_CATEGORIES      "CATEGORIES"
+/**
+ * EVC_EMAIL:
+ *
+ * Email address
+ */
 #define EVC_EMAIL           "EMAIL"
+/**
+ * EVC_ENCODING:
+ *
+ * The encoding format of the vCard
+ */
 #define EVC_ENCODING        "ENCODING"
 #define EVC_FBURL           "FBURL"
+/**
+ * EVC_FN:
+ *
+ * Full name; this is a single-string representation of the N field.
+ */
 #define EVC_FN              "FN"
+/**
+ * EVC_GEO:
+ *
+ * Geographical location field
+ */
 #define EVC_GEO		    "GEO"
 #define EVC_ICSCALENDAR     "ICSCALENDAR" /* XXX should this be X-EVOLUTION-ICSCALENDAR? */
 #define EVC_KEY             "KEY"
 #define EVC_LABEL           "LABEL"
 #define EVC_LOGO            "LOGO"
 #define EVC_MAILER          "MAILER"
+/**
+ * EVC_NICKNAME:
+ *
+ * A contact's nickname
+ */
 #define EVC_NICKNAME        "NICKNAME"
+/**
+ * EVC_N:
+ *
+ * Structured name field. The values for this field are, in order, as follows:
+ * &lt;family name&gt;;&lt;given name&gt;;&lt;middle name(s)&gt;;&lt;honorific prefix(es()&gt;;&lt;honorific suffix(es)&gt;
+ *
+ * Example from RFC 2426:
+ *    N:Stevenson;John;Philip,Paul;Dr.;Jr.,M.D.,A.C.P.
+ */
 #define EVC_N               "N"
+/**
+ * EVC_NOTE:
+ *
+ * An arbitrary user-set note about the contact
+ */
 #define EVC_NOTE            "NOTE"
+/**
+ * EVC_ORG:
+ *
+ * Organization/Company
+ */
 #define EVC_ORG             "ORG"
+/**
+ * EVC_PHOTO:
+ *
+ * Structured Photo/avatar. See RFC 2426 for more details.
+ */
 #define EVC_PHOTO           "PHOTO"
 #define EVC_PRODID          "PRODID"
 #define EVC_QUOTEDPRINTABLE "QUOTED-PRINTABLE"
 #define EVC_REV             "REV"
 #define EVC_ROLE            "ROLE"
+/**
+ * EVC_TEL:
+ *
+ * Telephone or fax number.
+ */
 #define EVC_TEL             "TEL"
+/**
+ * EVC_TITLE:
+ *
+ * Professional title (e.g., "Director, Standards and Practices Dept.")
+ */
 #define EVC_TITLE           "TITLE"
+/**
+ * EVC_TYPE:
+ *
+ * The vCard "TYPE" attribute parameter. Usually omitted, "HOME", "WORK", or
+ * "OTHER".
+ */
 #define EVC_TYPE            "TYPE"
+/**
+ * EVC_UID:
+ *
+ * Unique ID
+ */
 #define EVC_UID             "UID"
+/**
+ * EVC_URL:
+ *
+ * A Web URL
+ */
 #define EVC_URL             "URL"
 #define EVC_VALUE           "VALUE"
 #define EVC_VERSION         "VERSION"
 
+/**
+ * EVC_X_AIM:
+ *
+ * An AOL Instant Messenger username
+ */
 #define EVC_X_AIM              "X-AIM"
 #define EVC_X_ANNIVERSARY      "X-EVOLUTION-ANNIVERSARY"
 #define EVC_X_ASSISTANT        "X-EVOLUTION-ASSISTANT"
@@ -73,25 +198,79 @@ G_BEGIN_DECLS
 #define EVC_X_DEST_NAME        "X-EVOLUTION-DEST-NAME"
 #define EVC_X_DEST_SOURCE_UID  "X-EVOLUTION-DEST-SOURCE-UID"
 #define EVC_X_FILE_AS          "X-EVOLUTION-FILE-AS"
+/**
+ * EVC_X_ICQ:
+ *
+ * An ICQ messenger username
+ */
 #define EVC_X_ICQ              "X-ICQ"
+/**
+ * EVC_X_JABBER:
+ *
+ * A Jabber/XMPP username
+ */
 #define EVC_X_JABBER           "X-JABBER"
 #define EVC_X_LIST_SHOW_ADDRESSES "X-EVOLUTION-LIST-SHOW_ADDRESSES"
 #define EVC_X_LIST          	"X-EVOLUTION-LIST"
 #define EVC_X_MANAGER       	"X-EVOLUTION-MANAGER"
+/**
+ * EVC_X_MSN:
+ *
+ * A Microsoft Network/MSN Messenger username
+ */
 #define EVC_X_MSN           	"X-MSN"
 #define EVC_X_RADIO         	"X-EVOLUTION-RADIO"
+/**
+ * EVC_X_SIP:
+ *
+ * A SIP VoIP username
+ */
 #define EVC_X_SIP           	"X-SIP"
 #define EVC_X_SPOUSE        	"X-EVOLUTION-SPOUSE"
 #define EVC_X_TELEX         	"X-EVOLUTION-TELEX"
 #define EVC_X_TTYTDD        	"X-EVOLUTION-TTYTDD"
 #define EVC_X_VIDEO_URL     	"X-EVOLUTION-VIDEO-URL"
 #define EVC_X_WANTS_HTML    	"X-MOZILLA-HTML"
+/**
+ * EVC_X_YAHOO:
+ *
+ * A Yahoo! Messenger username
+ */
 #define EVC_X_YAHOO         	"X-YAHOO"
+/**
+ * EVC_X_GADUGADU:
+ *
+ * A Gadu Gadu messenger username
+ */
 #define EVC_X_GADUGADU        "X-GADUGADU"
+/**
+ * EVC_X_GROUPWISE:
+ *
+ * A Novell Groupwise username
+ */
 #define EVC_X_GROUPWISE     	"X-GROUPWISE"
+/**
+ * EVC_X_BOOK_URI:
+ *
+ * The URI of the contact's #EBook store. Do not set this manually.
+ */
 #define EVC_X_BOOK_URI     	"X-EVOLUTION-BOOK-URI"
+/**
+ * EVC_X_SKYPE:
+ *
+ * A Skype username
+ */
 #define EVC_X_SKYPE           "X-SKYPE"
 
+/**
+ * EVCardFormat:
+ * @EVC_FORMAT_VCARD_21: the vCard is formatted for version 2.1 of the
+ * specification
+ * @EVC_FORMAT_VCARD_30: the vCard is formatted for version 3.0 of the
+ * specification (RFC 2426)
+ *
+ * The specific vCard format version that the vCard complies with.
+ **/
 typedef enum {
 	EVC_FORMAT_VCARD_21,
 	EVC_FORMAT_VCARD_30
@@ -109,9 +288,29 @@ typedef enum {
 typedef struct _EVCard EVCard;
 typedef struct _EVCardClass EVCardClass;
 typedef struct _EVCardPrivate EVCardPrivate;
+
+/** 
+ * EVCardAttribute:
+ *
+ * All the fields of this structure are private to the object's implementation
+ * and should never be accessed directly.
+ **/
 typedef struct _EVCardAttribute EVCardAttribute;
+
+/** 
+ * EVCardAttributeParam:
+ *
+ * All the fields of this structure are private to the object's implementation
+ * and should never be accessed directly.
+ **/
 typedef struct _EVCardAttributeParam EVCardAttributeParam;
 
+/**
+ * EVCard:
+ *
+ * All the fields of this structure are private to the object's implementation
+ * and should never be accessed directly.
+ **/
 struct _EVCard {
 	GObject parent;
 	/*< private >*/

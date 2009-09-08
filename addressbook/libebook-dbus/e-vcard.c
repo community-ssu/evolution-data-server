@@ -860,6 +860,26 @@ e_vcard_unescape_string (const char *s)
 	return g_string_free (str, FALSE);
 }
 
+/* FIXME: this really shouldn't be public (especially the UID part) */
+/**
+ * e_vcard_construct_with_uid:
+ * @evc: an empty #EVCard
+ * @str: a string representation of the vcard to create
+ * @uid: a unique ID for the vCard
+ *
+ * Using this function directly is rather pointless; just use
+ * e_vcard_new_from_string() instead. Furthermore, it's best to leave the UID up
+ * to the back-end.
+ * 
+ * Replaces the internal vCard string in @evc with the passed-in string
+ * representation.
+ *
+ * The contents of the vCard will be lazily parsed into
+ * #EVCardAttribute<!-- -->s, so non-trivial errors in the vCard will not be
+ * resolved by the time this function returns.
+ *
+ * Return value: %TRUE if there weren't any trivial errors.
+ **/
 gboolean
 e_vcard_construct_with_uid (EVCard *evc, const char *str, const char *uid)
 {
@@ -886,6 +906,24 @@ e_vcard_construct_with_uid (EVCard *evc, const char *str, const char *uid)
 	return TRUE;
 }
 
+/* FIXME: this really shouldn't be public */
+/**
+ * e_vcard_construct:
+ * @evc: an empty #EVCard
+ * @str: a string representation of the vcard to create
+ *
+ * Using this function directly is rather pointless; just use
+ * e_vcard_new_from_string() instead.
+ * 
+ * Replaces the internal vCard string in @evc with the passed-in string
+ * representation.
+ *
+ * The contents of the vCard will be lazily parsed into
+ * #EVCardAttribute<!-- -->s, so non-trivial errors in the vCard will not be
+ * resolved by the time this function returns.
+ *
+ * Return value: %TRUE if there weren't any trivial errors.
+ **/
 gboolean
 e_vcard_construct (EVCard *evc, const char *str)
 {
@@ -909,8 +947,11 @@ e_vcard_new (void)
  * e_vcard_new_from_string:
  * @str: a string representation of the vcard to create
  *
- * Creates a new #EVCard from the passed-in string
- * representation.
+ * Creates a new #EVCard from the passed-in string representation.
+ *
+ * The contents of the vCard will be lazily parsed into
+ * #EVCardAttribute<!-- -->s, so non-trivial errors in the vCard will not be
+ * resolved by the time this function returns.
  *
  * Return value: A new #EVCard.
  **/
@@ -1335,7 +1376,7 @@ e_vcard_dump_structure (EVCard *evc)
  *
  * Check if the @evc has been parsed already. Used for debugging.
  *
- * Return: %TRUE if @evc has been parsed, %FALSE otherwise.
+ * Return value: %TRUE if @evc has been parsed, %FALSE otherwise.
  **/
 gboolean
 e_vcard_is_parsed (EVCard *evc)
@@ -1352,7 +1393,7 @@ e_vcard_is_parsed (EVCard *evc)
  * distinguish between parser caused attribute additions and real attribute
  * additions.
  *
- * Return: %TRUE if @evc is currently beening parsed, %FALSE otherwise.
+ * Return value: %TRUE if @evc is currently beening parsed, %FALSE otherwise.
  **/
 gboolean
 e_vcard_is_parsing (EVCard *evc)
@@ -1472,8 +1513,7 @@ string_list_compare (GList *a, GList *b)
  * attibute names, values and parameters. It is save to pass %NULL to its
  * arguments.
  *
- * Return value: Returns %TRUE when both attributes are equal,
- * and %FALSE otherwise.
+ * Return value: %TRUE when both attributes are equal, and %FALSE otherwise.
  **/
 gboolean
 e_vcard_attribute_equal (EVCardAttribute *attr_a, EVCardAttribute *attr_b)
@@ -1590,6 +1630,8 @@ e_vcard_remove_attribute (EVCard *evc, EVCardAttribute *attr)
  * @attr: an #EVCardAttribute to add
  *
  * Adds @attr to @evc.
+ *
+ * This also transfers ownership of @attr to @evc.
  **/
 void
 e_vcard_add_attribute (EVCard *evc, EVCardAttribute *attr)
@@ -1609,6 +1651,8 @@ e_vcard_add_attribute (EVCard *evc, EVCardAttribute *attr)
  * @value: a value to assign to the attribute
  *
  * Adds @attr to @evcard, setting it to @value.
+ *
+ * This also transfers ownership of @attr to @evc.
  **/
 void
 e_vcard_add_attribute_with_value (EVCard *evcard,
@@ -1629,6 +1673,8 @@ e_vcard_add_attribute_with_value (EVCard *evcard,
  * @Varargs: a %NULL-terminated list of values to assign to the attribute
  *
  * Adds @attr to @evcard, assigning the list of values to it.
+ *
+ * This also transfers ownership of @attr to @evc.
  **/
 void
 e_vcard_add_attribute_with_values (EVCard *evcard, EVCardAttribute *attr, ...)
@@ -1903,6 +1949,8 @@ e_vcard_attribute_param_copy (EVCardAttributeParam *param)
  * @param: an #EVCardAttributeParam to add
  *
  * Adds @param to @attr's list of parameters.
+ *
+ * This also transfers ownership of @param to @attr.
  **/
 void
 e_vcard_attribute_add_param (EVCardAttribute *attr,
@@ -2672,7 +2720,7 @@ _evc_base64_decode_simple (char *data, size_t len)
 					(unsigned char *)data, &state, &save);
 }
 
-/**
+/*
  * _evc_quoted_printable_decode: decodes quoted-printable text into
  * raw format.
  * @input: Input string in quoted-printable form.
