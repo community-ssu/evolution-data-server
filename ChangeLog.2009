@@ -1,3 +1,12 @@
+2009-09-02  Marco Barisione  <marco.barisione@collabora.co.uk>
+
+	Don't check if the vcards we parse are valid UTF-8 as they can be in
+	different encodings.
+
+	* libebook-dbus/e-vcard.c (e_vcard_construct_with_uid):
+
+	Reviewed-By: Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+
 2009-08-20  Jonathon Jongsma  <jonathon.jongsma@collabora.co.uk>
 
 	* addressbook/libebook-dbus/e-book.c:

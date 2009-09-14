@@ -1,6 +1,7 @@
 evolution-data-server (1.4.2.1-20090820.99) unstable; urgency=low
 
   * Significant clean-up of the documentation for libebook.
+  * Fixes: NB#134487 - vcards don't always open
 
  -- Jonathon Jongsma <jonathon.jongsma@collabora.co.uk>  Thu, 20 Aug 2009 10:04:51 -0500
 
