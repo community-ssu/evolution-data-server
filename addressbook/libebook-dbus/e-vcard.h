@@ -409,6 +409,8 @@ gboolean         e_vcard_attribute_has_type         (EVCardAttribute *attr, cons
 char*            e_vcard_escape_string (const char *s);
 char*            e_vcard_unescape_string (const char *s);
 
+GList*           e_vcard_util_split_cards (const char *str, gsize *len);
+
 G_END_DECLS
 
 #endif /* _EVCARD_H */

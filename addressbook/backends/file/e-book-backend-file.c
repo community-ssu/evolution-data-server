@@ -1420,30 +1420,6 @@ out:
 #define PREINST_CONF_DIR "evolution-data-server"
 #define PREINST_CONF_FILE "preinst-stamps"
 
-/* Returns a newly allocated string that is read from @str,
- * @next points to the next char. On failure it returns NULL
- * and next points to NULL. */
-static char *
-get_contact_from_string (const char *str, char **next)
-{
-	char *begin, *end;
-
-	*next = NULL;
-	g_return_val_if_fail (str, NULL);
-
-	begin = strcasestr (str, "BEGIN:VCARD");
-	if (!begin)
-		return NULL;
-
-	end = strcasestr (begin + strlen ("BEGIN:VCARD"), "END:VCARD");
-	if (!end)
-		return NULL;
-
-	*next = end + strlen ("END:VCARD") + 1;
-
-	return g_strndup (begin, *next - begin);
-}
-
 static GHashTable *
 read_preinst_conf_file (const char *path)
 {
@@ -1465,6 +1441,7 @@ read_preinst_conf_file (const char *path)
 		/* if preinst config file doesn't exist we return with an empty HT,
 		 * so if there are pre-installed contacts the we can add them. */
 		DEBUG ("preinst config file does not exist");
+		g_error_free (error);
 		return ht;
 	}
 
@@ -1618,11 +1595,8 @@ install_pre_installed_vcards (EBookBackend *backend)
 	/* Read directorys filenames */
 	while ((name = g_dir_read_name (directory)) != NULL) {
 		gchar *path_plus_name;
-		gchar *vctmpstr = NULL;
-		EContact *contact;
 		gchar *vcard = NULL;
-		gchar *next = NULL;
-		gchar *begin;
+		GList *vcards;
 
 		if (!g_str_has_suffix (name, ".vcf")) {
 			continue;
@@ -1643,11 +1617,11 @@ install_pre_installed_vcards (EBookBackend *backend)
 		}
 		g_free (path_plus_name);
 
-		begin = vcard;
-		while (begin &&
-			(vctmpstr = get_contact_from_string (begin, &next)) != NULL) {
+		vcards = e_vcard_util_split_cards (vcard, NULL);
+		while (vcards != NULL) {
+			EContact *contact;
 
-			if (G_LIKELY (insert_contact (bf, vctmpstr, &contact) == 0)) {
+			if (G_LIKELY (insert_contact (bf, vcards->data, &contact) == 0)) {
 				sync_needed = TRUE;
 			}
 			else {
@@ -1655,8 +1629,8 @@ install_pre_installed_vcards (EBookBackend *backend)
 			}
 
 			g_object_unref (contact);
-			g_free (vctmpstr);
-			begin = next;
+			g_free (vcards->data);
+			vcards = g_list_delete_link (vcards, vcards);
 		}
 		g_free (vcard);
 	}

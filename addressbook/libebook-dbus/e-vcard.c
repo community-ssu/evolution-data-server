@@ -24,6 +24,8 @@
  * http://www.imc.org/pdi/vcard-21.txt
  */
 
+#define _GNU_SOURCE
+
 #include <glib.h>
 #include <stdio.h>
 #include <string.h>
@@ -972,6 +974,56 @@ e_vcard_new_from_string (const char *str)
 	return evc;
 }
 
+
+/**
+ * e_vcard_util_split_cards:
+ * @str: string that will be split
+ * @len: out value, the length of the split cards.
+ *
+ * Splits the input string to separate vcard strings.
+ *
+ * Return value: a #GList with the newly allocated split cards.
+ **/
+GList *
+e_vcard_util_split_cards (const char *str, gsize *len)
+{
+	GList *vcards = NULL;
+	char *end, *begin;
+	gsize begin_len = strlen ("BEGIN:VCARD");
+	gsize end_len = strlen ("END:VCARD");
+	char *last_pos = (char *)str;
+
+	begin = strcasestr (str, "BEGIN:VCARD");
+	while (begin != NULL) {
+		char *current = begin + begin_len;
+		while ((end = strcasestr (current, "END:VCARD"))) {
+			if ( *(end - 1) == '\n' ||  *(end - 1) == '\r')
+				break;
+			current += end_len;
+		}
+
+		if (end == NULL) {
+			/* BEGIN without END */
+			break;
+		}
+
+		vcards = g_list_prepend (vcards,
+				g_strndup (begin, (end + end_len) - begin));
+		last_pos = end + end_len;
+
+		current = last_pos;
+		while ((begin = strcasestr (current, "BEGIN:VCARD"))) {
+			if ( *(begin - 1) == '\n' || *(begin - 1) == '\r')
+				break;
+			current += begin_len;
+		}
+	}
+
+	if (len)
+		*len = last_pos - str;
+
+	return g_list_reverse (vcards);
+}
 
 static char*
 e_vcard_to_string_vcard_21 (EVCard *evc)

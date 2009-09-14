@@ -1,3 +1,18 @@
+2009-09-14  Robert Peto  <robert.peto@maemo.org>
+
+	Introduce a vcard split function for convenience. (It splits vcards
+	when there is a line feed before the "BEGIN:VCARD" and "END:VCARD")
+
+	* addressbook/libebook-dbus/e-vcard.h
+	  addressbook/libebook-dbus/e-vcard.c: introduce
+	  e_vcard_util_split_cards() function
+	* addressbook/backends/file/e-book-backend-file.c:
+	  install_pre_installed_vcards(): use e_vcard_util_split_cards()
+	  instead of old get_contact_from_string().
+	  read_preinst_conf_file(): memory leak fix
+
+	Reviewed-By: Marco Barisione  <marco.barisione@maemo.org>
+
 2009-09-02  Marco Barisione  <marco.barisione@collabora.co.uk>
 
 	Don't check if the vcards we parse are valid UTF-8 as they can be in

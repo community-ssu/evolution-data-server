@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20090914.1) unstable; urgency=low
+
+  * Fixes: NB#136658 - Crash while restoring Backup
+
+ -- Robert Peto <robert.peto@maemo.org>  Mon, 14 Sep 2009 14:47:52 +0100
+
 evolution-data-server (1.4.2.1-20090914) unstable; urgency=low
 
   * Significant clean-up of the documentation for libebook.
