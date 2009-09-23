@@ -72,8 +72,6 @@
 
 #define PAS_ID_PREFIX "pas-id-"
 
-#define RUNREC_FILE "runrec"
-
 G_DEFINE_TYPE (EBookBackendFile, e_book_backend_file, E_TYPE_BOOK_BACKEND_SYNC);
 
 struct _EBookBackendFilePrivate {
@@ -1412,32 +1410,9 @@ file_errcall (const char *buf1, char *buf2)
 static void
 file_paniccall (DB_ENV *env, int errval)
 {
-	const char *db_home;
-	char *filename = NULL;
-	int fd = -1;
-	int db_error;
-
-	/* create the runrec file */
-	db_error = env->get_home (env, &db_home);
-	if (db_error != 0 || db_home == NULL) {
-		WARNING ("cannot get db_home: %s", db_strerror (db_error));
-		goto out;
-	}
-	filename = g_build_filename (db_home, RUNREC_FILE, NULL);
-
-	fd = g_open (filename, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
-	if (G_UNLIKELY (fd == -1)) {
-		WARNING ("cannot create %s: %s", filename, strerror (errno));
-		goto out;
-	}
-
-out:
-	if (-1 != fd)
-		close (fd);
-
-	g_free (filename);
-
 	/* abort here, try to recover on the next start */
+	/* NOTE: when opening the env next time the recovery
+	 *       is done automatically */
 	g_error ("Oops, db panic: %s", db_strerror (errval));
 }
 
@@ -1833,58 +1808,6 @@ error:
 	return db_error;
 }
 
-static gboolean
-e_book_backend_file_maybe_recover (const char *dirname)
-{
-	char *recfile;
-	const char *filename;
-	GDir *dir;
-
-	recfile = g_build_filename (dirname, RUNREC_FILE, NULL);
-	if (!g_file_test (recfile, G_FILE_TEST_IS_REGULAR)) {
-		DEBUG ("recovery is not needed");
-		g_free (recfile);
-		return TRUE;
-	}
-	g_free (recfile);
-
-	MESSAGE ("recovery is needed, removing corrupted files");
-
-	/* TODO: make a backup from the old contents,
-	 * maybe it is possible to recover some data from it */
-
-	/* remove the old damaged directory */
-	dir = g_dir_open (dirname, 0, NULL);
-	if (!dir) {
-		WARNING ("cannot open direcotory %s", dirname);
-		return FALSE;
-	}
-
-	while ((filename = g_dir_read_name (dir))) {
-		char *rm_file;
-
-		rm_file = g_build_filename (dirname, filename, NULL);
-
-		if (g_remove (rm_file) != 0) {
-			WARNING ("cannot remove file '%s': %s", filename, strerror (errno));
-			g_free (rm_file);
-			g_dir_close (dir);
-			return FALSE;
-		}
-
-		g_free (rm_file);
-	}
-	g_dir_close (dir);
-
-	if (g_remove (dirname) != 0) {
-		WARNING ("cannot remove directory: %s", strerror (errno));
-		return FALSE;
-	}
-
-	/* recovery procedure was successful */
-	return TRUE;
-}
-
 /* Check if there is any lock file left behind, if yes try to remove them.
  * NOTE: lock files only can be left on filesystem when process exits
  *       while the db->open() runs. Removing of these file is safe because
@@ -1958,15 +1881,6 @@ e_book_backend_file_load_source (EBookBackend *backend,
 
 	bf->priv->dirname = dirname;
 	bf->priv->filename = filename;
-
-	/* recover from a corrupted DB */
-	/* NOTE: currently it only removes the directory,
-	 *       later this should run the real recovery when transactions
-	 *       are introduced */
-	if (!e_book_backend_file_maybe_recover (dirname)) {
-		WARNING ("cannot recover dir '%s'", dirname);
-		goto error;
-	}
 
 	/* remove libdb's lock files if there is any */
 	if (!e_book_backend_file_remove_db_locks (dirname)) {
