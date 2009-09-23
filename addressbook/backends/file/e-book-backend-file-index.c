@@ -127,7 +127,7 @@ struct _EBookBackendFileIndexPrivate {
   char *index_dirname; /* dirname where the index dbs are stored */
 };
 
-static gboolean index_populate (EBookBackendFileIndex *index, GList *fields);
+static gboolean index_populate (EBookBackendFileIndex *index, GList *fields, GPtrArray *ops);
 static int index_add_contact (EBookBackendFileIndex *index, EContact *contact,
     EBookBackendFileIndexData *data, GPtrArray *ops);
 static void index_remove_contact (EBookBackendFileIndex *index, EContact *contact,
@@ -437,13 +437,25 @@ e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db, 
   /* now go through and populate these */
   if (dbs_to_populate)
   {
-    if (!index_populate (index, dbs_to_populate))
+    GPtrArray *ops = g_ptr_array_new ();
+
+    if (!index_populate (index, dbs_to_populate, ops))
     {
       WARNING ("Error whilst trying to populate the index");
+      txn_ops_free (ops);
       g_list_free (dbs_to_populate);
       return FALSE;
     }
     g_list_free (dbs_to_populate);
+
+    /* create and commit the transaction */
+    db_error = txn_execute_ops (env, NULL, ops);
+    txn_ops_free (ops);
+
+    if (db_error != 0) {
+      WARNING ("cannot commit index populate transaction: %s", db_strerror (db_error));
+      return FALSE;
+    }
 
     /* sync the db file, since we created dbs here */
     e_book_backend_file_index_sync (index);
@@ -727,7 +739,7 @@ test_generic_field_is_suffix_indexed_vcard (ESExp *sexp, gint argc, ESExpResult 
  * index that needs updating
  */
 static gboolean
-index_populate (EBookBackendFileIndex *index, GList *fields)
+index_populate (EBookBackendFileIndex *index, GList *fields, GPtrArray *ops)
 {
   EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
 
@@ -765,8 +777,13 @@ index_populate (EBookBackendFileIndex *index, GList *fields)
         /* now we interate through all the indexes that need doing */
         for (l = fields; l != NULL; l = l->next)
         {
-          index_add_contact (index, contact, (EBookBackendFileIndexData *)l->data, NULL); // TODO: ops
+          if (0 != index_add_contact (index, contact, (EBookBackendFileIndexData *)l->data, ops)) {
+            WARNING ("cannot populate index");
+            g_object_unref (contact);
+            return FALSE;
+          }
         }
+        g_object_unref (contact);
       }
     }
 
