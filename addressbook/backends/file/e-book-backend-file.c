@@ -1570,6 +1570,7 @@ install_pre_installed_vcards (EBookBackend *backend)
 	gboolean sync_needed = FALSE;
 	gboolean preinst_dirty = FALSE;
 	EBookBackendFile *bf = E_BOOK_BACKEND_FILE (backend);
+	GPtrArray *ops;
 
 	/* Get files from pre-install directory */
 	directory = g_dir_open (PREINSTALL_DIR, 0, NULL);
@@ -1587,6 +1588,8 @@ install_pre_installed_vcards (EBookBackend *backend)
 		g_free (conf_dir);
 		return;
 	}
+
+	ops = g_ptr_array_new ();
 
 	/* Read directorys filenames */
 	while ((name = g_dir_read_name (directory)) != NULL) {
@@ -1617,8 +1620,7 @@ install_pre_installed_vcards (EBookBackend *backend)
 		while (vcards != NULL) {
 			EContact *contact;
 
-			/* TODO: create ops */
-			if (G_LIKELY (insert_contact (bf, vcards->data, &contact, NULL) == 0)) {
+			if (G_LIKELY (insert_contact (bf, vcards->data, &contact, ops) == 0)) {
 				sync_needed = TRUE;
 			}
 			else {
@@ -1643,11 +1645,23 @@ install_pre_installed_vcards (EBookBackend *backend)
 	/* sync the main and index dbs only if needed */
 	if (sync_needed) {
 		/* store the running id */
-		e_book_backend_file_store_unique_id (bf);
+		if (store_unique_id (bf, ops) != 0) {
+			WARNING ("cannot store unique id");
+			goto out;
+		}
+
+		/* commit the transaction */
+		if (txn_execute_ops (bf->priv->env, NULL, ops) != 0) {
+			WARNING ("cannot commit transaction");
+			goto out;
+		}
 
 		/* sync databases */
 		sync_dbs (bf);
 	}
+
+out:
+	txn_ops_free (ops);
 }
 
 static int
