@@ -227,34 +227,6 @@ store_unique_id (EBookBackendFile *bf, GPtrArray *ops)
 	return txn_ops_add_new (ops, TXN_PUT, bf->priv->id_db, NULL, uid);
 }
 
-/* put the running_id only, sync should called in caller */
-static gboolean
-e_book_backend_file_store_unique_id (EBookBackendFile *bf)
-{
-	DB *db = NULL;
-	DBT rid_dbt, id_dbt;
-	int db_error;
-	char *uid;
-
-	db = bf->priv->id_db;
-	memset (&rid_dbt, 0, sizeof (rid_dbt));
-	memset (&id_dbt, 0, sizeof (id_dbt));
-
-	g_assert (bf->priv->running_id > 0);
-
-	uid = unique_id_to_string (bf->priv->running_id);
-	dbt_fill_with_string (&id_dbt, uid);
-
-	db_error = db->put (db, NULL, &rid_dbt, &id_dbt, 0);
-	g_free (uid);
-	if (db_error != 0) {
-		WARNING ("put failed: %s", db_strerror (db_error));
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
 static char *
 e_book_backend_file_create_unique_id (EBookBackendFile *bf)
 {
@@ -432,30 +404,27 @@ e_book_backend_file_create_contacts (EBookBackendSync *backend,
 	EContact *contact;
 	DB *db;
 	int db_error = 0;
+	GPtrArray *ops;
 
 	bf = E_BOOK_BACKEND_FILE (backend);
 	db = bf->priv->file_db;
 
-	/* Commit each of the new contacts, aborting if there was an error.
-	 * Really this should be in a transaction... */
+	ops = g_ptr_array_new ();
+
+	/* Commit each of the new contacts, aborting if there was an error. */
+	/* XXX: is this a good policy for the batch operation? */
 	for (; *vcards; vcards++) {
 		contact = NULL;
 
-		/* Commit the contact */
-		/* TODO: create ops */
-		db_error = insert_contact (bf, *vcards, &contact, NULL);
+		/* insert the contact */
+		db_error = insert_contact (bf, *vcards, &contact, ops);
 
 		if (db_error != 0) {
 			/* TODO: proper error handling */
-			/* revert transaction and clean the contacts list */
-			/* return db_error_to_status (db_error); */
-
 			/* try to sync the already added contacts now */
+			WARNING ("cannot add contact");
 			break;
 		}
-
-		/* NOTE: this function is moved to insert_contact
-		e_book_backend_file_index_add_contact (bf->priv->index, contact); */
 
 		/* Pass the contact back to the server for view updates */
 		*contacts = g_list_prepend (*contacts, contact);
@@ -464,10 +433,19 @@ e_book_backend_file_create_contacts (EBookBackendSync *backend,
 	*contacts = g_list_reverse (*contacts);
 
 	/* store the running id */
-	if (e_book_backend_file_store_unique_id (bf)) {
-		/* sync the databases */
+	db_error = store_unique_id (bf, ops);
+	if (db_error != 0) {
+		goto out;
+	}
+
+	db_error = txn_execute_ops (bf->priv->env, NULL, ops);
+	if (db_error == 0) {
+		/* sync databases */
 		db_error = sync_dbs (bf);
 	}
+
+out:
+	txn_ops_free (ops);
 
 	return db_error_to_status (db_error);
 }
