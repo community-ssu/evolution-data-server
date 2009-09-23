@@ -199,16 +199,11 @@ load_last_running_id (EBookBackendFile *bf)
 		g_free (id_dbt.data);
 
 		bf->priv->running_id = ret;
-
-		db_error = dbc->c_del (dbc, 0);
-		if (db_error != 0) {
-			WARNING ("c_del failed: %s", db_strerror (db_error));
-		}
 	}
 
 	db_error = dbc->c_close (dbc);
 	if (db_error != 0) {
-		WARNING (G_STRLOC ":c_close failed: %s", db_strerror (db_error));
+		WARNING ("dbc->c_close failed: %s", db_strerror (db_error));
 	}
 }
 
@@ -216,6 +211,20 @@ static char*
 unique_id_to_string (int id)
 {
 	return g_strdup_printf ("%d", id);
+}
+
+/* create and add a new TxnItem to ops */
+static int
+store_unique_id (EBookBackendFile *bf, GPtrArray *ops)
+{
+	char *uid;
+
+	g_assert (bf->priv->running_id > 0);
+
+	uid = unique_id_to_string (bf->priv->running_id);
+	DEBUG ("storing runnind_id = %s", uid);
+
+	return txn_ops_add_new (ops, TXN_PUT, bf->priv->id_db, NULL, uid);
 }
 
 /* put the running_id only, sync should called in caller */
@@ -294,10 +303,10 @@ is_contact_preserved (EContact *contact)
 static int
 insert_contact (EBookBackendFile *bf,
 		const char       *vcard_req,
-		EContact        **contact)
+		EContact        **contact,
+		GPtrArray        *ops)
 {
 	DB *db = bf->priv->file_db;
-	DBT id_dbt, vcard_dbt;
 	char *id;
 	char *vcard;
 	const char *rev;
@@ -307,6 +316,7 @@ insert_contact (EBookBackendFile *bf,
 	g_assert (bf);
 	g_assert (vcard_req);
 	g_assert (contact);
+	g_assert (ops);
 
 	if (0 == bf->priv->running_id) {
 		G_LOCK (running_id);
@@ -339,8 +349,6 @@ insert_contact (EBookBackendFile *bf,
 		e_contact_set (*contact, E_CONTACT_UID, id);
 	}
 
-	dbt_fill_with_string (&id_dbt, id);
-
 	rev = e_contact_get_const (*contact,  E_CONTACT_REV);
 	if (!(rev && *rev))
 		set_revision (*contact);
@@ -354,24 +362,14 @@ insert_contact (EBookBackendFile *bf,
 	vcard = e_vcard_to_string (E_VCARD (*contact), EVC_FORMAT_VCARD_30);
 
 	/* put the vcard to db */
-	dbt_fill_with_string (&vcard_dbt, vcard);
-
-	db_error = db->put (db, NULL, &id_dbt, &vcard_dbt, 0);
-
-	g_free (vcard);
-	g_free (id);
-
-	if (db_error) {
-		WARNING ("db->put failed with %s", db_strerror (db_error));
-		g_object_unref (*contact);
-		*contact = NULL;
-	}
-	else if (bf->priv->index) {
-		/* put contact to index db */
-		e_book_backend_file_index_add_contact (bf->priv->index, *contact);
+	db_error = txn_ops_add_new (ops, TXN_PUT, db, id, vcard);
+	if (db_error != 0) {
+		g_free (vcard);
+		g_free (id);
+		return db_error;
 	}
 
-	return db_error;
+	return e_book_backend_file_index_add_contact (bf->priv->index, *contact, ops);
 }
 
 /* put contact to main and index DBs, put running id, sync DBs */
@@ -380,18 +378,31 @@ insert_contact_sync (EBookBackendFile *bf,
 		     const char       *vcard_req,
 		     EContact        **contact)
 {
+	GPtrArray *ops;
 	int db_error;
 
-	db_error = insert_contact (bf, vcard_req, contact);
+	ops = g_ptr_array_new ();
 
-	if (0 == db_error) {
-		/* store the running id */
-		if (e_book_backend_file_store_unique_id (bf)) {
-			/* sync databases */
-			db_error = sync_dbs (bf);
-		}
+	db_error = insert_contact (bf, vcard_req, contact, ops);
+	if (db_error != 0) {
+		goto out;
 	}
 
+	db_error = store_unique_id (bf, ops);
+	if (db_error != 0) {
+		goto out;
+	}
+
+	/* create and commit the transaction */
+	db_error = txn_execute_ops (bf->priv->env, NULL, ops);
+	if (db_error != 0) {
+		goto out;
+	}
+
+	db_error = sync_dbs (bf);
+
+out:
+	txn_ops_free (ops);
 	return db_error;
 }
 
@@ -431,7 +442,8 @@ e_book_backend_file_create_contacts (EBookBackendSync *backend,
 		contact = NULL;
 
 		/* Commit the contact */
-		db_error = insert_contact (bf, *vcards, &contact);
+		/* TODO: create ops */
+		db_error = insert_contact (bf, *vcards, &contact, NULL);
 
 		if (db_error != 0) {
 			/* TODO: proper error handling */
@@ -1605,7 +1617,8 @@ install_pre_installed_vcards (EBookBackend *backend)
 		while (vcards != NULL) {
 			EContact *contact;
 
-			if (G_LIKELY (insert_contact (bf, vcards->data, &contact) == 0)) {
+			/* TODO: create ops */
+			if (G_LIKELY (insert_contact (bf, vcards->data, &contact, NULL) == 0)) {
 				sync_needed = TRUE;
 			}
 			else {

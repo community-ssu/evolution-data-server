@@ -56,7 +56,7 @@ GType e_book_backend_file_index_get_type (void);
 EBookBackendFileIndex *e_book_backend_file_index_new (void);
 gboolean e_book_backend_file_index_is_usable (EBookBackendFileIndex *index, const gchar *query);
 gboolean e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db, const gchar *index_dirname);
-void e_book_backend_file_index_add_contact (EBookBackendFileIndex *index, EContact *contact);
+int e_book_backend_file_index_add_contact (EBookBackendFileIndex *index, EContact *contact, GPtrArray *ops);
 void e_book_backend_file_index_remove_contact (EBookBackendFileIndex *index, EContact *contact);
 void e_book_backend_file_index_modify_contact (EBookBackendFileIndex *index, EContact *old_contact, EContact *new_contact);
 void e_book_backend_file_index_sync (EBookBackendFileIndex *index);

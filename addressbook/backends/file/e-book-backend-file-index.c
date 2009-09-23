@@ -80,8 +80,8 @@ typedef enum
 
 typedef struct _EBookBackendFileIndexData EBookBackendFileIndexData;
 
-typedef void (*EBookBackendFileIndexAddFunc) (EBookBackendFileIndex *index, EContact *contact,
-    EBookBackendFileIndexData *data, DB *db, const gchar *id);
+typedef int (*EBookBackendFileIndexAddFunc) (EBookBackendFileIndex *index, EContact *contact,
+    EBookBackendFileIndexData *data, DB *db, const gchar *id, GPtrArray *ops);
 typedef void (*EBookBackendFileIndexRemoveFunc) (EBookBackendFileIndex *index, EContact *contact,
     EBookBackendFileIndexData *data, DB *db, const gchar *id);
 
@@ -98,10 +98,10 @@ struct _EBookBackendFileIndexData
   EBookBackendFileIndexOrderFunc order_func; /* ordering func */
 };
 
-static void first_last_add_cb (EBookBackendFileIndex *index, EContact *contact,
-    EBookBackendFileIndexData *data, DB *db, const gchar *uid);
-static void last_first_add_cb (EBookBackendFileIndex *index, EContact *contact,
-    EBookBackendFileIndexData *data, DB *db, const gchar *uid);
+static int first_last_add_cb (EBookBackendFileIndex *index, EContact *contact,
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid, GPtrArray *ops);
+static int last_first_add_cb (EBookBackendFileIndex *index, EContact *contact,
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid, GPtrArray *ops);
 
 static void first_last_remove_cb (EBookBackendFileIndex *index, EContact *contact,
     EBookBackendFileIndexData *data, DB *db, const gchar *uid);
@@ -128,8 +128,8 @@ struct _EBookBackendFileIndexPrivate {
 };
 
 static gboolean index_populate (EBookBackendFileIndex *index, GList *fields);
-static void index_add_contact (EBookBackendFileIndex *index, EContact *contact,
-    EBookBackendFileIndexData *data);
+static int index_add_contact (EBookBackendFileIndex *index, EContact *contact,
+    EBookBackendFileIndexData *data, GPtrArray *ops);
 static void index_remove_contact (EBookBackendFileIndex *index, EContact *contact,
     EBookBackendFileIndexData *data);
 static void index_sync (EBookBackendFileIndex *index, const EBookBackendFileIndexData *data);
@@ -452,19 +452,26 @@ e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db, 
   return TRUE;
 }
 
-void
-e_book_backend_file_index_add_contact (EBookBackendFileIndex *index, EContact *contact)
+int
+e_book_backend_file_index_add_contact (EBookBackendFileIndex *index, EContact *contact, GPtrArray *ops)
 {
   gint i = 0;
+  int retval = 0;
 
-  g_return_if_fail (E_IS_BOOK_BACKEND_FILE_INDEX (index));
-  g_return_if_fail (E_IS_CONTACT (contact));
+  g_return_val_if_fail (E_IS_BOOK_BACKEND_FILE_INDEX (index), EINVAL);
+  g_return_val_if_fail (E_IS_CONTACT (contact), EINVAL);
+  g_return_val_if_fail (ops, EINVAL);
 
   /* for each index database try add this contact */
   for (i = 0; i < G_N_ELEMENTS (indexes); i++)
   {
-    index_add_contact (index, contact, (EBookBackendFileIndexData *)&indexes[i]);
+    retval = index_add_contact (index, contact, (EBookBackendFileIndexData *)&indexes[i], ops);
+    if (retval != 0) {
+      break;
+    }
   }
+
+  return retval;
 }
 
 void
@@ -495,7 +502,7 @@ e_book_backend_file_index_modify_contact (EBookBackendFileIndex *index, EContact
   for (i = 0; i < G_N_ELEMENTS (indexes); i++)
   {
     index_remove_contact (index, old_contact, (EBookBackendFileIndexData *)&indexes[i]);
-    index_add_contact (index, new_contact, (EBookBackendFileIndexData *)&indexes[i]);
+    index_add_contact (index, new_contact, (EBookBackendFileIndexData *)&indexes[i], NULL); // TODO: ops
   }
 }
 
@@ -758,7 +765,7 @@ index_populate (EBookBackendFileIndex *index, GList *fields)
         /* now we interate through all the indexes that need doing */
         for (l = fields; l != NULL; l = l->next)
         {
-          index_add_contact (index, contact, (EBookBackendFileIndexData *)l->data);
+          index_add_contact (index, contact, (EBookBackendFileIndexData *)l->data, NULL); // TODO: ops
         }
       }
     }
@@ -896,32 +903,27 @@ get_key (EContact *contact, gint ordering)
   return key;
 }
 
-static void
+static int
 generic_name_add_cb (EBookBackendFileIndex *index, EContact *contact,
-    EBookBackendFileIndexData *data, DB *db, const gchar *uid, gint ordering)
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid, gint ordering, GPtrArray *ops)
 {
-  DBT index_dbt, id_dbt;
   int db_error;
   char *key;
 
   key = get_key (contact, ordering);
   if (!key) {
     WARNING ("cannot create a sufficient key value");
-    return;
+    return EINVAL;
   }
-  dbt_fill_with_string (&index_dbt, key);
 
-  dbt_fill_with_string (&id_dbt, (gchar *)uid);
+  DEBUG ("adding to index with key %s and data %s", key, uid);
 
-  DEBUG ("adding to index with key %s and data %s",
-           (gchar *)index_dbt.data, (gchar *)id_dbt.data);
-
-  db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
-  g_free (key);
-
+  db_error = txn_ops_add_new (ops, TXN_PUT, db, key, g_strdup (uid));
   if (db_error != 0) {
-    WARNING ("db->put failed: %s", db_strerror (db_error));
+    WARNING ("cannot create new txn item: %s", db_strerror (db_error));
   }
+
+  return db_error;
 }
 
 static void
@@ -971,11 +973,11 @@ generic_name_remove_cb (EBookBackendFileIndex *index, EContact *contact,
   }
 }
 
-static void
+static int
 first_last_add_cb (EBookBackendFileIndex *index, EContact *contact,
-    EBookBackendFileIndexData *data, DB *db, const gchar *uid)
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid, GPtrArray *ops)
 {
-  generic_name_add_cb (index, contact, data, db, uid, ORDER_FIRSTLAST);
+  return generic_name_add_cb (index, contact, data, db, uid, ORDER_FIRSTLAST, ops);
 }
 
 static void
@@ -985,11 +987,11 @@ first_last_remove_cb (EBookBackendFileIndex *index, EContact *contact,
   generic_name_remove_cb (index, contact, data, db, uid, ORDER_FIRSTLAST);
 }
 
-static void
+static int
 last_first_add_cb (EBookBackendFileIndex *index, EContact *contact,
-    EBookBackendFileIndexData *data, DB *db, const gchar *uid)
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid, GPtrArray *ops)
 {
-  generic_name_add_cb (index, contact, data, db, uid, ORDER_LASTFIRST);
+  return generic_name_add_cb (index, contact, data, db, uid, ORDER_LASTFIRST, ops);
 }
 
 static void
@@ -1003,17 +1005,14 @@ last_first_remove_cb (EBookBackendFileIndex *index, EContact *contact,
  * generic version of function to get the index key from a contact based on
  * the VCard field
  */
-static void
+static int
 generic_field_add (EBookBackendFileIndex *index, EContact *contact,
-    EBookBackendFileIndexData *data, DB *db, const gchar *uid)
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid, GPtrArray *ops)
 {
   gchar *tmp = NULL;
-  DBT index_dbt, id_dbt;
   int db_error = 0;
   GList *attrs = NULL;
   GList *values = NULL;
-
-  dbt_fill_with_string (&id_dbt, (gchar *)uid);
 
   for (attrs = e_vcard_get_attributes (E_VCARD (contact));
       attrs != NULL;
@@ -1045,21 +1044,22 @@ generic_field_add (EBookBackendFileIndex *index, EContact *contact,
           g_free (tmp);
           tmp = reversed;
         }
-        dbt_fill_with_string (&index_dbt, g_strstrip (tmp));
 
-        DEBUG ("adding to index '%s' with key %s and data %s", data->index_name,
-            (gchar *)index_dbt.data, (gchar *)id_dbt.data);
+        g_strstrip (tmp);
+        DEBUG ("adding to index '%s' with key %s and data %s",
+            data->index_name, tmp, uid);
 
-        db_error = db->put (db, NULL, &index_dbt, &id_dbt, 0);
-        g_free (tmp);
-
+        db_error = txn_ops_add_new (ops, TXN_PUT, db, tmp, g_strdup (uid));
         if (db_error != 0)
         {
-          WARNING ("db->put failed: %s", db_strerror (db_error));
+          WARNING ("cannot create new txn item: %s", db_strerror (db_error));
+          return db_error;
         }
       }
     }
   }
+
+  return 0;
 }
 
 static void
@@ -1175,13 +1175,14 @@ index_remove_contact (EBookBackendFileIndex *index, EContact *contact,
  * just add a single entry to the index database. for the multiple case we add
  * all the values for the field
  */
-static void
+static int
 index_add_contact (EBookBackendFileIndex *index, EContact *contact,
-    EBookBackendFileIndexData *data)
+    EBookBackendFileIndexData *data, GPtrArray *ops)
 {
   EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
   gchar *uid = NULL;
   DB *db = NULL;
+  int retval = 0;
 
   /* we need the uid, this becomes the data for our index databases */
   uid = (gchar *)e_contact_get (contact, E_CONTACT_UID);
@@ -1191,11 +1192,13 @@ index_add_contact (EBookBackendFileIndex *index, EContact *contact,
 
   if (data->contact_add_func)
   {
-    data->contact_add_func (index, contact, data, db, uid);
+    retval = data->contact_add_func (index, contact, data, db, uid, ops);
   } else {
-    generic_field_add (index, contact, data, db, uid);
+    retval = generic_field_add (index, contact, data, db, uid, ops);
   }
   g_free (uid);
+
+  return retval;
 }
 
 static void
