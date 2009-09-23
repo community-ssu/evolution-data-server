@@ -61,6 +61,7 @@
 #include "e-book-backend-file.h"
 #include "e-book-backend-file-index.h"
 #include "e-book-backend-file-log.h"
+#include "e-book-backend-file-utils.h"
 
 #define CHANGES_DB_SUFFIX ".changes.db"
 #define RUNNING_ID_DB_NAME "running_id.db"
@@ -104,15 +105,6 @@ db_error_to_status (const int db_error)
 	default:
 		return GNOME_Evolution_Addressbook_OtherError;
 	}
-}
-
-static void
-string_to_dbt(const char *str, DBT *dbt)
-{
-	memset (dbt, 0, sizeof (*dbt));
-	dbt->data = (void*)str;
-	dbt->size = strlen (str) + 1;
-	dbt->flags = DB_DBT_USERMEM;
 }
 
 static EContact*
@@ -233,7 +225,7 @@ e_book_backend_file_store_unique_id (EBookBackendFile *bf)
 	DB *db = NULL;
 	DBT rid_dbt, id_dbt;
 	int db_error;
-	gchar *uid;
+	char *uid;
 
 	db = bf->priv->id_db;
 	memset (&rid_dbt, 0, sizeof (rid_dbt));
@@ -242,7 +234,7 @@ e_book_backend_file_store_unique_id (EBookBackendFile *bf)
 	g_assert (bf->priv->running_id > 0);
 
 	uid = unique_id_to_string (bf->priv->running_id);
-	string_to_dbt((const char *)uid, &id_dbt);
+	dbt_fill_with_string (&id_dbt, uid);
 
 	db_error = db->put (db, NULL, &rid_dbt, &id_dbt, 0);
 	g_free (uid);
@@ -347,7 +339,7 @@ insert_contact (EBookBackendFile *bf,
 		e_contact_set (*contact, E_CONTACT_UID, id);
 	}
 
-	string_to_dbt (id, &id_dbt);
+	dbt_fill_with_string (&id_dbt, id);
 
 	rev = e_contact_get_const (*contact,  E_CONTACT_REV);
 	if (!(rev && *rev))
@@ -362,7 +354,7 @@ insert_contact (EBookBackendFile *bf,
 	vcard = e_vcard_to_string (E_VCARD (*contact), EVC_FORMAT_VCARD_30);
 
 	/* put the vcard to db */
-	string_to_dbt (vcard, &vcard_dbt);
+	dbt_fill_with_string (&vcard_dbt, vcard);
 
 	db_error = db->put (db, NULL, &id_dbt, &vcard_dbt, 0);
 
@@ -489,7 +481,7 @@ e_book_backend_file_remove_contacts (EBookBackendSync *backend,
 	for (l = id_list; l; l = l->next) {
 		id = l->data;
 
-		string_to_dbt (id, &id_dbt);
+		dbt_fill_with_string (&id_dbt, id);
 
 		memset (&vcard_dbt, 0, sizeof (vcard_dbt));
 		vcard_dbt.flags = DB_DBT_MALLOC;
@@ -576,7 +568,7 @@ modify_contact (EBookBackendFile *bf,
 	else
 		dbt_id = id;
 
-	string_to_dbt (dbt_id, &id_dbt);
+	dbt_fill_with_string (&id_dbt, dbt_id);
 	memset (&vcard_dbt, 0, sizeof (vcard_dbt));
 	vcard_dbt.flags = DB_DBT_MALLOC;
 
@@ -587,7 +579,7 @@ modify_contact (EBookBackendFile *bf,
 	}
 	old_contact = e_contact_new_from_vcard (vcard_dbt.data);
 	g_free (vcard_dbt.data);
-	string_to_dbt (vcard_with_rev, &vcard_dbt);
+	dbt_fill_with_string (&vcard_dbt, vcard_with_rev);
 
 	db_error = db->put (db, NULL, &id_dbt, &vcard_dbt, 0);
 
@@ -676,7 +668,7 @@ e_book_backend_file_get_contact (EBookBackendSync *backend,
 	bf = E_BOOK_BACKEND_FILE (backend);
 	db = bf->priv->file_db;
 
-	string_to_dbt (id, &id_dbt);
+	dbt_fill_with_string (&id_dbt, id);
 	memset (&vcard_dbt, 0, sizeof (vcard_dbt));
 	vcard_dbt.flags = DB_DBT_MALLOC;
 
@@ -877,7 +869,7 @@ book_view_thread (gpointer data)
 			if (!e_flag_is_set (closure->running))
 				break;
 
-			string_to_dbt (id, &id_dbt);
+			dbt_fill_with_string (&id_dbt, id);
 			memset (&vcard_dbt, 0, sizeof (vcard_dbt));
 			vcard_dbt.flags = DB_DBT_MALLOC;
 
@@ -1008,7 +1000,7 @@ e_book_backend_file_changes_foreach_key (const char *key, gpointer user_data)
 	DBT id_dbt, vcard_dbt;
 	int db_error = 0;
 
-	string_to_dbt (key, &id_dbt);
+	dbt_fill_with_string (&id_dbt, key);
 	memset (&vcard_dbt, 0, sizeof (vcard_dbt));
 	vcard_dbt.flags = DB_DBT_MALLOC;
 
@@ -1296,7 +1288,7 @@ e_book_backend_file_upgrade_db (EBookBackendFile *bf, char *old_version)
 					e_contact_set (contact, E_CONTACT_UID, id_dbt.data);
 
 					vcard = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
-					string_to_dbt (vcard, &vcard_dbt);
+					dbt_fill_with_string (&vcard_dbt, vcard);
 
 					db_error = db->put (db, NULL,
 							&id_dbt, &vcard_dbt, 0);
@@ -1319,8 +1311,8 @@ e_book_backend_file_upgrade_db (EBookBackendFile *bf, char *old_version)
 		}
 	}
 
-	string_to_dbt (E_BOOK_BACKEND_FILE_VERSION_NAME, &version_name_dbt);
-	string_to_dbt (E_BOOK_BACKEND_FILE_VERSION, &version_dbt);
+	dbt_fill_with_string (&version_name_dbt, E_BOOK_BACKEND_FILE_VERSION_NAME);
+	dbt_fill_with_string (&version_dbt, E_BOOK_BACKEND_FILE_VERSION);
 
 	db_error = db->put (db, NULL, &version_name_dbt, &version_dbt, 0);
 	if (db_error == 0)
@@ -1338,7 +1330,7 @@ e_book_backend_file_maybe_upgrade_db (EBookBackendFile *bf)
 	char *version;
 	gboolean ret_val = TRUE;
 
-	string_to_dbt (E_BOOK_BACKEND_FILE_VERSION_NAME, &version_name_dbt);
+	dbt_fill_with_string (&version_name_dbt, E_BOOK_BACKEND_FILE_VERSION_NAME);
 	memset (&version_dbt, 0, sizeof (version_dbt));
 	version_dbt.flags = DB_DBT_MALLOC;
 

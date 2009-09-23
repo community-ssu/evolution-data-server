@@ -19,6 +19,7 @@
 
 #include "e-book-backend-file-index.h"
 #include "e-book-backend-file-log.h"
+#include "e-book-backend-file-utils.h"
 
 #include "libedataserver/e-sexp.h"
 #include "libebook/e-contact.h"
@@ -133,7 +134,6 @@ static void index_remove_contact (EBookBackendFileIndex *index, EContact *contac
     EBookBackendFileIndexData *data);
 static void index_sync (EBookBackendFileIndex *index, const EBookBackendFileIndexData *data);
 static gboolean index_close_db_func (gpointer key, gpointer value, gpointer userdata);
-static void dbt_fill_with_string (DBT *dbt, gchar *str);
 
 #define E_BOOK_BACKEND_FILE_VERSION_NAME "PAS-DB-VERSION"
 
@@ -712,16 +712,6 @@ test_generic_field_is_suffix_indexed_vcard (ESExp *sexp, gint argc, ESExpResult 
 }
 
 /* index operations themselves */
-
-/* boring helper function */
-static void
-dbt_fill_with_string (DBT *dbt, gchar *str)
-{
-  memset (dbt, 0, sizeof (DBT));
-  dbt->data = (void *)str;
-  dbt->size = strlen (str) + 1;
-  dbt->flags = DB_DBT_USERMEM;
-}
 
 /* when given a list of fields, walk through the primary database, walk
  * through all contacts, parse them, then call the function to add to each

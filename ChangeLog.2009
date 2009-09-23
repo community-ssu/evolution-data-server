@@ -1,5 +1,19 @@
 2009-09-23  Robert Peto  <robert.peto@maemo.org>
 
+	Move dbt_fill_with_string() into a common header.
+
+	* addressbook/backends/file/Makefile.am
+	* addressbook/backends/file/e-book-backend-file-utils.c
+	* addressbook/backends/file/e-book-backend-file-utils.h: See above.
+	* addressbook/backends/file/e-book-backend-file.c
+	* addressbook/backends/file/e-book-backend-file-index.c: Change to use
+	  the above mentioned function.
+
+	Reviewed-By: Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+	Reviewed-By: Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
+2009-09-23  Robert Peto  <robert.peto@maemo.org>
+
 	Stylistic changes in addressbook's file backend:
 	 - remove trailing white spaces
 	 - use tabs for indenting
