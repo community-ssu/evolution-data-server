@@ -23,7 +23,29 @@
 #include "db.h"
 #include <glib.h>
 
-G_GNUC_INTERNAL void
-dbt_fill_with_string (DBT *dbt, const char *str);
+typedef enum {
+        TXN_PUT,
+        TXN_DEL,
+        TXN_CDEL
+} TxnOp;
+
+typedef struct TxnItem {
+        TxnOp op;
+        DB *db;
+        char *key;
+        char *value;
+} TxnItem;
+
+G_GNUC_INTERNAL
+int txn_execute_ops (DB_ENV *env, DB_TXN *parent_txn, GPtrArray *ops);
+
+G_GNUC_INTERNAL
+int txn_ops_add_new (GPtrArray *ops, TxnOp op, DB *db, char *key, char *value);
+
+G_GNUC_INTERNAL
+void txn_ops_free (GPtrArray *ops);
+
+G_GNUC_INTERNAL
+void dbt_fill_with_string (DBT *dbt, const char *str);
 
 #endif /* __E_BOOK_BACKEND_FILE_UTILS_H__ */
