@@ -27,4 +27,8 @@ extern gint e_book_backend_file_log_domain_id;
 	E_LOG (e_book_backend_file_log_domain_id, G_LOG_LEVEL_WARNING, format, \
 	       ##__VA_ARGS__)
 
+#define CRITICAL(format, ...) \
+	E_LOG (e_book_backend_file_log_domain_id, G_LOG_LEVEL_CRITICAL, format, \
+	       ##__VA_ARGS__)
+
 #endif /* _E_BOOK_BACKEND_FILE_LOG_H_ */

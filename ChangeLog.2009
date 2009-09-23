@@ -1,3 +1,19 @@
+2009-09-23  Robert Peto  <robert.peto@maemo.org>
+
+	Stylistic changes in addressbook's file backend:
+	 - remove trailing white spaces
+	 - use tabs for indenting
+	 - use macros from e-book-backend-file-log.h for debug messages
+
+	* addressbook/backends/file/e-book-backend-file-index.c
+	* addressbook/backends/file/e-book-backend-file-index.h
+	* addressbook/backends/file/e-book-backend-file.c: See above
+	* addressbook/backends/file/e-book-backend-file-log.h: CRITICAL macro
+	is addedd
+
+	Reviewed-By: Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+	Reviewed-By: Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
 2009-09-14  Robert Peto  <robert.peto@maemo.org>
 
 	Introduce a vcard split function for convenience. (It splits vcards
