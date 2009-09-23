@@ -541,22 +541,24 @@ out:
 	return db_error_to_status (db_error_final ? db_error_final : db_error);
 }
 
-static EBookBackendSyncStatus
+static int
 modify_contact (EBookBackendFile *bf,
 		const char       *vcard,
-		EContact        **contact)
+		EContact        **contact,
+		GPtrArray        *ops)
 {
 	DB *db;
 	int db_error;
 	char *vcard_with_rev;
 	const char *id, *dbt_id;
 	DBT id_dbt, vcard_dbt;
-	EContact *old_contact;
+	EContact *old_contact = NULL;
 
 	g_assert (bf);
 	g_assert (vcard);
 	g_assert (contact);
 	g_assert (*contact == NULL);
+	g_assert (ops);
 
 	db = bf->priv->file_db;
 
@@ -564,7 +566,7 @@ modify_contact (EBookBackendFile *bf,
 	id = e_contact_get_const (*contact, E_CONTACT_UID);
 
 	if (id == NULL)
-		return GNOME_Evolution_Addressbook_OtherError;
+		return EINVAL; /* this becomes OtherError */
 
 	/* update the revision (modified time of contact) */
 	set_revision (*contact);
@@ -588,25 +590,28 @@ modify_contact (EBookBackendFile *bf,
 	db_error = db->get (db, NULL, &id_dbt, &vcard_dbt, 0);
 	if (0 != db_error) {
 		WARNING ("db->get failed with %s", db_strerror (db_error));
-		return db_error_to_status (db_error);
+		goto out;
 	}
 	old_contact = e_contact_new_from_vcard (vcard_dbt.data);
 	g_free (vcard_dbt.data);
-	dbt_fill_with_string (&vcard_dbt, vcard_with_rev);
 
-	db_error = db->put (db, NULL, &id_dbt, &vcard_dbt, 0);
-
-	g_free (vcard_with_rev);
-
-	if (db_error == 0) {
-		e_book_backend_file_index_modify_contact (bf->priv->index, old_contact, *contact);
-		g_object_unref (old_contact);
-		return GNOME_Evolution_Addressbook_Success;
-	} else {
-		WARNING ("db->put failed with %s", db_strerror (db_error));
-		g_object_unref (old_contact);
-		return db_error_to_status (db_error);
+	db_error = txn_ops_add_new (ops, TXN_PUT, db, g_strdup (dbt_id), vcard_with_rev);
+	if (db_error != 0) {
+		WARNING ("cannot create new txn item");
+		goto out;
 	}
+
+	db_error = e_book_backend_file_index_modify_contact (bf->priv->index, old_contact, *contact, ops);
+	if (db_error != 0) {
+		WARNING ("cannot create new txn item for modify contacts");
+		goto out;
+	}
+
+out:
+	if (old_contact)
+		g_object_unref (old_contact);
+
+	return db_error;
 }
 
 static EBookBackendSyncStatus
@@ -616,16 +621,28 @@ e_book_backend_file_modify_contact (EBookBackendSync *backend,
 				    const char       *vcard,
 				    EContact        **contact)
 {
-	EBookBackendSyncStatus status;
 	EBookBackendFile *bf = E_BOOK_BACKEND_FILE (backend);
 	int db_error = 0;
+	GPtrArray *ops;
 
-	status = modify_contact (bf, vcard, contact);
+	ops = g_ptr_array_new ();
 
-	if (status == GNOME_Evolution_Addressbook_Success) {
-		/* sync databases */
-		db_error = sync_dbs (bf);
+	db_error = modify_contact (bf, vcard, contact, ops);
+	if (db_error != 0) {
+		WARNING ("cannot create new transaction item");
+		goto out;
 	}
+
+	db_error = txn_execute_ops (bf->priv->env, NULL, ops);
+	if (db_error != 0) {
+		WARNING ("cannot modify contact");
+		goto out;
+	}
+
+	db_error = sync_dbs (bf);
+
+out:
+	txn_ops_free (ops);
 
 	return db_error_to_status (db_error);
 }
@@ -638,30 +655,41 @@ e_book_backend_file_modify_contacts (EBookBackendSync *backend,
 				     GList           **contacts)
 {
 	EBookBackendFile *bf;
-	EBookBackendSyncStatus status = GNOME_Evolution_Addressbook_OtherError;
 	EContact *contact;
 	DB *db;
 	int db_error;
+	GPtrArray *ops;
 
 	bf = E_BOOK_BACKEND_FILE (backend);
 	db = bf->priv->file_db;
 
-	/* Commit each of the new contacts, aborting if there was an error.
-	 * Really this should be in a transaction... */
+	ops = g_ptr_array_new ();
+
+	/* add transaction items for each modified vcards */
 	for (; *vcards; vcards++) {
 		contact = NULL;
 
-		/* Commit the contact */
-		status = modify_contact (bf, *vcards, &contact);
-		if (status != GNOME_Evolution_Addressbook_Success)
-			return status;
+		db_error = modify_contact (bf, *vcards, &contact, ops);
+		if (db_error != 0) {
+			goto out;
+		}
 
 		/* Pass the contact back to the server for view updates */
 		*contacts = g_list_prepend (*contacts, contact);
 	}
 
+	/* create and commit transaction */
+	db_error = txn_execute_ops (bf->priv->env, NULL, ops);
+	if (db_error != 0) {
+		WARNING ("cannot modify contacts: %s", db_strerror (db_error));
+		goto out;
+	}
+
 	/* sync databases */
 	db_error = sync_dbs (bf);
+
+out:
+	txn_ops_free (ops);
 
 	return db_error_to_status (db_error);
 }

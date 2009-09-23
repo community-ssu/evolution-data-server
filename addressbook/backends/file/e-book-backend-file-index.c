@@ -508,21 +508,34 @@ e_book_backend_file_index_remove_contact (EBookBackendFileIndex *index, EContact
   return retval;
 }
 
-void
-e_book_backend_file_index_modify_contact (EBookBackendFileIndex *index, EContact *old_contact, EContact *new_contact)
+int
+e_book_backend_file_index_modify_contact (EBookBackendFileIndex *index, EContact *old_contact, EContact *new_contact, GPtrArray *ops)
 {
   gint i = 0;
+  int retval = 0;
 
-  g_return_if_fail (E_IS_BOOK_BACKEND_FILE_INDEX (index));
-  g_return_if_fail (E_IS_CONTACT (old_contact));
-  g_return_if_fail (E_IS_CONTACT (new_contact));
+  g_return_val_if_fail (E_IS_BOOK_BACKEND_FILE_INDEX (index), EINVAL);
+  g_return_val_if_fail (E_IS_CONTACT (old_contact), EINVAL);
+  g_return_val_if_fail (E_IS_CONTACT (new_contact), EINVAL);
+  g_return_val_if_fail (ops, EINVAL);
 
   /* for each index database try add this contact */
   for (i = 0; i < G_N_ELEMENTS (indexes); i++)
   {
-    index_remove_contact (index, old_contact, (EBookBackendFileIndexData *)&indexes[i], NULL); // TODO: ops
-    index_add_contact (index, new_contact, (EBookBackendFileIndexData *)&indexes[i], NULL); // TODO: ops
+    retval = index_remove_contact (index, old_contact,
+                    (EBookBackendFileIndexData *)&indexes[i], ops);
+    if (retval != 0) {
+      break;
+    }
+
+    retval = index_add_contact (index, new_contact,
+                    (EBookBackendFileIndexData *)&indexes[i], ops);
+    if (retval != 0) {
+      break;
+    }
   }
+
+  return retval;
 }
 
 void
