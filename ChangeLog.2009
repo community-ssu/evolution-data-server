@@ -1,5 +1,16 @@
 2009-09-23  Robert Peto  <robert.peto@maemo.org>
 
+	Do db->open() in a transaction, add the version number into freshly
+	created db. (See NB#120562)
+
+	* addressbook/backends/file/e-book-backend-file.c
+	* addressbook/backends/file/e-book-backend-file-index.c: See above.
+
+	Reviewed-By: Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+	Reviewed-By: Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
+2009-09-23  Robert Peto  <robert.peto@maemo.org>
+
 	Move dbt_fill_with_string() into a common header.
 
 	* addressbook/backends/file/Makefile.am

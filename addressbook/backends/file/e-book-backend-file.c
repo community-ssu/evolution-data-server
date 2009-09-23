@@ -1251,6 +1251,8 @@ e_book_backend_file_upgrade_db (EBookBackendFile *bf, char *old_version)
 		return FALSE;
 	}
 
+	/* XXX: this should be a transaction, but in our case this should
+	 *      never happen since we do always a fresh install */
 	if (!strcmp (old_version, "0.1")) {
 		/* we just loop through all the cards in the db,
 		 * giving them valid ids if they don't have them */
@@ -1649,12 +1651,13 @@ e_book_backend_file_setup_running_ids (EBookBackendFile *bf)
 
 	db_error = db_create (&sdb, bf->priv->env, 0);
 	if (db_error != 0) {
-		WARNING ("running index db_create failed with %s", db_strerror (db_error));
+		WARNING ("running index db_create failed: %s", db_strerror (db_error));
 		goto error;
 	}
 
 	running_id_db = g_build_filename (bf->priv->dirname, RUNNING_ID_DB_NAME, NULL);
-	db_error = sdb->open (sdb, NULL, running_id_db, NULL, DB_HASH, DB_THREAD, 0666);
+	db_error = sdb->open (sdb, NULL, running_id_db, NULL, DB_HASH,
+			      DB_THREAD | DB_AUTO_COMMIT, 0666);
 
 	if (db_error != 0) {
 		DEBUG ("%s doesn't exist, try to create it", running_id_db);
@@ -1663,14 +1666,14 @@ e_book_backend_file_setup_running_ids (EBookBackendFile *bf)
 		sdb->close (sdb, 0);
 		db_error = db_create (&sdb, bf->priv->env, 0);
 		if (db_error != 0) {
-			WARNING ("running index db_create failed with %s", db_strerror (db_error));
+			WARNING ("running index db_create failed: %s", db_strerror (db_error));
 			goto error;
 		}
 
-		db_error = sdb->open (sdb, NULL, running_id_db, NULL,
-				      DB_HASH, DB_CREATE | DB_THREAD, 0666);
+		db_error = sdb->open (sdb, NULL, running_id_db, NULL, DB_HASH,
+				      DB_CREATE | DB_THREAD | DB_AUTO_COMMIT, 0666);
 		if (db_error != 0) {
-			WARNING ("running index open failed with %s", db_strerror (db_error));
+			WARNING ("running index open failed: %s", db_strerror (db_error));
 			sdb->close (sdb, 0);
 			goto error;
 		}
@@ -1756,7 +1759,8 @@ e_book_backend_file_setup_db_env (EBookBackendFile *bf, gboolean only_if_exists)
 
 	/* open the environment for use */
 	db_error = env->open (env, db_home, DB_CREATE | DB_INIT_MPOOL | DB_PRIVATE
-			| DB_THREAD | DB_INIT_LOCK, 0);
+			| DB_THREAD | DB_INIT_LOCK
+			| DB_RECOVER | DB_INIT_TXN, 0);
 	if (db_error != 0) {
 		WARNING ("db_env_open failed with %s", db_strerror (db_error));
 		goto error;
@@ -1916,7 +1920,7 @@ e_book_backend_file_load_source (EBookBackend *backend,
 	/* continue an aborted db_upgrade (this won't happen in our case) */
 	db_error = e_db3_utils_maybe_recover (filename);
 	if (db_error != 0) {
-		WARNING ("db recovery failed with %s", db_strerror (db_error));
+		WARNING ("db recovery failed: %s", db_strerror (db_error));
 		goto error;
 	}
 
@@ -1931,21 +1935,23 @@ e_book_backend_file_load_source (EBookBackend *backend,
 	/* TODO: create a function for this */
 	db_error = db_create (&db, bf->priv->env, 0);
 	if (db_error != 0) {
-		WARNING ("db_create failed with %s", db_strerror (db_error));
+		WARNING ("db_create failed: %s", db_strerror (db_error));
 		goto error;
 	}
 
-	db_error = (*db->open) (db, NULL, filename, NULL, DB_HASH, DB_THREAD, 0666);
+	db_error = (*db->open) (db, NULL, filename, NULL, DB_HASH,
+			DB_THREAD | DB_AUTO_COMMIT, 0666);
 
 	if (db_error == DB_OLD_VERSION) {
 		db_error = e_db3_utils_upgrade_format (filename);
 
 		if (db_error != 0) {
-			WARNING ("db format upgrade failed with %s", db_strerror (db_error));
+			WARNING ("db format upgrade failed: %s", db_strerror (db_error));
 			goto error;
 		}
 
-		db_error = (*db->open) (db, NULL, filename, NULL, DB_HASH, DB_THREAD, 0666);
+		db_error = (*db->open) (db, NULL, filename, NULL, DB_HASH,
+				DB_THREAD | DB_AUTO_COMMIT, 0666);
 	}
 
 	if (db_error == 0) {
@@ -1955,10 +1961,11 @@ e_book_backend_file_load_source (EBookBackend *backend,
 
 		db_error = db_create (&db, bf->priv->env, 0);
 		if (db_error != 0) {
-			WARNING ("db_create failed with %s", db_strerror (db_error));
+			WARNING ("db_create failed: %s", db_strerror (db_error));
 			goto error;
 		}
-		db_error = (*db->open) (db, NULL, filename, NULL, DB_HASH, DB_RDONLY | DB_THREAD, 0666);
+		db_error = (*db->open) (db, NULL, filename, NULL, DB_HASH,
+				DB_RDONLY | DB_THREAD | DB_AUTO_COMMIT, 0666);
 
 		if (db_error != 0 && !only_if_exists) {
 			/* the database didn't exist, so we create the db */
@@ -1967,16 +1974,32 @@ e_book_backend_file_load_source (EBookBackend *backend,
 
 			db_error = db_create (&db, bf->priv->env, 0);
 			if (db_error != 0) {
-				WARNING ("db_create failed with %s", db_strerror (db_error));
+				WARNING ("db_create failed: %s", db_strerror (db_error));
 				goto error;
 			}
 
-			db_error = (*db->open) (db, NULL, filename, NULL, DB_HASH, DB_CREATE | DB_THREAD, 0666);
+			db_error = (*db->open) (db, NULL, filename, NULL, DB_HASH,
+					DB_CREATE | DB_THREAD | DB_AUTO_COMMIT, 0666);
 			if (db_error != 0) {
 				db->close (db, 0);
-				WARNING ("db->open (... DB_CREATE ...) failed with %s", db_strerror (db_error));
+				WARNING ("db->open (... DB_CREATE ...) failed: %s",
+						db_strerror (db_error));
 			}
 			else {
+				/* our freshly created db needs a version */
+				DBT version_name_dbt, version_dbt;
+
+				dbt_fill_with_string (&version_name_dbt,
+						E_BOOK_BACKEND_FILE_VERSION_NAME);
+				dbt_fill_with_string (&version_dbt,
+						E_BOOK_BACKEND_FILE_VERSION);
+
+				db_error = db->put (db, NULL, &version_name_dbt,
+						&version_dbt, DB_AUTO_COMMIT);
+				if (db_error != 0) {
+					WARNING ("cannot insert version string: %s",
+							db_strerror (db_error));
+				}
 #ifdef CREATE_DEFAULT_VCARD
 				EContact *contact = NULL;
 

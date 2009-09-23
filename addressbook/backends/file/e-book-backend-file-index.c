@@ -399,7 +399,8 @@ e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db, 
 
     /* we cannot pass DB_CREATE in the first time, because if index dbs aren't
      * present we need to populate them */
-    db_error = sdb->open (sdb, NULL, index_db_path, NULL, DB_BTREE, DB_THREAD, 0666);
+    db_error = sdb->open (sdb, NULL, index_db_path, NULL, DB_BTREE,
+        DB_THREAD | DB_AUTO_COMMIT, 0666);
     if (db_error != 0)
     {
       DEBUG ("%s doesn't exist, try to create it", index_db_path);
@@ -413,7 +414,8 @@ e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db, 
         return FALSE;
       }
 
-      db_error = sdb->open (sdb, NULL, index_db_path, NULL, DB_BTREE, DB_CREATE | DB_THREAD, 0666);
+      db_error = sdb->open (sdb, NULL, index_db_path, NULL, DB_BTREE,
+          DB_CREATE | DB_THREAD | DB_AUTO_COMMIT, 0666);
       if (db_error != 0)
       {
         WARNING ("creating %s failed: %s", index_db_path, db_strerror (db_error));
