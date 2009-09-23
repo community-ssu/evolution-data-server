@@ -1,3 +1,13 @@
+2009-09-23  Sayantan Majumder  <sayantan.majumder@nokia.com>
+
+	NB#139743 - e-addressbook-factory crash while incoming chat notification
+
+	* addressbook/libebook-dbus/e-book-sexp.c (compare_address()):
+	  Use a different looping variable for the inner loop.
+
+	Reviewed-By: Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+	Reviewed-By: Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
 2009-09-23  Robert Peto  <robert.peto@maemo.org>
 
 	Remove old recovery functionality. (See NB#120562)

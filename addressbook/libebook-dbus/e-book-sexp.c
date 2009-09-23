@@ -210,7 +210,7 @@ compare_address (EContact *contact, const char *str, CompareFunc compare)
 {
 	char     *needle = normalize_spaces (str);
 	gboolean  rv = FALSE;
-	int       i;
+	int       i, o;
 
 	for (i = E_CONTACT_FIRST_ADDRESS_ID; i <= E_CONTACT_LAST_ADDRESS_ID; i ++) {
 		EContactAddress *address = e_contact_get (contact, i);
@@ -222,8 +222,8 @@ compare_address (EContact *contact, const char *str, CompareFunc compare)
 				address->code, address->country
 			};
 
-			for (i = 0; i < G_N_ELEMENTS (address_values); ++i) {
-				char *value = normalize_spaces (address_values[i]);
+			for (o = 0; o < G_N_ELEMENTS (address_values); ++o) {
+				char *value = normalize_spaces (address_values[o]);
 
 				if (value && compare (value, needle)) {
 					g_free (value);
