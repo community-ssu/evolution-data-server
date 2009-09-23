@@ -462,11 +462,14 @@ e_book_backend_file_remove_contacts (EBookBackendSync *backend,
 	DBT id_dbt;
 	DBT vcard_dbt;
 	int db_error;
+	int db_error_final = 0;
 	char *id;
 	GList *l;
 	GList *removed_cards = NULL;
 	GList *removed_contacts = NULL;
-	GNOME_Evolution_Addressbook_CallStatus rv = GNOME_Evolution_Addressbook_Success;
+	GPtrArray *ops;
+
+	ops = g_ptr_array_new ();
 
 	for (l = id_list; l; l = l->next) {
 		id = l->data;
@@ -478,14 +481,15 @@ e_book_backend_file_remove_contacts (EBookBackendSync *backend,
 
 		db_error = db->get (db, NULL, &id_dbt, &vcard_dbt, 0);
 		if (0 != db_error) {
-			WARNING ("db->get failed with %s", db_strerror (db_error));
-			rv = db_error_to_status (db_error);
+			WARNING ("db->get failed: %s", db_strerror (db_error));
+			db_error_final = db_error;
 			continue;
 		}
-		db_error = db->del (db, NULL, &id_dbt, 0);
+
+		db_error = txn_ops_add_new (ops, TXN_DEL, db, g_strdup (id), NULL);
 		if (0 != db_error) {
-			WARNING ("db->del failed with %s", db_strerror (db_error));
-			rv = db_error_to_status (db_error);
+			WARNING ("cannot create new txn item");
+			db_error_final = db_error;
 			continue;
 		}
 
@@ -497,7 +501,13 @@ e_book_backend_file_remove_contacts (EBookBackendSync *backend,
 
 	while (removed_contacts) {
 		EContact *contact = removed_contacts->data;
-		e_book_backend_file_index_remove_contact (bf->priv->index, contact);
+		db_error = e_book_backend_file_index_remove_contact (bf->priv->index,
+				contact, ops);
+		if (db_error != 0) {
+			WARNING ("cannot create txn items for remove index");
+			/* this case we cannot commit the transaction */
+			goto out;
+		}
 		g_object_unref (contact);
 		removed_contacts = g_list_delete_link (removed_contacts, removed_contacts);
 		/* TODO: check if conversion to EContact is realy needed for
@@ -507,15 +517,28 @@ e_book_backend_file_remove_contacts (EBookBackendSync *backend,
 
 	*ids = removed_cards;
 
-	db_error = sync_dbs (bf);
+	/* create and commit the transaction */
+	db_error = txn_execute_ops (bf->priv->env, NULL, ops);
+	if (db_error != 0) {
+		WARNING ("cannot commit transaction: %s", db_strerror (db_error));
+		goto out;
+	}
 
-	if (rv != GNOME_Evolution_Addressbook_Success) {
-		/* error happend whilst deleting contacts from db */
-		return rv;
+	db_error = sync_dbs (bf);
+	if (db_error != 0) {
+		WARNING ("cannot sync DBs: %s", db_strerror (db_error));
 	}
-	else {
-		return db_error_to_status (db_error);
+
+out:
+	txn_ops_free (ops);
+
+	/* if index_remove_contacts failed */
+	while (removed_contacts) {
+		g_object_unref (removed_contacts->data);
+		removed_contacts = g_list_delete_link (removed_contacts, removed_contacts);
 	}
+
+	return db_error_to_status (db_error_final ? db_error_final : db_error);
 }
 
 static EBookBackendSyncStatus

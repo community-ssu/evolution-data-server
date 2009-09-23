@@ -1,5 +1,16 @@
 2009-09-23  Robert Peto  <robert.peto@maemo.org>
 
+	Remove contacts in transaction. (See NB#120562)
+
+	* addressbook/backends/file/e-book-backend-file-index.c
+	* addressbook/backends/file/e-book-backend-file-index.h
+	* addressbook/backends/file/e-book-backend-file.c: See above.
+
+	Reviewed-By: Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+	Reviewed-By: Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
+2009-09-23  Robert Peto  <robert.peto@maemo.org>
+
 	Do the batch add within a transaction. (See NB#120562)
 
 	* addressbook/backends/file/e-book-backend-file.c: See above.

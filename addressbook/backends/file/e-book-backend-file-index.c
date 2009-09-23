@@ -82,8 +82,8 @@ typedef struct _EBookBackendFileIndexData EBookBackendFileIndexData;
 
 typedef int (*EBookBackendFileIndexAddFunc) (EBookBackendFileIndex *index, EContact *contact,
     EBookBackendFileIndexData *data, DB *db, const gchar *id, GPtrArray *ops);
-typedef void (*EBookBackendFileIndexRemoveFunc) (EBookBackendFileIndex *index, EContact *contact,
-    EBookBackendFileIndexData *data, DB *db, const gchar *id);
+typedef int (*EBookBackendFileIndexRemoveFunc) (EBookBackendFileIndex *index, EContact *contact,
+    EBookBackendFileIndexData *data, DB *db, const gchar *id, GPtrArray *ops);
 
 typedef int (*EBookBackendFileIndexOrderFunc) (DB *secondary, const DBT *akey, const DBT *bkey);
 
@@ -103,10 +103,10 @@ static int first_last_add_cb (EBookBackendFileIndex *index, EContact *contact,
 static int last_first_add_cb (EBookBackendFileIndex *index, EContact *contact,
     EBookBackendFileIndexData *data, DB *db, const gchar *uid, GPtrArray *ops);
 
-static void first_last_remove_cb (EBookBackendFileIndex *index, EContact *contact,
-    EBookBackendFileIndexData *data, DB *db, const gchar *uid);
-static void last_first_remove_cb (EBookBackendFileIndex *index, EContact *contact,
-    EBookBackendFileIndexData *data, DB *db, const gchar *uid);
+static int first_last_remove_cb (EBookBackendFileIndex *index, EContact *contact,
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid, GPtrArray *ops);
+static int last_first_remove_cb (EBookBackendFileIndex *index, EContact *contact,
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid, GPtrArray *ops);
 
 static int lexical_ordering_cb (DB *secondary, const DBT *akey, const DBT *bkey);
 
@@ -130,8 +130,8 @@ struct _EBookBackendFileIndexPrivate {
 static gboolean index_populate (EBookBackendFileIndex *index, GList *fields, GPtrArray *ops);
 static int index_add_contact (EBookBackendFileIndex *index, EContact *contact,
     EBookBackendFileIndexData *data, GPtrArray *ops);
-static void index_remove_contact (EBookBackendFileIndex *index, EContact *contact,
-    EBookBackendFileIndexData *data);
+static int index_remove_contact (EBookBackendFileIndex *index, EContact *contact,
+    EBookBackendFileIndexData *data, GPtrArray *ops);
 static void index_sync (EBookBackendFileIndex *index, const EBookBackendFileIndexData *data);
 static gboolean index_close_db_func (gpointer key, gpointer value, gpointer userdata);
 
@@ -486,19 +486,26 @@ e_book_backend_file_index_add_contact (EBookBackendFileIndex *index, EContact *c
   return retval;
 }
 
-void
-e_book_backend_file_index_remove_contact (EBookBackendFileIndex *index, EContact *contact)
+int
+e_book_backend_file_index_remove_contact (EBookBackendFileIndex *index, EContact *contact, GPtrArray *ops)
 {
   gint i = 0;
+  int retval = 0;
 
-  g_return_if_fail (E_IS_BOOK_BACKEND_FILE_INDEX (index));
-  g_return_if_fail (E_IS_CONTACT (contact));
+  g_return_val_if_fail (E_IS_BOOK_BACKEND_FILE_INDEX (index), EINVAL);
+  g_return_val_if_fail (E_IS_CONTACT (contact), EINVAL);
+  g_return_val_if_fail (ops, EINVAL);
 
   /* for each index database try add this contact */
   for (i = 0; i < G_N_ELEMENTS (indexes); i++)
   {
-    index_remove_contact (index, contact, (EBookBackendFileIndexData *)&indexes[i]);
+    retval = index_remove_contact (index, contact, (EBookBackendFileIndexData *)&indexes[i], ops);
+    if (retval != 0) {
+      break;
+    }
   }
+
+  return retval;
 }
 
 void
@@ -513,7 +520,7 @@ e_book_backend_file_index_modify_contact (EBookBackendFileIndex *index, EContact
   /* for each index database try add this contact */
   for (i = 0; i < G_N_ELEMENTS (indexes); i++)
   {
-    index_remove_contact (index, old_contact, (EBookBackendFileIndexData *)&indexes[i]);
+    index_remove_contact (index, old_contact, (EBookBackendFileIndexData *)&indexes[i], NULL); // TODO: ops
     index_add_contact (index, new_contact, (EBookBackendFileIndexData *)&indexes[i], NULL); // TODO: ops
   }
 }
@@ -943,51 +950,28 @@ generic_name_add_cb (EBookBackendFileIndex *index, EContact *contact,
   return db_error;
 }
 
-static void
+static int
 generic_name_remove_cb (EBookBackendFileIndex *index, EContact *contact,
-    EBookBackendFileIndexData *data, DB *db, const gchar *uid, gint ordering)
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid, gint ordering, GPtrArray *ops)
 {
-  DBC *dbc = NULL; /* cursor */
-  DBT index_dbt, id_dbt;
   int db_error;
   char *key;
-
-  db_error = db->cursor (db, NULL, &dbc, 0);
-  if (db_error) {
-    WARNING ("db->cursor failed: %s", db_strerror (db_error));
-    return;
-  }
 
   key = get_key (contact, ordering);
   if (!key) {
     /* TODO: remove index only by uid */
     WARNING ("cannot determine the key value");
-    return;
+    return EINVAL;
   }
-  dbt_fill_with_string (&index_dbt, key);
 
-  dbt_fill_with_string (&id_dbt, (gchar *)uid);
+  DEBUG ("removing from index with key %s and data %s", key, uid);
 
-  DEBUG ("removing from index with key %s and data %s",
-           (gchar *)index_dbt.data, (gchar *)id_dbt.data);
-
-  id_dbt.flags = 0;
-  index_dbt.flags = 0;
-  db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_GET_BOTH);
-  if (db_error) {
-    WARNING ("dbc->c_get failed: %s", db_strerror (db_error));
-  } else {
-    db_error = dbc->c_del (dbc, 0);
-    if (db_error != 0) {
-      WARNING ("dbc->c_del failed: %s", db_strerror (db_error));
-    }
+  db_error = txn_ops_add_new (ops, TXN_CDEL, db, key, g_strdup (uid));
+  if (db_error != 0) {
+    WARNING ("cannot create new txn item: %s", db_strerror (db_error));
   }
-  g_free (key);
 
-  db_error = dbc->c_close (dbc);
-  if (db_error) {
-    WARNING ("db->c_close failed: %s", db_strerror (db_error));
-  }
+  return db_error;
 }
 
 static int
@@ -997,11 +981,11 @@ first_last_add_cb (EBookBackendFileIndex *index, EContact *contact,
   return generic_name_add_cb (index, contact, data, db, uid, ORDER_FIRSTLAST, ops);
 }
 
-static void
+static int
 first_last_remove_cb (EBookBackendFileIndex *index, EContact *contact,
-    EBookBackendFileIndexData *data, DB *db, const gchar *uid)
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid, GPtrArray *ops)
 {
-  generic_name_remove_cb (index, contact, data, db, uid, ORDER_FIRSTLAST);
+  return generic_name_remove_cb (index, contact, data, db, uid, ORDER_FIRSTLAST, ops);
 }
 
 static int
@@ -1011,11 +995,11 @@ last_first_add_cb (EBookBackendFileIndex *index, EContact *contact,
   return generic_name_add_cb (index, contact, data, db, uid, ORDER_LASTFIRST, ops);
 }
 
-static void
+static int
 last_first_remove_cb (EBookBackendFileIndex *index, EContact *contact,
-    EBookBackendFileIndexData *data, DB *db, const gchar *uid)
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid, GPtrArray *ops)
 {
-  generic_name_remove_cb (index, contact, data, db, uid, ORDER_LASTFIRST);
+  return generic_name_remove_cb (index, contact, data, db, uid, ORDER_LASTFIRST, ops);
 }
 
 /*
@@ -1079,27 +1063,15 @@ generic_field_add (EBookBackendFileIndex *index, EContact *contact,
   return 0;
 }
 
-static void
+static int
 generic_field_remove (EBookBackendFileIndex *index, EContact *contact,
-    EBookBackendFileIndexData *data, DB *db, const gchar *uid)
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid, GPtrArray *ops)
 {
-  DBT index_dbt, id_dbt;
   GList *attrs;
   GList *values;
   gint db_error = 0;
   gchar *tmp = NULL;
-  DBC *dbc = NULL; /* cursor */
 
-  /* create the cursor for the interation */
-  db_error = db->cursor (db, NULL, &dbc, 0);
-
-  if (db_error != 0)
-  {
-    WARNING ("db->cursor failed: %s", db_strerror (db_error));
-    return;
-  }
-
-  dbt_fill_with_string (&id_dbt, (gchar*)uid);
   for (attrs = e_vcard_get_attributes (E_VCARD (contact));
       attrs != NULL;
       attrs = attrs->next)
@@ -1130,46 +1102,34 @@ generic_field_remove (EBookBackendFileIndex *index, EContact *contact,
           g_free (tmp);
           tmp = reversed;
         }
-        dbt_fill_with_string (&index_dbt, g_strstrip (tmp));
 
-        DEBUG ("removing from index '%s' with key %s and data %s", data->index_name,
-            (gchar *)index_dbt.data, (gchar *)id_dbt.data);
+        g_strstrip (tmp);
+        DEBUG ("removing from index '%s' with key %s and data %s",
+            data->index_name, tmp, uid);
 
-        id_dbt.flags = 0;
-        index_dbt.flags = 0;
-        db_error = dbc->c_get (dbc, &index_dbt, &id_dbt, DB_GET_BOTH);
-        if (db_error != 0)
-        {
-          WARNING ("dbc->c_get failed: %s", db_strerror (db_error));
-        } else {
-          db_error = dbc->c_del (dbc, 0);
-          if (db_error != 0)
-          {
-            WARNING ("dbc->c_del failed: %s", db_strerror (db_error));
-          }
+        db_error = txn_ops_add_new (ops, TXN_CDEL, db, tmp, g_strdup (uid));
+        if (db_error != 0) {
+          WARNING ("cannot create new txn item: %s", db_strerror (db_error));
+          return db_error;
         }
-        g_free (tmp);
       }
     }
   }
-  db_error = dbc->c_close (dbc);
 
-  if (db_error != 0)
-  {
-    WARNING ("db->c_closed failed: %s", db_strerror (db_error));
-  }
+  return 0;
 }
 
 /*
  * for a given index remove this contact
  */
-static void
+static int
 index_remove_contact (EBookBackendFileIndex *index, EContact *contact,
-    EBookBackendFileIndexData *data)
+    EBookBackendFileIndexData *data, GPtrArray *ops)
 {
   EBookBackendFileIndexPrivate *priv = GET_PRIVATE (index);
   gchar *uid = NULL;
   DB *db = NULL;
+  int retval;
 
   /* we need the uid, so that we can match both key and value of index-entries */
   uid = (gchar *)e_contact_get (contact, E_CONTACT_UID);
@@ -1179,12 +1139,14 @@ index_remove_contact (EBookBackendFileIndex *index, EContact *contact,
 
   if (data->contact_remove_func)
   {
-    data->contact_remove_func (index, contact, data, db, uid);
+    retval = data->contact_remove_func (index, contact, data, db, uid, ops);
   } else {
-    generic_field_remove (index, contact, data, db, uid);
+    retval = generic_field_remove (index, contact, data, db, uid, ops);
   }
 
   g_free (uid);
+
+  return retval;
 }
 
 /*
