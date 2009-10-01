@@ -135,8 +135,6 @@ static int index_remove_contact (EBookBackendFileIndex *index, EContact *contact
 static void index_sync (EBookBackendFileIndex *index, const EBookBackendFileIndexData *data);
 static gboolean index_close_db_func (gpointer key, gpointer value, gpointer userdata);
 
-#define E_BOOK_BACKEND_FILE_VERSION_NAME "PAS-DB-VERSION"
-
 static void
 e_book_backend_file_index_dispose (GObject *object)
 {
@@ -787,24 +785,21 @@ index_populate (EBookBackendFileIndex *index, GList *fields, GPtrArray *ops)
 
   while (db_error == 0)
   {
-    if (!g_str_equal (id_dbt.data, E_BOOK_BACKEND_FILE_VERSION_NAME))
-    {
-      /* parse the vcard */
-      contact = e_contact_new_from_vcard (vcard_dbt.data);
+    /* parse the vcard */
+    contact = e_contact_new_from_vcard (vcard_dbt.data);
 
-      if (contact)
+    if (contact)
+    {
+      /* now we interate through all the indexes that need doing */
+      for (l = fields; l != NULL; l = l->next)
       {
-        /* now we interate through all the indexes that need doing */
-        for (l = fields; l != NULL; l = l->next)
-        {
-          if (0 != index_add_contact (index, contact, (EBookBackendFileIndexData *)l->data, ops)) {
-            WARNING ("cannot populate index");
-            g_object_unref (contact);
-            return FALSE;
-          }
+        if (0 != index_add_contact (index, contact, (EBookBackendFileIndexData *)l->data, ops)) {
+          WARNING ("cannot populate index");
+          g_object_unref (contact);
+          return FALSE;
         }
-        g_object_unref (contact);
       }
+      g_object_unref (contact);
     }
 
     db_error = dbc->c_get (dbc, &id_dbt, &vcard_dbt, DB_NEXT);

@@ -768,16 +768,8 @@ e_book_backend_file_get_contact_list (EBookBackendSync *backend,
 	db_error = dbc->c_get(dbc, &id_dbt, &vcard_dbt, DB_FIRST);
 
 	while (db_error == 0) {
-		/* don't include the version in the list of cards */
-		if (id_dbt.size != strlen(E_BOOK_BACKEND_FILE_VERSION_NAME) + 1
-		    || strcmp (id_dbt.data, E_BOOK_BACKEND_FILE_VERSION_NAME)) {
-
-			if ((!search_needed) || (card_sexp != NULL && e_book_backend_sexp_match_vcard  (card_sexp, vcard_dbt.data))) {
-				contact_list = g_list_prepend (contact_list, vcard_dbt.data);
-			}
-			else {
-				g_free (vcard_dbt.data);
-			}
+		if ((!search_needed) || (card_sexp != NULL && e_book_backend_sexp_match_vcard  (card_sexp, vcard_dbt.data))) {
+			contact_list = g_list_prepend (contact_list, vcard_dbt.data);
 		}
 		else {
 			g_free (vcard_dbt.data);
@@ -942,15 +934,10 @@ book_view_thread (gpointer data)
 				if (!e_flag_is_set (closure->running))
 					break;
 
-				/* don't include the version in the list of cards */
-				if (strcmp (id_dbt.data, E_BOOK_BACKEND_FILE_VERSION_NAME)) {
-					if (allcontacts)
-						e_data_book_view_notify_update_prefiltered_vcard (book_view, id_dbt.data, vcard_dbt.data);
-					else
-						e_data_book_view_notify_update_vcard (book_view, vcard_dbt.data);
-				} else {
-					g_free (vcard_dbt.data);
-				}
+				if (allcontacts)
+					e_data_book_view_notify_update_prefiltered_vcard (book_view, id_dbt.data, vcard_dbt.data);
+				else
+					e_data_book_view_notify_update_vcard (book_view, vcard_dbt.data);
 
 				db_error = dbc->c_get(dbc, &id_dbt, &vcard_dbt, DB_NEXT);
 			}
@@ -1114,38 +1101,34 @@ e_book_backend_file_get_changes (EBookBackendSync *backend,
 
 		while (db_error == 0) {
 
-			/* don't include the version in the list of cards */
-			if (id_dbt.size != strlen(E_BOOK_BACKEND_FILE_VERSION_NAME) + 1
-			    || strcmp (id_dbt.data, E_BOOK_BACKEND_FILE_VERSION_NAME)) {
-				EContact *contact;
-				char *id = id_dbt.data;
-				char *vcard_string;
+			EContact *contact;
+			char *id = id_dbt.data;
+			char *vcard_string;
 
-				/* Remove fields the user can't change
-				 * and can change without the rest of the
-				 * card changing */
-				contact = create_contact (id_dbt.data, vcard_dbt.data);
+			/* Remove fields the user can't change
+			 * and can change without the rest of the
+			 * card changing */
+			contact = create_contact (id_dbt.data, vcard_dbt.data);
 
 #ifdef notyet
-				g_object_set (card, "last_use", NULL, "use_score", 0.0, NULL);
+			g_object_set (card, "last_use", NULL, "use_score", 0.0, NULL);
 #endif
-				vcard_string = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
-				g_object_unref (contact);
+			vcard_string = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
+			g_object_unref (contact);
 
-				/* check what type of change has occurred, if any */
-				switch (e_dbhash_compare (ehash, id, vcard_string)) {
-				case E_DBHASH_STATUS_SAME:
-					g_free(vcard_string);
-					break;
-				case E_DBHASH_STATUS_NOT_FOUND:
-					ctx.add_cards = g_list_append (ctx.add_cards, vcard_string);
-					ctx.add_ids = g_list_append (ctx.add_ids, g_strdup(id));
-					break;
-				case E_DBHASH_STATUS_DIFFERENT:
-					ctx.mod_cards = g_list_append (ctx.mod_cards, vcard_string);
-					ctx.mod_ids = g_list_append (ctx.mod_ids, g_strdup(id));
-					break;
-				}
+			/* check what type of change has occurred, if any */
+			switch (e_dbhash_compare (ehash, id, vcard_string)) {
+			case E_DBHASH_STATUS_SAME:
+				g_free(vcard_string);
+				break;
+			case E_DBHASH_STATUS_NOT_FOUND:
+				ctx.add_cards = g_list_append (ctx.add_cards, vcard_string);
+				ctx.add_ids = g_list_append (ctx.add_ids, g_strdup(id));
+				break;
+			case E_DBHASH_STATUS_DIFFERENT:
+				ctx.mod_cards = g_list_append (ctx.mod_cards, vcard_string);
+				ctx.mod_ids = g_list_append (ctx.mod_ids, g_strdup(id));
+				break;
 			}
 
 			db_error = dbc->c_get(dbc, &id_dbt, &vcard_dbt, DB_NEXT);
@@ -1263,134 +1246,6 @@ e_book_backend_file_get_supported_fields (EBookBackendSync *backend,
 
 	*fields_out = fields;
 	return GNOME_Evolution_Addressbook_Success;
-}
-
-/*
-** versions:
-**
-** 0.0 just a list of cards
-**
-** 0.1 same as 0.0, but with the version tag
-**
-** 0.2 not a real format upgrade, just a hack to fix broken ids caused
-**     by a bug in early betas, but we only need to convert them if
-**     the previous version is 0.1, since the bug existed after 0.1
-**     came about.
-*/
-static gboolean
-e_book_backend_file_upgrade_db (EBookBackendFile *bf, char *old_version)
-{
-	DB *db = bf->priv->file_db;
-	int db_error;
-	DBT version_name_dbt, version_dbt;
-
-	if (strcmp (old_version, "0.0")
-	    && strcmp (old_version, "0.1")) {
-		WARNING ("unsupported version '%s' found in PAS backend file", old_version);
-		return FALSE;
-	}
-
-	/* XXX: this should be a transaction, but in our case this should
-	 *      never happen since we do always a fresh install */
-	if (!strcmp (old_version, "0.1")) {
-		/* we just loop through all the cards in the db,
-		 * giving them valid ids if they don't have them */
-		DBT id_dbt, vcard_dbt;
-		DBC *dbc;
-		int card_failed = 0;
-
-		db_error = db->cursor (db, NULL, &dbc, 0);
-		if (db_error != 0) {
-			WARNING ("db->cursor failed with %s", db_strerror (db_error));
-			return FALSE;
-		}
-
-		memset (&id_dbt, 0, sizeof (id_dbt));
-		memset (&vcard_dbt, 0, sizeof (vcard_dbt));
-
-		db_error = dbc->c_get(dbc, &id_dbt, &vcard_dbt, DB_FIRST);
-
-		while (db_error == 0) {
-			if (id_dbt.size != strlen(E_BOOK_BACKEND_FILE_VERSION_NAME) + 1
-			    || strcmp (id_dbt.data, E_BOOK_BACKEND_FILE_VERSION_NAME)) {
-				EContact *contact;
-
-				contact = create_contact (id_dbt.data, vcard_dbt.data);
-
-				/* the cards we're looking for are
-				   created with a normal id dbt, but
-				   with the id field in the vcard set
-				   to something that doesn't match.
-				   so, we need to modify the card to
-				   have the same id as the the dbt. */
-				if (strcmp (id_dbt.data, e_contact_get_const (contact, E_CONTACT_UID))) {
-					char *vcard;
-
-					e_contact_set (contact, E_CONTACT_UID, id_dbt.data);
-
-					vcard = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
-					dbt_fill_with_string (&vcard_dbt, vcard);
-
-					db_error = db->put (db, NULL,
-							&id_dbt, &vcard_dbt, 0);
-
-					g_free (vcard);
-
-					if (db_error != 0)
-						card_failed++;
-				}
-
-				g_object_unref (contact);
-			}
-
-			db_error = dbc->c_get(dbc, &id_dbt, &vcard_dbt, DB_NEXT);
-		}
-
-		if (card_failed) {
-			WARNING ("failed to update %d cards", card_failed);
-			return FALSE;
-		}
-	}
-
-	dbt_fill_with_string (&version_name_dbt, E_BOOK_BACKEND_FILE_VERSION_NAME);
-	dbt_fill_with_string (&version_dbt, E_BOOK_BACKEND_FILE_VERSION);
-
-	db_error = db->put (db, NULL, &version_name_dbt, &version_dbt, 0);
-	if (db_error == 0)
-		return TRUE;
-	else
-		return FALSE;
-}
-
-static gboolean
-e_book_backend_file_maybe_upgrade_db (EBookBackendFile *bf)
-{
-	DB *db = bf->priv->file_db;
-	DBT version_name_dbt, version_dbt;
-	int db_error;
-	char *version;
-	gboolean ret_val = TRUE;
-
-	dbt_fill_with_string (&version_name_dbt, E_BOOK_BACKEND_FILE_VERSION_NAME);
-	memset (&version_dbt, 0, sizeof (version_dbt));
-	version_dbt.flags = DB_DBT_MALLOC;
-
-	db_error = db->get (db, NULL, &version_name_dbt, &version_dbt, 0);
-	if (db_error == 0) {
-		/* success */
-		version = version_dbt.data;
-	}
-	else {
-		/* key was not in file */
-		version = g_strdup ("0.0");
-	}
-
-	if (strcmp (version, E_BOOK_BACKEND_FILE_VERSION))
-		ret_val = e_book_backend_file_upgrade_db (bf, version);
-
-	g_free (version);
-
-	return ret_val;
 }
 
 #ifdef CREATE_DEFAULT_VCARD
@@ -1859,6 +1714,26 @@ e_book_backend_file_remove_db_locks (const char *dirname)
 	return TRUE;
 }
 
+/* Removes version tag from old dbs. Returns with TRUE on success. */
+static gboolean
+e_book_backend_file_remove_version_tag_from_db (EBookBackendFile *bf)
+{
+	DB *db = bf->priv->file_db;
+	DBT version_name_dbt;
+	int db_error;
+
+	dbt_fill_with_string (&version_name_dbt,
+			E_BOOK_BACKEND_FILE_VERSION_NAME);
+
+	db_error = db->del (db, NULL, &version_name_dbt, DB_AUTO_COMMIT);
+	if (db_error != 0 && db_error != DB_NOTFOUND) {
+		WARNING ("db->del failed: %s", db_strerror (db_error));
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 static GNOME_Evolution_Addressbook_CallStatus
 e_book_backend_file_load_source (EBookBackend *backend,
 				 ESource      *source,
@@ -1956,20 +1831,6 @@ e_book_backend_file_load_source (EBookBackend *backend,
 						db_strerror (db_error));
 			}
 			else {
-				/* our freshly created db needs a version */
-				DBT version_name_dbt, version_dbt;
-
-				dbt_fill_with_string (&version_name_dbt,
-						E_BOOK_BACKEND_FILE_VERSION_NAME);
-				dbt_fill_with_string (&version_dbt,
-						E_BOOK_BACKEND_FILE_VERSION);
-
-				db_error = db->put (db, NULL, &version_name_dbt,
-						&version_dbt, DB_AUTO_COMMIT);
-				if (db_error != 0) {
-					WARNING ("cannot insert version string: %s",
-							db_strerror (db_error));
-				}
 #ifdef CREATE_DEFAULT_VCARD
 				EContact *contact = NULL;
 
@@ -1993,10 +1854,16 @@ e_book_backend_file_load_source (EBookBackend *backend,
 
 	bf->priv->file_db = db;
 
-	if (!e_book_backend_file_maybe_upgrade_db (bf)) {
-		WARNING ("e_book_backend_file_maybe_upgrade_db failed");
+	/* remove the db version tag from db if it is created
+	 * with previous versions of file-backend */
+	if (FALSE == e_book_backend_file_remove_version_tag_from_db (bf)) {
+		WARNING ("cannot remove version tag from addressbook.db");
 		goto error;
 	}
+
+	/* NOTE: we removed the db format upgrade functionality from here,
+	 * since it is not useful for us. (This is a side effect of the
+	 * removal of bogus version tag from addressbook.db.) */
 
 	bf->priv->index = e_book_backend_file_index_new ();
 

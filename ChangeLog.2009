@@ -1,3 +1,15 @@
+2009-09-30  Robert Peto  <robert.peto@maemo.org>
+
+	Remove version tag from addressbook.db and db format upgrade
+	functionality. (See NB#120562)
+
+	* addressbook/backends/file/e-book-backend-file.c: See above.
+	* addressbook/backends/file/e-book-backend-file-index.c: Do not filter
+	  the version tag when populating indices.
+
+	Reviewed-By: Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+	Reviewed-By: Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
 2009-09-23  Sayantan Majumder  <sayantan.majumder@nokia.com>
 
 	NB#139743 - e-addressbook-factory crash while incoming chat notification
