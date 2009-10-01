@@ -1022,7 +1022,11 @@ generic_field_add (EBookBackendFileIndex *index, EContact *contact,
   int db_error = 0;
   GList *attrs = NULL;
   GList *values = NULL;
+  GHashTable *ht;
+  GHashTableIter iter;
+  gpointer key, value;
 
+  ht = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
   for (attrs = e_vcard_get_attributes (E_VCARD (contact));
       attrs != NULL;
       attrs = attrs->next)
@@ -1055,18 +1059,25 @@ generic_field_add (EBookBackendFileIndex *index, EContact *contact,
         }
 
         g_strstrip (tmp);
-        DEBUG ("adding to index '%s' with key %s and data %s",
-            data->index_name, tmp, uid);
-
-        db_error = txn_ops_add_new (ops, TXN_PUT, db, tmp, g_strdup (uid));
-        if (db_error != 0)
-        {
-          WARNING ("cannot create new txn item: %s", db_strerror (db_error));
-          return db_error;
-        }
+        g_hash_table_insert (ht, tmp, NULL);
       }
     }
   }
+
+  g_hash_table_iter_init (&iter, ht);
+  while (g_hash_table_iter_next (&iter, &key, &value))
+  {
+    DEBUG ("adding to index '%s' with key %s and data %s",
+           data->index_name, key, uid);
+
+    db_error = txn_ops_add_new (ops, TXN_PUT, db, g_strdup (key), g_strdup (uid));
+    if (db_error != 0)
+    {
+      WARNING ("cannot create new txn item: %s", db_strerror (db_error));
+      return db_error;
+    }
+  }
+  g_hash_table_destroy (ht);
 
   return 0;
 }
@@ -1079,7 +1090,11 @@ generic_field_remove (EBookBackendFileIndex *index, EContact *contact,
   GList *values;
   gint db_error = 0;
   gchar *tmp = NULL;
+  GHashTable *ht;
+  GHashTableIter iter;
+  gpointer key, value;
 
+  ht = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
   for (attrs = e_vcard_get_attributes (E_VCARD (contact));
       attrs != NULL;
       attrs = attrs->next)
@@ -1112,17 +1127,24 @@ generic_field_remove (EBookBackendFileIndex *index, EContact *contact,
         }
 
         g_strstrip (tmp);
-        DEBUG ("removing from index '%s' with key %s and data %s",
-            data->index_name, tmp, uid);
-
-        db_error = txn_ops_add_new (ops, TXN_CDEL, db, tmp, g_strdup (uid));
-        if (db_error != 0) {
-          WARNING ("cannot create new txn item: %s", db_strerror (db_error));
-          return db_error;
-        }
+        g_hash_table_insert (ht, tmp, NULL);
       }
     }
   }
+
+  g_hash_table_iter_init (&iter, ht);
+  while (g_hash_table_iter_next (&iter, &key, &value))
+  {
+    DEBUG ("removing from index '%s' with key %s and data %s",
+           data->index_name, key, uid);
+
+    db_error = txn_ops_add_new (ops, TXN_CDEL, db, g_strdup (key), g_strdup (uid));
+    if (db_error != 0) {
+      WARNING ("cannot create new txn item: %s", db_strerror (db_error));
+      return db_error;
+    }
+  }
+  g_hash_table_destroy (ht);
 
   return 0;
 }

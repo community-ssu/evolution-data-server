@@ -1,3 +1,15 @@
+2009-09-30  Joergen Scheibengruber <jorgen.scheibengruber@nokia.com>
+
+	NB#123381 - If a vcard contains duplicate fields, there will be
+	warnings from the index.
+
+	* addressbook/backends/file/e-book-backend-file-index.c
+	 (generic_field_add(), generic_field_remove()): Make sure we do not try
+	  to add/remove key/value dups to the index.
+
+	Reviewed-By: Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+
 2009-09-30  Robert Peto  <robert.peto@maemo.org>
 
 	Remove version tag from addressbook.db and db format upgrade
