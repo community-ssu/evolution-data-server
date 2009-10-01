@@ -1,5 +1,15 @@
 2009-09-30  Joergen Scheibengruber <jorgen.scheibengruber@nokia.com>
 
+	NB#140530 - Memory leak in transaction enabled eds
+
+	* addressbook/backends/file/e-book-backend-file-utils.c
+	 (txn_delete_by_cursor()): See above.
+
+	Reviewed-By: Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+
+2009-09-30  Joergen Scheibengruber <jorgen.scheibengruber@nokia.com>
+
 	NB#123381 - If a vcard contains duplicate fields, there will be
 	warnings from the index.
 

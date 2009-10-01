@@ -58,20 +58,24 @@ txn_delete_by_cursor (DB *db, DB_TXN *tid, DBT *key, DBT *value)
         g_return_val_if_fail (key, EINVAL);
         g_return_val_if_fail (value, EINVAL);
 
-        key->flags = DB_DBT_MALLOC;
-        value->flags = DB_DBT_MALLOC;
-
         db_error = db->cursor (db, tid, &dbc, 0);
         if (db_error != 0) {
                 WARNING ("db->cursor failed: %s", db_strerror (db_error));
                 return db_error;
         }
 
+        /* This is weird, but just as DB_SET, DB_GET_BOTH seems to need
+         * memory to allocate the returned value
+         * (which is the same as we pass in) */
+        value->flags = DB_DBT_MALLOC;
         dbc_error = dbc->c_get (dbc, key, value, DB_GET_BOTH);
         if (dbc_error != 0) {
                 WARNING ("dbc->c_get failed: %s", db_strerror (dbc_error));
                 goto out;
         }
+        /* We are not really interessted in the value, as we know it
+         * already */
+        g_free (value->data);
 
         dbc_error = dbc->c_del (dbc, 0);
         if (dbc_error != 0) {
