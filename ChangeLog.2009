@@ -1,3 +1,14 @@
+2009-10-12  Joergen Scheibengruber <jorgen.scheibengruber@nokia.com>
+
+	NB#140354 - e-addressbook factory crashed while importing contacts
+
+	* addressbook/libedata-book-dbus/e-book-backend.c
+	  e_book_backend_get_book_views(): return with a copy of EList
+	  e_book_backend_foreach_view(): protect access to views with a mutex
+
+	Reviewed-By: Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+
 2009-10-12  Robert Peto  <robert.peto@maemo.org>
 
 	Split contact list to chunks when adding contacts with

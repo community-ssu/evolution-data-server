@@ -644,14 +644,23 @@ last_client_gone (EBookBackend *backend)
  *
  * Gets the list of #EDataBookView views running on this backend.
  *
- * Return value: An #EList of #EDataBookView objects.
+ * Return value: An #EList of #EDataBookView objects,
+ * caller should unref the result with #g_object_unref().
  **/
 EList*
 e_book_backend_get_book_views (EBookBackend *backend)
 {
+	EList *copy;
+
 	g_return_val_if_fail (E_IS_BOOK_BACKEND (backend), NULL);
 
-	return g_object_ref (backend->priv->views);
+	g_mutex_lock (backend->priv->views_mutex);
+
+	copy = e_list_duplicate (backend->priv->views);
+
+	g_mutex_unlock (backend->priv->views_mutex);
+
+	return copy;
 }
 
 /**
@@ -974,12 +983,12 @@ e_book_backend_foreach_view (EBookBackend *backend,
 			     void (*callback) (EDataBookView *, gpointer),
 			     gpointer user_data)
 {
-	EList *views;
 	EDataBookView *view;
 	EIterator *iter;
 
-	views = e_book_backend_get_book_views (backend);
-	iter = e_list_get_iterator (views);
+	g_mutex_lock (backend->priv->views_mutex);
+
+	iter = e_list_get_iterator (backend->priv->views);
 
 	while (e_iterator_is_valid (iter)) {
 		view = (EDataBookView*)e_iterator_get (iter);
@@ -991,8 +1000,10 @@ e_book_backend_foreach_view (EBookBackend *backend,
 		e_iterator_next (iter);
 	}
 
+	e_list_remove_iterator (backend->priv->views, iter);
 	g_object_unref (iter);
-	g_object_unref (views);
+
+	g_mutex_unlock (backend->priv->views_mutex);
 }
 
 
