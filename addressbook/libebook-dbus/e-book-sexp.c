@@ -82,6 +82,7 @@ compare_list (EContact *contact, const char *str, CompareFunc compare,
 		g_free (value);
 	}
 
+	g_free (needle);
 	g_list_foreach (values, (GFunc) g_free, NULL);
 	g_list_free (values);
 

@@ -1,5 +1,15 @@
 2009-10-12  Joergen Scheibengruber <jorgen.scheibengruber@nokia.com>
 
+	NB#140520 - Memory leak in addressbook/libebook-dbus/e-book-sexp.c
+	compare_list
+
+	* addressbook/libebook-dbus/e-book-sexp.c (compare_list()): See above
+
+	Reviewed-By: Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+
+2009-10-12  Joergen Scheibengruber <jorgen.scheibengruber@nokia.com>
+
 	NB#140354 - e-addressbook factory crashed while importing contacts
 
 	* addressbook/libedata-book-dbus/e-book-backend.c

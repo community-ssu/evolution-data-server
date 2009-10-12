@@ -2,6 +2,7 @@ evolution-data-server (1.4.2.1-20091001.99) unstable; urgency=low
 
   * Fixes: NB#137860 - e_book_async_add_contacts() doesn't send contacts in chunks
   * Fixes: NB#140354 - e-addressbook factory crashed while importing contacts
+  * Fixes: NB#140520 - Memory leak in addressbook/libebook-dbus/e-book-sexp.c compare_list
 
  -- Robert Peto <robert.peto@maemo.org>  Mon, 12 Oct 2009 10:48:02 +0100
 
