@@ -1526,7 +1526,7 @@ e_book_add_contacts (EBook *book, GList *contacts, GError **error)
   while (node) {
     /* assemble the list_threshold */
     for (i = 0, list_threshold = NULL;
-         node && i < THRESHOLD;
+         node && i < BATCH_THRESHOLD;
          node = g_list_next (node), i++) {
       list_threshold = g_list_prepend (list_threshold, node->data);
     }
@@ -1543,24 +1543,93 @@ e_book_add_contacts (EBook *book, GList *contacts, GError **error)
   return TRUE;
 }
 
+typedef struct {
+  EBook *book;
+  GList *vcards;
+  void *callback;
+  gpointer closure;
+} AsyncDataAddContacts;
+
+/* helper functions for allocating and freeing AsyncDataAddContacts structs
+ * that automatically ref and unref the book attribute */
+static AsyncDataAddContacts *
+async_data_add_contacts_new (EBook *book, GList *vcards, void *callback, gpointer closure)
+{
+  AsyncDataAddContacts *data = g_slice_new0 (AsyncDataAddContacts);
+  if (book)
+    data->book = g_object_ref (book);
+  data->vcards = vcards;
+  data->callback = callback;
+  data->closure = closure;
+
+  return data;
+}
+
+static void
+async_data_add_contacts_free (AsyncDataAddContacts *data)
+{
+  if (data->book)
+    g_object_unref (data->book);
+
+  while (data->vcards) {
+    g_free (data->vcards->data);
+    data->vcards = g_list_delete_link (data->vcards, data->vcards);
+  }
+
+  g_slice_free (AsyncDataAddContacts, data);
+}
+
+static void
+e_book_async_add_contacts_by_threshold_limit (AsyncDataAddContacts *async_data);
+
 static void
 add_contacts_reply (DBusGProxy *proxy, char **uids, GError *error, gpointer user_data)
 {
-  AsyncData *data = user_data;
+  AsyncDataAddContacts *data = user_data;
   EBookCallback cb = data->callback;
 
-  if (error)
-    uids = NULL;
+  if (error || data->vcards == NULL) {
+    if (cb)
+      cb (data->book, get_status_from_error (error), data->closure);
 
-  /* TODO: what to do with uids? */
-  if (cb)
-    cb (data->book, get_status_from_error (error), data->closure);
+    /* Protect against garbage return values on error */
+    if (error) {
+      uids = NULL;
+      g_error_free (error);
+    }
 
-  if (error)
-    g_error_free (error);
+    g_strfreev (uids);
+    async_data_add_contacts_free (data);
+
+    return;
+  }
 
   g_strfreev (uids);
-  async_data_free (data);
+
+  e_book_async_add_contacts_by_threshold_limit (data);
+}
+
+static void
+e_book_async_add_contacts_by_threshold_limit (AsyncDataAddContacts *async_data)
+{
+  char **vcards_strv, **i;
+  int len;
+  EBookCallback cb = async_data->callback;
+
+  vcards_strv = g_new0 (char*, BATCH_THRESHOLD + 1);
+
+  for (len = 0, i = vcards_strv;
+       len < BATCH_THRESHOLD && async_data->vcards;
+       len++, i++) {
+    *i = async_data->vcards->data;
+    async_data->vcards = g_list_delete_link (async_data->vcards, async_data->vcards);
+  }
+
+  if (!org_gnome_evolution_dataserver_addressbook_Book_add_contacts_async (async_data->book->priv->proxy, (const char**)vcards_strv, add_contacts_reply, async_data)) {
+    cb (async_data->book, E_BOOK_ERROR_CORBA_EXCEPTION, async_data->closure);
+    async_data_add_contacts_free (async_data);
+  }
+  g_strfreev (vcards_strv);
 }
 
 /**
@@ -1580,8 +1649,9 @@ add_contacts_reply (DBusGProxy *proxy, char **uids, GError *error, gpointer user
 guint
 e_book_async_add_contacts (EBook *book, GList *contacts, EBookCallback cb, gpointer closure)
 {
-  char **vcards, **i;
-  AsyncData *data;
+  AsyncDataAddContacts *data;
+  GList *vcards = NULL;
+  GList *l;
 
   e_return_async_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
@@ -1589,21 +1659,21 @@ e_book_async_add_contacts (EBook *book, GList *contacts, EBookCallback cb, gpoin
   e_return_async_error_if_fail (book->priv->loaded, E_BOOK_ERROR_SOURCE_NOT_LOADED);
   e_return_async_error_if_fail (book->priv->writable, E_BOOK_ERROR_PERMISSION_DENIED);
 
-  vcards = g_new0 (char*, g_list_length (contacts)+1);
-  for (i = vcards; contacts; contacts = contacts->next, i++) {
-    *i = e_vcard_to_string (E_VCARD (contacts->data), EVC_FORMAT_VCARD_30);
-    if (!*i) {
-      g_strfreev (vcards);
-      e_return_async_error_if_fail (*i, E_BOOK_ERROR_OTHER_ERROR);
+  /* convert contacts to strings */
+  for (l = contacts; l; l = l->next) {
+    char *vcard = e_vcard_to_string (E_VCARD (l->data), EVC_FORMAT_VCARD_30);
+    if (!vcard) {
+      while (vcards) {
+        g_free (vcards->data);
+        vcards = g_list_delete_link (vcards, vcards);
+      }
+      e_return_async_error_if_fail (NULL, E_BOOK_ERROR_OTHER_ERROR);
     }
+    vcards = g_list_prepend (vcards, vcard);
   }
+  data = async_data_add_contacts_new (book, vcards, cb, closure);
+  e_book_async_add_contacts_by_threshold_limit (data);
 
-  data = async_data_new (book, NULL, cb, closure);
-
-  if (!org_gnome_evolution_dataserver_addressbook_Book_add_contacts_async (book->priv->proxy, (const char**)vcards, add_contacts_reply, data))
-    cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, closure);
-
-  g_strfreev (vcards);
   return 0;
 }
 

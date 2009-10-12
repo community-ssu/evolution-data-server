@@ -1,3 +1,20 @@
+2009-10-12  Robert Peto  <robert.peto@maemo.org>
+
+	Split contact list to chunks when adding contacts with
+	e_book_async_add_contacts() function. (Do the same as in
+	e_book_add_contacts()).
+
+	* addressbook/libebook-dbus/e-book.c (async_data_add_contacts_new(),
+	  async_data_add_contacts_free(), add_contacts_reply(),
+	  e_book_async_add_contacts_by_threshold_limit(),
+	  e_book_async_add_contacts()): See above.
+	* addressbook/libedata-book-dbus/e-data-book-view.c: rename THRESHOLD
+	  macro to NOTIFY_THRESHOLD.
+	* configure.in: set default BATCH_THRESHOLD value to 256 and
+	  NOTIFY_THRESHOLD to 96.
+
+	Reviewed-By: Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
 2009-09-30  Joergen Scheibengruber <jorgen.scheibengruber@nokia.com>
 
 	NB#140530 - Memory leak in transaction enabled eds

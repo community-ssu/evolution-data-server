@@ -157,10 +157,10 @@ e_data_book_view_init (EDataBookView *book_view)
   priv->running = FALSE;
   g_static_rec_mutex_init (&priv->pending_mutex);
 
-  /* THRESHOLD * 2: we store UID and vCard */
-  priv->adds = g_ptr_array_sized_new (THRESHOLD * 2);
-  priv->changes = g_ptr_array_sized_new (THRESHOLD * 2);
-  priv->removes = g_ptr_array_sized_new (THRESHOLD);
+  /* NOTIFY_THRESHOLD * 2: we store UID and vCard */
+  priv->adds = g_ptr_array_sized_new (NOTIFY_THRESHOLD * 2);
+  priv->changes = g_ptr_array_sized_new (NOTIFY_THRESHOLD * 2);
+  priv->removes = g_ptr_array_sized_new (NOTIFY_THRESHOLD);
 
   priv->ids = g_hash_table_new_full (g_str_hash, g_str_equal,
                                      g_free, NULL);
@@ -596,7 +596,7 @@ notify_add (EDataBookView *view, const char *id, char *vcard)
   send_pending_changes (view);
   send_pending_removes (view);
 
-  if (priv->adds->len == 2 * THRESHOLD) {
+  if (priv->adds->len == 2 * NOTIFY_THRESHOLD) {
     if (priv->freezable)
     {
       g_static_rec_mutex_lock (&priv->pending_mutex);
