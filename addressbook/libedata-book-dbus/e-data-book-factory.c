@@ -19,6 +19,7 @@
  */
 
 #include <config.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <glib-object.h>
@@ -382,6 +383,46 @@ backup_start (DBusGProxy *proxy, EDataBookFactory *factory)
   g_mutex_unlock (factory->priv->books_lock);
 }
 
+/* delete_directory() copied from telepathy-haze (file src/main.c)
+ * and relicensed from GPL to LGPL by the author.
+ *
+ * Copyright (C) 2007 Will Thompson
+ */
+static gboolean
+delete_directory (const char *path)
+{
+  const gchar *child_path;
+  GDir *dir;
+  gboolean ret = TRUE;
+
+  dir = g_dir_open (path, 0, NULL);
+  if (!dir)
+    return FALSE;
+
+  while (ret && (child_path = g_dir_read_name (dir))) {
+    gchar *child_full_path;
+
+    child_full_path = g_build_filename (path, child_path, NULL);
+
+    if (g_file_test (child_full_path, G_FILE_TEST_IS_DIR)) {
+      if (!delete_directory (child_full_path))
+        ret = FALSE;
+    } else {
+      if (g_unlink (child_full_path) != 0)
+        ret = FALSE;
+    }
+
+    g_free (child_full_path);
+  }
+
+  g_dir_close (dir);
+
+  if (ret)
+    ret = !g_rmdir (path);
+
+  return ret;
+}
+
 #define E_DATA_BOOK_FACTORY_SERVICE_NAME "org.gnome.evolution.dataserver.AddressBook"
 
 int
@@ -390,6 +431,9 @@ main (int argc, char **argv)
   GError *error = NULL;
   DBusGProxy *bus_proxy;
   guint32 request_name_ret;
+  gchar *data_dir;
+  gchar *restore_dir;
+  gchar *tmp_dir;
 
   g_type_init ();
   if (!g_thread_supported ()) g_thread_init (NULL);
@@ -441,6 +485,39 @@ main (int argc, char **argv)
                                             "com.nokia.backup");
   dbus_g_proxy_add_signal (backup_proxy, "backup_start", G_TYPE_INVALID);
   dbus_g_proxy_connect_signal (backup_proxy, "backup_start", G_CALLBACK (backup_start), factory, NULL);
+
+  /* Nokia N900 specific code: if a ~/.osso-abook-restore directory exists
+   * (created by osso-backup) then rename it to ~/.osso-abook and use it */
+  data_dir = g_build_filename (g_get_home_dir (), ".osso-abook", NULL);
+  restore_dir = g_build_filename (g_get_home_dir (), ".osso-abook-restore", NULL);
+  tmp_dir = g_build_filename (g_get_home_dir (), ".osso-abook-tmp", NULL);
+
+  if (g_file_test (restore_dir, G_FILE_TEST_IS_DIR)) {
+    /* Delete the temporary directory just in case it exists */
+    delete_directory (tmp_dir);
+
+    /* Rename the .osso-abook directory (if it exists) to a temporary
+     * location as a backup in case the restore procedure fails */
+    if (g_rename (data_dir, tmp_dir) != 0 ||
+        g_file_error_from_errno (errno) != G_FILE_ERROR_NOENT) {
+      g_critical ("Failed to restore the backup, using the old data");
+    } else {
+      /* Now actually restore the backup */
+      if (g_rename (restore_dir, data_dir) == 0) {
+        /* Done, cleanup the temporary stuff */
+        delete_directory (tmp_dir);
+      } else {
+        g_critical ("Failed to restore the backup, using the old data");
+        /* Failed to restore the backup, let's try at least not to lose
+         * the contacts we had before the restore */
+        g_rename (tmp_dir, data_dir);
+      }
+    }
+  }
+
+  g_free (tmp_dir);
+  g_free (restore_dir);
+  g_free (data_dir);
 
   g_main_loop_run (loop);
 

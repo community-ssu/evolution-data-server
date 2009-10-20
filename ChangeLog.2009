@@ -1,3 +1,17 @@
+2009-10-19  Marco Barisione  <marco.barisione@collabora.co.uk>
+
+	Add some support code for backup restoration.
+	If there is a directory ~/.osso-abook-restore (created by the
+	backup/restore application) rename it to ~/.osso-abook. This way we
+	can replace the DBs in an atomic way without interfering with the
+	normal behaviour of EDS.
+
+	* libedata-book-dbus/e-data-book-factory.c (delete_directory),
+	(main):
+
+	Reviewed-By: Jonathon Jongsma  <jonathon.jongsma@maemo.org>
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+
 2009-10-12  Joergen Scheibengruber <jorgen.scheibengruber@nokia.com>
 
 	NB#140520 - Memory leak in addressbook/libebook-dbus/e-book-sexp.c
