@@ -1,8 +1,8 @@
-evolution-data-server (1.4.2.1-20091013.99) unstable; urgency=low
+evolution-data-server (1.4.2.1-20091020) unstable; urgency=low
 
   * Add support code for backup restoration, see NB#138107
 
- -- Robert Peto <robert.peto@maemo.org>  Tue, 13 Oct 2009 10:29:21 +0100
+ -- Robert Peto <robert.peto@maemo.org>  Tue, 20 Oct 2009 14:41:23 +0100
 
 evolution-data-server (1.4.2.1-20091013) unstable; urgency=low
 
