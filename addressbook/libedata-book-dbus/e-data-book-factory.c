@@ -24,6 +24,7 @@
 #include <string.h>
 #include <glib-object.h>
 #include <glib/gi18n.h>
+#include <glib/gstdio.h>
 #include <dbus/dbus-protocol.h>
 #include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-lowlevel.h>

@@ -1,3 +1,11 @@
+2009-10-20  Marco Barisione  <marco.barisione@collabora.co.uk>
+
+	Add a missing include for glib/gstdio.h.
+
+	* libedata-book-dbus/e-data-book-factory.c:
+
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+
 2009-10-19  Marco Barisione  <marco.barisione@collabora.co.uk>
 
 	Add some support code for backup restoration.
