@@ -83,9 +83,34 @@ struct _EBookBackendFilePrivate {
 	EBookBackendFileIndex   *index;
 	char                    *sort_order;
 	int                      running_id;
+	GMutex                  *cursor_lock;    /* lock used for protecting open_cursors */
+	int                      open_cursors;   /* numbert of threads with open cursor */
+	GCond                   *no_cursor_cond; /* true if open_cursors is 0 */
 };
 
 G_LOCK_DEFINE_STATIC (running_id);
+
+static void
+increment_open_cursors (EBookBackendFile *bf)
+{
+	g_mutex_lock (bf->priv->cursor_lock);
+
+	++(bf->priv->open_cursors);
+
+	g_mutex_unlock (bf->priv->cursor_lock);
+}
+
+static void
+decrement_open_cursors (EBookBackendFile *bf)
+{
+	g_mutex_lock (bf->priv->cursor_lock);
+
+	/* decrement and test if there are open cursors */
+	if (--(bf->priv->open_cursors) == 0)
+		g_cond_broadcast (bf->priv->no_cursor_cond);
+
+	g_mutex_unlock (bf->priv->cursor_lock);
+}
 
 static EBookBackendSyncStatus
 db_error_to_status (const int db_error)
@@ -515,12 +540,19 @@ e_book_backend_file_remove_contacts (EBookBackendSync *backend,
 
 	*ids = removed_cards;
 
+	/* increment open cursors count (removing from index can use db cursor) */
+	increment_open_cursors (bf);
+
 	/* create and commit the transaction */
 	db_error = txn_execute_ops (bf->priv->env, NULL, ops);
 	if (db_error != 0) {
 		WARNING ("cannot commit transaction: %s", db_strerror (db_error));
+		decrement_open_cursors (bf);
 		goto out;
 	}
+
+	/* decrement open cursor count */
+	decrement_open_cursors (bf);
 
 	db_error = sync_dbs (bf);
 	if (db_error != 0) {
@@ -537,6 +569,84 @@ out:
 	}
 
 	return db_error_to_status (db_error_final ? db_error_final : db_error);
+}
+
+static EBookBackendSyncStatus
+e_book_backend_file_remove_all_contacts (EBookBackendSync *backend,
+					 EDataBook *book,
+					 guint32 opid,
+					 GList **removed_ids)
+{
+	EBookBackendFile *bf = E_BOOK_BACKEND_FILE (backend);
+	DB *db = bf->priv->file_db;
+	int db_error;
+	u_int32_t count;
+	GList *ids = NULL;
+	DBC *dbc;
+	DBT id_dbt, vcard_dbt;
+
+	memset (&id_dbt, 0, sizeof (id_dbt));
+	memset (&vcard_dbt, 0, sizeof (vcard_dbt));
+	id_dbt.flags = DB_DBT_MALLOC;
+
+	g_mutex_lock (bf->priv->cursor_lock);
+
+	/* wait until there aren't any threads with open cursor */
+	while (bf->priv->open_cursors != 0)
+		g_cond_wait (bf->priv->no_cursor_cond, bf->priv->cursor_lock);
+
+	/* get the ids */
+	db_error = db->cursor (db, NULL, &dbc, 0);
+	if (db_error != 0) {
+		WARNING ("db->cursor failed: %s", db_strerror (db_error));
+		goto out;
+	}
+
+	db_error = dbc->c_get(dbc, &id_dbt, &vcard_dbt, DB_FIRST);
+	while (db_error == 0) {
+		ids = g_list_prepend (ids, id_dbt.data);
+		db_error = dbc->c_get(dbc, &id_dbt, &vcard_dbt, DB_NEXT);
+	}
+	DEBUG ("ids list length = %d", g_list_length (ids));
+
+	dbc->c_close (dbc);
+	if (db_error && db_error != DB_NOTFOUND) {
+		WARNING ("error building id list: %s", db_strerror (db_error));
+		goto out;
+	}
+
+	/* truncate our main db */
+	db_error = db->truncate (db, NULL, &count, DB_AUTO_COMMIT);
+	if (db_error != 0) {
+		WARNING ("db->truncate failed: %s", db_strerror (db_error));
+		goto out;
+	}
+
+	/* FIXME: all of this should be in one transaction, so truncate of
+	 * main db can be restored if something unexpected happens while
+	 * truncating index dbs */
+	db_error = e_book_backend_file_index_truncate (bf->priv->index);
+	if (db_error != 0) {
+		goto out;
+	}
+
+	/* NOTE: running id should be preserved */
+
+	/* finally sync the dbs */
+	db_error = sync_dbs (bf);
+
+out:
+	g_mutex_unlock (bf->priv->cursor_lock);
+
+	if (db_error != 0) {
+		while (ids) {
+			g_free (ids->data);
+			ids = g_list_delete_link (ids, ids);
+		}
+	}
+	*removed_ids = ids;
+
+	return db_error_to_status (db_error);
 }
 
 static int
@@ -631,11 +741,16 @@ e_book_backend_file_modify_contact (EBookBackendSync *backend,
 		goto out;
 	}
 
+	increment_open_cursors (bf);
+
 	db_error = txn_execute_ops (bf->priv->env, NULL, ops);
 	if (db_error != 0) {
 		WARNING ("cannot modify contact");
+		decrement_open_cursors (bf);
 		goto out;
 	}
+
+	decrement_open_cursors (bf);
 
 	db_error = sync_dbs (bf);
 
@@ -676,12 +791,17 @@ e_book_backend_file_modify_contacts (EBookBackendSync *backend,
 		*contacts = g_list_prepend (*contacts, contact);
 	}
 
+	increment_open_cursors (bf);
+
 	/* create and commit transaction */
 	db_error = txn_execute_ops (bf->priv->env, NULL, ops);
 	if (db_error != 0) {
 		WARNING ("cannot modify contacts: %s", db_strerror (db_error));
+		decrement_open_cursors (bf);
 		goto out;
 	}
+
+	decrement_open_cursors (bf);
 
 	/* sync databases */
 	db_error = sync_dbs (bf);
@@ -754,11 +874,14 @@ e_book_backend_file_get_contact_list (EBookBackendSync *backend,
 		return GNOME_Evolution_Addressbook_OtherError;
 	}
 
+	increment_open_cursors (bf);
+
 	db_error = db->cursor (db, NULL, &dbc, 0);
 
 	if (db_error != 0) {
 		WARNING ("db->cursor failed with %s", db_strerror (db_error));
 		/* XXX this needs to be some CouldNotOpen error */
+		decrement_open_cursors (bf);
 		return db_error_to_status (db_error);
 	}
 
@@ -790,6 +913,8 @@ e_book_backend_file_get_contact_list (EBookBackendSync *backend,
 	if (db_error != 0) {
 		WARNING ("dbc->c_close failed with %s", db_strerror (db_error));
 	}
+
+	decrement_open_cursors (bf);
 
 	*contacts = contact_list;
 	return status;
@@ -877,6 +1002,8 @@ book_view_thread (gpointer data)
 	MESSAGE ("signalling parent thread");
 	e_flag_set (closure->running);
 
+	increment_open_cursors (bf);
+
 	DEBUG ("Query is %s", query);
 	if (e_book_backend_file_index_is_usable (bf->priv->index, query)) {
 		DEBUG ("Using index for %s", query);
@@ -894,6 +1021,10 @@ book_view_thread (gpointer data)
 	if (ids)
 	{
 		int i;
+
+		/* decrement open cursors since we already done with the query*/
+		decrement_open_cursors (bf);
+
 		for (i = 0; i < ids->len; i ++) {
 			char *id = g_ptr_array_index (ids, i);
 
@@ -925,6 +1056,7 @@ book_view_thread (gpointer data)
 		memset (&vcard_dbt, 0, sizeof (vcard_dbt));
 		vcard_dbt.flags = DB_DBT_MALLOC;
 
+		/* NOTE: we increased cursor count already */
 		db_error = db->cursor (db, NULL, &dbc, 0);
 		if (db_error == 0) {
 
@@ -947,6 +1079,8 @@ book_view_thread (gpointer data)
 				WARNING ("e_book_backend_file_search: error building list: %s",
 						db_strerror (db_error));
 		}
+
+		decrement_open_cursors (bf);
 	}
 
 	if (e_flag_is_set (closure->running))
@@ -1092,6 +1226,8 @@ e_book_backend_file_get_changes (EBookBackendSync *backend,
 	if (fd >= 0)
 		flock (fd, LOCK_EX);
 
+	increment_open_cursors (bf);
+
 	db_error = db->cursor (db, NULL, &dbc, 0);
 
 	if (db_error != 0) {
@@ -1135,6 +1271,8 @@ e_book_backend_file_get_changes (EBookBackendSync *backend,
 		}
 		dbc->c_close (dbc);
 	}
+
+	decrement_open_cursors (bf);
 
 	e_dbhash_foreach_key (ehash, (EDbHashFunc)e_book_backend_file_changes_foreach_key, &ctx);
 
@@ -2029,7 +2167,7 @@ e_book_backend_file_remove (EBookBackendSync *backend,
 static char *
 e_book_backend_file_get_static_capabilities (EBookBackend *backend)
 {
-	return g_strdup("local,do-initial-query,bulk-removes,contact-lists,freezable");
+	return g_strdup("local,do-initial-query,bulk-removes,contact-lists,freezable,remove-all-contacts");
 }
 
 static GNOME_Evolution_Addressbook_CallStatus
@@ -2124,6 +2262,12 @@ e_book_backend_file_dispose (GObject *object)
 		bf->priv->env = NULL;
 	}
 
+	g_mutex_free (bf->priv->cursor_lock);
+	bf->priv->cursor_lock = NULL;
+
+	g_cond_free (bf->priv->no_cursor_cond);
+	bf->priv->no_cursor_cond = NULL;
+
 	G_OBJECT_CLASS (e_book_backend_file_parent_class)->dispose (object);
 }
 
@@ -2210,6 +2354,7 @@ e_book_backend_file_class_init (EBookBackendFileClass *klass)
 	sync_class->create_contact_sync        = e_book_backend_file_create_contact;
         sync_class->create_contacts_sync       = e_book_backend_file_create_contacts;
 	sync_class->remove_contacts_sync       = e_book_backend_file_remove_contacts;
+	sync_class->remove_all_contacts_sync   = e_book_backend_file_remove_all_contacts;
 	sync_class->modify_contact_sync        = e_book_backend_file_modify_contact;
 	sync_class->modify_contacts_sync       = e_book_backend_file_modify_contacts;
 	sync_class->get_contact_sync           = e_book_backend_file_get_contact;
@@ -2241,4 +2386,7 @@ e_book_backend_file_init (EBookBackendFile *backend)
 	priv = g_new0 (EBookBackendFilePrivate, 1);
 
 	backend->priv = priv;
+
+	priv->cursor_lock = g_mutex_new ();
+	priv->no_cursor_cond = g_cond_new ();
 }

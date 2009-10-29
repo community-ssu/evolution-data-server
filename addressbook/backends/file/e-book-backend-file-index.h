@@ -59,6 +59,7 @@ gboolean e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index,
 int e_book_backend_file_index_add_contact (EBookBackendFileIndex *index, EContact *contact, GPtrArray *ops);
 int e_book_backend_file_index_remove_contact (EBookBackendFileIndex *index, EContact *contact, GPtrArray *ops);
 int e_book_backend_file_index_modify_contact (EBookBackendFileIndex *index, EContact *old_contact, EContact *new_contact, GPtrArray *ops);
+int e_book_backend_file_index_truncate (EBookBackendFileIndex *index);
 void e_book_backend_file_index_sync (EBookBackendFileIndex *index);
 GPtrArray *e_book_backend_file_index_query (EBookBackendFileIndex *index, const gchar *query);
 GPtrArray *e_book_backend_file_index_get_ordered_ids (EBookBackendFileIndex *index, const gchar *query_term);

@@ -1,3 +1,36 @@
+2009-10-29  Robert Peto  <robert.peto@maemo.org>
+
+	Add the "remove-all-contacts" capability for the file-backend.
+
+	* addressbook/backends/file/e-book-backend-file-index.c:
+	* addressbook/backends/file/e-book-backend-file-index.h:
+	 (e_book_backend_file_index_truncate()): function for emptying the
+	  backing stores for index tables.
+
+	* addressbook/backends/file/e-book-backend-file.c
+	 (increment_open_cursors(), decrement_open_cursors()): helper
+	  functions for handling the open_cursors variable
+
+	* addressbook/backends/file/e-book-backend-file.c
+	 (e_book_backend_file_remove_contacts(), modify_contact(),
+	  e_book_backend_file_modify_contacts(),
+	  e_book_backend_file_get_contact_list(), book_view_thread(),
+	  e_book_backend_file_get_changes()): indicate that the running thread
+	  is using a cursor
+
+	* addressbook/backends/file/e-book-backend-file.c
+	 (e_book_backend_file_remove_all_contacts()): the actual
+	  implementation of the remove-all-contacts
+
+	* addressbook/backends/file/e-book-backend-file.c
+	 (e_book_backend_file_get_static_capabilities()): add
+	  "remove-all-contacts" to static capabilities
+
+	* addressbook/libedata-book-dbus/e-data-book.c
+	 (e_data_book_respond_remove_all_contacts()): fix a memleak.
+
+	Reviewed-By: Marco Barisione  <marco.barisione@collabora.co.uk>
+
 2009-10-20  Marco Barisione  <marco.barisione@collabora.co.uk>
 
 	Add a missing include for glib/gstdio.h.

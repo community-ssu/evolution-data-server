@@ -862,8 +862,11 @@ e_data_book_respond_remove_all_contacts (EDataBook *book, guint32 opid, EDataBoo
     g_idle_add (idle_dbus_method_return, context);
 
     /* notify views after */
-    for (i = ids; i; i = i->next)
+    for (i = ids; i; i = i->next) {
       e_book_backend_notify_remove (e_data_book_get_backend (book), i->data);
+      /* e_book_backend_notify_remove doesn't free this up */
+      g_free (i->data);
+    }
     e_book_backend_notify_complete (e_data_book_get_backend (book));
   }
 }

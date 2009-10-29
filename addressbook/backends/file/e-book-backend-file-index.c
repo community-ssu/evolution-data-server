@@ -536,6 +536,34 @@ e_book_backend_file_index_modify_contact (EBookBackendFileIndex *index, EContact
   return retval;
 }
 
+int
+e_book_backend_file_index_truncate (EBookBackendFileIndex *index)
+{
+  int db_error = 0;
+  EBookBackendFileIndexPrivate *priv;
+  GHashTableIter iter;
+  gpointer key, value;
+
+  g_return_val_if_fail (E_IS_BOOK_BACKEND_FILE_INDEX (index), EINVAL);
+
+  priv = GET_PRIVATE (index);
+
+  g_hash_table_iter_init (&iter, priv->sdbs);
+  while (g_hash_table_iter_next (&iter, &key, &value)) {
+    /* truncate db, escape on failure */
+    u_int32_t count;
+    DB *db = value;
+
+    db_error = db->truncate (db, NULL, &count, DB_AUTO_COMMIT);
+    if (db_error != 0) {
+      WARNING ("db->truncate failed: %s", db_strerror (db_error));
+      return db_error;
+    }
+  }
+
+  return db_error;
+}
+
 void
 e_book_backend_file_index_sync (EBookBackendFileIndex *index)
 {

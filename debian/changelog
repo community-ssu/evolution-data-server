@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20091020.99) unstable; urgency=low
+
+  * Fixes: NB#122756 - Implement delete all contacts in file backend
+
+ -- Robert Peto <robert.peto@maemo.org>  Thu, 29 Oct 2009 11:23:23 +0100
+
 evolution-data-server (1.4.2.1-20091020) unstable; urgency=low
 
   * Add support code for backup restoration, see NB#138107
