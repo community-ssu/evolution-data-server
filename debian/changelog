@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20091103.99) unstable; urgency=low
+
+  * Fixes: NB#132818 - IOP - Missing name and surname in Vcard sent from Motorola, BenQ/Siemens
+
+ -- Robert Peto <robert.peto@maemo.org>  Tue,  3 Nov 2009 15:36:33 +0100
+
 evolution-data-server (1.4.2.1-20091103) unstable; urgency=low
 
   * Fixes: NB#122756 - Implement delete all contacts in file backend
