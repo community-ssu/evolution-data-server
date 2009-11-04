@@ -437,7 +437,7 @@ read_attribute_params (EVCardAttribute *attr, const char **p, gboolean *quoted_p
 					char *param_name;
 					if (!g_ascii_strcasecmp (str->str,
 								 "quoted-printable")) {
-						param_name = "ENCODING";
+						param_name = NULL; /* ENCODING */
 						*quoted_printable = TRUE;
 					}
 					/* apple's broken addressbook app outputs naked BASE64
