@@ -39,13 +39,16 @@
 #ifndef nsMBCSGroupProber_h__
 #define nsMBCSGroupProber_h__
 
-#include "nsSJISProber.h"
 #include "nsUTF8Prober.h"
+
+#if !MAEMO_CHANGES
+#include "nsSJISProber.h"
 #include "nsEUCJPProber.h"
 #include "nsGB2312Prober.h"
 #include "nsEUCKRProber.h"
 #include "nsBig5Prober.h"
 #include "nsEUCTWProber.h"
+#endif //!MAEMO_CHANGES
 
 #define NUM_OF_PROBERS    7
 

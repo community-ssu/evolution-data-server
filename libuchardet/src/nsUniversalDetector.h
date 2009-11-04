@@ -44,7 +44,9 @@ class nsCharSetProber;
 
 typedef enum {
   ePureAscii = 0,
+#if !MAEMO_CHANGES
   eEscAscii  = 1,
+#endif //!MAEMO_CHANGES
   eHighbyte  = 2
 } nsInputState;
 
@@ -82,7 +84,9 @@ protected:
    PRUint32 mLanguageFilter;
 
    nsCharSetProber  *mCharSetProbers[NUM_OF_CHARSET_PROBERS];
+#if !MAEMO_CHANGES
    nsCharSetProber  *mEscCharSetProber;
+#endif //!MAEMO_CHANGES
 };
 
 #endif

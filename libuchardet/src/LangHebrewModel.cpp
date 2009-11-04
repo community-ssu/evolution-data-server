@@ -216,4 +216,3 @@ const SequenceModel Win1255Model =
   PR_FALSE,
   "windows-1255"
 };
-

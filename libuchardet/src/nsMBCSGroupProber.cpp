@@ -61,6 +61,7 @@ nsMBCSGroupProber::nsMBCSGroupProber(PRUint32 aLanguageFilter)
     mProbers[i] = nsnull;
 
   mProbers[0] = new nsUTF8Prober();
+#if !MAEMO_CHANGES
   if (aLanguageFilter & NS_FILTER_JAPANESE) 
   {
     mProbers[1] = new nsSJISProber(aLanguageFilter == NS_FILTER_JAPANESE);
@@ -75,6 +76,7 @@ nsMBCSGroupProber::nsMBCSGroupProber(PRUint32 aLanguageFilter)
     mProbers[5] = new nsBig5Prober(aLanguageFilter == NS_FILTER_CHINESE_TRADITIONAL);
     mProbers[6] = new nsEUCTWProber(aLanguageFilter == NS_FILTER_CHINESE_TRADITIONAL);
   }
+#endif //!MAEMO_CHANGES
   Reset();
 }
 

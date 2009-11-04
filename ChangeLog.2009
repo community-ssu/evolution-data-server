@@ -1,5 +1,19 @@
 2009-10-23  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
+	NB#132818 - Disable detectors that g_convert() doesn't support.
+
+	* libuchardet/src/*:
+	   Disable Hebrew, Thamil and some Cyrillic language models.
+
+	* libuchardet/tests/Makefile.am:
+	* libuchardet/tests/test_charsets.c (new file):
+	  Check which charsets actually are supported by g_convert().
+
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+	Reviewed-By: Marco Barisione  <marco.barisione@collabora.co.uk>
+
+2009-10-23  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
 	NB#132818 - Add the Universal Charset Detector to the build system.
 
 	* configure.in:

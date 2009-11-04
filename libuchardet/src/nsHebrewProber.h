@@ -173,4 +173,5 @@ protected:
  * charset identified, either "windows-1255" or "ISO-8859-8".
  *
  */
+
 #endif /* nsHebrewProber_h__ */

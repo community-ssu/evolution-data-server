@@ -48,15 +48,31 @@ nsSBCSGroupProber::nsSBCSGroupProber()
 {
   mProbers[0] = new nsSingleByteCharSetProber(&Win1251Model);
   mProbers[1] = new nsSingleByteCharSetProber(&Koi8rModel);
+#if MAEMO_CHANGES
+  mProbers[2] = 0;
+  mProbers[3] = 0;
+  mProbers[4] = 0;
+  mProbers[5] = 0;
+#else //!MAEMO_CHANGES
   mProbers[2] = new nsSingleByteCharSetProber(&Latin5Model);
   mProbers[3] = new nsSingleByteCharSetProber(&MacCyrillicModel);
   mProbers[4] = new nsSingleByteCharSetProber(&Ibm866Model);
   mProbers[5] = new nsSingleByteCharSetProber(&Ibm855Model);
+#endif //!MAEMO_CHANGES
   mProbers[6] = new nsSingleByteCharSetProber(&Latin7Model);
   mProbers[7] = new nsSingleByteCharSetProber(&Win1253Model);
+#if MAEMO_CHANGES
+  mProbers[8] = 0;
+#else //!MAEMO_CHANGES
   mProbers[8] = new nsSingleByteCharSetProber(&Latin5BulgarianModel);
+#endif //!MAEMO_CHANGES
   mProbers[9] = new nsSingleByteCharSetProber(&Win1251BulgarianModel);
 
+#if MAEMO_CHANGES
+  mProbers[10] = 0;
+  mProbers[11] = 0;
+  mProbers[12] = 0;
+#else //!MAEMO_CHANGES
   nsHebrewProber *hebprober = new nsHebrewProber();
   // Notice: Any change in these indexes - 10,11,12 must be reflected
   // in the code below as well.
@@ -76,6 +92,7 @@ nsSBCSGroupProber::nsSBCSGroupProber()
       mProbers[i] = 0; 
     }
   }
+#endif //!MAEMO_CHANGES
 
   // disable latin2 before latin1 is available, otherwise all latin1 
   // will be detected as latin2 because of their similarity.

@@ -50,7 +50,9 @@ nsUniversalDetector::nsUniversalDetector(PRUint32 aLanguageFilter)
   mDone = PR_FALSE;
   mBestGuess = -1;   //illegal value as signal
   mInTag = PR_FALSE;
+#if !MAEMO_CHANGES
   mEscCharSetProber = nsnull;
+#endif //!MAEMO_CHANGES
 
   mStart = PR_TRUE;
   mDetectedCharset = nsnull;
@@ -69,8 +71,10 @@ nsUniversalDetector::~nsUniversalDetector()
   for (PRInt32 i = 0; i < NUM_OF_CHARSET_PROBERS; i++)
     if (mCharSetProbers[i])      
       delete mCharSetProbers[i];
+#if !MAEMO_CHANGES
   if (mEscCharSetProber)
     delete mEscCharSetProber;
+#endif //!MAEMO_CHANGES
 }
 
 void 
@@ -86,8 +90,10 @@ nsUniversalDetector::Reset()
   mInputState = ePureAscii;
   mLastChar = '\0';
 
+#if !MAEMO_CHANGES
   if (mEscCharSetProber)
     mEscCharSetProber->Reset();
+#endif //!MAEMO_CHANGES
 
   PRUint32 i;
   for (i = 0; i < NUM_OF_CHARSET_PROBERS; i++)
@@ -122,7 +128,11 @@ nsresult nsUniversalDetector::HandleData(const char* aBuf, PRUint32 aLen)
         case '\xFE':
           if (('\xFF' == aBuf[1]) && ('\x00' == aBuf[2]) && ('\x00' == aBuf[3]))
             // FE FF 00 00  UCS-4, unusual octet order BOM (3412)
+#if MAEMO_CHANGES
+            mDetectedCharset = "ISO-10646/UCS4";
+#else //!MAEMO_CHANGES
             mDetectedCharset = "X-ISO-10646-UCS-4-3412";
+#endif //!MAEMO_CHANGES
           else if ('\xFF' == aBuf[1])
             // FE FF  UTF-16, big endian BOM
             mDetectedCharset = "UTF-16";
@@ -133,7 +143,11 @@ nsresult nsUniversalDetector::HandleData(const char* aBuf, PRUint32 aLen)
             mDetectedCharset = "UTF-32";
           else if (('\x00' == aBuf[1]) && ('\xFF' == aBuf[2]) && ('\xFE' == aBuf[3]))
             // 00 00 FF FE  UCS-4, unusual octet order BOM (2143)
+#if MAEMO_CHANGES
+            mDetectedCharset = "ISO-10646/UCS4";
+#else //!MAEMO_CHANGES
             mDetectedCharset = "X-ISO-10646-UCS-4-2143";
+#endif //!MAEMO_CHANGES
         break;
         case '\xFF':
           if (('\xFE' == aBuf[1]) && ('\x00' == aBuf[2]) && ('\x00' == aBuf[3]))
@@ -164,11 +178,13 @@ nsresult nsUniversalDetector::HandleData(const char* aBuf, PRUint32 aLen)
         //adjust state
         mInputState = eHighbyte;
 
+#if !MAEMO_CHANGES
         //kill mEscCharSetProber if it is active
         if (mEscCharSetProber) {
           delete mEscCharSetProber;
           mEscCharSetProber = nsnull;
         }
+#endif //!MAEMO_CHANGES
 
         //start multibyte and singlebyte charset prober
         if (nsnull == mCharSetProbers[0])
@@ -194,6 +210,7 @@ nsresult nsUniversalDetector::HandleData(const char* aBuf, PRUint32 aLen)
     }
     else
     {
+#if !MAEMO_CHANGES
       //ok, just pure ascii so far
       if ( ePureAscii == mInputState &&
         (aBuf[i] == '\033' || (aBuf[i] == '{' && mLastChar == '~')) )
@@ -201,6 +218,7 @@ nsresult nsUniversalDetector::HandleData(const char* aBuf, PRUint32 aLen)
         //found escape character or HZ "~{"
         mInputState = eEscAscii;
       }
+#endif //!MAEMO_CHANGES
       mLastChar = aBuf[i];
     }
   }
@@ -208,6 +226,7 @@ nsresult nsUniversalDetector::HandleData(const char* aBuf, PRUint32 aLen)
   nsProbingState st;
   switch (mInputState)
   {
+#if !MAEMO_CHANGES
   case eEscAscii:
     if (nsnull == mEscCharSetProber) {
       mEscCharSetProber = new nsEscCharSetProber(mLanguageFilter);
@@ -221,6 +240,7 @@ nsresult nsUniversalDetector::HandleData(const char* aBuf, PRUint32 aLen)
       mDetectedCharset = mEscCharSetProber->GetCharSetName();
     }
     break;
+#endif //!MAEMO_CHANGES
   case eHighbyte:
     for (i = 0; i < NUM_OF_CHARSET_PROBERS; i++)
     {
@@ -286,8 +306,10 @@ void nsUniversalDetector::DataEnd()
         Report(mCharSetProbers[maxProber]->GetCharSetName());
     }
     break;
+#if !MAEMO_CHANGES
   case eEscAscii:
     break;
+#endif //!MAEMO_CHANGES
   default:
     ;
   }

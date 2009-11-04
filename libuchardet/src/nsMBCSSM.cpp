@@ -257,7 +257,11 @@ const SMModel EUCTWSMModel = {
    7,
   {eIdxSft4bits, eSftMsk4bits, eBitSft4bits, eUnitMsk4bits, EUCTW_st },
   EUCTWCharLenTable,
+#if MAEMO_CHANGES
+  "EUC-TW",
+#else //!MAEMO_CHANGES
   "x-euc-tw",
+#endif //!MAEMO_CHANGES
 };
 
 /* obsolete GB2312 by gb18030

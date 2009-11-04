@@ -48,6 +48,7 @@
 //this talbe is modified base on win1251BulgarianCharToOrderMap, so 
 //only number <64 is sure valid
 
+#if !MAEMO_CHANGES
 static const unsigned char Latin5_BulgarianCharToOrderMap[] =
 {
 255,255,255,255,255,255,255,255,255,255,254,255,255,254,255,255,  //00
@@ -67,6 +68,7 @@ static const unsigned char Latin5_BulgarianCharToOrderMap[] =
   7,  8,  5, 19, 29, 25, 22, 21, 27, 24, 17, 75, 52,241, 42, 16,  //e0
  62,242,243,244, 58,245, 98,246,247,248,249,250,251, 91,252,253,  //f0
 };
+#endif //!MAEMO_CHANGES
 
 static const unsigned char win1251BulgarianCharToOrderMap[] =
 {
@@ -226,6 +228,7 @@ static const char BulgarianLangModel[] =
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
 };
 
+#if !MAEMO_CHANGES
 const SequenceModel Latin5BulgarianModel = 
 {
   Latin5_BulgarianCharToOrderMap,
@@ -234,6 +237,7 @@ const SequenceModel Latin5BulgarianModel =
   PR_FALSE,
   "ISO-8859-5"
 };
+#endif //!MAEMO_CHANGES
 
 const SequenceModel Win1251BulgarianModel = 
 {

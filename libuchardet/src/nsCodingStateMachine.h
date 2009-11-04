@@ -95,7 +95,9 @@ extern const SMModel GB18030SMModel;
 extern const SMModel SJISSMModel;
 
 
+#if !MAEMO_CHANGES
 extern const SMModel HZSMModel;
+#endif //!MAEMO_CHANGES
 extern const SMModel ISO2022CNSMModel;
 extern const SMModel ISO2022JPSMModel;
 extern const SMModel ISO2022KRSMModel;

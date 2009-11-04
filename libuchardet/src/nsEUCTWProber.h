@@ -50,7 +50,11 @@ public:
     Reset();}
   virtual ~nsEUCTWProber(void){delete mCodingSM;}
   nsProbingState HandleData(const char* aBuf, PRUint32 aLen);
+#if MAEMO_CHANGES
+  const char* GetCharSetName() {return "EUC-TW";}
+#else //!MAEMO_CHANGES
   const char* GetCharSetName() {return "x-euc-tw";}
+#endif //!MAEMO_CHANGES
   nsProbingState GetState(void) {return mState;}
   void      Reset(void);
   float     GetConfidence(void);

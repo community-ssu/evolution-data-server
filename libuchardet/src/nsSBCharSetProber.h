@@ -108,17 +108,23 @@ protected:
 
 extern const SequenceModel Koi8rModel;
 extern const SequenceModel Win1251Model;
+#if !MAEMO_CHANGES
 extern const SequenceModel Latin5Model;
 extern const SequenceModel MacCyrillicModel;
 extern const SequenceModel Ibm866Model;
 extern const SequenceModel Ibm855Model;
+#endif //!MAEMO_CHANGES
 extern const SequenceModel Latin7Model;
 extern const SequenceModel Win1253Model;
+#if !MAEMO_CHANGES
 extern const SequenceModel Latin5BulgarianModel;
+#endif //!MAEMO_CHANGES
 extern const SequenceModel Win1251BulgarianModel;
 extern const SequenceModel Latin2HungarianModel;
 extern const SequenceModel Win1250HungarianModel;
+#if !MAEMO_CHANGES
 extern const SequenceModel Win1255Model;
+#endif //!MAEMO_CHANGES
 
 #endif /* nsSingleByteCharSetProber_h__ */
 

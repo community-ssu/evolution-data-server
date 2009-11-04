@@ -81,6 +81,7 @@ static const unsigned char win1251_CharToOrderMap[] =
   9,  7,  6, 14, 39, 26, 28, 22, 25, 29, 54, 18, 17, 30, 27, 16,
 };
 
+#if !MAEMO_CHANGES
 static const unsigned char latin5_CharToOrderMap[] =
 {
 255,255,255,255,255,255,255,255,255,255,254,255,255,254,255,255,  //00
@@ -160,6 +161,7 @@ static const unsigned char IBM866_CharToOrderMap[] =
   9,  7,  6, 14, 39, 26, 28, 22, 25, 29, 54, 18, 17, 30, 27, 16,
 239, 68,240,241,242,243,244,245,246,247,248,249,250,251,252,255,
 };
+#endif //!MAEMO_CHANGES
 
 //Model Table: 
 //total sequences: 100%
@@ -318,6 +320,7 @@ const SequenceModel Win1251Model =
   "windows-1251"
 };
 
+#if !MAEMO_CHANGES
 const SequenceModel Latin5Model = 
 {
   latin5_CharToOrderMap,
@@ -353,3 +356,5 @@ const SequenceModel Ibm855Model =
   PR_FALSE,
   "IBM855"
 };
+#endif //!MAEMO_CHANGES
+
