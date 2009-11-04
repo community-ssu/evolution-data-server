@@ -1,5 +1,38 @@
 2009-10-23  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
+	NB#132818 - Add the Universal Charset Detector to the build system.
+
+	* configure.in:
+	  Find header files for libuchardet.
+
+	* debian/control:
+	  Add build dependency on microb-engine-dev.
+
+	* Makefile.am (LIBUCHARDET, SUBDIRS):
+	* libuchardet/Makefile.am (new file):
+	* libuchardet/src/Makefile.am (new file):
+	* libuchardet/tests/Makefile.am (new file):
+	  Add instructions for building libuchardet.
+
+	* libuchardet/src/nsCharSetProber.cpp
+	 (nsCharSetProber::FilterWithoutEnglishLetters,
+	  nsCharSetProber::FilterWithEnglishLetters):
+	* libuchardet/src/nsLatin1Prober.cpp
+	 (nsProbingState nsLatin1Prober::HandleData):
+	* libuchardet/src/nsSBCSGroupProber.cpp
+	 (nsSBCSGroupProber::HandleData):
+	  Use builtin C++ allocator instead of the NSPR allocator to avoid
+	  linking against Gecko libraries. It's not worth the overhead for
+	  such trivial functions.
+
+	* libuchardet/tests/test_libuchardet.cpp (new file):
+	  Check that the Universal Charset Detector can be use.
+
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+	Reviewed-By: Marco Barisione  <marco.barisione@collabora.co.uk>
+
+2009-10-23  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
 	NB#132818 - Copy Gecko's Universal Charset Detector.
 
 	* libuchardet/*: Copy source code from microb-engine-20090612.

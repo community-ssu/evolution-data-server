@@ -170,7 +170,12 @@ nsProbingState nsSBCSGroupProber::HandleData(const char* aBuf, PRUint32 aLen)
   }
 
 done:
+#if MAEMO_CHANGES
+  if (newLen1)
+    delete[] newBuf1;
+#else //!MAEMO_CHANGES
   PR_FREEIF(newBuf1);
+#endif //!MAEMO_CHANGES
 
   return mState;
 }

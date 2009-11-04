@@ -1352,6 +1352,17 @@ dnl Gtk Doc stuff
 dnl *************
 GTK_DOC_CHECK(1.0)
 
+dnl *****************************************
+dnl Universal Charset Conversion from Mozilla
+dnl *****************************************
+PKG_CHECK_MODULES([UCHARDET], [mozilla-nspr],
+                  [AC_DEFINE([ENABLE_UCHARDET],[1],
+                             [Use Universal Charset Conversion from Mozilla])
+                   enable_uchardet=yes])
+
+AM_CONDITIONAL([ENABLE_UCHARDET],
+               [test "$enable_uchardet" = yes])
+
 dnl ******************************
 dnl Makefiles
 dnl ******************************
@@ -1396,6 +1407,9 @@ docs/reference/libedataserver/Makefile
 libdb/Makefile
 libedataserver/Makefile
 libedataserver/libedataserver.pc
+libuchardet/Makefile
+libuchardet/src/Makefile
+libuchardet/tests/Makefile
 src/Makefile
 ])
 

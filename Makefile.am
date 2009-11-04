@@ -5,14 +5,18 @@ if ! WITH_LIBDB
 LIBDB = libdb
 endif
 
+if ENABLE_UCHARDET
+LIBUCHARDET = libuchardet
+endif
+
 if ENABLE_CALENDAR
 CALENDAR_DIR = calendar
 endif
 
 if ENABLE_DBUS
-SUBDIRS = $(LIBDB) libedataserver addressbook docs
+SUBDIRS = $(LIBDB) $(LIBUCHARDET) libedataserver addressbook docs
 else
-SUBDIRS = $(LIBDB) libedataserver servers camel addressbook $(CALENDAR_DIR) libedataserverui src docs art po
+SUBDIRS = $(LIBDB) $(LIBUCHARDET) libedataserver servers camel addressbook $(CALENDAR_DIR) libedataserverui src docs art po
 endif
 
 DIST_SUBDIRS = $(SUBDIRS)

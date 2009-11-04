@@ -138,8 +138,13 @@ nsProbingState nsLatin1Prober::HandleData(const char* aBuf, PRUint32 aLen)
     mLastCharClass = charClass;
   }
 
+#if MAEMO_CHANGES
+  if (newBuf1 && newBuf1 != aBuf)
+    delete[] newBuf1;
+#else //!MAEMO_CHANGES
   if (newBuf1 != aBuf)
     PR_FREEIF(newBuf1);
+#endif //!MAEMO_CHANGES
 
   return mState;
 }

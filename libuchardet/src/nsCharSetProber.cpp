@@ -46,7 +46,11 @@ PRBool nsCharSetProber::FilterWithoutEnglishLetters(const char* aBuf, PRUint32 a
   char *prevPtr, *curPtr;
   
   PRBool meetMSB = PR_FALSE;   
+#if MAEMO_CHANGES
+  newptr = *newBuf = new char[aLen];
+#else //!MAEMO_CHANGES
   newptr = *newBuf = (char*)PR_Malloc(aLen);
+#endif //!MAEMO_CHANGES
   if (!newptr)
     return PR_FALSE;
 
@@ -87,7 +91,11 @@ PRBool nsCharSetProber::FilterWithEnglishLetters(const char* aBuf, PRUint32 aLen
   char *prevPtr, *curPtr;
   PRBool isInTag = PR_FALSE;
 
+#if MAEMO_CHANGES
+  newptr = *newBuf = new char[aLen];
+#else //!MAEMO_CHANGES
   newptr = *newBuf = (char*)PR_Malloc(aLen);
+#endif //!MAEMO_CHANGES
   if (!newptr)
     return PR_FALSE;
 
