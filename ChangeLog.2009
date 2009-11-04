@@ -1,5 +1,19 @@
 2009-10-23  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
+	NB#132818 - Use the Universal Charset Detector for parsing vCards.
+
+	* addressbook/libebook-dbus/Makefile.am:
+	* addressbook/libebook-dbus/e-uchardet.cpp (new file):
+	  Introduce function for guessing the charset of a vCard.
+
+	* addressbook/libebook-dbus/e-vcard.c (ensure_utf8_attributes):
+	  Call _evc_guess_charset() to guess the charset of the vCard.
+
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+	Reviewed-By: Marco Barisione  <marco.barisione@collabora.co.uk>
+
+2009-10-23  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
 	NB#132818 - Disable detectors that g_convert() doesn't support.
 
 	* libuchardet/src/*:

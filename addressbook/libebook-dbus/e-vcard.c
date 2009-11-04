@@ -82,6 +82,13 @@ static char * _evc_escape_string_21 (const char *s);
 
 static void e_vcard_attribute_param_add_value_with_len (EVCardAttributeParam *param, const char *value, int length);
 
+#ifdef ENABLE_UCHARDET
+
+/* Internal function, but implemented in e-uchardet.cpp */
+char * _evc_guess_charset (EVCard *evc);
+
+#endif /* ENABLE_UCHARDET */
+
 static void
 e_vcard_dispose (GObject *object)
 {
@@ -783,14 +790,33 @@ ensure_utf8_values (GList *values, const char *attr_name, const char *charset)
 static void
 ensure_utf8_attributes (EVCard *evc)
 {
-	const char *charset_name;
+	const char *charset_name = NULL;
+	char *auto_charset_name = NULL;
 	GList *charset_link;
 	GList *a, *p;
+
+#ifdef ENABLE_UCHARDET
+
+	/* Run Gecko's heuristic Universal Charset Detector. We have to run
+	 * it on the entire vCard as single attribute values might not have
+	 * sufficient ham for feeding the detector. Also we cannot run it
+	 * directly on the vCard string it might use quote encoding.
+	 * See NB#132818. */
+	auto_charset_name = _evc_guess_charset (evc);
+
+	if (!g_strcmp0 (auto_charset_name, "UTF-8")) {
+		g_free (auto_charset_name);
+		auto_charset_name = NULL;
+	}
+
+#endif /* ENABLE_UCHARDET */
 
 	for (a = evc->priv->attributes; a ; a = a->next) {
 		EVCardAttribute *attr = a->data;
 
-		charset_name = get_charset (attr, &charset_link);
+		if (!(charset_name = get_charset (attr, &charset_link)))
+			charset_name = auto_charset_name;
+
 		ensure_utf8_values (attr->values, attr->name, charset_name);
 
 		for (p = attr->params; p; p = p->next) {
@@ -809,6 +835,8 @@ ensure_utf8_attributes (EVCard *evc)
 			attr->params = g_list_delete_link (attr->params, charset_link);
 		}
 	}
+
+	g_free (auto_charset_name);
 }
 
 static GList*

@@ -14,7 +14,7 @@ MARSHAL_GENERATED = e-book-marshal.c e-book-marshal.h
 # The library
 lib_LTLIBRARIES = libebook-1.2.la
 
-libebook_1_2_la_SOURCES =					\
+libebook_1_2_la_SOURCES =				\
 	$(MARSHAL_GENERATED)				\
 	$(DBUS_GENERATED_H)				\
 	e-address-western.c				\
@@ -36,6 +36,13 @@ libebook_1_2_la_LIBADD =					\
 
 libebook_1_2_la_LDFLAGS = 							\
 	-version-info $(LIBEBOOK_CURRENT):$(LIBEBOOK_REVISION):$(LIBEBOOK_AGE)
+
+if ENABLE_UCHARDET
+INCLUDES += -I$(top_srcdir)/libuchardet/src $(UCHARDET_CFLAGS)
+libebook_1_2_la_CXXFLAGS = -Wall -fno-rtti -fno-exceptions -DMAEMO_CHANGES=1
+libebook_1_2_la_LIBADD += $(top_builddir)/libuchardet/src/libuchardet.a
+libebook_1_2_la_SOURCES += e-uchardet.cpp
+endif
 
 libebookincludedir = $(privincludedir)/libebook
 
