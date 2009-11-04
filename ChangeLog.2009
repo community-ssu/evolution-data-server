@@ -1,3 +1,21 @@
+2009-10-23  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
+	NB#132818 - Improve robustness of vCard parser for bogus charsets.
+
+	* addressbook/libebook-dbus/e-vcard.c (skip_until(),
+	  read_attribute_value(), read_attribute_params(), read_attribute(),
+	  get_charset(), enforce_utf8(), ensure_utf8_values(),
+	  ensure_utf8_attributes(), e_vcard_ensure_attributes()):
+	  Don't eagerly try UTF-8 routines on text which also could any kind
+	  of extended ASCII charset (ISO-8859, KOI, GB, ...): Most low-level
+	  routines don't check for invalid UTF-8. Therefore we risk to skip
+	  significant tokens by assuming UTF-8 too early. We now treat the
+	  vCard as plain ASCII when parsing and only normalize attribute
+	  values to UTF-8 when done with parsing.
+
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+	Reviewed-By: Marco Barisione  <marco.barisione@collabora.co.uk>
+
 2009-10-29  Robert Peto  <robert.peto@maemo.org>
 
 	Add the "remove-all-contacts" capability for the file-backend.

@@ -199,8 +199,8 @@ skip_until (const char **p, char *s)
 	while (*lp != '\r' && *lp != '\0') {
 		gboolean s_matches = FALSE;
 		char *ls;
-		for (ls = s; *ls; ls = g_utf8_next_char (ls)) {
-			if (g_utf8_get_char (ls) == g_utf8_get_char (lp)) {
+		for (ls = s; *ls; ls++) {
+			if (*ls == *lp) {
 				s_matches = TRUE;
 				break;
 			}
@@ -208,7 +208,7 @@ skip_until (const char **p, char *s)
 
 		if (s_matches)
 			break;
-		lp = g_utf8_next_char (lp);
+		lp++;
 	}
 
 	*p = lp;
@@ -255,55 +255,17 @@ skip_until (const char **p, char *s)
 		}				       \
 	}
 
-
-/* Try to convert @value from @charset to utf-8, and add it to @attr */
-/* NOTE: This is only needed for parsing attribute values, since we use utf-8
- * internally. */
-static void
-attribute_add_value_utf8 (EVCardAttribute *attr, const char *value, const char *charset)
-{
-	if (G_UNLIKELY (charset && g_ascii_strcasecmp (charset, "utf-8"))) {
-		/* charset is different than utf8, we need to convert */
-		char *converted;
-
-		converted = g_convert (value, -1, "utf-8", charset, NULL, NULL, NULL);
-		if (converted) {
-			e_vcard_attribute_add_value (attr, converted);
-			g_free (converted);
-			return;
-		}
-		else {
-			g_warning (G_STRLOC ": value conversion failed from "
-					"charset %s to utf-8", charset);
-		}
-	}
-
-	/* charset is not set or it is alredy utf-8, or conversion failed */
-	/* validate the value string as utf-8, don't add it if it's not valid */
-	if (g_utf8_validate (value, -1, NULL)) {
-		e_vcard_attribute_add_value (attr, value);
-	} else {
-		g_warning (G_STRLOC ": invalid utf-8 sting");
-	}
-}
-
-/* returns with the next char in lp, only used in read_attribure_value()
- * since other functions use uft8 */
-#define NEXT_CHAR(lp,utf8) (utf8 ? g_utf8_next_char (lp) : lp + 1)
-
 static gboolean
-read_attribute_value (EVCardAttribute *attr, const char **p, gboolean quoted_printable, char *charset)
+read_attribute_value (EVCardAttribute *attr, const char **p, gboolean quoted_printable)
 {
 	const char *lp = *p;
 	GString *str;
 	const char *chunk_start = NULL;
 	gint count = 0;
-	gboolean utf8 = (!charset || !g_ascii_strcasecmp (charset, "utf-8")) ? TRUE : FALSE;
 
 	/* read in the value */
 	str = g_string_sized_new (16);
 	while (*lp && (count < 40)) {
-		//g_printerr("(%c)", *lp);
 		if (*lp == '=' && quoted_printable) {
 			char a, b;
 			WRITE_CHUNK;
@@ -337,7 +299,7 @@ read_attribute_value (EVCardAttribute *attr, const char **p, gboolean quoted_pri
 			WRITE_CHUNK;
 			/* convert back to the non-escaped version of
 			   the characters */
-			lp = NEXT_CHAR(lp, utf8);
+			lp++;
 			if (*lp == '\0') {
 				g_string_append_c (str, '\\');
 				break;
@@ -351,21 +313,17 @@ read_attribute_value (EVCardAttribute *attr, const char **p, gboolean quoted_pri
 			default:
 				g_warning ("invalid escape, passing it through");
 				g_string_append_c (str, '\\');
-				if (utf8) {
-					g_string_append_unichar (str, g_utf8_get_char(lp));
-				} else {
-					g_string_append_c (str, *lp);
-				}
+				g_string_append_c (str, *lp);
 				break;
 			}
-			lp = NEXT_CHAR(lp, utf8);
+			lp++;
 		}
 		else if ((*lp == ';') ||
 			 (*lp == ',' && !strcmp (attr->name, "CATEGORIES"))) {
 			WRITE_CHUNK;
-			attribute_add_value_utf8 (attr, str->str, charset);
+			e_vcard_attribute_add_value (attr, str->str);
 			g_string_assign (str, "");
-			lp = NEXT_CHAR(lp, utf8);
+			lp++;
 			count++;
 		}
 		UNFOLD_CHUNK(lp)
@@ -374,7 +332,7 @@ read_attribute_value (EVCardAttribute *attr, const char **p, gboolean quoted_pri
 				chunk_start = lp;
 
 			//g_string_insert_unichar (str, -1, g_utf8_get_char (lp));
-			lp = NEXT_CHAR(lp, utf8);
+			lp++;
 		}
 	}
 
@@ -388,7 +346,7 @@ read_attribute_value (EVCardAttribute *attr, const char **p, gboolean quoted_pri
 	WRITE_CHUNK;
 	if (str) {
 		/* don't forget the last value */
-		attribute_add_value_utf8 (attr, str->str, charset);
+		e_vcard_attribute_add_value (attr, str->str);
 		g_string_free (str, TRUE);
 	}
 
@@ -397,7 +355,7 @@ read_attribute_value (EVCardAttribute *attr, const char **p, gboolean quoted_pri
 }
 
 static gboolean
-read_attribute_params (EVCardAttribute *attr, const char **p, gboolean *quoted_printable, char **charset)
+read_attribute_params (EVCardAttribute *attr, const char **p, gboolean *quoted_printable)
 {
 	const char *lp = *p;
 	GString *str;
@@ -409,11 +367,11 @@ read_attribute_params (EVCardAttribute *attr, const char **p, gboolean *quoted_p
 	while (*lp != '\0' && (count < 20)) {
 		if (*lp == '"') {
 			in_quote = !in_quote;
-			lp = g_utf8_next_char (lp);
+			lp++;
 		}
 		else if (in_quote || g_unichar_isalnum (g_utf8_get_char (lp)) || *lp == '-' || *lp == '_') {
 			g_string_insert_unichar (str, -1, g_utf8_get_char (lp));
-			lp = g_utf8_next_char (lp);
+			lp++;
 		}
 		/* accumulate until we hit the '=' or ';'.  If we hit
 		 * a '=' the string contains the parameter name.  if
@@ -425,17 +383,17 @@ read_attribute_params (EVCardAttribute *attr, const char **p, gboolean *quoted_p
 			if (str->len > 0) {
 				param = e_vcard_attribute_param_new (str->str);
 				g_string_assign (str, "");
-				lp = g_utf8_next_char (lp);
+				lp++;
 			}
 			else {
 				skip_until (&lp, ":;");
 				if (*lp == '\r') {
-					lp = g_utf8_next_char (lp); /* \n */
-					lp = g_utf8_next_char (lp); /* start of the next line */
+					lp++; /* \n */
+					lp++; /* start of the next line */
 					break;
 				}
 				else if (*lp == ';')
-					lp = g_utf8_next_char (lp);
+					lp++;
 			}
 		}
 		else if (*lp == ';' || *lp == ':' || *lp == ',') {
@@ -447,7 +405,7 @@ read_attribute_params (EVCardAttribute *attr, const char **p, gboolean *quoted_p
 					e_vcard_attribute_param_add_value_with_len (param, str->str, str->len);
 					g_string_assign (str, "");
 					if (!colon)
-						lp = g_utf8_next_char (lp);
+						lp++;
 				}
 				else {
 					/* we've got a parameter of the form:
@@ -462,7 +420,7 @@ read_attribute_params (EVCardAttribute *attr, const char **p, gboolean *quoted_p
 						e_vcard_attribute_param_free (param);
 						param = NULL;
 						if (!colon)
-							lp = g_utf8_next_char (lp);
+							lp++;
 					}
 				}
 				if (param) {
@@ -471,12 +429,6 @@ read_attribute_params (EVCardAttribute *attr, const char **p, gboolean *quoted_p
 					        *quoted_printable = TRUE;
 					        e_vcard_attribute_param_free (param);
 					        param = NULL;
-                                        }
-                                        /* we convert any charset to UTF-8 so we don't need it further */
-                                        else if (!g_ascii_strcasecmp (param->name, "CHARSET")) {
-                                                *charset = g_strdup (param->values->data);
-                                                e_vcard_attribute_param_free (param);
-                                                param = NULL;
                                         }
 				}
                         }
@@ -505,7 +457,7 @@ read_attribute_params (EVCardAttribute *attr, const char **p, gboolean *quoted_p
 					}
 					g_string_assign (str, "");
 					if (!colon)
-						lp = g_utf8_next_char (lp);
+						lp++;
 				}
 				else {
 					/* we've got an attribute with a truly empty
@@ -521,7 +473,7 @@ read_attribute_params (EVCardAttribute *attr, const char **p, gboolean *quoted_p
 					   continue through the loop again if we hit a ';',
 					   or we'll break out correct below if it was a ':' */
 					if (!colon)
-						lp = g_utf8_next_char (lp);
+						lp++;
 				}
 			}
 			if (param && !comma) {
@@ -539,8 +491,8 @@ read_attribute_params (EVCardAttribute *attr, const char **p, gboolean *quoted_p
 			skip_until (&lp, ":;");
 			
 			if (*lp == '\r') {
-				lp = g_utf8_next_char (lp); /* \n */
-				lp = g_utf8_next_char (lp); /* start of the next line */
+				lp++; /* \n */
+				lp++; /* start of the next line */
 				break;
 			}
 		}
@@ -570,7 +522,6 @@ read_attribute (const char **p)
 {
 	char *attr_group = NULL;
 	char *attr_name = NULL;
-        char *charset = NULL;
 	EVCardAttribute *attr = NULL;
 	GString *str;
 	const char *lp = *p;
@@ -628,7 +579,7 @@ read_attribute (const char **p)
 			goto lose;
 		}
 
-		lp = g_utf8_next_char(lp);
+		lp++;
 		count++;
 	}
 
@@ -652,8 +603,8 @@ read_attribute (const char **p)
 
 	if (*lp == ';') {
 		/* skip past the ';' */
-		lp = g_utf8_next_char(lp);
-		if (!read_attribute_params (attr, &lp, &is_qp, &charset)) {
+		lp++;
+		if (!read_attribute_params (attr, &lp, &is_qp)) {
 			*p = lp;
 			skip_to_next_line(p);
 			goto lose;
@@ -664,8 +615,8 @@ read_attribute (const char **p)
 	}
 	if (*lp == ':') {
 		/* skip past the ':' */
-		lp = g_utf8_next_char(lp);
-		if (!read_attribute_value (attr, &lp, is_qp, charset))
+		lp++;
+		if (!read_attribute_value (attr, &lp, is_qp))
 		{
 			goto lose;
 		}
@@ -676,15 +627,11 @@ read_attribute (const char **p)
 	if (!attr->values) {
 		goto lose;
 	}
-        if (charset)
-                g_free (charset);
 
 	return attr;
  lose:
 	if (attr)
 		e_vcard_attribute_free (attr);
-        if (charset)
-                g_free (charset);
 
 	return NULL;
 }
@@ -746,6 +693,124 @@ parse (EVCard *evc, const char *str, gboolean ignore_uid)
 	evc->priv->attributes = g_list_reverse (evc->priv->attributes);
 }
 
+static const char *
+get_charset (EVCardAttribute *attr, GList **link)
+{
+	const char *charset = NULL;
+	GList *p;
+
+	for (p = attr->params; p; p = p->next) {
+		EVCardAttributeParam *param = p->data;
+
+		if (!g_ascii_strcasecmp (param->name, "CHARSET")) {
+			if (param->values)
+				charset = param->values->data;
+
+			break;
+		}
+	}
+
+	if (NULL != link)
+		*link = p;
+
+	return charset;
+}
+
+static char *
+enforce_utf8 (const char *str)
+{
+	const char *end;
+	GString *buf;
+	gssize len;
+
+	len = strlen (str);
+
+	if (g_utf8_validate (str, len, &end))
+		return NULL; /* This string is proper UTF-8. Nothing to do. */
+
+	/* Replace invalid characters with question marks,
+	 * but preserve as much information as possible. */
+
+	buf = g_string_new (NULL);
+
+	do {
+		g_string_append_len (buf, str, end - str);
+		g_string_append_c (buf, '?');
+
+		len -= (end - str) + 1;
+		str = end + 1;
+	} while (!g_utf8_validate (str, len, &end));
+
+	return g_string_free (buf, FALSE);
+}
+
+static void
+ensure_utf8_values (GList *values, const char *attr_name, const char *charset)
+{
+	GList *v;
+
+	for (v = values; v; v = v->next) {
+		GError *error = NULL;
+		char *utf8 = NULL;
+
+		if (!v->data)
+			continue;
+
+		if (charset) {
+			/* Convert to UTF-8 as instructed by the CHARSET parameter. */
+			utf8 = g_convert (v->data, -1, "UTF-8", charset, NULL, NULL, &error);
+
+			if (!utf8) {
+				g_warning ("%s: converting from %s to UTF-8 failed for %s attribute: %s",
+					   G_STRLOC, charset, attr_name, error ? error->message : NULL);
+				g_clear_error (&error);
+			}
+		}
+
+		if (!utf8) {
+			/* Don't know yet if this value is proper UTF-8. Finally check this. */
+			utf8 = enforce_utf8 (v->data);
+		}
+
+		if (utf8) {
+			/* Replace attribute value with UTF-8 variant. */
+			g_free (v->data);
+			v->data = utf8;
+		}
+	}
+}
+
+static void
+ensure_utf8_attributes (EVCard *evc)
+{
+	const char *charset_name;
+	GList *charset_link;
+	GList *a, *p;
+
+	for (a = evc->priv->attributes; a ; a = a->next) {
+		EVCardAttribute *attr = a->data;
+
+		charset_name = get_charset (attr, &charset_link);
+		ensure_utf8_values (attr->values, attr->name, charset_name);
+
+		for (p = attr->params; p; p = p->next) {
+			EVCardAttributeParam *param = p->data;
+
+			if (p != charset_link)
+				ensure_utf8_values (param->values, attr->name, charset_name);
+		}
+
+		if (charset_link) {
+			/* We convert any charset to UTF-8. So keeping the
+			 * parameter would be bogus. NOTE: We have to remove
+			 * this parameter as late as possible as charset_name
+			 * might point on this parameter's first value. */
+			e_vcard_attribute_param_free (charset_link->data);
+			attr->params = g_list_delete_link (attr->params, charset_link);
+		}
+	}
+}
+
 static GList*
 e_vcard_ensure_attributes (EVCard *evc)
 {
@@ -764,7 +829,11 @@ e_vcard_ensure_attributes (EVCard *evc)
 		evc->priv->parsing = TRUE;
 		evc->priv->vcard = NULL;
 
+		/* First parse the vCard in plain ASCII mode.
+		 * Only normalize attribute values to UTF-8 when done.
+		 * See NB#132818. */
 		parse (evc, vcs, have_uid);
+		ensure_utf8_attributes (evc);
 		g_free (vcs);
 
 		evc->priv->parsing = FALSE;
