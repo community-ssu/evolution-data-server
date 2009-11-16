@@ -24,6 +24,8 @@
  * http://www.imc.org/pdi/vcard-21.txt
  */
 
+#include "config.h"
+
 #define _GNU_SOURCE
 
 #include <glib.h>

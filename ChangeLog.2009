@@ -1,3 +1,10 @@
+2009-11-16  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
+	NB#132818 - Use the Universal Charset Detector for parsing vCards.
+
+	* addressbook/libebook-dbus/e-vcard.c (ensure_utf8_attributes()):
+	  Really run the charset detector.
+
 2009-10-23  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
 	NB#132818 - Use the Universal Charset Detector for parsing vCards.

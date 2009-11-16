@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20091116) unstable; urgency=low
+
+  * Fixes: NB#132818 - IOP - Missing name and surname in Vcard sent from Motorola, BenQ/Siemens
+
+ -- Mathias Hasselmann <mathias.hasselmann@maemo.org>  Mon, 16 Nov 2009 13:54:51 +0100
+
 evolution-data-server (1.4.2.1-20091104) unstable; urgency=low
 
   * Fixes: NB#132818 - IOP - Missing name and surname in Vcard sent from Motorola, BenQ/Siemens
