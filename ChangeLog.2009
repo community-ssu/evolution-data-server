@@ -1,5 +1,45 @@
 2009-12-09  Robert Peto  <robert.peto@maemo.org>
 
+	NB#143770 - New API function to reset synchronization history.
+
+	* addressbook/backends/file/e-book-backend-file.c
+	 (e_book_backend_file_get_changes(),
+	  e_book_backend_file_reset_changes()): protect the changes files with
+	  a mutex, implement reset_changes().
+
+	* addressbook/libebook-dbus/e-book.c (e_book_reset_changes(),
+	  reset_changes_reply(), e_book_async_reset_change()):
+	* addressbook/libebook-dbus/e-book.h (e_book_reset_change(),
+	  e_book_async_reset_changes()):
+	  Introduce D-Bus wrappers for resetChanges method.
+
+	* addressbook/libedata-book-dbus/e-book-backend-sync.c
+	 (e_book_backend_sync_reset_changes(),
+	 _e_book_backend_reset_changes(), e_book_backend_sync_class_init()):
+	* addressbook/libedata-book-dbus/e-book-backend-sync.h
+	 (EBookBackendSyncClass, e_book_backend_sync_reset_changes()):
+	  Provide hooks for synchronous version of resetChanges method.
+
+	* addressbook/libedata-book-dbus/e-book-backend.c
+	 (e_book_backend_reset_changes()):
+	* addressbook/libedata-book-dbus/e-book-backend.h (EBookBackendClass,
+	  e_book_backend_reset_changes()):
+	  Provide hooks for asynchronous version of resetChanges method.
+
+	* addressbook/libedata-book-dbus/e-data-book.c
+	 (OperationID, operation_thread(),
+	  impl_AddressBook_Book_resetChanges(),
+	  e_data_book_respond_reset_changes(), ):
+	* addressbook/libedata-book-dbus/e-data-book.h
+	 (e_data_book_respond_reset_changes):
+	* addressbook/libedata-book-dbus/e-data-book.xml
+	 (org.gnome.evolution.dataserver.addressbook.Book):
+	  Introduce resetContacts DBus method.
+
+	Reviewed-By: Marco Barisione  <marco.barisione@collabora.co.uk>
+
+2009-12-09  Robert Peto  <robert.peto@maemo.org>
+
 	NB#148921 - Properly free the EBookBackendFileChangeContext struct.
 
 	* addressbook/backends/file/e-book-backend-file.c

@@ -70,6 +70,7 @@ void e_data_book_respond_modify_contacts (EDataBook *book, guint32 opid, EDataBo
 void e_data_book_respond_create (EDataBook *book, guint32 opid, EDataBookStatus status, EContact *contact);
 void e_data_book_respond_create_contacts (EDataBook *book, guint32 opid, EDataBookStatus status, GList *contacts);
 void e_data_book_respond_get_changes (EDataBook *book, guint32 opid, EDataBookStatus status, GList *changes);
+void e_data_book_respond_reset_changes (EDataBook *book, guint32 opid, EDataBookStatus status);
 void e_data_book_respond_authenticate_user (EDataBook *book, guint32 opid, EDataBookStatus status);
 void e_data_book_respond_get_supported_fields (EDataBook *book, guint32 opid, EDataBookStatus status, GList *fields);
 void e_data_book_respond_get_required_fields (EDataBook *book, guint32 opid, EDataBookStatus status, GList *fields);

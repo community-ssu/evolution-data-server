@@ -128,10 +128,16 @@ Copyright (C) 2005 Opened Hand Ltd
       <arg name="changes" type="a(us)" direction="out"/>
     </method>
 
+    <method name="resetChanges">
+      <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_AddressBook_Book_resetChanges"/>
+      <annotation name="org.freedesktop.DBus.GLib.Async" value=""/>
+      <arg name="change_id" type="s" direction="in"/>
+    </method>
+
     <method name="cancelOperation">
       <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_AddressBook_Book_cancelOperation"/>
     </method>
-    
+
     <method name="close">
       <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="impl_AddressBook_Book_close"/>
       <annotation name="org.freedesktop.DBus.GLib.Async" value=""/>

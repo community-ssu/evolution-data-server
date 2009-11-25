@@ -53,6 +53,7 @@ static void impl_AddressBook_Book_getRequiredFields(EDataBook *book, DBusGMethod
 static void impl_AddressBook_Book_getSupportedAuthMethods(EDataBook *book, DBusGMethodInvocation *context);
 static void impl_AddressBook_Book_getBookView (EDataBook *book, const char *search, const guint max_results, DBusGMethodInvocation *context);
 static void impl_AddressBook_Book_getChanges(EDataBook *book, const char *IN_change_id, DBusGMethodInvocation *context);
+static void impl_AddressBook_Book_resetChanges(EDataBook *book, const char *IN_change_id, DBusGMethodInvocation *context);
 static gboolean impl_AddressBook_Book_cancelOperation(EDataBook *book, GError **error);
 static void impl_AddressBook_Book_close(EDataBook *book, DBusGMethodInvocation *context);
 #include "e-data-book-glue.h"
@@ -271,6 +272,7 @@ typedef enum {
   OP_REMOVE_CONTACTS,
   OP_REMOVE_ALL_CONTACTS,
   OP_GET_CHANGES,
+  OP_RESET_CHANGES,
 } OperationID;
 
 typedef struct {
@@ -298,6 +300,7 @@ typedef struct {
     /* OP_REMOVE_CONTACTS */
     GList *ids;
     /* OP_GET_CHANGES */
+    /* OP_RESET_CHANGES */
     char *change_id;
   };
 } OperationData;
@@ -362,6 +365,10 @@ operation_thread (gpointer data, gpointer user_data)
     break;
   case OP_GET_CHANGES:
     e_book_backend_get_changes (backend, op->book, op->id, op->change_id);
+    g_free (op->change_id);
+    break;
+  case OP_RESET_CHANGES:
+    e_book_backend_reset_changes (backend, op->book, op->id, op->change_id);
     g_free (op->change_id);
     break;
   }
@@ -999,6 +1006,30 @@ e_data_book_respond_get_changes (EDataBook *book, guint32 opid, EDataBookStatus 
 
     g_idle_add (idle_dbus_method_return_ptrarray,
                 dbus_method_return_ptrarray_data_new (context, array));
+  }
+}
+
+static void
+impl_AddressBook_Book_resetChanges(EDataBook *book, const char *IN_change_id, DBusGMethodInvocation *context)
+{
+  OperationData *op;
+
+  op = op_new (OP_RESET_CHANGES, book, context);
+  op->change_id = g_strdup (IN_change_id);
+  g_thread_pool_push (op_pool, op, NULL);
+}
+
+void
+e_data_book_respond_reset_changes (EDataBook *book, guint32 opid, EDataBookStatus status)
+{
+  DBusGMethodInvocation *context = opid_fetch (opid);
+
+  if (status != Success) {
+    GError *error = g_error_new (E_DATA_BOOK_ERROR, status, _("Cannot reset changes"));
+    DBusErrorReturnData *data = dbus_error_return_data_new (context, error);
+    g_idle_add (idle_dbus_return_error, data);
+  } else {
+    g_idle_add (idle_dbus_method_return, context);
   }
 }
 

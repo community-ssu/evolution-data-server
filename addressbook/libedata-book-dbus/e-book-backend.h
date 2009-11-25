@@ -79,7 +79,7 @@ struct _EBookBackendClass {
 	/* Padding for future expansion */
 	void (*set_view_sort_order) (EBookBackend *backend, EDataBookView *book_view, const gchar *query_term);
 	void (*remove_all_contacts) (EBookBackend *backend, EDataBook *book, guint32 opid);
-	void (*_pas_reserved4) (void);
+	void (*reset_changes)       (EBookBackend *backend, EDataBook *book, guint32 opid, const char *change_id);
 };
 
 gboolean    e_book_backend_construct                (EBookBackend             *backend);
@@ -141,6 +141,10 @@ void        e_book_backend_get_contact_list         (EBookBackend             *b
 						     guint32                   opid,
 						     const char               *query);
 void        e_book_backend_get_changes              (EBookBackend             *backend,
+						     EDataBook                *book,
+						     guint32                   opid,
+						     const char               *change_id);
+void        e_book_backend_reset_changes            (EBookBackend             *backend,
 						     EDataBook                *book,
 						     guint32                   opid,
 						     const char               *change_id);

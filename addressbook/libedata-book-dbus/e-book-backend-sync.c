@@ -332,6 +332,33 @@ e_book_backend_sync_get_changes (EBookBackendSync *backend,
 }
 
 /**
+ * e_book_backend_sync_reset_changes:
+ * @backend: an #EBookBackendSync
+ * @book: an #EDataBook
+ * @opid: the unique ID of the operation
+ * @change_id: a unique changes ID
+ *
+ * Resets the chages to the given changes ID, resulting the state that this
+ * ID wasn't be used before.
+ *
+ * Return value: An #EBookBackendSyncStatus indicating the outcome of the operation.
+ */
+EBookBackendSyncStatus
+e_book_backend_sync_reset_changes (EBookBackendSync *backend,
+				   EDataBook *book,
+				   guint32 opid,
+				   const char *change_id)
+{
+	g_return_val_if_fail (E_IS_BOOK_BACKEND_SYNC (backend), GNOME_Evolution_Addressbook_OtherError);
+	g_return_val_if_fail (E_IS_DATA_BOOK (book), GNOME_Evolution_Addressbook_OtherError);
+	g_return_val_if_fail (change_id, GNOME_Evolution_Addressbook_OtherError);
+
+	E_BOOK_BACKEND_SYNC_CHECK_METHOD (backend, reset_changes_sync);
+
+	return (* E_BOOK_BACKEND_SYNC_GET_CLASS (backend)->reset_changes_sync) (backend, book, opid, change_id);
+}
+
+/**
  * e_book_backend_sync_authenticate_user:
  * @backend: an #EBookBackendSync
  * @book: an #EDataBook
@@ -604,6 +631,19 @@ _e_book_backend_get_changes (EBookBackend *backend,
 }
 
 static void
+_e_book_backend_reset_changes (EBookBackend *backend,
+			       EDataBook    *book,
+			       guint32       opid,
+			       const char   *change_id)
+{
+	EBookBackendSyncStatus status;
+
+	status = e_book_backend_sync_reset_changes (E_BOOK_BACKEND_SYNC (backend), book, opid, change_id);
+
+	e_data_book_respond_reset_changes (book, opid, status);
+}
+
+static void
 _e_book_backend_authenticate_user (EBookBackend *backend,
 				   EDataBook    *book,
 				   guint32       opid,
@@ -718,6 +758,7 @@ e_book_backend_sync_class_init (EBookBackendSyncClass *klass)
 	backend_class->get_contact = _e_book_backend_get_contact;
 	backend_class->get_contact_list = _e_book_backend_get_contact_list;
 	backend_class->get_changes = _e_book_backend_get_changes;
+	backend_class->reset_changes = _e_book_backend_reset_changes;
 	backend_class->authenticate_user = _e_book_backend_authenticate_user;
 	backend_class->get_required_fields = _e_book_backend_get_required_fields;
 	backend_class->get_supported_fields = _e_book_backend_get_supported_fields;

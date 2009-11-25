@@ -344,6 +344,15 @@ guint    e_book_async_get_changes          (EBook             *book,
 					    EBookListCallback  cb,
 					    gpointer           closure);
 
+gboolean e_book_reset_changes              (EBook       *book,
+                                            char        *changeid,
+                                            GError     **error);
+
+guint    e_book_async_reset_changes        (EBook         *book,
+                                            char          *changeid,
+                                            EBookCallback  cb,
+                                            gpointer       closure);
+
 void     e_book_free_change_list           (GList       *change_list);
 
 const char *e_book_get_uri                 (EBook       *book);

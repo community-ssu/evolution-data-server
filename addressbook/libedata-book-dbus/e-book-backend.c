@@ -506,6 +506,35 @@ e_book_backend_get_changes (EBookBackend *backend,
 }
 
 /**
+ * e_book_backend_reset_changes:
+ * @backend: an #EBookBackend
+ * @book: an #EDataBook
+ * @opid: the ID to use for this operation
+ * @change_id: the ID of the changeset
+ *
+ * Executes a 'reset changes' request specified by @opid on @book
+ * using @backend.
+ */
+void
+e_book_backend_reset_changes (EBookBackend *backend,
+			      EDataBook    *book,
+			      guint32       opid,
+			      const char   *change_id)
+{
+	g_return_if_fail (E_IS_BOOK_BACKEND (backend));
+	g_return_if_fail (E_IS_DATA_BOOK (book));
+	g_return_if_fail (change_id);
+
+	E_BOOK_BACKEND_CHECK_METHOD (backend, reset_changes);
+
+	e_flag_wait (backend->priv->opened_flag);
+
+	E_BOOK_BACKEND_CHECK_FLAG(backend, loaded, reset_changes, OtherError);
+
+	(* E_BOOK_BACKEND_GET_CLASS (backend)->reset_changes) (backend, book, opid, change_id);
+}
+
+/**
  * e_book_backend_authenticate_user:
  * @backend: an #EBookBackend
  * @book: an #EDataBook

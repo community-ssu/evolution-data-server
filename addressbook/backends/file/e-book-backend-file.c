@@ -86,6 +86,7 @@ struct _EBookBackendFilePrivate {
 	GMutex                  *cursor_lock;    /* lock used for protecting open_cursors */
 	int                      open_cursors;   /* numbert of threads with open cursor */
 	GCond                   *no_cursor_cond; /* true if open_cursors is 0 */
+	GMutex                  *changes_lock;   /* lock for changes db */
 };
 
 G_LOCK_DEFINE_STATIC (running_id);
@@ -1215,6 +1216,8 @@ e_book_backend_file_get_changes (EBookBackendSync *backend,
 	/* Find the changed ids */
 	filename = g_strdup_printf ("%s/%s" CHANGES_DB_SUFFIX, bf->priv->dirname, change_id);
 
+	g_mutex_lock (bf->priv->changes_lock);
+
 	ehash = e_dbhash_new (filename);
 
 	/* We lock the file so that the backup script doesn't save it
@@ -1337,6 +1340,47 @@ e_book_backend_file_get_changes (EBookBackendSync *backend,
 	g_list_free (ctx.del_cards);
 
 	e_dbhash_destroy (ehash);
+	g_free (filename);
+
+	g_mutex_unlock (bf->priv->changes_lock);
+
+	return result;
+}
+
+static EBookBackendSyncStatus
+e_book_backend_file_reset_changes (EBookBackendSync *backend,
+				   EDataBook *book,
+				   guint32 opid,
+				   const char *change_id)
+{
+	EBookBackendFile *bf = E_BOOK_BACKEND_FILE (backend);
+	EBookBackendSyncStatus result = GNOME_Evolution_Addressbook_Success;
+	char *filename;
+
+	filename = g_strdup_printf ("%s/%s" CHANGES_DB_SUFFIX, bf->priv->dirname, change_id);
+
+	g_mutex_lock (bf->priv->changes_lock);
+
+	if (g_unlink (filename) != 0) {
+		switch (errno) {
+			case ENOENT:
+				/* there is no corresponding file to change_id
+				 * we can report success */
+				break;
+			case EACCES:
+				WARNING ("cannot unlink file '%s': %s",
+						filename, strerror (errno));
+				result = GNOME_Evolution_Addressbook_PermissionDenied;
+				break;
+			default:
+				WARNING ("cannot unlink file '%s': %s",
+						filename, strerror (errno));
+				result = GNOME_Evolution_Addressbook_OtherError;
+		}
+	}
+
+	g_mutex_unlock (bf->priv->changes_lock);
+
 	g_free (filename);
 
 	return result;
@@ -2275,6 +2319,9 @@ e_book_backend_file_dispose (GObject *object)
 	g_cond_free (bf->priv->no_cursor_cond);
 	bf->priv->no_cursor_cond = NULL;
 
+	g_mutex_free (bf->priv->changes_lock);
+	bf->priv->changes_lock = NULL;
+
 	G_OBJECT_CLASS (e_book_backend_file_parent_class)->dispose (object);
 }
 
@@ -2367,6 +2414,7 @@ e_book_backend_file_class_init (EBookBackendFileClass *klass)
 	sync_class->get_contact_sync           = e_book_backend_file_get_contact;
 	sync_class->get_contact_list_sync      = e_book_backend_file_get_contact_list;
 	sync_class->get_changes_sync           = e_book_backend_file_get_changes;
+	sync_class->reset_changes_sync         = e_book_backend_file_reset_changes;
 	sync_class->authenticate_user_sync     = e_book_backend_file_authenticate_user;
 	sync_class->get_supported_fields_sync  = e_book_backend_file_get_supported_fields;
 	sync_class->get_required_fields_sync   = e_book_backend_file_get_required_fields;
@@ -2396,4 +2444,5 @@ e_book_backend_file_init (EBookBackendFile *backend)
 
 	priv->cursor_lock = g_mutex_new ();
 	priv->no_cursor_cond = g_cond_new ();
+	priv->changes_lock = g_mutex_new ();
 }

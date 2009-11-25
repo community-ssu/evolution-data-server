@@ -1371,6 +1371,81 @@ e_book_free_change_list (GList *change_list)
 }
 
 /**
+ * e_book_reset_changes:
+ * @book: an #EBook
+ * @changeid: the change ID
+ * @error: a #GError to set on failure.
+ *
+ * Reset the given change ID, so the subsequent #e_book_get_changes or
+ * #e_book_async_get_changes will return the result as if it never was
+ * called before.
+ *
+ * Return value: TRUE on success, FALSE otherwise
+ */
+gboolean
+e_book_reset_changes (EBook *book, char *changeid, GError **error)
+{
+  GError *err = NULL;
+
+  e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
+  e_return_error_if_fail (book->priv->loaded, E_BOOK_ERROR_SOURCE_NOT_LOADED);
+
+  org_gnome_evolution_dataserver_addressbook_Book_reset_changes (book->priv->proxy, changeid, &err);
+  if (!err) {
+    return TRUE;
+  } else {
+    return unwrap_gerror (err, error);
+  }
+}
+
+static void
+reset_changes_reply (DBusGProxy *proxy, GError *error, gpointer user_data)
+{
+  AsyncData *data = user_data;
+  EBookCallback cb = data->callback;
+
+  if (cb)
+    cb (data->book, get_status_from_error (error), data->closure);
+
+  if (error)
+    g_error_free (error);
+
+  async_data_free (data);
+}
+
+/**
+ * e_book_async_reset_changes:
+ * @book: an #EBook
+ * @changeid: the change ID
+ * @cb: function to call when operation finishes
+ * @closure: data to pass to callback function
+ *
+ * Reset the given change ID, so the subsequent #e_book_get_changes or
+ * #e_book_async_get_changes will return the result as if it never was
+ * called before.
+ *
+ * Return value: 0 on success
+ */
+guint
+e_book_async_reset_changes (EBook *book, char *changeid, EBookCallback cb, gpointer closure)
+{
+  AsyncData *data;
+
+  e_return_async_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
+  e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
+  e_return_async_error_if_fail (book->priv->loaded, E_BOOK_ERROR_SOURCE_NOT_LOADED);
+
+  data = async_data_new (book, NULL, cb, closure);
+
+  if (!org_gnome_evolution_dataserver_addressbook_Book_reset_changes_async (book->priv->proxy, changeid, reset_changes_reply, data))
+    cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, closure);
+
+  return 0;
+}
+
+
+/**
  * e_book_add_contact:
  * @book: an #EBook
  * @contact: an #EContact

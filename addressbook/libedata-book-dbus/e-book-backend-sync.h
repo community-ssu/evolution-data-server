@@ -80,7 +80,9 @@ struct _EBookBackendSyncClass {
 							    guint32 opid,
 							    GList **removed_ids);
 
-	void (*_pas_reserved2) (void);
+	EBookBackendSyncStatus (*reset_changes_sync) (EBookBackendSync *backend, EDataBook *book,
+						      guint32 opid,
+						      const char *change_id);
 	void (*_pas_reserved3) (void);
 	void (*_pas_reserved4) (void);
 
@@ -100,6 +102,7 @@ EBookBackendSyncStatus e_book_backend_sync_modify_contacts  (EBookBackendSync *b
 EBookBackendSyncStatus e_book_backend_sync_get_contact (EBookBackendSync *backend, EDataBook *book, guint32 opid, const char *id, char **vcard);
 EBookBackendSyncStatus e_book_backend_sync_get_contact_list (EBookBackendSync *backend, EDataBook *book, guint32 opid, const char *query, GList **contacts);
 EBookBackendSyncStatus e_book_backend_sync_get_changes (EBookBackendSync *backend, EDataBook *book, guint32 opid, const char *change_id, GList **changes);
+EBookBackendSyncStatus e_book_backend_sync_reset_changes (EBookBackendSync *backend, EDataBook *book, guint32 opid, const char *change_id);
 EBookBackendSyncStatus e_book_backend_sync_authenticate_user (EBookBackendSync *backend, EDataBook *book, guint32 opid, const char *user, const char *passwd, const char *auth_method);
 
 EBookBackendSyncStatus e_book_backend_sync_get_required_fields (EBookBackendSync *backend, EDataBook *book, guint32 opid, GList **fields);
