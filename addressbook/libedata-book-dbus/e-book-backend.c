@@ -15,7 +15,7 @@
 #define E_BOOK_BACKEND_CHECK_METHOD(backend, method, ...) G_STMT_START{ \
 	if (G_UNLIKELY (!E_BOOK_BACKEND_GET_CLASS ((backend))->method)) { \
 		g_warning ("%s: %s: unsupported method: %s", G_STRFUNC, G_OBJECT_TYPE_NAME ((backend)), #method); \
-		e_data_book_respond_ ## method (book, opid, OtherError, ## __VA_ARGS__); \
+		e_data_book_respond_ ## method (book, opid, MethodNotSupported, ## __VA_ARGS__); \
 		return; \
 	} \
 }G_STMT_END

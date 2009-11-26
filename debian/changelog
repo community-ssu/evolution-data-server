@@ -5,6 +5,7 @@ evolution-data-server (1.4.2.1-20091116.99) unstable; urgency=low
   * Fixes: NB#148921 - Memory leak in e-addressbook-factory while adding
     and deleting an event repeatedly
   * Fixes: NB#143770 - No API to clear or reset synchronization history
+  * Introduce method not supporter return value. (See NB#143770)
 
  -- Mathias Hasselmann <mathias.hasselmann@maemo.org>  Mon, 16 Nov 2009 13:54:51 +0100
 

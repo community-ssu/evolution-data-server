@@ -16,7 +16,7 @@
 	if (!E_BOOK_BACKEND_SYNC_GET_CLASS ((backend))->method) { \
 		g_warning ("%s: %s: unsupported method: %s", \
 			   G_STRFUNC, G_OBJECT_TYPE_NAME ((backend)), #method); \
-		return GNOME_Evolution_Addressbook_OtherError; \
+		return MethodNotSupported; \
 	} \
 }G_STMT_END
 

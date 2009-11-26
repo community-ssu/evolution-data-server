@@ -60,6 +60,8 @@ typedef enum {
 	InvalidServerVersion,
 	NoSpace,
 	InvalidField,
+
+	MethodNotSupported,
 } EDataBookStatus;
 
 /* Some hacks so the backends compile without change */

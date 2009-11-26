@@ -2857,6 +2857,8 @@ get_status_from_error (GError *error)
       E_BOOK_VIEW_ERROR_INVALID_QUERY, 0 },
     { "org.gnome.evolution.dataserver.addressbook.BookView.queryrefused",
       E_BOOK_VIEW_ERROR_QUERY_REFUSED, 0 },
+    { "org.gnome.evolution.dataserver.addressbook.Book.methodnotsupported",
+      E_BOOK_ERROR_METHOD_NOT_SUPPORTED, 0 },
   };
 
   if G_LIKELY (error == NULL)

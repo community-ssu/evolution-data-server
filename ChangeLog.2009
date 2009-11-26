@@ -1,5 +1,20 @@
 2009-12-09  Robert Peto  <robert.peto@maemo.org>
 
+	NB#143770 - Introduce method not supporter return value.
+
+	* addressbook/libebook-dbus/e-book-types.h (EBookStatus):
+	* addressbook/libebook-dbus/e-book.c (get_status_from_error()):
+	  Client side changes to handle the new return value.
+
+	* addressbook/libedata-book-dbus/e-book-backend-sync.c:
+	* addressbook/libedata-book-dbus/e-book-backend.c:
+	* addressbook/libedata-book-dbus/e-data-book-types.h:
+	  Server side changes to send the new return value when it is needed.
+
+	Reviewed-By: Marco Barisione  <marco.barisione@collabora.co.uk>
+
+2009-12-09  Robert Peto  <robert.peto@maemo.org>
+
 	NB#143770 - New API function to reset synchronization history.
 
 	* addressbook/backends/file/e-book-backend-file.c

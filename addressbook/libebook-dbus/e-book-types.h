@@ -71,6 +71,8 @@ GQuark e_book_error_quark (void) G_GNUC_CONST;
  * required storage space was not available
  * @E_BOOK_ERROR_INVALID_FIELD: one or more of the fields involved is confirmed
  * invalid
+ * @E_BOOK_ERROR_METHOD_NOT_SUPPORTED: the operation cannot be performed because
+ * the corresponding backend does not support it
  *
  * The final status of the corresponding #EBook operation.
  **/
@@ -98,7 +100,8 @@ typedef enum {
 	E_BOOK_ERROR_OTHER_ERROR,
 	E_BOOK_ERROR_INVALID_SERVER_VERSION,
 	E_BOOK_ERROR_NO_SPACE,
-	E_BOOK_ERROR_INVALID_FIELD
+	E_BOOK_ERROR_INVALID_FIELD,
+	E_BOOK_ERROR_METHOD_NOT_SUPPORTED,
 } EBookStatus;
 
 /**
