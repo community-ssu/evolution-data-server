@@ -37,6 +37,7 @@ G_GNUC_DEPRECATED
 int          e_util_mkdir_hier (const char *path, mode_t mode);
 #endif
 
+gboolean     e_util_recursive_rmdir (const char *path);
 gchar       *e_util_strstrcase (const gchar *haystack, const gchar *needle);
 gchar       *e_util_unicode_get_utf8 (const gchar *text, gunichar *out);
 const gchar *e_util_utf8_strstrcase (const gchar *haystack, const gchar *needle);

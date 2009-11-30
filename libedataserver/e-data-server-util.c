@@ -49,6 +49,54 @@ e_util_mkdir_hier (const char *path, mode_t mode)
 }
 
 /**
+ * e_util_recursive_rmdir:
+ * @path: The root of directory hierarchy to remove.
+ *
+ * Removes a directory with removing all its contents recursively.
+ **/
+/* Copied from telepathy-haze (file src/main.c)
+ * and relicensed from GPL to LGPL by the author.
+ *
+ * Copyright (C) 2007 Will Thompson
+ */
+gboolean
+e_util_recursive_rmdir (const char *path)
+{
+        const gchar *child_path;
+        GDir *dir;
+        gboolean ret = TRUE;
+
+        dir = g_dir_open (path, 0, NULL);
+        if (!dir)
+                return FALSE;
+
+        while (ret && (child_path = g_dir_read_name (dir))) {
+                gchar *child_full_path;
+
+                child_full_path = g_build_filename (path, child_path, NULL);
+
+                if (g_file_test (child_full_path, G_FILE_TEST_IS_DIR) &&
+                    !g_file_test (child_full_path, G_FILE_TEST_IS_SYMLINK)) {
+                        if (!e_util_recursive_rmdir (child_full_path))
+                                ret = FALSE;
+                } else {
+                        if (g_unlink (child_full_path) != 0)
+                                ret = FALSE;
+                }
+
+                g_free (child_full_path);
+        }
+
+        g_dir_close (dir);
+
+        if (ret)
+                ret = !g_rmdir (path);
+
+        return ret;
+}
+
+
+/**
  * e_util_strstrcase:
  * @haystack: The string to search in.
  * @needle: The string to search for.

@@ -1,3 +1,14 @@
+2009-01-18  Robert Peto  <robert.peto@maemo.org>
+
+	NB#145900 - Create a public version from delete_directory() as
+	e_util_recursive_rmdir().
+
+	* addressbook/libedata-book-dbus/e-data-book-factory.c:
+	* libedataserver/e-data-server-util.c:
+	* libedataserver/e-data-server-util..h: See above.
+
+	Reviewed-By: Marco Barisione  <marco.barisione@collabora.co.uk>
+
 2010-01-12  Robert Peto  <robert.peto@maemo.org>
 
 	NB#140389 - fine tune checkpoint handling
