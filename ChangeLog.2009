@@ -1,5 +1,15 @@
 2010-01-12  Robert Peto  <robert.peto@maemo.org>
 
+	NB#140389 - fine tune transaction log handling
+
+	* addressbook/backends/file/e-book-backend-file.c
+	 (e_book_backend_file_setup_db_env()): set log file size to 4MB and
+	  log buffer size to 128kB.
+
+	Reviewed-By: Marco Barisione  <marco.barisione@collabora.co.uk>
+
+2010-01-12  Robert Peto  <robert.peto@maemo.org>
+
 	NB#140389 - wait 200ms before retry to commit the transaction
 
 	* addressbook/backends/file/e-book-backend-file-utils.c

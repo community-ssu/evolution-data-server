@@ -72,6 +72,11 @@
 
 #define PAS_ID_PREFIX "pas-id-"
 
+/* libdb's log buffer size */
+#define BDB_LOG_BUFFER_SIZE 128*1024
+/* libdb's log file size, it must be at least 4 times greater than buffer size */
+#define BDB_LOG_MAX_SIZE 4*1024*1024
+
 G_DEFINE_TYPE (EBookBackendFile, e_book_backend_file, E_TYPE_BOOK_BACKEND_SYNC);
 
 struct _EBookBackendFilePrivate {
@@ -1801,7 +1806,7 @@ e_book_backend_file_setup_db_env (EBookBackendFile *bf, gboolean only_if_exists)
 	/* create the environment */
 	db_error = db_env_create (&env, 0);
 	if (db_error != 0) {
-		WARNING ("db_env_create failed with %s", db_strerror (db_error));
+		WARNING ("db_env_create failed: %s", db_strerror (db_error));
 		goto error;
 	}
 
@@ -1812,7 +1817,7 @@ e_book_backend_file_setup_db_env (EBookBackendFile *bf, gboolean only_if_exists)
 	/* set up our panic callback */
 	db_error = env->set_paniccall (env, file_paniccall);
 	if (db_error != 0) {
-		WARNING ("set_paniccall failed with: %s", db_strerror (db_error));
+		WARNING ("set_paniccall failed: %s", db_strerror (db_error));
 		goto error;
 	}
 
@@ -1821,14 +1826,28 @@ e_book_backend_file_setup_db_env (EBookBackendFile *bf, gboolean only_if_exists)
 			(void *(*)(void *, size_t))g_try_realloc,
 			g_free);
 	if (db_error != 0) {
-		WARNING ("set_alloc failed with %s", db_strerror (db_error));
+		WARNING ("set_alloc failed: %s", db_strerror (db_error));
 		goto error;
 	}
 
 	/* do deadlock detection internally. */
 	db_error = env->set_lk_detect(env, DB_LOCK_DEFAULT);
 	if (db_error != 0) {
-		WARNING ("set_lk_detect failed with %s", db_strerror (db_error));
+		WARNING ("set_lk_detect failed: %s", db_strerror (db_error));
+		goto error;
+	}
+
+	/* set the log buffer size */
+	db_error = env->set_lg_bsize (env, BDB_LOG_BUFFER_SIZE);
+	if (db_error != 0) {
+		WARNING ("set_lg_bsize failed: %s", db_strerror (db_error));
+		goto error;
+	}
+
+	/* set the max log file size */
+	db_error = env->set_lg_max (env, BDB_LOG_MAX_SIZE);
+	if (db_error != 0) {
+		WARNING ("set_lg_max failed: %s", db_strerror (db_error));
 		goto error;
 	}
 
@@ -1837,7 +1856,7 @@ e_book_backend_file_setup_db_env (EBookBackendFile *bf, gboolean only_if_exists)
 			| DB_THREAD | DB_INIT_LOCK
 			| DB_RECOVER | DB_INIT_TXN, 0);
 	if (db_error != 0) {
-		WARNING ("db_env_open failed with %s", db_strerror (db_error));
+		WARNING ("db_env_open failed: %s", db_strerror (db_error));
 		goto error;
 	}
 
