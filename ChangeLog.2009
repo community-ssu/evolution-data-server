@@ -1,5 +1,21 @@
 2010-01-12  Robert Peto  <robert.peto@maemo.org>
 
+	NB#140389 - fine tune checkpoint handling
+
+	* addressbook/backends/file/e-book-backend-file.c (sync_dbs()):
+	  Create a checkpoint if the last checkpoint was created more than 60
+	  mins ago or more than 1MB was written to log file. Remove
+	  unnecessary log file to preserve disk space. (We don't prepare for
+	  catastrophic recovery.)
+
+	* addressbook/backends/file/e-book-backend-file.c
+	 (e_book_backend_file_sync()): Force checkpoint before we create the
+	  backup.
+
+	Reviewed-By: Marco Barisione  <marco.barisione@collabora.co.uk>
+
+2010-01-12  Robert Peto  <robert.peto@maemo.org>
+
 	NB#140389 - fine tune transaction log handling
 
 	* addressbook/backends/file/e-book-backend-file.c

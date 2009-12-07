@@ -76,6 +76,9 @@
 #define BDB_LOG_BUFFER_SIZE 128*1024
 /* libdb's log file size, it must be at least 4 times greater than buffer size */
 #define BDB_LOG_MAX_SIZE 4*1024*1024
+/* create checkpoint after 1MB or 60 minutes */
+#define BDB_CHKP_KB 1024
+#define BDB_CHKP_MIN 60
 
 G_DEFINE_TYPE (EBookBackendFile, e_book_backend_file, E_TYPE_BOOK_BACKEND_SYNC);
 
@@ -162,10 +165,11 @@ set_revision (EContact *contact)
 
 /* sync main, running_id and index DBs */
 static int
-sync_dbs (EBookBackendFile *bf)
+sync_dbs (EBookBackendFile *bf, gboolean force_checkpoint)
 {
 	int db_error;
 	int retval = 0;
+	DB_ENV *env = bf->priv->env;
 
 	/* sync the index file if available */
 	if (bf->priv->index)
@@ -184,6 +188,21 @@ sync_dbs (EBookBackendFile *bf)
 	if (db_error != 0) {
 		WARNING ("file_db->sync failed with %s", db_strerror (db_error));
 		retval = db_error;
+	}
+
+	/* create checkpoint if needed */
+	db_error = env->txn_checkpoint (env, BDB_CHKP_KB, BDB_CHKP_MIN,
+			force_checkpoint ? DB_FORCE : 0);
+	if (db_error != 0) {
+		WARNING ("DB_ENV->txn_checkpoint failed: %s", db_strerror (db_error));
+		return db_error;
+	}
+
+	/* remove old log files, we won't do catastrophic recovery */
+	db_error = env->log_archive (env, NULL, DB_ARCH_REMOVE);
+	if (db_error != 0) {
+		WARNING ("DB_ENV->log_archive failed: %s", db_strerror (db_error));
+		return db_error;
 	}
 
 	return retval;
@@ -400,7 +419,7 @@ insert_contact_sync (EBookBackendFile *bf,
 		goto out;
 	}
 
-	db_error = sync_dbs (bf);
+	db_error = sync_dbs (bf, FALSE);
 
 out:
 	txn_ops_free (ops);
@@ -470,7 +489,7 @@ e_book_backend_file_create_contacts (EBookBackendSync *backend,
 	db_error = txn_execute_ops (bf->priv->env, NULL, ops);
 	if (db_error == 0) {
 		/* sync databases */
-		db_error = sync_dbs (bf);
+		db_error = sync_dbs (bf, FALSE);
 	}
 
 out:
@@ -560,7 +579,7 @@ e_book_backend_file_remove_contacts (EBookBackendSync *backend,
 	/* decrement open cursor count */
 	decrement_open_cursors (bf);
 
-	db_error = sync_dbs (bf);
+	db_error = sync_dbs (bf, FALSE);
 	if (db_error != 0) {
 		WARNING ("cannot sync DBs: %s", db_strerror (db_error));
 	}
@@ -639,7 +658,7 @@ e_book_backend_file_remove_all_contacts (EBookBackendSync *backend,
 	/* NOTE: running id should be preserved */
 
 	/* finally sync the dbs */
-	db_error = sync_dbs (bf);
+	db_error = sync_dbs (bf, FALSE);
 
 out:
 	g_mutex_unlock (bf->priv->cursor_lock);
@@ -758,7 +777,7 @@ e_book_backend_file_modify_contact (EBookBackendSync *backend,
 
 	decrement_open_cursors (bf);
 
-	db_error = sync_dbs (bf);
+	db_error = sync_dbs (bf, FALSE);
 
 out:
 	txn_ops_free (ops);
@@ -810,7 +829,7 @@ e_book_backend_file_modify_contacts (EBookBackendSync *backend,
 	decrement_open_cursors (bf);
 
 	/* sync databases */
-	db_error = sync_dbs (bf);
+	db_error = sync_dbs (bf, FALSE);
 
 out:
 	txn_ops_free (ops);
@@ -1710,7 +1729,7 @@ install_pre_installed_vcards (EBookBackend *backend)
 		}
 
 		/* sync databases */
-		sync_dbs (bf);
+		sync_dbs (bf, FALSE);
 	}
 
 out:
@@ -2269,7 +2288,9 @@ e_book_backend_file_sync (EBookBackend *backend)
 		return;
 	}
 
-	sync_dbs (bf);
+	/* force checkpoint, this function gets called before
+	 * we create the backup */
+	sync_dbs (bf, TRUE);
 }
 
 static gboolean
