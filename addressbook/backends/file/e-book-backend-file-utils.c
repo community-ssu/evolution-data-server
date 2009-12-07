@@ -19,12 +19,15 @@
 
 #include <errno.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "e-book-backend-file-log.h"
 #include "e-book-backend-file-utils.h"
 
 /* maximum retry to commit a transaction */
-#define MAX_RETRY 5
+#define MAX_RETRY 10
+/* wait 200ms before retry the transaction */
+#define RETRY_WAIT 200000
 
 
 /**
@@ -183,11 +186,12 @@ RETRY:
                                 return db_err;
                         }
 
-                        if (++fail < MAX_RETRY) {
+                        if (++fail < MAX_RETRY && db_error == DB_LOCK_DEADLOCK) {
+                                usleep (RETRY_WAIT);
                                 goto RETRY;
                         }
                         else {
-                                WARNING ("MAX_RETRY exceeded");
+                                WARNING ("MAX_RETRY exceeded or unhandled db error");
                                 return db_error;
                         }
                 }

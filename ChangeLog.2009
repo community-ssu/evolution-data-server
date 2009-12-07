@@ -1,3 +1,14 @@
+2010-01-12  Robert Peto  <robert.peto@maemo.org>
+
+	NB#140389 - wait 200ms before retry to commit the transaction
+
+	* addressbook/backends/file/e-book-backend-file-utils.c
+	 (txn_execute_ops()):
+	  wait 200ms before retry the commit, only retry if the transaction
+	  was aborted because of deadlock in libdb, retry max 10 times
+
+	Reviewed-By: Marco Barisione  <marco.barisione@collabora.co.uk>
+
 2010-01-11  Robert Peto  <robert.peto@maemo.org>
 
 	NB#148921 - Fix memory leak in get_changes().
