@@ -1,3 +1,11 @@
+2009-12-09  Robert Peto  <robert.peto@maemo.org>
+
+	NB#148921 - Close and re-create the db handle while getting changes.
+
+	* libedataserver/e-dbhash.c (e_dbhash_new()): See above.
+
+	Reviewed-By: Marco Barisione  <marco.barisione@collabora.co.uk>
+
 2009-11-16  Mathias Hasselmann  <mathias.hasselmann@maemo.org>
 
 	NB#132818 - Use the Universal Charset Detector for parsing vCards.
