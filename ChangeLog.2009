@@ -1,5 +1,14 @@
 2009-12-09  Robert Peto  <robert.peto@maemo.org>
 
+	NB#148921 - Properly free the EBookBackendFileChangeContext struct.
+
+	* addressbook/backends/file/e-book-backend-file.c
+	 (e_book_backend_file_get_changes()): See above.
+
+	Reviewed-By: Marco Barisione  <marco.barisione@collabora.co.uk>
+
+2009-12-09  Robert Peto  <robert.peto@maemo.org>
+
 	NB#148921 - Close and re-create the db handle while getting changes.
 
 	* libedataserver/e-dbhash.c (e_dbhash_new()): See above.

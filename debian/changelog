@@ -2,6 +2,8 @@ evolution-data-server (1.4.2.1-20091116.99) unstable; urgency=low
 
   * Close and re-create the db handle while getting addressbook changes.
     (See NB#148921)
+  * Fixes: NB#148921 - Memory leak in e-addressbook-factory while adding
+    and deleting an event repeatedly
 
  -- Mathias Hasselmann <mathias.hasselmann@maemo.org>  Mon, 16 Nov 2009 13:54:51 +0100
 
