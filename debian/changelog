@@ -1,9 +1,9 @@
-evolution-data-server (1.4.2.1-20091209) unstable; urgency=low
+evolution-data-server (1.4.2.1-20091209.1) unstable; urgency=low
 
   * Close and re-create the db handle while getting addressbook changes.
     (See NB#148921)
-  * Fixes: NB#148921 - Memory leak in e-addressbook-factory while adding
-    and deleting an event repeatedly
+  * Fix memory leaks found in e_book_backend_file_get_changes()
+    (See NB#148921)
   * Fixes: NB#143770 - No API to clear or reset synchronization history
   * Introduce method not supporter return value. (See NB#143770)
 
