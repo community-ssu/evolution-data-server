@@ -1,3 +1,13 @@
+2010-01-11  Robert Peto  <robert.peto@maemo.org>
+
+	NB#148921 - Fix memory leak in get_changes().
+
+	* addressbook/backends/file/e-book-backend-file.c
+	 (e_book_backend_file_changes_foreach_key): Properly free
+	  vcard_dbt.data.
+
+	Reviewed-By: Marco Barisione  <marco.barisione@collabora.co.uk>
+
 2009-12-09  Robert Peto  <robert.peto@maemo.org>
 
 	NB#143770 - Introduce method not supporter return value.
