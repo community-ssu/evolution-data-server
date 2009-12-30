@@ -383,8 +383,18 @@ void                  e_vcard_attribute_param_add_values      (EVCardAttributePa
 							       ...);
 void                  e_vcard_attribute_param_remove_values   (EVCardAttributeParam *param);
 
-void                  e_vcard_attribute_merge_param           (EVCardAttribute *attr, EVCardAttributeParam *param, GCompareFunc cmp_func);
+void                  e_vcard_attribute_merge_param             (EVCardAttribute *attr, EVCardAttributeParam *param,
+								 GCompareFunc cmp_func);
 
+void                  e_vcard_attribute_merge_param_with_value  (EVCardAttribute *attr, EVCardAttributeParam *param,
+								 const char *value, GCompareFunc cmp_func);
+void                  e_vcard_attribute_merge_param_with_values (EVCardAttribute *attr, EVCardAttributeParam *param,
+								 GCompareFunc cmp_func, ...);
+
+void                  e_vcard_attribute_param_merge_value       (EVCardAttributeParam *param, const char *value,
+								 GCompareFunc cmp_func);
+void                  e_vcard_attribute_param_merge_values      (EVCardAttributeParam *param, GCompareFunc cmp_func,
+								 ...);
 
 /* EVCard* accessors.  nothing returned from these functions should be
    freed by the caller. */

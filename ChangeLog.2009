@@ -1,5 +1,19 @@
 2010-01-14  Marco Barisione  <marco.barisione@collabora.co.uk>
 
+	Add other merge functions similar to e_vcard_attribute_merge_param().
+
+	Based on an original patch by Robert Peto.
+
+	* libebook-dbus/e-vcard.c (e_vcard_attribute_param_merge_value),
+	(e_vcard_attribute_param_merge_values),
+	(e_vcard_attribute_merge_param_with_value),
+	(e_vcard_attribute_merge_param_with_values):
+	* libebook-dbus/e-vcard.h:
+
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+
+2010-01-14  Marco Barisione  <marco.barisione@collabora.co.uk>
+
 	Add e_vcard_attribute_merge_param().
 
 	Based on an original patch by Robert Peto.

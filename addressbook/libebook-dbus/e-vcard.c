@@ -2236,6 +2236,46 @@ e_vcard_attribute_param_add_value (EVCardAttributeParam *param,
 }
 
 /**
+ * e_vcard_attribute_param_merge_value:
+ * @param: an #EVCardAttributeParam
+ * @value: a string value to add
+ * @cmp_func: a #GCompareFunc or %NULL
+ *
+ * Adds @value to @param's list of values if value is not already there.
+ * (Eg. doesn't allow duplicate values).
+ *
+ * To decide whether @value is already present or not @cmp_func is called
+ * with the two strings to compare as arguments. If @cmp_func is %NULL then
+ * g_ascii_strcasecmp() is used.
+ *
+ * Note that if param is ENCODING then its value gets overwritten.
+ **/
+void
+e_vcard_attribute_param_merge_value (EVCardAttributeParam *param,
+				     const char *value,
+				     GCompareFunc cmp_func)
+{
+	GList *tmp;
+
+	g_return_if_fail (param != NULL);
+
+	if (!cmp_func)
+		cmp_func = (GCompareFunc) g_ascii_strcasecmp;
+
+	if (!strcmp (param->name, EVC_ENCODING)) {
+		/* replace the value */
+		e_vcard_attribute_param_remove_values (param);
+		e_vcard_attribute_param_add_value (param, value);
+	}
+	else {
+		tmp = g_list_find_custom (param->values, value, cmp_func);
+		if (!tmp) {
+			e_vcard_attribute_param_add_value (param, value);
+		}
+	}
+}
+
+/**
  * e_vcard_attribute_param_add_value_with_len:
  * @param: an #EVCardAttributeParam
  * @value: a string value to add
@@ -2280,6 +2320,37 @@ e_vcard_attribute_param_add_values (EVCardAttributeParam *param,
 }
 
 /**
+ * e_vcard_attribute_param_merge_values:
+ * @param: an #EVCardAttributeParam
+ * @cmp_func: a #GCompareFunc or %NULL
+ * @Varargs: a %NULL-terminated list of strings
+ *
+ * Merges a list of values to param's value list.
+ *
+ * To decide whether the values are already present or not @cmp_func is called
+ * with the two strings to compare as arguments. If @cmp_func is %NULL then
+ * g_ascii_strcasecmp() is used.
+ **/
+void
+e_vcard_attribute_param_merge_values (EVCardAttributeParam *param,
+				      GCompareFunc cmp_func,
+				      ...)
+{
+	va_list ap;
+	char *v;
+
+	g_return_if_fail (param != NULL);
+
+	va_start (ap, cmp_func);
+
+	while ((v = va_arg (ap, char*))) {
+		e_vcard_attribute_param_merge_value (param, v, cmp_func);
+	}
+
+	va_end (ap);
+}
+
+/**
  * e_vcard_attribute_add_param_with_value:
  * @attr: an #EVCardAttribute
  * @param: an #EVCardAttributeParam
@@ -2297,6 +2368,35 @@ e_vcard_attribute_add_param_with_value (EVCardAttribute *attr,
 	e_vcard_attribute_param_add_value (param, value);
 
 	e_vcard_attribute_add_param (attr, param);
+}
+
+/**
+ * e_vcard_attribute_merge_param_with_value:
+ * @attr: an #EVCardAttribute
+ * @param: an #EVCardAttributeParam
+ * @value: a string value
+ * @cmp_func: a #GCompareFunc or %NULL
+ *
+ * Merges @value to @param, then merges @param to @attr.
+ *
+ * The ownership of @param is transferred to @attr.
+ *
+ * To decide whether @value is already present or not @cmp_func is called
+ * with the two strings to compare as arguments. If @cmp_func is %NULL then
+ * g_ascii_strcasecmp() is used.
+ **/
+void
+e_vcard_attribute_merge_param_with_value (EVCardAttribute *attr,
+					  EVCardAttributeParam *param,
+					  const char *value,
+					  GCompareFunc cmp_func)
+{
+	g_return_if_fail (attr != NULL);
+	g_return_if_fail (param != NULL);
+
+	e_vcard_attribute_param_merge_value (param, cmp_func, value);
+
+	return e_vcard_attribute_merge_param (attr, cmp_func, param);
 }
 
 /**
@@ -2327,6 +2427,44 @@ e_vcard_attribute_add_param_with_values (EVCardAttribute *attr,
 	va_end (ap);
 
 	e_vcard_attribute_add_param (attr, param);
+}
+
+/**
+ * e_vcard_attribute_merge_param_with_values:
+ * @attr: an #EVCardAttribute
+ * @param: an #EVCardAttributeParam
+ * @Varargs: a %NULL-terminated list of strings
+ *
+ * Merges the list of values to @param, then merges @param
+ * to @attr.
+ *
+ * The ownership of @param is transferred to @attr.
+ *
+ * To decide whether @value is already present or not @cmp_func is called
+ * with the two strings to compare as arguments. If @cmp_func is %NULL then
+ * g_ascii_strcasecmp() is used.
+ **/
+void
+e_vcard_attribute_merge_param_with_values (EVCardAttribute *attr,
+					   EVCardAttributeParam *param,
+					   GCompareFunc cmp_func,
+					   ...)
+{
+	va_list ap;
+	char *v;
+
+	g_return_if_fail (attr != NULL);
+	g_return_if_fail (param != NULL);
+
+	va_start (ap, cmp_func);
+
+	while ((v = va_arg (ap, char*))) {
+		e_vcard_attribute_param_merge_value (param, v, cmp_func);
+	}
+
+	va_end (ap);
+
+	return e_vcard_attribute_merge_param (attr, param, cmp_func);
 }
 
 /**
