@@ -2139,6 +2139,86 @@ e_vcard_attribute_add_param (EVCardAttribute *attr,
 	}
 }
 
+/* merge list b into list a */
+static GList *
+merge_values (GList *a, GList *b, GCompareFunc cmp_func)
+{
+	GList *l;
+	GList *tmp;
+
+	g_assert (cmp_func);
+
+	for (l = b; l; l = l->next) {
+		tmp = g_list_find_custom (a, l->data,
+				(GCompareFunc) g_ascii_strcasecmp);
+		if (!tmp)
+			a = g_list_append (a, g_strdup (l->data));
+	}
+
+	return a;
+}
+
+/**
+ * e_vcard_attribute_merge_param:
+ * @attr: an #EVCardAttribute
+ * @param: an #EVCardAttributeParam to add
+ * @cmp_func: a #GCompareFunc or %NULL
+ *
+ * Merge @param to @attr's list of parameters. If @param is not present
+ * already then it works like e_vcard_attribute_add_param(), if it is
+ * present then it won't create a new param but merge the @param's values
+ * to @attr.
+ *
+ * To decide whether @param's values are already present or not @cmp_func
+ * is called with the two strings to compare as arguments. If @cmp_func is
+ * %NULL then g_ascii_strcasecmp() is used.
+ *
+ * This also transfers ownership of @param to @attr, the caller
+ * should not access @param anymore.
+ *
+ * Return value: TRUE if the param was added successfully, FALSE otherwise.
+ **/
+void
+e_vcard_attribute_merge_param (EVCardAttribute *attr,
+			       EVCardAttributeParam *param,
+			       GCompareFunc cmp_func)
+{
+	GList *params;
+	gboolean merged = FALSE;
+
+	g_return_if_fail (attr != NULL);
+	g_return_if_fail (param != NULL);
+
+	if (!cmp_func)
+		cmp_func = (GCompareFunc) g_ascii_strcasecmp;
+
+	/* check encoding first, do not allow multiple encoding parameters
+	 * in the same attribute */
+	if (!strcmp (param->name, EVC_ENCODING) && attr->encoding_set) {
+		g_warning ("ENCODING was already set");
+		e_vcard_attribute_param_free (param);
+		return;
+	}
+
+	/* check if param->name is already in attr->params */
+	for (params = attr->params; params; params = params->next) {
+		EVCardAttributeParam *a = params->data;
+
+		if (g_ascii_strcasecmp (param->name, a->name) == 0) {
+			/* param is already there, merge the two values lists */
+			a->values = merge_values (a->values, param->values, cmp_func);
+			e_vcard_attribute_param_free (param);
+			merged = TRUE;
+			break;
+		}
+	}
+
+	/* attribute doesn't have this param yet, encoding is handled in
+	 * e_vcard_attribute_add_param */
+	if (!merged)
+		e_vcard_attribute_add_param (attr, param);
+}
+
 /**
  * e_vcard_attribute_param_add_value:
  * @param: an #EVCardAttributeParam

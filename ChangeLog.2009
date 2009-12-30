@@ -1,3 +1,15 @@
+2010-01-14  Marco Barisione  <marco.barisione@collabora.co.uk>
+
+	Add e_vcard_attribute_merge_param().
+
+	Based on an original patch by Robert Peto.
+
+	* libebook-dbus/e-vcard.c (merge_values),
+	(e_vcard_attribute_merge_param):
+	* libebook-dbus/e-vcard.h:
+
+	Reviewed-By: Robert Peto  <robert.peto@maemo.org>
+
 2009-01-20  Robert Peto  <robert.peto@maemo.org>
 
 	Add nickname index table to file-backend for supporting 'get all
