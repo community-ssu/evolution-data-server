@@ -1475,12 +1475,151 @@ file_errcall (const char *buf1, char *buf2)
 	WARNING ("libdb error: %s", buf2);
 }
 
+#define RECOVERY_FILE_NAME "recovery-needed"
+
+typedef enum {
+	RECOVERY_STATE_ERROR,
+	RECOVERY_STATE_NORMAL,
+	RECOVERY_STATE_REMOVE_DIR
+} RecoveryLevels;
+
+static void
+set_recovery_level (const char *filename, RecoveryLevels level)
+{
+	GError *error = NULL;
+	char *content = g_strdup_printf ("%d", level);
+
+	if (!g_file_set_contents (filename, content, -1, &error)) {
+		WARNING ("cannot set recovery level: %s", error->message);
+		g_error_free (error);
+	}
+	g_free (content);
+}
+
+static RecoveryLevels
+get_recovery_level (const char *filename)
+{
+	GError *error = NULL;
+	char *contents;
+	int recovery_level;
+
+	if (!g_file_get_contents (filename, &contents, NULL, &error)) {
+		if (!g_error_matches (error, G_FILE_ERROR, G_FILE_ERROR_NOENT)) {
+			CRITICAL ("cannot get file contents: %s", error->message);
+			recovery_level = RECOVERY_STATE_ERROR;
+		}
+		else {
+			/* file does not exist, so we can perform a normal
+			 * recovery on next start */
+			recovery_level = RECOVERY_STATE_NORMAL;
+		}
+		g_error_free (error);
+		goto out;
+	}
+
+	if (1 != sscanf (contents, "%d", &recovery_level) ||
+			recovery_level < RECOVERY_STATE_ERROR ||
+			recovery_level > RECOVERY_STATE_REMOVE_DIR) {
+		WARNING ("cannot convert '%s': %s", contents, strerror (errno));
+		recovery_level = RECOVERY_STATE_ERROR;
+	}
+	g_free (contents);
+
+out:
+	DEBUG ("recovery level from file = %d", recovery_level);
+
+	return recovery_level;
+}
+
+static void
+remove_recovery_file_from_path (const char *path)
+{
+	char *filename;
+
+	filename = g_build_filename (path, RECOVERY_FILE_NAME, NULL);
+	if (g_unlink (filename)) {
+		if (errno != ENOENT) {
+			WARNING ("cannot remove recovery file '%s': %s",
+					filename, strerror (errno));
+		}
+	}
+	g_free (filename);
+}
+
+static void
+rename_db_dir (const char *old_dir)
+{
+	char *corrupted_dir;
+
+	corrupted_dir = g_strdup_printf ("%s-corrupted", old_dir);
+
+	e_util_recursive_rmdir (corrupted_dir);
+
+	if (g_rename (old_dir, corrupted_dir) != 0) {
+		WARNING ("cannot rename file '%s': %s", old_dir,
+				strerror (errno));
+		e_util_recursive_rmdir (old_dir);
+	}
+
+	g_free (corrupted_dir);
+}
+
 static void
 file_paniccall (DB_ENV *env, int errval)
 {
-	/* abort here, try to recover on the next start */
-	/* NOTE: when opening the env next time the recovery
-	 *       is done automatically */
+	/* Abort here, try to recover on the next start */
+	/* NOTE: When opening the env next time the recovery is done
+	 *       automatically. If it would fail again, then we will
+	 *       get here again, and we can decide how to proceed on
+	 *       the next start */
+
+	int db_error;
+	const char **data_dir;
+	char *recovery_file;
+	RecoveryLevels recovery_level;
+
+	/* Get the data_dir, where the db files are stored
+	 * (in our case this is the db_home directory) */
+	db_error = env->get_data_dirs (env, &data_dir);
+	if (db_error != 0) {
+		CRITICAL ("cannot get data_dir, recovery may not work: %s",
+				db_strerror (db_error));
+		goto out;
+	}
+
+	recovery_file = g_build_filename (*data_dir, RECOVERY_FILE_NAME, NULL);
+	recovery_level = get_recovery_level (recovery_file);
+
+	switch (recovery_level) {
+		case RECOVERY_STATE_NORMAL:
+			/* First we try to run a normal recovery, this is done
+			 * by libdb's env->open() call, so we don't need to do
+			 * any special action */
+			/* Store the next level, so if we get the paniccall again
+			 * then we can proceed with RECOVERY_REMOVE_DIR */
+			set_recovery_level (recovery_file, recovery_level + 1);
+			break;
+
+		case RECOVERY_STATE_REMOVE_DIR:
+			/* Automatic recovery failed.
+			 * We can not do anything but removing the
+			 * whole directory and start from scratch. */
+			WARNING ("removing whole directory: %s", *data_dir);
+			rename_db_dir (*data_dir);
+			/* NOTE: no need to set the recovery file since
+			 * next time we start from scratch */
+			break;
+
+		case RECOVERY_STATE_ERROR:
+		default:
+			WARNING ("unknown recovery level, or an error happened"
+					"while reading recovery file");
+			/* Remove the recovery file, so we wouldn't stuck in */
+			remove_recovery_file_from_path (*data_dir);
+	}
+	g_free (recovery_file);
+
+out:
 	g_error ("Oops, db panic: %s", db_strerror (errval));
 }
 
@@ -1870,6 +2009,15 @@ e_book_backend_file_setup_db_env (EBookBackendFile *bf, gboolean only_if_exists)
 		goto error;
 	}
 
+	/* set up the db_home as data_dir, where the database files
+	 * will be stored. this is needed to be able to get the dir
+	 * when the paniccall gets called. */
+	db_error = env->set_data_dir (env, db_home);
+	if (db_error != 0) {
+		WARNING ("set_data_dir failed: %s", db_strerror (db_error));
+		goto error;
+	}
+
 	/* open the environment for use */
 	db_error = env->open (env, db_home, DB_CREATE | DB_INIT_MPOOL | DB_PRIVATE
 			| DB_THREAD | DB_INIT_LOCK
@@ -1878,6 +2026,10 @@ e_book_backend_file_setup_db_env (EBookBackendFile *bf, gboolean only_if_exists)
 		WARNING ("db_env_open failed: %s", db_strerror (db_error));
 		goto error;
 	}
+
+	/* opening the environment was successful,
+	 * remove the recovery file if it is present */
+	remove_recovery_file_from_path (db_home);
 
 	bf->priv->env = env;
 

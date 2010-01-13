@@ -1,5 +1,18 @@
 2009-01-18  Robert Peto  <robert.peto@maemo.org>
 
+	NB#145900 - corematic: ABRT in __dbenv_open_4002
+
+	* addressbook/backends/file/e-book-backend-file.c:
+	  Put a "recovery-needed" file in db_home directory when the paniccall
+	  gets called. When libdb's regular recovery fails, then rename the
+	  db dir to db-corrupted so we can start our db from scratch again.
+	  (This agressive file removal is needed because without this we can
+	  stuck in a recovery - crash loop.)
+
+	Reviewed-By: Marco Barisione  <marco.barisione@collabora.co.uk>
+
+2009-01-18  Robert Peto  <robert.peto@maemo.org>
+
 	NB#145900 - Create a public version from delete_directory() as
 	e_util_recursive_rmdir().
 
