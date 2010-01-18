@@ -1,6 +1,7 @@
 evolution-data-server (1.4.2.1-20091209.99) unstable; urgency=low
 
   * Fixes: NB#148921 - Memory leak in e-addressbook-factory while adding and deleting an event repeatedly
+  * Fixes: NB#140389 - fine tune libdb environment in file-backend
 
  -- Robert Peto <robert.peto@maemo.org>  Wed,  9 Dec 2009 10:29:45 +0100
 
