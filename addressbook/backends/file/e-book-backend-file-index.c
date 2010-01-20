@@ -102,10 +102,14 @@ static int first_last_add_cb (EBookBackendFileIndex *index, EContact *contact,
     EBookBackendFileIndexData *data, DB *db, const gchar *uid, GPtrArray *ops);
 static int last_first_add_cb (EBookBackendFileIndex *index, EContact *contact,
     EBookBackendFileIndexData *data, DB *db, const gchar *uid, GPtrArray *ops);
+static int nickname_add_cb (EBookBackendFileIndex *index, EContact *contact,
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid, GPtrArray *ops);
 
 static int first_last_remove_cb (EBookBackendFileIndex *index, EContact *contact,
     EBookBackendFileIndexData *data, DB *db, const gchar *uid, GPtrArray *ops);
 static int last_first_remove_cb (EBookBackendFileIndex *index, EContact *contact,
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid, GPtrArray *ops);
+static int nickname_remove_cb (EBookBackendFileIndex *index, EContact *contact,
     EBookBackendFileIndexData *data, DB *db, const gchar *uid, GPtrArray *ops);
 
 static int lexical_ordering_cb (DB *secondary, const DBT *akey, const DBT *bkey);
@@ -117,6 +121,7 @@ static const EBookBackendFileIndexData indexes[] = {
   {"email", "email", FALSE, NULL, NULL, EVC_EMAIL, NULL},
   {"first-last", "first_last", FALSE, first_last_add_cb, first_last_remove_cb, NULL, lexical_ordering_cb},
   {"last-first", "last_first", FALSE, last_first_add_cb, last_first_remove_cb, NULL, lexical_ordering_cb},
+  {"nick", "nick", FALSE, nickname_add_cb, nickname_remove_cb, EVC_NICKNAME, lexical_ordering_cb}
 };
 
 typedef struct _EBookBackendFileIndexPrivate EBookBackendFileIndexPrivate;
@@ -859,8 +864,17 @@ static char *key_priority[] = {
   NULL
 };
 
+static char *key_priority_nick[] = {
+  EVC_NICKNAME,
+  EVC_N,
+  EVC_X_COMPANY,
+  EVC_TEL,
+  EVC_EMAIL,
+  NULL
+};
+
 static EVCardAttribute *
-get_key_attribute (EContact *contact)
+get_key_attribute (EContact *contact, const char **priority)
 {
   GList *attrs = NULL;
   GHashTable *ht = NULL;
@@ -882,7 +896,7 @@ get_key_attribute (EContact *contact)
 
     DEBUG ("looking attrib '%s'", attr_name);
 
-    if (g_str_equal (attr_name, key_priority[0])) {
+    if (g_str_equal (attr_name, priority[0])) {
       if (!e_vcard_attribute_get_values (attr))
         continue;
 
@@ -894,8 +908,8 @@ get_key_attribute (EContact *contact)
   }
 
   /* iterate from 2nd element since 1st was not found */
-  for (i = 1; key_priority[i]; i++) {
-    key_attr = (EVCardAttribute *) g_hash_table_lookup (ht, key_priority[i]);
+  for (i = 1; priority[i]; i++) {
+    key_attr = (EVCardAttribute *) g_hash_table_lookup (ht, priority[i]);
     if (key_attr && e_vcard_attribute_get_values (key_attr)) {
       break;
     }
@@ -922,7 +936,8 @@ get_key_attribute (EContact *contact)
 enum
 {
   ORDER_FIRSTLAST = 0,
-  ORDER_LASTFIRST
+  ORDER_LASTFIRST,
+  ORDER_NICKNAME
 };
 
 static char *
@@ -935,7 +950,12 @@ get_key (EContact *contact, gint ordering)
 
   g_return_val_if_fail (E_IS_CONTACT (contact), NULL);
 
-  key_attr = get_key_attribute (contact);
+  if (ordering == ORDER_NICKNAME) {
+    key_attr = get_key_attribute (contact, (const char **) key_priority_nick);
+  }
+  else {
+    key_attr = get_key_attribute (contact, (const char **) key_priority);
+  }
   if (!key_attr) {
     WARNING ("contact is empty?");
     return NULL;
@@ -1036,6 +1056,20 @@ last_first_remove_cb (EBookBackendFileIndex *index, EContact *contact,
     EBookBackendFileIndexData *data, DB *db, const gchar *uid, GPtrArray *ops)
 {
   return generic_name_remove_cb (index, contact, data, db, uid, ORDER_LASTFIRST, ops);
+}
+
+static int
+nickname_add_cb (EBookBackendFileIndex *index, EContact *contact,
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid, GPtrArray *ops)
+{
+  return generic_name_add_cb (index, contact, data, db, uid, ORDER_NICKNAME, ops);
+}
+
+static int
+nickname_remove_cb (EBookBackendFileIndex *index, EContact *contact,
+    EBookBackendFileIndexData *data, DB *db, const gchar *uid, GPtrArray *ops)
+{
+  return generic_name_remove_cb (index, contact, data, db, uid, ORDER_NICKNAME, ops);
 }
 
 /*

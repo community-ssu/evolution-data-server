@@ -1,3 +1,15 @@
+2009-01-20  Robert Peto  <robert.peto@maemo.org>
+
+	Add nickname index table to file-backend for supporting 'get all
+	contacts ordered by nick' queries.
+
+	* addressbook/backends/file/e-book-backend-file-index.c:
+	  nickname_add_cb(), nickname_remove_cb(): callback functions for
+	  adding and removing nicknames
+	  get_key_attribute(): priority arg added
+
+	Reviewed-By: Mathias Hasselmann  <mathias.hasselmann@maemo.org>
+
 2009-01-18  Robert Peto  <robert.peto@maemo.org>
 
 	NB#145900 - corematic: ABRT in __dbenv_open_4002
