@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20100122.1) unstable; urgency=low
+
+  * Fix some compile warnings intruduced with the previous release.
+
+ -- Robert Peto <robert.peto@maemo.org>  Fri, 22 Jan 2010 10:09:45 +0100
+
 evolution-data-server (1.4.2.1-20100122) unstable; urgency=low
 
   * Fixes: NB#116645 - file backend doesn't support "nick" sort order for book views
