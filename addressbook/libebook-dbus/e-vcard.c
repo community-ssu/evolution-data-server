@@ -2394,9 +2394,9 @@ e_vcard_attribute_merge_param_with_value (EVCardAttribute *attr,
 	g_return_if_fail (attr != NULL);
 	g_return_if_fail (param != NULL);
 
-	e_vcard_attribute_param_merge_value (param, cmp_func, value);
+	e_vcard_attribute_param_merge_value (param, value, cmp_func);
 
-	return e_vcard_attribute_merge_param (attr, cmp_func, param);
+	return e_vcard_attribute_merge_param (attr, param, cmp_func);
 }
 
 /**
