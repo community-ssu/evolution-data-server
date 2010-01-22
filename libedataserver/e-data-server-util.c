@@ -27,6 +27,7 @@
 #include <unistd.h>
 
 #include <glib.h>
+#include <glib/gstdio.h>
 
 #include "e-data-server-util.h"
 
