@@ -2074,8 +2074,9 @@ gboolean
 e_book_remove_contacts (EBook *book, GList *ids, GError **error)
 {
   GError *err = NULL;
-  char **l;
-  GList *id;
+  gchar **id_batch;
+  GList *node;
+  gint i;
 
   e_return_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
@@ -2083,30 +2084,101 @@ e_book_remove_contacts (EBook *book, GList *ids, GError **error)
   e_return_error_if_fail (book->priv->loaded, E_BOOK_ERROR_SOURCE_NOT_LOADED);
   e_return_error_if_fail (book->priv->writable, E_BOOK_ERROR_PERMISSION_DENIED);
 
-  for (id = ids; id; id = id->next) {
-    e_return_error_if_fail (g_utf8_validate (id->data, -1, NULL), E_BOOK_ERROR_INVALID_ARG);
+  for (node = ids; node; node = node->next) {
+    e_return_error_if_fail (node->data, E_BOOK_ERROR_INVALID_ARG);
+    e_return_error_if_fail (g_utf8_validate (node->data, -1, NULL), E_BOOK_ERROR_INVALID_ARG);
   }
 
-  l = flatten_stringlist (ids);
+  id_batch = g_new0 (gchar *, BATCH_THRESHOLD + 1);
 
-  org_gnome_evolution_dataserver_addressbook_Book_remove_contacts (book->priv->proxy, (const char **) l, &err);
-  g_free (l);
-  return unwrap_gerror (err, error);
+  node = ids;
+  while (node) {
+    for (i = 0; node && i < BATCH_THRESHOLD; node = node->next, i++)
+      id_batch[i] = node->data;
+    id_batch[i] = NULL;
+
+    if (!org_gnome_evolution_dataserver_addressbook_Book_remove_contacts (book->priv->proxy, (const gchar **)id_batch, &err)) {
+      g_free (id_batch);
+      return unwrap_gerror (err, error);
+    }
+  }
+
+  g_free (id_batch);
+
+  return TRUE;
 }
+
+typedef struct {
+  EBook *book;
+  GList *id_batches; /* GList of gchar** */
+  EBookCallback callback;
+  gpointer closure;
+} AsyncDataRemoveContacts;
+
+/* helper functions for allocating and freeing AsyncDataRemoveContacts structs
+ * that automatically ref and unref the book attribute */
+static AsyncDataRemoveContacts *
+async_data_remove_contacts_new (EBook *book, EBookCallback callback, gpointer closure)
+{
+  AsyncDataRemoveContacts *data = g_slice_new0 (AsyncDataRemoveContacts);
+  if (book)
+    data->book = g_object_ref (book);
+  data->callback = callback;
+  data->closure = closure;
+
+  return data;
+}
+
+static void
+async_data_remove_contacts_free (AsyncDataRemoveContacts *data)
+{
+  if (data->book)
+    g_object_unref (data->book);
+
+  g_list_foreach (data->id_batches, (GFunc)g_strfreev, NULL);
+  g_list_free (data->id_batches);
+
+  g_slice_free (AsyncDataRemoveContacts, data);
+}
+
+static void
+e_book_async_remove_contacts_by_threshold_limit (AsyncDataRemoveContacts *async_data);
 
 static void
 remove_contacts_reply (DBusGProxy *proxy, GError *error, gpointer user_data)
 {
-  AsyncData *data = user_data;
-  EBookCallback cb = data->callback;
+  AsyncDataRemoveContacts *data = user_data;
 
-  if (cb)
-    cb (data->book, get_status_from_error (error), data->closure);
+  if (error || data->id_batches == NULL) {
+    if (data->callback)
+      data->callback (data->book, get_status_from_error (error), data->closure);
 
-  if (error)
-    g_error_free (error);
+    if (error)
+      g_error_free (error);
 
-  async_data_free (data);
+    async_data_remove_contacts_free (data);
+
+    return;
+  }
+
+  e_book_async_remove_contacts_by_threshold_limit (data);
+}
+
+static void
+e_book_async_remove_contacts_by_threshold_limit (AsyncDataRemoveContacts *async_data)
+{
+  gchar **id_batch;
+
+  id_batch = async_data->id_batches->data;
+  async_data->id_batches = g_list_delete_link (async_data->id_batches, async_data->id_batches);
+
+  if (!org_gnome_evolution_dataserver_addressbook_Book_remove_contacts_async (async_data->book->priv->proxy, (const gchar **)id_batch, remove_contacts_reply, async_data)) {
+    if (async_data->callback)
+      async_data->callback (async_data->book, E_BOOK_ERROR_CORBA_EXCEPTION, async_data->closure);
+    async_data_remove_contacts_free (async_data);
+  }
+
+  g_strfreev (id_batch);
 }
 
 /**
@@ -2126,9 +2198,10 @@ remove_contacts_reply (DBusGProxy *proxy, GError *error, gpointer user_data)
 guint
 e_book_async_remove_contacts (EBook *book, GList *id_list, EBookCallback cb, gpointer closure)
 {
-  AsyncData *data;
-  char **l;
+  AsyncDataRemoveContacts *data;
   GList *id;
+  gint i;
+  gchar **id_batch;
 
   e_return_async_error_if_fail (E_IS_BOOK (book), E_BOOK_ERROR_INVALID_ARG);
   e_return_async_error_if_fail (book->priv->proxy, E_BOOK_ERROR_REPOSITORY_OFFLINE);
@@ -2147,14 +2220,23 @@ e_book_async_remove_contacts (EBook *book, GList *id_list, EBookCallback cb, gpo
                                   E_BOOK_ERROR_INVALID_ARG);
   }
 
-  l = flatten_stringlist (id_list);
+  data = async_data_remove_contacts_new (book, cb, closure);
 
-  data = async_data_new (book, NULL, cb, closure);
+  /* Split the list in batches so we avoid timeouts if there is too much
+   * work to complete it in less than the default D-Bus timeout */
+  for (id = id_list, i = 0; id; id = id->next, i++) {
+    if (i % BATCH_THRESHOLD == 0) {
+      id_batch = g_new0 (gchar *, BATCH_THRESHOLD + 1);
+      data->id_batches = g_list_prepend (data->id_batches, id_batch);
+    }
 
-  if (!org_gnome_evolution_dataserver_addressbook_Book_remove_contacts_async (book->priv->proxy, (const char **) l, remove_contacts_reply, data))
-    cb (book, E_BOOK_ERROR_CORBA_EXCEPTION, closure);
+    id_batch[i % BATCH_THRESHOLD] = g_strdup (id->data);
+  }
 
-  g_free (l);
+  data->id_batches = g_list_reverse (data->id_batches);
+
+  e_book_async_remove_contacts_by_threshold_limit (data);
+
   return 0;
 }
 
@@ -2892,22 +2974,6 @@ get_status_from_error (GError *error)
     g_warning ("DBus error: %s", error->message);
     return E_BOOK_ERROR_CORBA_EXCEPTION;
   }
-}
-
-/**
- * Turn a GList of strings into an array of strings.
- */
-static char **
-flatten_stringlist (GList *list)
-{
-  char **array = g_new0 (char *, g_list_length (list) + 1);
-  GList *l = list;
-  int i = 0;
-  while (l != NULL) {
-    array[i++] = l->data;
-    l = l->next;
-  }
-  return array;
 }
 
 /**
