@@ -48,4 +48,10 @@ void txn_ops_free (GPtrArray *ops);
 G_GNUC_INTERNAL
 void dbt_fill_with_string (DBT *dbt, const char *str);
 
+G_GNUC_INTERNAL
+gboolean indices_need_cleanup (DB_ENV *env);
+
+G_GNUC_INTERNAL
+void indices_mark_as_clean (DB_ENV *env);
+
 #endif /* __E_BOOK_BACKEND_FILE_UTILS_H__ */

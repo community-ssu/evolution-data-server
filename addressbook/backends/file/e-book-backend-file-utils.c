@@ -20,6 +20,7 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
+#include <glib/gstdio.h>
 
 #include "e-book-backend-file-log.h"
 #include "e-book-backend-file-utils.h"
@@ -48,9 +49,80 @@ dbt_fill_with_string (DBT *dbt, const char *str)
 }
 
 
+/* functions for cleaning up indices */
+
+#define INDICES_CLEANUP_FILE_NAME "indices-cleanup-needed"
+
+static gchar *
+indices_get_cleanup_file (DB_ENV *env)
+{
+        gint db_error;
+        const gchar **data_dir;
+
+        db_error = env->get_data_dirs (env, &data_dir);
+        if (db_error != 0) {
+                CRITICAL ("cannot get data_dir: %s",
+                          db_strerror (db_error));
+                return NULL;
+        }
+
+        return g_build_filename (*data_dir, INDICES_CLEANUP_FILE_NAME, NULL);
+}
+
+static void
+indices_schedule_cleanup (DB_ENV *env)
+{
+        gchar *cleanup_file;
+        GError *error = NULL;
+
+        cleanup_file = indices_get_cleanup_file (env);
+        if (!cleanup_file)
+                return;
+
+        /* The actual content of the file is useless */
+        if (!g_file_set_contents (cleanup_file,
+                                 "Indices out of sync, cleanup needed\n",
+                                 -1, &error)) {
+                CRITICAL ("cannot write " INDICES_CLEANUP_FILE_NAME ": %s",
+                          error ? error->message : "unknown error");
+                g_clear_error (&error);
+        }
+
+        g_free (cleanup_file);
+}
+
+gboolean
+indices_need_cleanup (DB_ENV *env)
+{
+        gchar *cleanup_file;
+        gboolean ret;
+
+        cleanup_file = indices_get_cleanup_file (env);
+        if (!cleanup_file)
+                return FALSE;
+
+        ret = g_file_test (cleanup_file, G_FILE_TEST_EXISTS);
+        g_free (cleanup_file);
+        return ret;
+}
+
+void
+indices_mark_as_clean (DB_ENV *env)
+{
+        gchar *cleanup_file;
+        gboolean ret;
+
+        cleanup_file = indices_get_cleanup_file (env);
+        if (!cleanup_file)
+                return;
+
+        g_unlink (cleanup_file);
+}
+
+
 /* helper function that deletes a matching key/value pair from db with a cursor */
 static int
-txn_delete_by_cursor (DB *db, DB_TXN *tid, DBT *key, DBT *value)
+txn_delete_by_cursor (DB_ENV *env, DB *db, DB_TXN *tid, DBT *key, DBT *value)
 {
         int db_error;
         int dbc_error = 0;
@@ -74,6 +146,23 @@ txn_delete_by_cursor (DB *db, DB_TXN *tid, DBT *key, DBT *value)
         dbc_error = dbc->c_get (dbc, key, value, DB_GET_BOTH);
         if (dbc_error != 0) {
                 WARNING ("dbc->c_get failed: %s", db_strerror (dbc_error));
+                if (dbc_error == DB_NOTFOUND) {
+                        /* This should not happen, but we found some indices
+                         * with missing items in the past, probably created by
+                         * some broken EDS versions or by the old EDS without
+                         * transactions.
+                         * In this case we just ignore the error (or the
+                         * transaction will fail) and mark the DB as needing
+                         * the regeneration of all the indices.
+                         * The indices will be recreated at the next start of
+                         * the address book as we cannot do it while it's
+                         * running.
+                         */
+                        g_critical ("An index and the main DB seem to be out of "
+                                    "sync, the indices will be reset");
+                        indices_schedule_cleanup (env);
+                        dbc_error = 0;
+                }
                 goto out;
         }
         /* We are not really interessted in the value, as we know it
@@ -97,7 +186,7 @@ out:
 
 /* helper function that executes a single db operation in a transaction */
 static int
-do_db_operation (DB_TXN *tid, TxnItem *txn_item)
+do_db_operation (DB_ENV *env, DB_TXN *tid, TxnItem *txn_item)
 {
         int db_error;
         DBT key, value;
@@ -129,7 +218,8 @@ do_db_operation (DB_TXN *tid, TxnItem *txn_item)
 
                 case TXN_INDEX_DEL:
                         /* delete with cursor */
-                        return txn_delete_by_cursor (txn_item->db, tid, &key, &value);
+                        return txn_delete_by_cursor (env, txn_item->db, tid,
+                                                     &key, &value);
 
                 default:
                         WARNING ("invalid TxnItem->op");
@@ -176,7 +266,7 @@ RETRY:
         for (i = 0; i < ops->len; i++) {
                 TxnItem *txn_item = g_ptr_array_index (ops, i);
 
-                if (txn_item && (db_error = do_db_operation (tid, txn_item)) != 0) {
+                if (txn_item && (db_error = do_db_operation (env, tid, txn_item)) != 0) {
                         /* abort and retry */
                         int db_err;
                         db_err = tid->abort (tid);

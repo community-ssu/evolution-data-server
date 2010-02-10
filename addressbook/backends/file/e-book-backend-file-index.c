@@ -375,6 +375,7 @@ e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db, 
   int i = 0;
   DB *sdb = NULL;
   DB_ENV *env = NULL;
+  gboolean need_cleanup;
 
   /* for each database we go through and try and create it exclusively, if
    * that fails then we know that we don't need to populate it so we go and
@@ -389,6 +390,8 @@ e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db, 
     return FALSE;
   }
 
+  need_cleanup = indices_need_cleanup (env);
+
   for (i = 0; i < G_N_ELEMENTS (indexes); i++)
   {
     char *index_db_path;
@@ -399,6 +402,13 @@ e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db, 
     }
 
     index_db_path = make_index_db_path (index_dirname, indexes[i].index_name);
+
+    if (need_cleanup) {
+      /* The indices are in an inconsistent state, so we need to clean them
+       * up and regenerate them */
+      DEBUG ("cleaning up index file: %s", index_db_path);
+      g_unlink (index_db_path);
+    }
 
     /* we cannot pass DB_CREATE in the first time, because if index dbs aren't
      * present we need to populate them */
@@ -436,6 +446,9 @@ e_book_backend_file_index_setup_indicies (EBookBackendFileIndex *index, DB *db, 
     /* add it to the hash table of mappings of query term to database */
     g_hash_table_insert (priv->sdbs, indexes[i].query_term, sdb);
   }
+
+  if (need_cleanup)
+    indices_mark_as_clean (env);
 
   /* now go through and populate these */
   if (dbs_to_populate)
