@@ -26,7 +26,7 @@
 typedef enum {
         TXN_PUT,
         TXN_DEL,
-        TXN_CDEL
+        TXN_INDEX_DEL
 } TxnOp;
 
 typedef struct TxnItem {

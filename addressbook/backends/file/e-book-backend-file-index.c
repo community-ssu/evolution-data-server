@@ -1022,7 +1022,7 @@ generic_name_remove_cb (EBookBackendFileIndex *index, EContact *contact,
 
   DEBUG ("removing from index with key %s and data %s", key, uid);
 
-  db_error = txn_ops_add_new (ops, TXN_CDEL, db, key, g_strdup (uid));
+  db_error = txn_ops_add_new (ops, TXN_INDEX_DEL, db, key, g_strdup (uid));
   if (db_error != 0) {
     WARNING ("cannot create new txn item: %s", db_strerror (db_error));
   }
@@ -1200,7 +1200,7 @@ generic_field_remove (EBookBackendFileIndex *index, EContact *contact,
     DEBUG ("removing from index '%s' with key %s and data %s",
            data->index_name, key, uid);
 
-    db_error = txn_ops_add_new (ops, TXN_CDEL, db, g_strdup (key), g_strdup (uid));
+    db_error = txn_ops_add_new (ops, TXN_INDEX_DEL, db, g_strdup (key), g_strdup (uid));
     if (db_error != 0) {
       WARNING ("cannot create new txn item: %s", db_strerror (db_error));
       return db_error;

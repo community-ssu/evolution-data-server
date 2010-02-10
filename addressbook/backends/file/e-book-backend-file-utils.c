@@ -127,7 +127,7 @@ do_db_operation (DB_TXN *tid, TxnItem *txn_item)
                         }
                         return db_error;
 
-                case TXN_CDEL:
+                case TXN_INDEX_DEL:
                         /* delete with cursor */
                         return txn_delete_by_cursor (txn_item->db, tid, &key, &value);
 
