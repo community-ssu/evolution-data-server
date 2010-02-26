@@ -9,6 +9,11 @@ ifneq (,$(findstring thumb,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -mthumb
 endif
 
+# Disable GObject cast checks by default
+ifeq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -DG_DISABLE_CAST_CHECKS
+endif
+
 ifneq (,$(findstring parallel,$(DEB_BUILD_OPTIONS)))
     PARALLEL_JOBS := $(shell echo $(DEB_BUILD_OPTIONS) | \
         sed -e 's/.*parallel=\([0-9]\+\).*/\1/')
