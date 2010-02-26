@@ -38,6 +38,69 @@
 
 #define E_DATA_BOOK_FACTORY_SERVICE_NAME "org.gnome.evolution.dataserver.AddressBook"
 
+
+/* When we have to add or remove a lot of contacts we split the operation
+ * in batches, but in some cases even adding/removing a single batch can
+ * take too long.
+ * This is not easy to predict as it depends on the activity of the rest of
+ * the system and having batches that are too small would make things
+ * slower.
+ * We just increase the D-Bus timeout to 5 minutes, so if we can a timeout
+ * it's because something really went wrong. */
+#define BATCH_OP_TIMEOUT (5 * 60 * 1000)
+
+/* The following functions are copied from e-data-book-bindings.h and were
+ * modified to use a timeout of BATCH_OP_TIMEOUT milliseconds. */
+static gboolean
+Book_add_contacts (DBusGProxy *proxy, const char ** IN_vcards,
+    char *** OUT_uids, GError **error)
+
+{
+  return dbus_g_proxy_call_with_timeout (proxy, "addContacts",
+      BATCH_OP_TIMEOUT,error, G_TYPE_STRV, IN_vcards, G_TYPE_INVALID,
+      G_TYPE_STRV, OUT_uids, G_TYPE_INVALID);
+}
+
+static DBusGProxyCall*
+Book_add_contacts_async (DBusGProxy *proxy, const char ** IN_vcards,
+    org_gnome_evolution_dataserver_addressbook_Book_add_contacts_reply callback,
+    gpointer userdata)
+{
+  DBusGAsyncData *stuff;
+  stuff = g_slice_new (DBusGAsyncData);
+  stuff->cb = G_CALLBACK (callback);
+  stuff->userdata = userdata;
+  return dbus_g_proxy_begin_call_with_timeout (proxy, "addContacts",
+      org_gnome_evolution_dataserver_addressbook_Book_add_contacts_async_callback,
+      stuff, _dbus_glib_async_data_free, BATCH_OP_TIMEOUT, G_TYPE_STRV,
+      IN_vcards, G_TYPE_INVALID);
+}
+
+static gboolean
+Book_remove_contacts (DBusGProxy *proxy, const char ** IN_list,
+    GError **error)
+{
+  return dbus_g_proxy_call_with_timeout (proxy, "removeContacts",
+      BATCH_OP_TIMEOUT, error, G_TYPE_STRV, IN_list, G_TYPE_INVALID,
+      G_TYPE_INVALID);
+}
+
+static DBusGProxyCall*
+Book_remove_contacts_async (DBusGProxy *proxy, const char ** IN_list,
+    org_gnome_evolution_dataserver_addressbook_Book_remove_contacts_reply callback,
+    gpointer userdata) 
+{
+  DBusGAsyncData *stuff;
+  stuff = g_slice_new (DBusGAsyncData);
+  stuff->cb = G_CALLBACK (callback);
+  stuff->userdata = userdata;
+  return dbus_g_proxy_begin_call_with_timeout (proxy, "removeContacts",
+      org_gnome_evolution_dataserver_addressbook_Book_remove_contacts_async_callback,
+      stuff, _dbus_glib_async_data_free, BATCH_OP_TIMEOUT, G_TYPE_STRV,
+      IN_list, G_TYPE_INVALID);
+}
+
+
 static char** flatten_stringlist(GList *list);
 static GList *array_to_stringlist (char **list);
 static gboolean unwrap_gerror(GError *error, GError **client_error);
@@ -1559,7 +1622,7 @@ e_book_add_contacts_by_threshold_limit (EBook *book, GList *contacts_list_thresh
     }
   }
 
-  org_gnome_evolution_dataserver_addressbook_Book_add_contacts (book->priv->proxy, (const char **)vcards, &uids, &err);
+  Book_add_contacts (book->priv->proxy, (const char **)vcards, &uids, &err);
   if (!err) {
     for (i = uids, it = contacts_list_threshold; *i && it; i++, it = it->next) {
       e_contact_set (it->data, E_CONTACT_UID, *i);
@@ -1700,7 +1763,7 @@ e_book_async_add_contacts_by_threshold_limit (AsyncDataAddContacts *async_data)
     async_data->vcards = g_list_delete_link (async_data->vcards, async_data->vcards);
   }
 
-  if (!org_gnome_evolution_dataserver_addressbook_Book_add_contacts_async (async_data->book->priv->proxy, (const char**)vcards_strv, add_contacts_reply, async_data)) {
+  if (!Book_add_contacts_async (async_data->book->priv->proxy, (const char**)vcards_strv, add_contacts_reply, async_data)) {
     cb (async_data->book, E_BOOK_ERROR_CORBA_EXCEPTION, async_data->closure);
     async_data_add_contacts_free (async_data);
   }
@@ -2097,7 +2160,7 @@ e_book_remove_contacts (EBook *book, GList *ids, GError **error)
       id_batch[i] = node->data;
     id_batch[i] = NULL;
 
-    if (!org_gnome_evolution_dataserver_addressbook_Book_remove_contacts (book->priv->proxy, (const gchar **)id_batch, &err)) {
+    if (!Book_remove_contacts (book->priv->proxy, (const gchar **)id_batch, &err)) {
       g_free (id_batch);
       return unwrap_gerror (err, error);
     }
@@ -2172,7 +2235,8 @@ e_book_async_remove_contacts_by_threshold_limit (AsyncDataRemoveContacts *async_
   id_batch = async_data->id_batches->data;
   async_data->id_batches = g_list_delete_link (async_data->id_batches, async_data->id_batches);
 
-  if (!org_gnome_evolution_dataserver_addressbook_Book_remove_contacts_async (async_data->book->priv->proxy, (const gchar **)id_batch, remove_contacts_reply, async_data)) {
+  if (!Book_remove_contacts_async (async_data->book->priv->proxy,
+        (const gchar **)id_batch, remove_contacts_reply, async_data)) {
     if (async_data->callback)
       async_data->callback (async_data->book, E_BOOK_ERROR_CORBA_EXCEPTION, async_data->closure);
     async_data_remove_contacts_free (async_data);
