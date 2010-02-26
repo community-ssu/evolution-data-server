@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20100226) unstable; urgency=low
+
+  * Fixes: NB#138862 - Addressbook get crashed while deleting all the contacts
+
+ -- Marco Barisione <marco.barisione@collabora.co.uk>  Fri, 26 Feb 2010 15:02:22 +0000
+
 evolution-data-server (1.4.2.1-20100212) unstable; urgency=low
 
   * Fixes: NB#156021 - Unable to modify any contact because index and DB are out of sync
