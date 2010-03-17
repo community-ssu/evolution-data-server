@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20100317) unstable; urgency=low
+
+  * Fixes: NB#160630 - e-addressbook-factory new crash trace in slice_alloc after fix of FD & mem leak
+
+ -- Xavier Claessens <xclaesse@xclaesse-laptop>  Wed, 17 Mar 2010 17:36:03 +0100
+
 evolution-data-server (1.4.2.1-20100226) unstable; urgency=low
 
   * Fixes: NB#138862 - Addressbook get crashed while deleting all the contacts
