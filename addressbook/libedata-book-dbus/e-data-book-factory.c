@@ -208,6 +208,8 @@ book_closed_cb (EDataBook *book, const char *client)
 {
   GList *list;
 
+  /* WARNING: We don't unref the book here, because to book will unref itself
+   * when this callback returns */
   list = g_hash_table_lookup (factory->priv->connections, client);
   list = g_list_remove (list, book);
   g_hash_table_insert (factory->priv->connections, g_strdup (client), list);

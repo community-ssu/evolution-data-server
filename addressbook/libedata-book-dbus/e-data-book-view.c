@@ -171,21 +171,40 @@ e_data_book_view_init (EDataBookView *book_view)
 }
 
 static void
+stop_view_if_running (EDataBookView *view)
+{
+  EDataBookViewPrivate *priv = view->priv;
+
+  if (priv->running) {
+    e_data_book_view_thaw (view);
+    priv->running = FALSE;
+    e_book_backend_stop_book_view (priv->backend, view);
+  }
+}
+
+static DBusHandlerResult
+dbus_signal_filter_cb (DBusConnection *connection, DBusMessage *message, void *user_data);
+
+static void
+commit_suicide (EDataBookView *view)
+{
+  /* sometimes we get RemoveMatch and Disconnected signals after this function
+   * gets called, but we don't want that, so we have to remove the connection filter */
+  dbus_connection_remove_filter (view->priv->conn, dbus_signal_filter_cb, view);
+
+  stop_view_if_running (view);
+  g_object_unref (view);
+}
+
+static void
 book_destroyed_cb (gpointer data, GObject *dead)
 {
   EDataBookView *view = E_DATA_BOOK_VIEW (data);
-  EDataBookViewPrivate *priv = view->priv;
 
   /* The book has just died, so unset the pointer so we don't try and remove a
      dead weak reference. */
   view->priv->book = NULL;
-
-  /* If the view is running stop it here. */
-  if (priv->running) {
-    e_data_book_view_thaw (view);
-    e_book_backend_stop_book_view (priv->backend, view);
-    priv->running = FALSE;
-  }
+  commit_suicide (view);
 }
 
 /* Oh dear god, think of the children. */
@@ -200,7 +219,7 @@ dbus_signal_filter_cb (DBusConnection *connection, DBusMessage *message, void *u
      * we have to dispose the dangling object to avoid memleak */
     EDataBookView *view = user_data;
 
-    g_object_unref (view);
+    commit_suicide (view);
   }
 
   return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
@@ -235,6 +254,12 @@ new_connection_func (DBusServer *server, DBusConnection *conn, gpointer user_dat
  *
  * Create a new #EDataBookView for the given #EBook, filtering on #card_sexp,
  * and place it on DBus at the object path #path.
+ *
+ * WARNING: This function does NOT return a ref owned by caller. The caller
+ * should add a ref to the view ONLY when the view is started and must drop it
+ * when the view is stopped. The initial ref is owned by self and will be
+ * dropped when DBus connection is disconnected, @book finalized, or "dispose"
+ * DBus method is called on self.
  */
 EDataBookView *
 e_data_book_view_new (EDataBook *book, const char *path, const char *card_query, EBookBackendSExp *card_sexp, int max_results)
@@ -255,7 +280,7 @@ e_data_book_view_new (EDataBook *book, const char *path, const char *card_query,
     return NULL;
   }
   dbus_server_setup_with_g_main (server, NULL);
-  
+
   view = g_object_new (E_TYPE_DATA_BOOK_VIEW, NULL);
   priv = view->priv;
 
@@ -284,12 +309,7 @@ e_data_book_view_dispose (GObject *object)
     priv->book = NULL;
   }
 
-  if (priv->running) {
-    /* stop the book view if it is still running */
-    e_data_book_view_thaw (book_view);
-    e_book_backend_stop_book_view (priv->backend, book_view);
-    priv->running = FALSE;
-  }
+  stop_view_if_running (book_view);
 
   if (priv->backend) {
     e_book_backend_remove_book_view (priv->backend, book_view);
@@ -379,12 +399,8 @@ bookview_idle_stop (gpointer data)
 {
   EDataBookView *book_view = data;
 
-  if (book_view->priv->running) {
-    e_data_book_view_thaw (book_view);
-    e_book_backend_stop_book_view (book_view->priv->backend, book_view);
-  }
+  stop_view_if_running (book_view);
 
-  book_view->priv->running = FALSE;
   book_view->priv->idle_id = 0;
 
   return FALSE;
@@ -393,12 +409,9 @@ bookview_idle_stop (gpointer data)
 static gboolean
 impl_BookView_stop (EDataBookView *book_view, GError **error)
 {
-  if (FALSE == book_view->priv->running) {
+  if (!book_view->priv->running || book_view->priv->idle_id != 0) {
     return TRUE;
   }
-
-  if (book_view->priv->idle_id)
-    g_source_remove (book_view->priv->idle_id);
 
   book_view->priv->idle_id = g_idle_add (bookview_idle_stop, book_view);
   return TRUE;
@@ -407,11 +420,7 @@ impl_BookView_stop (EDataBookView *book_view, GError **error)
 static gboolean
 impl_BookView_dispose (EDataBookView *book_view, GError **eror)
 {
-  /* sometimes we get RemoveMatch and Disconnected signals after this function
-   * gets called, but we don't want that, so we have to remove the connection filter */
-  dbus_connection_remove_filter (book_view->priv->conn, dbus_signal_filter_cb, book_view);
-  g_object_unref (book_view);
-
+  commit_suicide (book_view);
   return TRUE;
 }
 
