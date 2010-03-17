@@ -1,3 +1,4 @@
+*.stamp
 *.[ao]
 *.gcda
 *.gcno
@@ -49,6 +50,21 @@ debian/files
 debian/stamp-autotools-files
 debian/stamp-makefile-build
 debian/tmp
+debian/*.debhelper
+debian/*.substvars
+debian/evolution-data-server-addressbook-dbg
+debian/evolution-data-server-addressbook
+debian/evolution-data-server-dev
+debian/evolution-data-server-doc
+debian/libebook-dbg
+debian/libebook-dev
+debian/libebook
+debian/libedata-book-dbg
+debian/libedata-book-dev
+debian/libedata-book
+debian/libedataserver-dbg
+debian/libedataserver-dev
+debian/libedataserver
 
 /m4/gtk-doc.m4
 /m4/libtool.m4
@@ -67,3 +83,4 @@ debian/tmp
 /calendar/libical/src/libical/icalversion.h
 /iconv-detect.h
 /libedataserver/test-source-list
+
