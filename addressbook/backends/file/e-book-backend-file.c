@@ -1625,178 +1625,33 @@ out:
 
 #define PREINSTALL_DIR "/usr/share/evolution-data-server"
 #define PREINST_CONF_DIR "evolution-data-server"
-#define PREINST_CONF_FILE "preinst-stamps"
-
-static GHashTable *
-read_preinst_conf_file (const char *path)
-{
-	GHashTable *ht;
-	GError *error = NULL;
-	char *contents;
-	char **lines;
-
-	ht = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
-
-	if (!g_file_get_contents (path, &contents, NULL, &error)) {
-		if (!g_error_matches (error, G_FILE_ERROR, G_FILE_ERROR_NOENT)) {
-			WARNING ("cannot read preinst config file: %s", error->message);
-			g_error_free (error);
-			g_hash_table_destroy (ht);
-			return NULL;
-		}
-
-		/* if preinst config file doesn't exist we return with an empty HT,
-		 * so if there are pre-installed contacts the we can add them. */
-		DEBUG ("preinst config file does not exist");
-		g_error_free (error);
-		return ht;
-	}
-
-	/* split content lines */
-	lines = g_strsplit (contents, "\n", -1);
-
-	char **l;
-	for (l = lines; l && *l && **l != '\0'; l++) {
-		char **tokens;
-		char *filename = NULL, *mtime_str = NULL;
-		long int *mtime;
-
-		tokens = g_strsplit (*l, ";", -1);
-
-		if (tokens && tokens[0]) {
-			filename = tokens[0];
-			mtime_str = tokens[1];
-		}
-		if (!filename || !mtime_str) {
-			WARNING ("content line is wrong: '%s'", *l);
-			/* try the next line */
-			g_strfreev (tokens);
-			continue;
-		}
-
-		mtime = g_new0 (long int, 1);
-		*mtime = strtol ((const char *)mtime_str, (char **)NULL, 10);
-
-		if ((errno == ERANGE && (*mtime == LONG_MAX || *mtime == LONG_MIN))
-				|| (errno != 0 && *mtime == 0)) {
-			WARNING ("unable to parse mtime value: %s", mtime_str);
-			g_free (mtime);
-			g_strfreev (tokens);
-			continue;
-		}
-
-		g_hash_table_insert (ht, g_strdup (filename), mtime);
-		DEBUG ("adding filename=%s mtime=%ld to preinst-conf", filename, *mtime);
-		g_strfreev (tokens);
-	}
-
-	g_strfreev (lines);
-	g_free (contents);
-
-	return ht;
-}
-
-static void
-add_content_line_cb (const char *filename, const long int *mtime, GString *contents)
-{
-	g_return_if_fail (filename);
-	g_return_if_fail (mtime);
-	g_return_if_fail (contents);
-
-	g_string_append_printf (contents, "%s;%ld\n", filename, *mtime);
-}
-
-static void
-write_preinst_conf_file (const char *path, GHashTable *ht)
-{
-	GString *contents;
-	GError *error = NULL;
-	gchar *conf_dir;
-
-	g_return_if_fail (path);
-	g_return_if_fail (ht);
-
-	contents = g_string_new (NULL);
-
-	g_hash_table_foreach (ht, (GHFunc)add_content_line_cb, contents);
-
-	conf_dir = g_build_filename (g_get_user_config_dir (), PREINST_CONF_DIR, NULL);
-	if (!g_file_test (conf_dir, G_FILE_TEST_IS_DIR)) {
-		if (g_mkdir_with_parents (conf_dir, S_IRUSR | S_IWUSR | S_IXUSR) != 0) {
-			WARNING ("cannot create dir '%s': %s", conf_dir, strerror (errno));
-			goto out;
-		}
-	}
-
-	if (!g_file_set_contents (path, contents->str, -1, &error)) {
-		WARNING ("cannot write preinst conf file: %s", error->message);
-		g_error_free (error);
-	}
-
-out:
-	g_free (conf_dir);
-
-	g_string_free (contents, TRUE);
-}
-
-/* returns TRUE if pre-install file needs to be installed, FALSE otherwise */
-static gboolean
-check_preinst_conf (GHashTable *ht, const char *filename)
-{
-	long int *old_mtime;
-	long int *new_mtime;
-	struct stat file_stat;
-
-	g_return_val_if_fail (ht, FALSE);
-	g_return_val_if_fail (filename, FALSE);
-
-	old_mtime = g_hash_table_lookup (ht, filename);
-
-	if (g_stat (filename, &file_stat) != 0) {
-		WARNING ("cannot get stat of file '%s'", filename);
-		return FALSE;
-	}
-
-	if (old_mtime && *old_mtime == file_stat.st_mtime) {
-		DEBUG ("file is already installed");
-		return FALSE;
-	}
-
-	new_mtime = g_new (long int, 1);
-	*new_mtime = file_stat.st_mtime;
-
-	g_hash_table_insert (ht, g_strdup (filename), new_mtime);
-	DEBUG ("adding filename=%s, mtime=%ld to preinst-conf", filename, *new_mtime);
-
-	return TRUE;
-}
+#define PREINST_STAMP_FILE "preinst-stamps"
+#define PREINST_STAMP_CONTENT "pre-installed vcards imported"
 
 static void
 install_pre_installed_vcards (EBookBackend *backend)
 {
-	GDir *directory;
-	GHashTable *ht;
-	const gchar *name;
-	char *conf_dir;
-	gboolean sync_needed = FALSE;
-	gboolean preinst_dirty = FALSE;
 	EBookBackendFile *bf = E_BOOK_BACKEND_FILE (backend);
+	char *stamp_file;
+	GDir *directory;
 	GPtrArray *ops;
+	const gchar *name;
+	gboolean create_stamp = FALSE;
+	gboolean sync_needed = FALSE;
+
+	/* check if we already imported vcards */
+	stamp_file = g_build_filename (g_get_user_config_dir (),
+		PREINST_CONF_DIR, PREINST_STAMP_FILE, NULL);
+	if (g_file_test (stamp_file, G_FILE_TEST_EXISTS)) {
+		g_free (stamp_file);
+		return;
+	}
 
 	/* Get files from pre-install directory */
 	directory = g_dir_open (PREINSTALL_DIR, 0, NULL);
 	if (directory == NULL) {
 		DEBUG ("pre-install directory does not exist");
-		return;
-	}
-
-	/* read pre-installed config file */
-	conf_dir = g_build_filename (g_get_user_config_dir (), PREINST_CONF_DIR, PREINST_CONF_FILE, NULL);
-	ht = read_preinst_conf_file (conf_dir);
-	if (!ht) {
-		/* we cannot read pre-installed config directory (error differs from ENOENT)
-		 * so we cannot write it later, hence returning immediately */
-		g_free (conf_dir);
+		g_free (stamp_file);
 		return;
 	}
 
@@ -1813,13 +1668,7 @@ install_pre_installed_vcards (EBookBackend *backend)
 		}
 
 		path_plus_name = g_build_filename (PREINSTALL_DIR, name, NULL);
-		if (!check_preinst_conf (ht, path_plus_name)) {
-			g_free (path_plus_name);
-			continue;
-		}
-		/* we don't write pre-installed conf file here,
-		 * only after we are ready with all pre-installed files */
-		preinst_dirty = TRUE;
+		create_stamp = TRUE;
 
 		if (!g_file_get_contents (path_plus_name, &vcard, NULL, NULL)) {
 			g_free (path_plus_name);
@@ -1846,12 +1695,19 @@ install_pre_installed_vcards (EBookBackend *backend)
 	}
 	g_dir_close (directory);
 
-	if (preinst_dirty) {
-		write_preinst_conf_file (conf_dir, ht);
+	if (create_stamp) {
+		gchar *conf_dir;
+
+		conf_dir = g_build_filename (g_get_user_config_dir (),
+			PREINST_CONF_DIR, NULL);
+
+		g_mkdir_with_parents (conf_dir, S_IRUSR | S_IWUSR | S_IXUSR);
+		g_file_set_contents (stamp_file, PREINST_STAMP_CONTENT, -1, NULL);
+
+		g_free (conf_dir);
 	}
 
-	g_hash_table_destroy (ht);
-	g_free (conf_dir);
+	g_free (stamp_file);
 
 	/* sync the main and index dbs only if needed */
 	if (sync_needed) {
