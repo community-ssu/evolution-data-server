@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20100623) unstable; urgency=low
+
+  * Fixes: NB#149444 - Customized contacts are doubled after update customized sw via SSU
+
+ -- Marco Barisione <marco.barisione@collabora.co.uk>  Wed, 23 Jun 2010 11:30:45 +0100
+
 evolution-data-server (1.4.2.1-20100317) unstable; urgency=low
 
   * Fixes: NB#160630 - e-addressbook-factory new crash trace in slice_alloc after fix of FD & mem leak
