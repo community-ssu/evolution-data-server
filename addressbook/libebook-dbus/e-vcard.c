@@ -1267,6 +1267,15 @@ e_vcard_to_string_vcard_21 (EVCard *evc)
 
 			g_free (escaped_value);
 		}
+
+		if (value_str->len <= 1 && g_strcmp0(attr->name, EVC_N) &&
+		    g_strcmp0(attr->name, EVC_TEL)) {
+                        g_string_free (attr_str, TRUE);
+                        g_string_free (value_str, TRUE);
+
+                        continue;
+                }
+
                 g_string_append (attr_str, value_str->str);
                 g_string_free (value_str, TRUE);
 
@@ -1333,6 +1342,7 @@ e_vcard_to_string_vcard_30 (EVCard *evc)
 		GList *p;
 		EVCardAttribute *attr = l->data;
 		GString *attr_str;
+                GString *value_str;
 
 		if (!strcmp (attr->name, "VERSION"))
 			continue;
@@ -1382,7 +1392,7 @@ e_vcard_to_string_vcard_30 (EVCard *evc)
 			}
 		}
 
-		g_string_append_c (attr_str, ':');
+		value_str = g_string_new (":");
 
 		for (v = attr->values; v; v = v->next) {
 			char *value = v->data;
@@ -1390,19 +1400,30 @@ e_vcard_to_string_vcard_30 (EVCard *evc)
 
 			escaped_value = e_vcard_escape_string (value);
 
-			g_string_append (attr_str, escaped_value);
+			g_string_append (value_str, escaped_value);
 			if (v->next) {
 				/* XXX toshok - i hate you, rfc 2426.
 				   why doesn't CATEGORIES use a ; like
 				   a normal list attribute? */
 				if (!strcmp (attr->name, "CATEGORIES"))
-					g_string_append_c (attr_str, ',');
+					g_string_append_c (value_str, ',');
 				else
-					g_string_append_c (attr_str, ';');
+					g_string_append_c (value_str, ';');
 			}
 
 			g_free (escaped_value);
 		}
+
+		if (value_str->len <= 1 && g_strcmp0(attr->name, EVC_N) &&
+		    g_strcmp0(attr->name, EVC_FN) && g_strcmp0(attr->name, EVC_TEL)) {
+                        g_string_free (attr_str, TRUE);
+                        g_string_free (value_str, TRUE);
+
+                        continue;
+                }
+
+                g_string_append (attr_str, value_str->str);
+                g_string_free (value_str, TRUE);
 
 		/* 5.8.2:
 		 * When generating a content line, lines longer than 75

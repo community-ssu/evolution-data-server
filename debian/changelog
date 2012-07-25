@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20120717-maemo1+cssu1) unstable; urgency=low
+
+  * Remove lines with empty value from VCARD string (except required fields)
+
+ -- Ludek Finstrle <luf@pzkagis.cz>  Tue, 17 Jul 2012 02:47:39 +0200
+
 evolution-data-server (1.4.2.1-20100623) unstable; urgency=low
 
   * Fixes: NB#149444 - Customized contacts are doubled after update customized sw via SSU

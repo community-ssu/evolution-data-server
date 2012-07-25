@@ -1,8 +1,8 @@
 Source: evolution-data-server
 Section: base
 Priority: optional
-Maintainer: Joergen Scheibengruber <Jorgen.Scheibengruber@nokia.com>
-Uploaders: Robert Peto <robert.peto@maemo.org>, Jonathon Jongsma <jonathon.jongsma@maemo.org>, Mathias Hasselmann <mathias.hasselmann@maemo.org>
+Maintainer: Ludek Finstrle <luf@pzkagis.cz>
+XSBC-Original-Maintainer: Joergen Scheibengruber <Jorgen.Scheibengruber@nokia.com>
 Build-Depends: debhelper (>= 5.0.0), cdbs, intltool (>= 0.28-2), flex, bison, libc6-dev (>= 2.5), libgtk2.0-dev, gnome-common, gtk-doc-tools, libgconf2-dev, libxml2-dev, libdb4.2-dev, libdbus-glib-1-dev (>= 0.73-0osso2), microb-engine-dev
 Standards-Version: 3.7
 
