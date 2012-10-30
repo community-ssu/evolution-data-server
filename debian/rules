@@ -6,7 +6,8 @@ include /usr/share/cdbs/1/class/gnome.mk
 
 # Use soft-float and thumb mode if it enabled. 
 ifneq (,$(findstring thumb,$(DEB_BUILD_OPTIONS)))
-	CFLAGS += -mthumb
+	CFLAGS += -mthumb -mword-relocations
+	CPPFLAGS += -mthumb -mword-relocations
 endif
 
 # Disable GObject cast checks by default

@@ -1,3 +1,9 @@
+evolution-data-server (1.4.2.1-20120717-maemo1+0cssu1+thumb0) unstable; urgency=low
+
+  * Thumb2 compile
+
+ -- Ivaylo Dimitrov <freemangordon@abv.bg>  Tue, 30 Oct 2012 17:55:54 +0200
+
 evolution-data-server (1.4.2.1-20120717-maemo1+0cssu1) unstable; urgency=low
 
   * Fix CSSU version info
@@ -458,7 +464,7 @@ evolution-data-server (1.4.2.1-20090304) unstable; urgency=low
 
 evolution-data-server (1.4.2.1-20090225) unstable; urgency=low
 
-  * Fix "base64" encoding problem with PHOTO attribute.	
+  * Fix "base64" encoding problem with PHOTO attribute.
   * Add Quoted Printable support for EVCardAttribute.
   * Fix decoding of QUOTED-PRINTABLE encoded attributes in EVCard;
     Fixes: NB#99991
@@ -561,7 +567,7 @@ evolution-data-server (1.4.2.1-20081203) unstable; urgency=low
 
 evolution-data-server (1.4.2.1-20081121) unstable; urgency=low
 
-  * 35_file_backend_shorter_uids.diff: Fix bug when creating unique id. 
+  * 35_file_backend_shorter_uids.diff: Fix bug when creating unique id.
     Fixes: NB#91901
   * 45_index-same-key-multiple-values.diff: Removed some debug printing and
     changed indexes db to sync only once when modifying it.
@@ -582,7 +588,7 @@ evolution-data-server (1.4.2.1-20081111) unstable; urgency=low
   * 45_index-same-key-multiple-values.diff: Add support to file-backend
     multiple velues to one key. There can now be same name twice or more in
     index.
-  * 46_null-query-fixes.diff: Checks some NULL input values. 
+  * 46_null-query-fixes.diff: Checks some NULL input values.
     Fixes: NB#87497, NB#88164, NB#88163
   * 47_e_book_add_contacts.diff: Add support for batch add in addressbook.
     New functions: e_book_add_contacts() and e_book_async_add_contacts().
@@ -636,7 +642,7 @@ evolution-data-server (1.4.2.1-20080828) unstable; urgency=low
 
 evolution-data-server (1.4.2.1-20080812) unstable; urgency=low
 
-  * 31_book-view-get-query.diff: Add e_book_view_get_query. 
+  * 31_book-view-get-query.diff: Add e_book_view_get_query.
     (Mathias Hasselmann <mathias.hasselmann@maemo.org>)
   * 32_limit-vcard-parsing.diff: Add limits on VCARD parsing to avoid DoS.
   * 33_syncable-field-flag.diff: Add e_contact_is_syncable.
@@ -816,7 +822,7 @@ evolution-data-server (1.4.2.1-20070828) unstable; urgency=low
 evolution-data-server (1.4.2.1-20070823) unstable; urgency=low
 
   * Don't treat client name changes as disconnects, fixing "random" closing
-    of EDS.  
+    of EDS.
   * Register the bus name earlier
 
  -- Ross Burton <ross@openedhand.com>  Thu, 23 Aug 2007 16:35:49 +0100
@@ -1064,7 +1070,7 @@ evolution-data-server (1.4.1-0osso20060531) unstable; urgency=low
     (#31198)
 
  -- Jorn Baayen <jorn@openedhand.com>  Wed, 31 May 2006 13:33:33 +0300
- 
+
 evolution-data-server (1.4.1-0osso20060526) unstable; urgency=low
 
   * Merge with upstream rev 402:
@@ -1104,7 +1110,7 @@ evolution-data-server (1.4.1-0osso20060516) unstable; urgency=low
     from the libraries.
   * Merge from upstream rev 392:
     - add error handling for async calls
-  
+
  -- Ross Burton <ross@openedhand.com>  Tue, 16 May 2006 10:25:25 +0100
 
 evolution-data-server (1.4.1-0osso20060512) unstable; urgency=low
@@ -1187,7 +1193,7 @@ evolution-data-server (1.4.1-0osso13) unstable; urgency=low
   * Fix NULL dereference in e-address-western
   * Fix EContact init
   * Fix EBook unref
-  
+
  -- Ross Burton <ross@openedhand.com>  Tue, 18 Apr 2006 16:51:30 +0100
 
 evolution-data-server (1.4.1-0osso12) unstable; urgency=low
@@ -1276,7 +1282,7 @@ evolution-data-server (1.4.1-0ubuntu1) breezy; urgency=low
     - cannot create  recurring GW events with interval more than 1
     - camel-lock-client looking for a non-existant camel-lock-helper
     - Syncing passwords across components fails for Exchange
-    - In 'Attendees' tab particpants id displayed as junk 
+    - In 'Attendees' tab particpants id displayed as junk
       after delegating meeting
     - Evolution crashes
     - Editing addresses in the composer is buggy
@@ -1329,14 +1335,14 @@ evolution-data-server (1.3.8-0ubuntu1) breezy; urgency=low
     - Mailbox does not appear on top in offline mode.
     - Status tracking does not work for some items.
     - Additional mail is sent to delegate(s) in Groupwise.
-    - Meeting request mail cannot be sent for Meeting 
+    - Meeting request mail cannot be sent for Meeting
       created in 'Personal' calendar.
     - 'make check' fails on gpg test.
     - gw: trying to copy the mailbox folder when online copies the folder below
       the mailbox folder.
     - Calendar loading progress information goes beyond 100%.
     - mh: Renaming parent folder loses subfolders.
-    - sometimes clicking on a meeting request mail or any mail related 
+    - sometimes clicking on a meeting request mail or any mail related
       to assigned task crashes evolution.
     - Signature shown as attachment.
     - In GW calendar user should be able to delegate all instances together.
@@ -1345,7 +1351,7 @@ evolution-data-server (1.3.8-0ubuntu1) breezy; urgency=low
     - crash in camel-folder-thread.c:sort_node when generating message list.
     - gw: Evolution crashes while starting up.
     - Regressing 274308 - EDS crashed.
-    - gw: Unable to create a new folder(subfolder) with names like Mailbox, 
+    - gw: Unable to create a new folder(subfolder) with names like Mailbox,
       Sent Items, etc.
     - Useless assignment in e-vcard.
     - camel indexing valgrind hits.
@@ -1372,7 +1378,7 @@ evolution-data-server (1.3.7-0ubuntu1) breezy; urgency=low
     - 1.3.6 lists a pile of old folders.
     - configure script fails to detect getaddrinfo.
     - GW: Fwded message headers are not displayed.
-    - Description does not appear completely 
+    - Description does not appear completely
       when using the ITIP FORMATTER plugin.
     - problems with junk test in filters.
     - Configuring same account for IMAP and GroupWise troubles Proxy Login.
@@ -1381,7 +1387,7 @@ evolution-data-server (1.3.7-0ubuntu1) breezy; urgency=low
     - Cannot create recurring 'All Day event' in groupwise calendar.
     - evolution-data-server crashes trying to reply all.
     - GW long delays & no status.
-    - Key /apps/evolution/lock/mail/accounts/save_password 
+    - Key /apps/evolution/lock/mail/accounts/save_password
       does not work correctly.
   * debian/patches/03_imaplist.patch:
     - fixed with the new version.
@@ -1553,8 +1559,8 @@ evolution-data-server (1.1.5-0ubuntu1) hoary; urgency=low
   * New upstream release:
     - fix the crash when adding a task in the calendar (Hoary: #5952).
   * debian/control:
-    - updated for the new sonames.  
-  
+    - updated for the new sonames.
+
  -- Sebastien Bacher <seb128@canonical.com>  Tue,  8 Feb 2005 14:46:54 +0100
 
 evolution-data-server (1.1.4.2-0ubuntu1) hoary; urgency=low
@@ -1582,7 +1588,7 @@ evolution-data-server (1.1.4-0ubuntu1) hoary; urgency=low
     - calendar migration speed.
     - use proxy if necessary for webcal.
     Camel:
-    - newly created folder on local maildir doesn't show until 
+    - newly created folder on local maildir doesn't show until
       evolution restart.
     - authenticated SMTP and TLS work very slowly.
     - doesn't update NNTP folder in a Virtual folder.
@@ -1623,7 +1629,7 @@ evolution-data-server (1.1.3-0ubuntu8) hoary; urgency=low
 
   * debian/control.in:
     - libebook1.2-dev Depends on heimdal-dev, libnspr-dev.
-  
+
  -- Sebastien Bacher <seb128@canonical.com>  Tue, 18 Jan 2005 18:33:12 +0100
 
 evolution-data-server (1.1.3-0ubuntu7) hoary; urgency=low
@@ -1645,7 +1651,7 @@ evolution-data-server (1.1.3-0ubuntu6) hoary; urgency=low
 evolution-data-server (1.1.3-0ubuntu5) hoary; urgency=low
 
   * debian/patches/03_sslconnect.patch:
-    - patch from the CVS to fix the SMTP authentification, thanks 
+    - patch from the CVS to fix the SMTP authentification, thanks
       to Michael Rimbert <rimbert@purdue.edu> for pointing the patch
       (Hoary: #71082).
 
@@ -1662,7 +1668,7 @@ evolution-data-server (1.1.3-0ubuntu4) hoary; urgency=low
 evolution-data-server (1.1.3-0ubuntu3) hoary; urgency=low
 
   * debian/evolution-data-server.postinst:
-    - fix the lock issue on /var/mail (Hoary: #5438). 
+    - fix the lock issue on /var/mail (Hoary: #5438).
 
  -- Sebastien Bacher <seb128@canonical.com>  Fri, 14 Jan 2005 14:47:33 +0100
 
@@ -1685,7 +1691,7 @@ evolution-data-server (1.1.3-0ubuntu1) hoary; urgency=low
   * debian/control.in:
     - libcamel1.2-1 Conflicts/Replaces libcamel1.2-0.
     - libedataserver1.2-0 depends on libnspr4.
-  
+
  -- Sebastien Bacher <seb128@canonical.com>  Tue, 11 Jan 2005 16:51:05 +0100
 
 evolution-data-server (1.1.2-0ubuntu3) hoary; urgency=low
@@ -1742,7 +1748,7 @@ evolution-data-server (1.1.0-0ubuntu3) hoary; urgency=low
  -- Sebastien Bacher <seb128@canonical.com>  Fri,  5 Nov 2004 16:58:51 +0100
 
 evolution-data-server (1.1.0-0ubuntu2) hoary; urgency=low
-  
+
   * debian/evolution-data-server.install:
     - added some missing files.
   * debian/control.in:
