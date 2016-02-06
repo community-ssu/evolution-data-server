@@ -1223,16 +1223,17 @@ get_contacts_reply(DBusGProxy *proxy, char **vcards, GError *error, gpointer use
     vcards = NULL;
   }
 
-  if (vcards) {
-    char **i = vcards;
-    while (*i != NULL) {
-      list = g_list_prepend (list, e_contact_new_from_vcard (*i++));
+  if (cb) {
+    if (vcards) {
+      char **i = vcards;
+      while (*i != NULL) {
+        list = g_list_prepend (list, e_contact_new_from_vcard (*i++));
+      }
     }
-  }
-  list = g_list_reverse (list);
+    list = g_list_reverse (list);
 
-  if (cb)
     cb (data->book, get_status_from_error (error), list, data->closure);
+  }
   g_strfreev (vcards);
 
   if (error)
@@ -1372,11 +1373,12 @@ get_changes_reply (DBusGProxy *proxy, GPtrArray *changes, GError *error, gpointe
   if (error)
     changes = NULL;
 
-  if (changes)
-    list = parse_changes_array (changes);
+  if (cb) {
+    if (changes)
+      list = parse_changes_array (changes);
 
-  if (cb)
     cb (data->book, get_status_from_error (error), list, data->closure);
+  }
 
   if (error)
     g_error_free (error);
@@ -2527,36 +2529,40 @@ get_book_view_reply (DBusGProxy *proxy, char *address, GError *error, gpointer u
   if (error)
     address = NULL;
 
-  if (address) {
-    view_conn = dbus_g_connection_open (address, &err);
-    g_free (address);
+  if (cb) {
+    if (address) {
+      view_conn = dbus_g_connection_open (address, &err);
+      g_free (address);
 
-    if (!view_conn)
-    {
-      g_warning (G_STRLOC ": cannot get connection: %s", err->message);
-      g_error_free (err);
-      status = E_BOOK_ERROR_CORBA_EXCEPTION;
-    } else {
-
-      view_proxy = dbus_g_proxy_new_for_peer (view_conn, "/", "org.gnome.evolution.dataserver.addressbook.BookView");
-      dbus_g_connection_unref (view_conn);
-
-      if (view_proxy) {
-        view = e_book_view_new (data->book, data->query, view_proxy);
-        status = E_BOOK_ERROR_OK;
-      } else {
-        g_warning (G_STRLOC ": cannot get connection to view: %s", err->message);
+      if (!view_conn)
+      {
+        g_warning (G_STRLOC ": cannot get connection: %s", err->message);
         g_error_free (err);
         status = E_BOOK_ERROR_CORBA_EXCEPTION;
+      } else {
+
+        view_proxy = dbus_g_proxy_new_for_peer (view_conn, "/", "org.gnome.evolution.dataserver.addressbook.BookView");
+        dbus_g_connection_unref (view_conn);
+
+        if (view_proxy) {
+          view = e_book_view_new (data->book, data->query, view_proxy);
+          status = E_BOOK_ERROR_OK;
+        } else {
+          g_warning (G_STRLOC ": cannot get connection to view: %s", err->message);
+          g_error_free (err);
+          status = E_BOOK_ERROR_CORBA_EXCEPTION;
+        }
       }
+
+    } else {
+      status = get_status_from_error (error);
     }
 
-  } else {
-    status = get_status_from_error (error);
-  }
-
-  if (cb)
     cb (data->book, status, view, data->closure);
+  } else {
+    if (address)
+      g_free (address);
+  }
 
   if (error)
     g_error_free (error);

@@ -161,7 +161,7 @@ nsProbingState nsSBCSGroupProber::HandleData(const char* aBuf, PRUint32 aLen)
     goto done;
   
   if (newLen1 == 0)
-    goto done; // Nothing to see here, move on.
+    goto cleanup; // Nothing to see here, move on.
 
   for (i = 0; i < NUM_OF_SBCS_PROBERS; i++)
   {
@@ -186,14 +186,14 @@ nsProbingState nsSBCSGroupProber::HandleData(const char* aBuf, PRUint32 aLen)
      }
   }
 
-done:
+cleanup:
 #if MAEMO_CHANGES
-  if (newLen1)
-    delete[] newBuf1;
+  delete[] newBuf1;
 #else //!MAEMO_CHANGES
   PR_FREEIF(newBuf1);
 #endif //!MAEMO_CHANGES
 
+done:
   return mState;
 }
 
